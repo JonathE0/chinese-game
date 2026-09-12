@@ -1,7 +1,5 @@
 # 青禾小镇 · Little Mandarin Town
 
-**[Play in your browser](https://jonathe0.github.io/VibeCoded/)** — this link works once GitHub Pages is enabled (Settings → Pages → Source: GitHub Actions).
-
 A local, playable browser game for learning Mandarin by living in a small Chinese city, seen through your own eyes. Walk the streets, look at things to learn their names, talk to people, shop, and furnish your own home. Built with the PlayCanvas standalone engine and modular JavaScript. No Unity or hosted editor account required.
 
 ## Start playing
