@@ -1,0 +1,56 @@
+{
+ "syllabus": {
+  "standard": "HSK 3.0",
+  "fullName": "国际中文教育中文水平等级标准 (2021)",
+  "shortName": "HSK 3.0 (2021 standard)",
+  "source": "https://www.chinesetest.cn/syllabus",
+  "dataset": "complete-hsk-vocabulary (MIT) — https://github.com/drkameleon/complete-hsk-vocabulary",
+  "validated": false,
+  "validationNote": "Levels come from the dataset above and have NOT been verified word-by-word against the official published syllabus. Classic HSK 2.0 bands are carried separately in legacyLevel and are never merged with HSK 3.0 levels."
+ },
+ "wordsFile": "/hsk/words.json",
+ "audioLevels": [
+  1,
+  2,
+  3
+ ],
+ "levels": [
+  {
+   "level": 1,
+   "zh": "一级",
+   "en": "Level 1 — first words",
+   "count": 506
+  },
+  {
+   "level": 2,
+   "zh": "二级",
+   "en": "Level 2 — everyday basics",
+   "count": 750
+  },
+  {
+   "level": 3,
+   "zh": "三级",
+   "en": "Level 3 — getting around",
+   "count": 953
+  },
+  {
+   "level": 4,
+   "zh": "四级",
+   "en": "Level 4 — opinions and plans",
+   "count": 972
+  },
+  {
+   "level": 5,
+   "zh": "五级",
+   "en": "Level 5 — fuller conversation",
+   "count": 1059
+  },
+  {
+   "level": 6,
+   "zh": "六级",
+   "en": "Level 6 — abstract and formal",
+   "count": 1123
+  }
+ ],
+ "total": 5363
+}

@@ -1,0 +1,10 @@
+{
+  "reviewIntervalsMinutes": [10, 1440, 4320, 10080, 20160, 43200],
+  "hintMinutes": 10,
+  "retryMinutes": 2,
+  "reviewCoins": 3,
+  "supportedCoins": 1,
+  "lessonCoins": 20,
+  "supportedLessonCoins": 10,
+  "practiceCompletionCoins": 8
+}

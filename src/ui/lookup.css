@@ -1,0 +1,9 @@
+#lookup{max-width:calc(100vw - 24px)}
+.lookup-source{max-width:calc(100% - 30px);overflow-wrap:anywhere}
+.lookup-translation{padding:8px 1px 10px}
+.lookup-meaning{color:#34493c;font-size:14px;line-height:1.5;font-weight:600}
+.lookup-sentence-pinyin{color:#6f8d78;font-size:11.5px;line-height:1.5;margin-top:4px}
+.lookup-details{border-top:1px solid #e7e3d0;padding-top:7px}
+.lookup-details summary{color:#667764;cursor:pointer;font-size:11px;list-style-position:outside;margin-left:1em;padding:2px 0 5px}
+.lookup-details:not([open]) .lookup-words{display:none}
+.lookup-loading{color:#8b9280;font-size:11px;padding:4px 1px 6px}

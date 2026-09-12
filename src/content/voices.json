@@ -1,0 +1,19 @@
+{
+  "provider": "edge-tts",
+  "providerName": "Microsoft Edge neural text-to-speech",
+  "language": "zh-CN",
+  "review": "unreviewed",
+  "notice": "Generated Mandarin speech, not native-speaker recordings. Cast and prosody are editable here; rerun scripts/generate-voice.py to rebuild clips.",
+  "cast": {
+    "lin":      {"voice": "zh-CN-XiaoxiaoNeural", "rate": "-4%",  "pitch": "-2Hz", "note": "Auntie Lin, tea stall. Warm, unhurried."},
+    "mei":      {"voice": "zh-CN-XiaoyiNeural",   "rate": "+0%",  "pitch": "+0Hz", "note": "Xiaomei, practice corner. Young and lively."},
+    "chen":     {"voice": "zh-CN-YunjianNeural",  "rate": "-3%",  "pitch": "-4Hz", "note": "Uncle Chen, souvenir stall. Hearty seller."},
+    "narrator": {"voice": "zh-CN-YunyangNeural",  "rate": "-6%",  "pitch": "+0Hz", "note": "Calm scene narration."},
+    "friend-a": {"voice": "zh-CN-YunxiNeural",    "rate": "+0%",  "pitch": "+0Hz", "note": "Background stroller A."},
+    "friend-b": {"voice": "zh-CN-YunxiaNeural",   "rate": "+0%",  "pitch": "+0Hz", "note": "Background stroller B."},
+    "teacher":  {"voice": "zh-CN-XiaoyiNeural",   "rate": "-20%", "pitch": "+0Hz", "note": "Single words and vocabulary drills, deliberately slower."},
+    "student":  {"voice": "zh-CN-XiaoxiaoNeural", "rate": "+8%",  "pitch": "+8Hz", "note": "A student on the Yunhai avenue, asked for directions. Young and helpful."},
+    "driver":   {"voice": "zh-CN-YunjianNeural",  "rate": "+6%",  "pitch": "+2Hz", "note": "A Yunhai taxi driver. Brisk and friendly."},
+    "cook":     {"voice": "zh-CN-YunxiNeural",    "rate": "+4%",  "pitch": "-3Hz", "note": "The cook at 海风面馆 in Yunhai. Warm and quick."}
+  }
+}

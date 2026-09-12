@@ -1,0 +1,123 @@
+{
+  "id": "city-noodles",
+  "title": "来一碗面",
+  "pinyin": "Lái yì wǎn miàn",
+  "en": "A bowl of noodles",
+  "target": "ordering: 碗, 还是, 辣, 带走",
+  "curriculumStatus": "Beginner prototype; HSK level mapping and native-speaker review pending",
+  "host": {"zh": "面馆师傅", "pinyin": "miànguǎn shīfu", "en": "the noodle cook", "color": "#c46a3c"},
+  "nodes": [
+    {
+      "id": "dish",
+      "zh": "欢迎光临！想吃什么面？",
+      "pinyin": "Huānyíng guānglín! Xiǎng chī shénme miàn?",
+      "en": "Welcome! What noodles would you like?",
+      "note": "碗 (wǎn) is a bowl, and the measure word for a bowl of food. 来一碗… is a casual way to order.",
+      "speaker": "cook",
+      "intent": "option",
+      "store": "dish",
+      "options": [
+        {"value": "beef", "choice": "我要一碗牛肉面。", "accepted": ["我要一碗牛肉面", "一碗牛肉面", "牛肉面", "我要牛肉面", "来一碗牛肉面", "我想吃牛肉面"]},
+        {"value": "egg", "choice": "我要一碗鸡蛋面。", "accepted": ["我要一碗鸡蛋面", "一碗鸡蛋面", "鸡蛋面", "我要鸡蛋面", "来一碗鸡蛋面", "我想吃鸡蛋面"]}
+      ],
+      "hint": "Name a dish: 我要一碗牛肉面。",
+      "audio": "city-noodles-dish"
+    },
+    {
+      "id": "size",
+      "zh": "大碗还是小碗？",
+      "pinyin": "Dà wǎn háishi xiǎo wǎn?",
+      "en": "Large bowl or small?",
+      "note": "还是 (háishi) means 'or' in a question.",
+      "speaker": "cook",
+      "intent": "option",
+      "store": "size",
+      "options": [
+        {"value": "large", "choice": "大碗。", "accepted": ["大碗", "大碗的", "要大碗", "大的", "我要大碗"]},
+        {"value": "small", "choice": "小碗。", "accepted": ["小碗", "小碗的", "要小碗", "小的", "我要小碗"]}
+      ],
+      "hint": "Answer 大碗 or 小碗.",
+      "audio": "city-noodles-size"
+    },
+    {
+      "id": "spice",
+      "zh": "要辣的吗？",
+      "pinyin": "Yào là de ma?",
+      "en": "Do you want it spicy?",
+      "speaker": "cook",
+      "intent": "option",
+      "store": "spice",
+      "options": [
+        {"value": "hot", "choice": "要辣的！", "accepted": ["要辣的", "要", "辣的", "要辣", "我要辣的", "多放辣"]},
+        {"value": "mild", "choice": "微辣就好。", "accepted": ["微辣", "微辣就好", "一点点辣", "少放辣", "少放点辣", "有一点辣就好"]},
+        {"value": "none", "choice": "不要辣。", "accepted": ["不要辣", "不要", "不辣", "不要辣的", "不吃辣", "我不吃辣"]}
+      ],
+      "hint": "辣 (là) is spicy. 微辣 (wēi là) is mildly spicy; 不要辣 is not spicy.",
+      "audio": "city-noodles-spice"
+    },
+    {
+      "id": "where",
+      "zh": "在这儿吃还是带走？",
+      "pinyin": "Zài zhèr chī háishi dài zǒu?",
+      "en": "Eat here or take away?",
+      "note": "打包 (dǎbāo, to pack up) is another common way to ask for takeaway.",
+      "speaker": "cook",
+      "intent": "option",
+      "store": "where",
+      "options": [
+        {"value": "here", "choice": "在这儿吃。", "accepted": ["在这儿吃", "这儿吃", "在这里吃", "在这吃", "就在这儿吃"]},
+        {"value": "takeaway", "choice": "带走。", "accepted": ["带走", "打包", "我要带走", "打包带走", "我带走"]}
+      ],
+      "hint": "带走 (dài zǒu) is to take away; 在这儿吃 is to eat here.",
+      "audio": "city-noodles-where"
+    },
+    {
+      "id": "coming",
+      "zh": "好嘞，马上就好！",
+      "pinyin": "Hǎo lei, mǎshàng jiù hǎo!",
+      "en": "Coming right up!",
+      "register": "casual",
+      "speaker": "cook",
+      "intent": "none",
+      "audio": "city-noodles-coming"
+    }
+  ],
+  "extraLines": {
+    "served-here": {
+      "zh": "面来了，慢慢吃！",
+      "pinyin": "Miàn lái le, mànman chī!",
+      "en": "Here are your noodles. Enjoy!",
+      "note": "慢慢吃 (literally 'eat slowly') is how people say 'enjoy your meal'.",
+      "speaker": "cook",
+      "audio": "city-noodles-served-here"
+    },
+    "served-takeaway": {
+      "zh": "给你，小心烫！",
+      "pinyin": "Gěi nǐ, xiǎoxīn tàng!",
+      "en": "Here you go. Careful, it's hot!",
+      "speaker": "cook",
+      "audio": "city-noodles-served-takeaway"
+    },
+    "cant-afford": {
+      "zh": "不好意思，钱好像不够。",
+      "pinyin": "Bù hǎoyìsi, qián hǎoxiàng bú gòu.",
+      "en": "Sorry, that doesn't seem to be enough money.",
+      "speaker": "cook",
+      "audio": "city-noodles-cant-afford"
+    },
+    "cancelled": {
+      "zh": "没关系，下次再来！",
+      "pinyin": "Méi guānxi, xià cì zài lái!",
+      "en": "No problem, come again next time!",
+      "speaker": "cook",
+      "audio": "city-noodles-cancelled"
+    },
+    "recipe": {
+      "zh": "第一次来吧？教你做个家常的番茄鸡蛋面，回家试试！",
+      "pinyin": "Dì yī cì lái ba? Jiāo nǐ zuò ge jiācháng de fānqié jīdàn miàn, huí jiā shìshi!",
+      "en": "First time here? Let me teach you a simple home dish, tomato and egg noodles. Try it at home!",
+      "speaker": "cook",
+      "audio": "city-noodles-recipe"
+    }
+  }
+}

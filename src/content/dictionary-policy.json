@@ -1,0 +1,11 @@
+{
+  "blockedSensePatterns": [],
+  "wordOverrides": {
+    "黄": {
+      "pinyin": "huáng",
+      "senses": [
+        "yellow"
+      ]
+    }
+  }
+}

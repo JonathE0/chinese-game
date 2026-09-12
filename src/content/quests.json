@@ -1,0 +1,233 @@
+{
+  "note": "Main missions. The name is curated Chinese; the description is English by default so a new player always knows what to do. Tapping ? reveals the pinyin. `done` is either a flag recorded in profile.completed, or a metric counted from progress. `where` is what the minimap draws a line to when the mission is tapped.",
+  "quests": [
+    {
+      "id": "greet",
+      "zh": "初次见面",
+      "pinyin": "Chūcì jiànmiàn",
+      "en": "Say hello to Auntie Lin at the tea stall on the west side of the square.",
+      "done": {
+        "flag": "introductions"
+      },
+      "where": {
+        "district": "square",
+        "x": -9,
+        "z": -2,
+        "zh": "茶铺 · 林阿姨"
+      }
+    },
+    {
+      "id": "four-words",
+      "zh": "认识四个新词",
+      "pinyin": "Rènshi sì ge xīn cí",
+      "en": "Learn four everyday words with Xiaomei at the practice corner.",
+      "done": {
+        "flag": "practice:first"
+      },
+      "where": {
+        "district": "square",
+        "x": -2.9,
+        "z": -6.4,
+        "zh": "练习角 · 小美"
+      }
+    },
+    {
+      "id": "name-things",
+      "zh": "认出十样东西",
+      "pinyin": "Rèn chū shí yàng dōngxi",
+      "en": "Name ten things around town — look at anything and press F.",
+      "done": {
+        "metric": "discovered",
+        "count": 10
+      },
+      "where": {
+        "district": "square",
+        "x": 0,
+        "z": 5,
+        "zh": "广场中心"
+      }
+    },
+    {
+      "id": "souvenir",
+      "zh": "带一份纪念品回家",
+      "pinyin": "Dài yí fèn jìniànpǐn huí jiā",
+      "en": "Buy something from Uncle Chen. Haggling works better when he is in a good mood.",
+      "done": {
+        "flag": "purchase:first"
+      },
+      "where": {
+        "district": "square",
+        "x": 9,
+        "z": -2,
+        "zh": "小小商店 · 陈叔叔"
+      }
+    },
+    {
+      "id": "furnish",
+      "zh": "布置你的房间",
+      "pinyin": "Bùzhì nǐ de fángjiān",
+      "en": "Go home and put something new in your room.",
+      "done": {
+        "metric": "home",
+        "count": 4
+      },
+      "where": {
+        "district": "square",
+        "x": 18,
+        "z": 15.6,
+        "zh": "我的家"
+      }
+    },
+    {
+      "id": "market",
+      "zh": "走进商业街",
+      "pinyin": "Zǒu jìn shāngyè jiē",
+      "en": "Open the shopping street by learning 25 HSK 1 words. Drilling and naming things both count.",
+      "done": {
+        "metric": "district",
+        "district": "market"
+      },
+      "where": {
+        "district": "square",
+        "x": 19.4,
+        "z": 0,
+        "zh": "商业街的门"
+      }
+    },
+    {
+      "id": "order",
+      "zh": "用中文点一道菜",
+      "pinyin": "Yòng Zhōngwén diǎn yí dào cài",
+      "en": "Order a dish in Chinese at the restaurant, from a table tablet or a waiter.",
+      "done": {
+        "metric": "ordered"
+      },
+      "where": {
+        "district": "riverside",
+        "x": -11,
+        "z": -25.9,
+        "zh": "家常餐厅"
+      }
+    },
+    {
+      "id": "furnish-shop",
+      "zh": "去家居小铺看看",
+      "pinyin": "Qù jiājū xiǎo pù kànkan",
+      "en": "Visit the home-goods shop on the west side of the square and buy one thing for your room.",
+      "done": {
+        "flag": "homeware:first"
+      },
+      "where": {
+        "district": "square",
+        "x": -17.5,
+        "z": -0.6,
+        "zh": "家居小铺"
+      }
+    },
+    {
+      "id": "daily",
+      "zh": "完成一件日常小事",
+      "pinyin": "Wánchéng yí jiàn rìcháng xiǎoshì",
+      "en": "Finish one of today’s errands and collect the reward in your journal.",
+      "done": {
+        "flag": "daily:first"
+      },
+      "where": {
+        "district": "square",
+        "x": 0,
+        "z": 9,
+        "zh": "城里到处都行"
+      }
+    },
+    {
+      "id": "metro-first",
+      "zh": "坐地铁去云海",
+      "pinyin": "Zuò dìtiě qù Yúnhǎi",
+      "en": "Buy a ticket at the metro station on the square and ride out to the city.",
+      "done": {
+        "flag": "metro:first"
+      },
+      "where": {
+        "district": "square",
+        "x": -7.5,
+        "z": 11.6,
+        "zh": "青禾地铁站"
+      }
+    },
+    {
+      "id": "city-line",
+      "zh": "记下城里人说的一句话",
+      "pinyin": "Jì xià chéng lǐ rén shuō de yí jù huà",
+      "en": "Talk to someone on a Yunhai street and keep what they said in your word bank.",
+      "done": {
+        "flag": "city:line"
+      }
+    },
+    {
+      "id": "teahouse-permit",
+      "zh": "拿到开店许可证",
+      "pinyin": "Ná dào kāidiàn xǔkězhèng",
+      "en": "Get a shop permit at Qinghe Bank on the west side of the square. The bank opens after your first practice with Xiaomei.",
+      "done": {
+        "flag": "permit:shop"
+      },
+      "where": {
+        "district": "square",
+        "x": -18,
+        "z": -6,
+        "zh": "青禾银行"
+      }
+    },
+    {
+      "id": "teahouse-build",
+      "zh": "把茶楼盖起来",
+      "pinyin": "Bǎ chálóu gài qǐlái",
+      "en": "Bring 8 timber, 6 bricks and 4 bolts of cloth (sold at 家居小铺) to the empty lot on the north side of the square, then start building. Once it stands, it pays 18 coins every morning.",
+      "done": {
+        "flag": "built:teahouse"
+      },
+      "where": {
+        "district": "square",
+        "x": 7,
+        "z": 13,
+        "zh": "茶楼工地"
+      }
+    },
+    {
+      "id": "city-directions",
+      "zh": "问路找书店",
+      "pinyin": "Wèn lù zhǎo shūdiàn",
+      "en": "In Yunhai, ask the student on the avenue where 一号书店 is, then walk there.",
+      "done": {
+        "flag": "city:found-bookstore"
+      }
+    },
+    {
+      "id": "city-taxi",
+      "zh": "用中文打车",
+      "pinyin": "Yòng Zhōngwén dǎ chē",
+      "en": "Take a taxi in Yunhai: tell the driver where you want to go.",
+      "done": {
+        "flag": "city-taxi"
+      }
+    },
+    {
+      "id": "city-noodles",
+      "zh": "在海风面馆吃碗面",
+      "pinyin": "Zài Hǎifēng miànguǎn chī wǎn miàn",
+      "en": "Order a bowl at 海风面馆 in Yunhai. The cook may teach you a recipe.",
+      "done": {
+        "flag": "city-noodles"
+      }
+    },
+    {
+      "id": "home-noodles",
+      "zh": "在家做番茄鸡蛋面",
+      "pinyin": "Zài jiā zuò fānqié jīdàn miàn",
+      "en": "Cook the tomato and egg noodles the noodle cook taught you, in your home kitchen.",
+      "done": {
+        "flag": "cooked:tomato-egg-noodles"
+      }
+    }
+  ]
+}

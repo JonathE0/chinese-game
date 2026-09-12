@@ -1,0 +1,475 @@
+{
+  "note": "The metropolis you reach by metro. `station` is the entrance back in the town square; `place` is the district itself, laid out in its own local coordinates and swapped in wholesale the same way an interior is. Towers, props and people are authored here so the layout can be checked without running the game.",
+  "station": {
+    "x": -7.5,
+    "z": 14.6,
+    "rotation": 180,
+    "zh": "青禾地铁站",
+    "pinyin": "Qīnghé dìtiězhàn",
+    "en": "Qinghe metro station",
+    "label": "进地铁站 · 去市里"
+  },
+  "fare": {
+    "single": 6,
+    "pass": 40,
+    "passDays": 7
+  },
+  "place": {
+    "id": "city",
+    "zh": "云海市中心",
+    "pinyin": "Yúnhǎi shì zhōngxīn",
+    "en": "Downtown Yunhai",
+    "outdoor": true,
+    "size": [
+      56,
+      68
+    ],
+    "spawn": [
+      0,
+      24.5
+    ],
+    "exit": [
+      0,
+      28.6
+    ],
+    "ground": "#8d8f93",
+    "pave": "#a3a49f",
+    "sky": "#6d7d8c",
+    "returnLabel": "坐地铁回青禾 · BACK TO TOWN"
+  },
+  "towers": [
+    {
+      "x": -17.5,
+      "z": 15,
+      "w": 13.8,
+      "d": 12,
+      "h": 26,
+      "color": "#7c8794",
+      "glass": "#a9bcc6",
+      "sign": "云海银行",
+      "signColor": "#d8e4dd",
+      "signInk": "#2a4a4f",
+      "rot": 90,
+      "name": "tower"
+    },
+    {
+      "x": -17.5,
+      "z": 0,
+      "w": 15,
+      "d": 13,
+      "h": 34,
+      "color": "#6f7a86",
+      "glass": "#9fb3c0",
+      "sign": "星光百货",
+      "signColor": "#f2d7a8",
+      "signInk": "#7a3f2f",
+      "rot": 90,
+      "name": "tower"
+    },
+    {
+      "x": -17.5,
+      "z": -16,
+      "w": 15,
+      "d": 12,
+      "h": 21,
+      "color": "#88837c",
+      "glass": "#b4bcc0",
+      "sign": "一号书店",
+      "signColor": "#dfe7cf",
+      "signInk": "#3d5340",
+      "rot": 90,
+      "name": "tower"
+    },
+    {
+      "x": 17.5,
+      "z": 16,
+      "w": 13.8,
+      "d": 12,
+      "h": 30,
+      "color": "#78828f",
+      "glass": "#a4b8c4",
+      "sign": "中山医院",
+      "signColor": "#e8dfe6",
+      "signInk": "#5b3f63",
+      "rot": -90,
+      "name": "tower"
+    },
+    {
+      "x": 17.5,
+      "z": 1,
+      "w": 15,
+      "d": 13,
+      "h": 24,
+      "color": "#8a8279",
+      "glass": "#b6bcbd",
+      "sign": "海风面馆",
+      "signColor": "#f4c9a1",
+      "signInk": "#7c3a2c",
+      "rot": -90,
+      "name": "tower"
+    },
+    {
+      "x": 17.5,
+      "z": -15,
+      "w": 15,
+      "d": 12,
+      "h": 32,
+      "color": "#737e8b",
+      "glass": "#9db2c1",
+      "sign": "光明电影院",
+      "signColor": "#d6dff0",
+      "signInk": "#33436b",
+      "rot": -90,
+      "name": "tower"
+    },
+    {
+      "x": -19,
+      "z": -31,
+      "w": 11,
+      "d": 7,
+      "h": 18,
+      "color": "#7f8892",
+      "glass": "#aabbc6",
+      "rot": 180,
+      "name": "tower"
+    },
+    {
+      "x": 19,
+      "z": -31,
+      "w": 11,
+      "d": 7,
+      "h": 16,
+      "color": "#858d95",
+      "glass": "#aebfc9",
+      "rot": 180,
+      "name": "tower"
+    }
+  ],
+  "props": [
+    {
+      "kind": "citylamp",
+      "x": -8.4,
+      "z": 20,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": 7.8,
+      "z": 20,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": -8.4,
+      "z": 12,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": 8.4,
+      "z": 12,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": -8.4,
+      "z": 4,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": 8.4,
+      "z": 4,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": -8.4,
+      "z": -4,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": 8.4,
+      "z": -4,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": -8.4,
+      "z": -12,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": 8.4,
+      "z": -12,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": -8.4,
+      "z": -20,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": 8.4,
+      "z": -20,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": -8.4,
+      "z": -25.6,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": 8.4,
+      "z": -25.6,
+      "name": "streetlight"
+    },
+    {
+      "kind": "cityplanter",
+      "x": -7,
+      "z": 17,
+      "name": "planter"
+    },
+    {
+      "kind": "citybench",
+      "x": 7,
+      "z": 17,
+      "rot": 180,
+      "name": "bench"
+    },
+    {
+      "kind": "cityplanter",
+      "x": 7,
+      "z": 9,
+      "name": "planter"
+    },
+    {
+      "kind": "citybench",
+      "x": -7,
+      "z": 9,
+      "name": "bench"
+    },
+    {
+      "kind": "cityplanter",
+      "x": -7,
+      "z": 1,
+      "name": "planter"
+    },
+    {
+      "kind": "citybench",
+      "x": 7,
+      "z": 1,
+      "rot": 180,
+      "name": "bench"
+    },
+    {
+      "kind": "cityplanter",
+      "x": 7,
+      "z": -7,
+      "name": "planter"
+    },
+    {
+      "kind": "citybench",
+      "x": -7,
+      "z": -7,
+      "name": "bench"
+    },
+    {
+      "kind": "cityplanter",
+      "x": -7,
+      "z": -15,
+      "name": "planter"
+    },
+    {
+      "kind": "citybench",
+      "x": 7,
+      "z": -15,
+      "rot": 180,
+      "name": "bench"
+    },
+    {
+      "kind": "cityplanter",
+      "x": 7,
+      "z": -23,
+      "name": "planter"
+    },
+    {
+      "kind": "citybench",
+      "x": -7,
+      "z": -23,
+      "name": "bench"
+    },
+    {
+      "kind": "bin",
+      "x": 7.4,
+      "z": 13,
+      "name": "bin"
+    },
+    {
+      "kind": "bin",
+      "x": -7.4,
+      "z": -11,
+      "name": "bin"
+    },
+    {
+      "kind": "citycrossing",
+      "x": 0,
+      "z": 6,
+      "name": "crossing"
+    },
+    {
+      "kind": "trafficlight",
+      "x": -7.6,
+      "z": 6,
+      "name": "traffic-light"
+    },
+    {
+      "kind": "trafficlight",
+      "x": 7.6,
+      "z": 6,
+      "rot": 180,
+      "name": "traffic-light"
+    },
+    {
+      "kind": "cityshelter",
+      "x": 9.6,
+      "z": 20,
+      "rot": -90,
+      "name": "bus-stop"
+    },
+    {
+      "kind": "citykiosk",
+      "x": -5.1,
+      "z": -10.5,
+      "rot": 90,
+      "name": "kiosk"
+    },
+    {
+      "kind": "bigscreen",
+      "x": 0,
+      "z": -31.5,
+      "name": "screen"
+    },
+    {
+      "kind": "taxi",
+      "x": 3.8,
+      "z": 23.9,
+      "name": "taxi"
+    },
+    {
+      "kind": "taxi",
+      "x": 3.8,
+      "z": 18.099999999999998,
+      "name": "taxi"
+    }
+  ],
+  "people": [
+    {
+      "id": "clerk",
+      "zh": "上班的人",
+      "pinyin": "shàngbān de rén",
+      "en": "an office worker",
+      "color": "#4a5a6b",
+      "x": -4.2,
+      "z": 11,
+      "rot": 160,
+      "lines": [
+        {
+          "zh": "上班快迟到了！",
+          "pinyin": "Shàngbān kuài chídào le!",
+          "en": "I am nearly late for work!",
+          "note": "迟到 (chídào) is to arrive late. 快…了 means it is about to happen."
+        },
+        {
+          "zh": "这边的地铁很方便。",
+          "pinyin": "Zhèbiān de dìtiě hěn fāngbiàn.",
+          "en": "The metro round here is very convenient.",
+          "note": "方便 (fāngbiàn) — convenient. A very common word in a city."
+        },
+        {
+          "zh": "你也是坐地铁来的吗？",
+          "pinyin": "Nǐ yě shì zuò dìtiě lái de ma?",
+          "en": "Did you come by metro too?",
+          "note": "坐地铁 — to travel by metro. 坐 is the verb for riding most vehicles."
+        }
+      ]
+    },
+    {
+      "id": "student",
+      "zh": "学生",
+      "pinyin": "xuésheng",
+      "en": "a student",
+      "color": "#7d5f86",
+      "x": 4.6,
+      "z": -6,
+      "rot": -20,
+      "lines": [
+        {
+          "zh": "我在等朋友。",
+          "pinyin": "Wǒ zài děng péngyou.",
+          "en": "I am waiting for a friend.",
+          "note": "在 before a verb marks something happening right now."
+        },
+        {
+          "zh": "这栋大楼有三十层。",
+          "pinyin": "Zhè dòng dàlóu yǒu sānshí céng.",
+          "en": "That building has thirty floors.",
+          "note": "栋 (dòng) is the measure word for a building; 层 (céng) counts floors."
+        },
+        {
+          "zh": "你想去看电影吗？",
+          "pinyin": "Nǐ xiǎng qù kàn diànyǐng ma?",
+          "en": "Do you want to go and see a film?",
+          "note": "看电影 — literally to look at a film."
+        }
+      ]
+    },
+    {
+      "id": "busker",
+      "zh": "街头艺人",
+      "pinyin": "jiētóu yìrén",
+      "en": "a busker",
+      "color": "#8c6b4a",
+      "x": -4.8,
+      "z": -19,
+      "rot": 30,
+      "lines": [
+        {
+          "zh": "城里晚上更热闹。",
+          "pinyin": "Chéng lǐ wǎnshang gèng rènao.",
+          "en": "The city is livelier at night.",
+          "note": "热闹 (rènao) — bustling, lively with people. A compliment in Chinese."
+        },
+        {
+          "zh": "喜欢这首歌吗？",
+          "pinyin": "Xǐhuan zhè shǒu gē ma?",
+          "en": "Do you like this song?",
+          "note": "首 (shǒu) is the measure word for songs and poems."
+        },
+        {
+          "zh": "我从早上唱到晚上。",
+          "pinyin": "Wǒ cóng zǎoshang chàng dào wǎnshang.",
+          "en": "I sing from morning until night.",
+          "note": "从…到… — from X to Y, for both time and place."
+        }
+      ]
+    }
+  ],
+  "department": {
+    "room": "hardware",
+    "x": -10.5,
+    "z": 0,
+    "label": "进星光五金百货"
+  },
+  "noodles": {
+    "x": 10.5,
+    "z": 1,
+    "label": "海风面馆 · 点面"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "id": "city-directions",
+  "title": "问路",
+  "pinyin": "Wèn lù",
+  "en": "Asking the way",
+  "target": "asking where a place is; 对面 and 旁边",
+  "curriculumStatus": "Beginner prototype; HSK level mapping and native-speaker review pending",
+  "host": {"zh": "学生", "pinyin": "xuésheng", "en": "a student", "color": "#7d5f86"},
+  "nodes": [
+    {
+      "id": "approach",
+      "zh": "你好！有什么事吗？",
+      "pinyin": "Nǐ hǎo! Yǒu shénme shì ma?",
+      "en": "Hi! Can I help you?",
+      "speaker": "student",
+      "intent": "variants",
+      "accepted": ["请问，一号书店在哪儿？", "一号书店在哪儿", "一号书店在哪里", "请问一号书店在哪里", "书店在哪儿", "请问书店在哪儿", "书店在哪里", "一号书店怎么走", "请问一号书店怎么走", "我想去一号书店", "我要去一号书店"],
+      "choices": ["请问，一号书店在哪儿？", "我想去一号书店。"],
+      "hint": "Ask where the bookstore is: 请问，一号书店在哪儿？",
+      "audio": "city-directions-approach"
+    },
+    {
+      "id": "answer",
+      "zh": "一号书店啊？就在光明电影院对面，星光百货旁边。",
+      "pinyin": "Yī hào shūdiàn a? Jiù zài Guāngmíng diànyǐngyuàn duìmiàn, Xīngguāng bǎihuò pángbiān.",
+      "en": "No. 1 Bookstore? It's right opposite the Guangming Cinema, next to Starlight department store.",
+      "note": "对面 (duìmiàn) is opposite or across from; 旁边 (pángbiān) is next to.",
+      "speaker": "student",
+      "intent": "variants",
+      "accepted": ["谢谢", "谢谢你", "好的，谢谢", "好的，谢谢你", "好，谢谢", "多谢", "太好了，谢谢", "谢谢啊"],
+      "choices": ["谢谢！", "好的，谢谢你！"],
+      "hint": "Say thank you: 谢谢！",
+      "audio": "city-directions-answer"
+    },
+    {
+      "id": "farewell",
+      "zh": "不客气！走过去两三分钟就到了。",
+      "pinyin": "Bú kèqi! Zǒu guòqu liǎng sān fēnzhōng jiù dào le.",
+      "en": "You're welcome! It's a two- or three-minute walk.",
+      "speaker": "student",
+      "intent": "none",
+      "audio": "city-directions-farewell"
+    }
+  ],
+  "extraLines": {
+    "found": {
+      "zh": "找到了！这就是一号书店。",
+      "pinyin": "Zhǎo dào le! Zhè jiù shì Yī hào shūdiàn.",
+      "en": "Found it! This is No. 1 Bookstore.",
+      "speaker": "narrator",
+      "audio": "city-directions-found"
+    }
+  }
+}

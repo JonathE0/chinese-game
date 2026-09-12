@@ -1,0 +1,1589 @@
+{
+  "home": {
+    "zh": "我的家",
+    "pinyin": "wǒ de jiā",
+    "en": "My home",
+    "building": "home",
+    "door": {
+      "x": 16.1,
+      "z": 15.6
+    },
+    "enterLabel": "回家",
+    "size": [
+      10,
+      9
+    ],
+    "spawn": [
+      0,
+      3
+    ],
+    "exit": [
+      0,
+      4.1
+    ],
+    "height": 3.1,
+    "floor": "#c2a077",
+    "wall": "#f0e4c8",
+    "trim": "#a8825d",
+    "roofBeam": "#8d6b4d",
+    "decoratable": true,
+    "annex": {
+      "room": "kitchen",
+      "zh": "厨房",
+      "x": 4.465,
+      "z": 2.85,
+      "label": "进厨房 · 做饭"
+    },
+    "window": [
+      -3.4,
+      3.4
+    ],
+    "desk": {
+      "x": -3.6,
+      "z": -1.2,
+      "rot": 90,
+      "label": "复习生词 · 书桌"
+    },
+    "slots": {
+      "bed": {
+        "zh": "床位",
+        "x": 2.9,
+        "z": -2.6,
+        "rot": 0,
+        "accepts": [
+          "bed"
+        ]
+      },
+      "nightstand": {
+        "zh": "床头柜",
+        "x": 1.1,
+        "z": -3.2,
+        "rot": 0,
+        "accepts": [
+          "nightstand"
+        ]
+      },
+      "dresser": {
+        "zh": "五斗柜",
+        "x": -1.4,
+        "z": -3.6,
+        "rot": 0,
+        "accepts": [
+          "dresser"
+        ]
+      },
+      "wardrobe": {
+        "zh": "衣柜",
+        "x": 4.2,
+        "z": 0.9,
+        "rot": 90,
+        "accepts": [
+          "wardrobe"
+        ]
+      },
+      "shelf": {
+        "zh": "书架",
+        "x": -4.3,
+        "z": 1.9,
+        "rot": 90,
+        "accepts": [
+          "shelf"
+        ]
+      },
+      "chair": {
+        "zh": "椅子",
+        "x": -2.5,
+        "z": -1.2,
+        "rot": -90,
+        "accepts": [
+          "chair"
+        ]
+      },
+      "rug": {
+        "zh": "地毯",
+        "x": 0.6,
+        "z": 0.6,
+        "rot": 0,
+        "accepts": [
+          "rug"
+        ]
+      },
+      "table": {
+        "zh": "矮桌",
+        "x": 0.6,
+        "z": 0.6,
+        "rot": 0,
+        "accepts": [
+          "table"
+        ]
+      },
+      "plant": {
+        "zh": "绿植",
+        "x": 4.1,
+        "z": 3.1,
+        "rot": 0,
+        "accepts": [
+          "plant"
+        ]
+      },
+      "floorlamp": {
+        "zh": "落地灯",
+        "x": -4.1,
+        "z": -3.2,
+        "rot": 0,
+        "accepts": [
+          "lamp"
+        ]
+      },
+      "desklamp": {
+        "zh": "台灯",
+        "x": -3.6,
+        "z": -2.4,
+        "rot": 0,
+        "accepts": [
+          "desklamp"
+        ]
+      },
+      "ceiling": {
+        "zh": "吊灯",
+        "x": 0,
+        "z": -0.4,
+        "rot": 0,
+        "accepts": [
+          "ceilinglamp"
+        ]
+      }
+    },
+    "fittings": [
+      {
+        "kind": "poster",
+        "x": -4.55,
+        "z": -0.2,
+        "rot": 90,
+        "action": "guide",
+        "label": "看看布置指南"
+      },
+      {
+        "kind": "plantpot",
+        "x": 4.35,
+        "z": -3.4,
+        "rot": 0
+      }
+    ]
+  },
+  "hall": {
+    "zh": "词语馆",
+    "pinyin": "cíyǔ guǎn",
+    "en": "The word hall",
+    "building": "practice-house",
+    "door": {
+      "x": 0,
+      "z": -9.4
+    },
+    "enterLabel": "进词语馆",
+    "size": [
+      11,
+      8
+    ],
+    "spawn": [
+      0,
+      2.6
+    ],
+    "exit": [
+      0,
+      3.6
+    ],
+    "height": 3.4,
+    "floor": "#b9a888",
+    "wall": "#eee6d2",
+    "trim": "#7f8f77",
+    "roofBeam": "#6f7f68",
+    "decoratable": false,
+    "window": [
+      -4,
+      4
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -2.4,
+      "label": "查词 · HSK"
+    },
+    "fittings": [
+      {
+        "kind": "bookcase",
+        "x": -4.4,
+        "z": -1,
+        "rot": 90
+      },
+      {
+        "kind": "bookcase",
+        "x": -4.4,
+        "z": 1.2,
+        "rot": 90
+      },
+      {
+        "kind": "bookcase",
+        "x": 4.4,
+        "z": -1,
+        "rot": -90
+      },
+      {
+        "kind": "bookcase",
+        "x": 4.4,
+        "z": 1.2,
+        "rot": -90
+      },
+      {
+        "kind": "readingdesk",
+        "x": -2.2,
+        "z": 2.2,
+        "rot": 0
+      },
+      {
+        "kind": "diningchair",
+        "x": -2.2,
+        "z": 1.15,
+        "rot": 180
+      },
+      {
+        "kind": "readingdesk",
+        "x": 2.2,
+        "z": 2.2,
+        "rot": 0
+      },
+      {
+        "kind": "diningchair",
+        "x": 2.2,
+        "z": 1.15,
+        "rot": 180
+      },
+      {
+        "kind": "scroll",
+        "x": -2.2,
+        "z": -3.85,
+        "rot": 0
+      },
+      {
+        "kind": "scroll",
+        "x": 2.2,
+        "z": -3.85,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": -4.3,
+        "z": 3,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": 4.3,
+        "z": 3,
+        "rot": 0
+      }
+    ]
+  },
+  "lifestyle": {
+    "zh": "生活馆",
+    "pinyin": "shēnghuó guǎn",
+    "en": "Lifestyle store",
+    "building": "lifestyle",
+    "door": {
+      "x": 39,
+      "z": 5.9
+    },
+    "enterLabel": "进生活馆",
+    "size": [
+      11,
+      8
+    ],
+    "spawn": [
+      0,
+      2.6
+    ],
+    "exit": [
+      0,
+      3.6
+    ],
+    "height": 3.6,
+    "floor": "#c9b898",
+    "wall": "#f2ece0",
+    "trim": "#9aa896",
+    "roofBeam": "#8d9a88",
+    "decoratable": false,
+    "window": [
+      -4,
+      4
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -2.4,
+      "label": "看看货架 · 家具与文具",
+      "shop": "lifestyle"
+    },
+    "stock": "lifestyle",
+    "fittings": [
+      {
+        "kind": "shelfunit",
+        "x": -4.6,
+        "z": -0.6,
+        "rot": 90
+      },
+      {
+        "kind": "shelfunit",
+        "x": -4.6,
+        "z": 1.8,
+        "rot": 90
+      },
+      {
+        "kind": "clothesrail",
+        "x": 4.4,
+        "z": 0.6,
+        "rot": 90
+      },
+      {
+        "kind": "displaytable",
+        "x": -1.7,
+        "z": 1.7,
+        "rot": 0
+      },
+      {
+        "kind": "displaytable",
+        "x": 1.7,
+        "z": 1.7,
+        "rot": 0
+      },
+      {
+        "kind": "shelfunit",
+        "x": 3.6,
+        "z": -2.9,
+        "rot": 0
+      },
+      {
+        "kind": "mannequin",
+        "x": 3.4,
+        "z": 2.6,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": -4.4,
+        "z": 3.2,
+        "rot": 0
+      },
+      {
+        "kind": "cupshelf",
+        "x": -3.6,
+        "z": -3.3,
+        "rot": 0
+      }
+    ]
+  },
+  "cafe": {
+    "zh": "慢慢咖啡",
+    "pinyin": "mànman kāfēi",
+    "en": "Slow coffee",
+    "building": "cafe",
+    "door": {
+      "x": 28,
+      "z": 5.9
+    },
+    "enterLabel": "进慢慢咖啡",
+    "size": [
+      9,
+      7
+    ],
+    "spawn": [
+      0,
+      2.2
+    ],
+    "exit": [
+      0,
+      3.1
+    ],
+    "height": 3.3,
+    "floor": "#b89876",
+    "wall": "#f0e2cd",
+    "trim": "#a9705d",
+    "roofBeam": "#8d6b4d",
+    "decoratable": false,
+    "window": [
+      -3.2,
+      3.2
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -1.9,
+      "label": "看看菜单",
+      "shop": "cafe"
+    },
+    "stock": "cafe",
+    "fittings": [
+      {
+        "kind": "coffeebar",
+        "x": 0,
+        "z": -2.9,
+        "rot": 0
+      },
+      {
+        "kind": "cakecase",
+        "x": 3.4,
+        "z": -2.5,
+        "rot": 0
+      },
+      {
+        "kind": "menuboard",
+        "x": -3.3,
+        "z": -2.7,
+        "rot": 0
+      },
+      {
+        "kind": "cupshelf",
+        "x": -3.3,
+        "z": -3.25,
+        "rot": 0
+      },
+      {
+        "kind": "diningtable",
+        "x": -2.7,
+        "z": 1.1,
+        "rot": 0
+      },
+      {
+        "kind": "diningtable",
+        "x": 2.7,
+        "z": 1.3,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -2.7,
+        "z": 2.25,
+        "rot": 180
+      },
+      {
+        "kind": "stool",
+        "x": 2.7,
+        "z": 2.45,
+        "rot": 180
+      },
+      {
+        "kind": "sofa",
+        "x": -3.5,
+        "z": -1.2,
+        "rot": 90
+      },
+      {
+        "kind": "plantpot",
+        "x": 3.6,
+        "z": 2.5,
+        "rot": 0
+      }
+    ]
+  },
+  "supermarket": {
+    "zh": "青禾超市",
+    "pinyin": "Qīnghé chāoshì",
+    "en": "Qinghe supermarket",
+    "building": "supermarket",
+    "door": {
+      "x": 28,
+      "z": -5.9
+    },
+    "enterLabel": "进青禾超市",
+    "size": [
+      12,
+      8
+    ],
+    "spawn": [
+      0,
+      2.6
+    ],
+    "exit": [
+      0,
+      3.6
+    ],
+    "height": 3.7,
+    "floor": "#c6c0ac",
+    "wall": "#eef0e4",
+    "trim": "#7f9099",
+    "roofBeam": "#6f8189",
+    "decoratable": false,
+    "window": [
+      -4.5,
+      4.5
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -2.4,
+      "label": "看看今天有什么",
+      "shop": "supermarket"
+    },
+    "stock": "supermarket",
+    "fittings": [
+      {
+        "kind": "producerack",
+        "x": -4.2,
+        "z": -1.4,
+        "rot": 0
+      },
+      {
+        "kind": "producerack",
+        "x": -4.2,
+        "z": 0.8,
+        "rot": 0
+      },
+      {
+        "kind": "fridge",
+        "x": 5,
+        "z": -1.2,
+        "rot": -90
+      },
+      {
+        "kind": "fridge",
+        "x": 5,
+        "z": 1.4,
+        "rot": -90
+      },
+      {
+        "kind": "shelfunit",
+        "x": -3.6,
+        "z": -3.3,
+        "rot": 0
+      },
+      {
+        "kind": "shelfunit",
+        "x": 3.6,
+        "z": -3.3,
+        "rot": 0
+      },
+      {
+        "kind": "checkout",
+        "x": 2,
+        "z": 2.3,
+        "rot": 0
+      },
+      {
+        "kind": "basketstack",
+        "x": -1.2,
+        "z": 2.5,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": -5,
+        "z": 3,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": 5.4,
+        "z": -3.4,
+        "rot": 0
+      }
+    ]
+  },
+  "lights": {
+    "zh": "青禾灯具",
+    "pinyin": "Qīnghé dēngjù",
+    "en": "Qinghe lighting",
+    "building": "lights",
+    "door": {
+      "x": 58,
+      "z": -4.4
+    },
+    "enterLabel": "进灯具店",
+    "size": [
+      9,
+      7
+    ],
+    "spawn": [
+      0,
+      2.2
+    ],
+    "exit": [
+      0,
+      3.1
+    ],
+    "height": 3.5,
+    "floor": "#c0b49a",
+    "wall": "#f0ead9",
+    "trim": "#8a7f9c",
+    "roofBeam": "#7a7089",
+    "decoratable": false,
+    "window": [
+      -3.2,
+      3.2
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -1.9,
+      "label": "看看灯具",
+      "shop": "lights"
+    },
+    "stock": "lights",
+    "fittings": [
+      {
+        "kind": "lampdisplay",
+        "x": -3.4,
+        "z": -1.4,
+        "rot": 0
+      },
+      {
+        "kind": "lampdisplay",
+        "x": 3.4,
+        "z": -1.4,
+        "rot": 0
+      },
+      {
+        "kind": "lampdisplay",
+        "x": 3.5,
+        "z": 1.3,
+        "rot": 90
+      },
+      {
+        "kind": "shelfunit",
+        "x": -3.4,
+        "z": 1.4,
+        "rot": 90
+      },
+      {
+        "kind": "plantpot",
+        "x": -3.5,
+        "z": 3,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": 1.2,
+        "z": 1.6,
+        "rot": 0
+      }
+    ]
+  },
+  "restaurant": {
+    "zh": "家常餐厅",
+    "pinyin": "Jiācháng cāntīng",
+    "en": "Home-style restaurant",
+    "building": "restaurant",
+    "door": {
+      "x": -11,
+      "z": -25.9
+    },
+    "enterLabel": "进餐厅",
+    "size": [
+      12,
+      9
+    ],
+    "spawn": [
+      0,
+      3.4
+    ],
+    "exit": [
+      0,
+      4.2
+    ],
+    "height": 3.6,
+    "floor": "#bb9a72",
+    "wall": "#f2e4cd",
+    "trim": "#b06a55",
+    "roofBeam": "#9c5f4c",
+    "decoratable": false,
+    "window": [
+      -4,
+      4
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -2.9,
+      "label": "点菜 · 服务台",
+      "shop": "restaurant"
+    },
+    "stock": "restaurant",
+    "fittings": [
+      {
+        "kind": "diningtable",
+        "x": -3.4,
+        "z": 0.4,
+        "rot": 0
+      },
+      {
+        "kind": "tablet",
+        "x": -3.4,
+        "z": 1.5,
+        "rot": 0,
+        "action": "menu",
+        "label": "看菜单点菜"
+      },
+      {
+        "kind": "diningtable",
+        "x": 3.4,
+        "z": 0.4,
+        "rot": 0
+      },
+      {
+        "kind": "tablet",
+        "x": 3.4,
+        "z": 1.5,
+        "rot": 0,
+        "action": "menu",
+        "label": "看菜单点菜"
+      },
+      {
+        "kind": "diningtable",
+        "x": -3.4,
+        "z": -2.2,
+        "rot": 0
+      },
+      {
+        "kind": "tablet",
+        "x": -3.4,
+        "z": -1.2,
+        "rot": 0,
+        "action": "menu",
+        "label": "看菜单点菜"
+      },
+      {
+        "kind": "diningchair",
+        "x": -4.75,
+        "z": 0.4,
+        "rot": 90
+      },
+      {
+        "kind": "diningchair",
+        "x": -2.05,
+        "z": 0.4,
+        "rot": -90
+      },
+      {
+        "kind": "diningchair",
+        "x": 4.75,
+        "z": 0.4,
+        "rot": -90
+      },
+      {
+        "kind": "diningchair",
+        "x": 2.05,
+        "z": 0.4,
+        "rot": 90
+      },
+      {
+        "kind": "diningchair",
+        "x": -2.05,
+        "z": -2.2,
+        "rot": -90
+      },
+      {
+        "kind": "diningchair",
+        "x": -3.4,
+        "z": -3.4,
+        "rot": 0
+      },
+      {
+        "kind": "menuboard",
+        "x": 4.6,
+        "z": -3.2,
+        "rot": -30
+      },
+      {
+        "kind": "shelfunit",
+        "x": -5,
+        "z": -2.6,
+        "rot": 90
+      },
+      {
+        "kind": "fishtank",
+        "x": 3.3,
+        "z": -3.3,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": 5.1,
+        "z": 2.9,
+        "rot": 0
+      }
+    ],
+    "staff": [
+      {
+        "id": "waiter-a",
+        "zh": "服务员",
+        "pinyin": "fúwùyuán",
+        "en": "waiter",
+        "color": "#c98a6d",
+        "path": [
+          [
+            -0.85,
+            2.3
+          ],
+          [
+            0.85,
+            2.3
+          ],
+          [
+            0.85,
+            -1.3
+          ],
+          [
+            -0.85,
+            -1.3
+          ]
+        ],
+        "speed": 1.1
+      },
+      {
+        "id": "waiter-b",
+        "zh": "服务员",
+        "pinyin": "fúwùyuán",
+        "en": "waiter",
+        "color": "#7f9aa5",
+        "path": [
+          [
+            0.85,
+            -1.3
+          ],
+          [
+            -0.85,
+            -1.3
+          ],
+          [
+            -0.85,
+            2.3
+          ],
+          [
+            0.85,
+            2.3
+          ]
+        ],
+        "speed": 0.9
+      }
+    ]
+  },
+  "homeware": {
+    "zh": "家居小铺",
+    "pinyin": "jiājū xiǎo pù",
+    "en": "Home goods",
+    "building": "homeware",
+    "door": {
+      "x": -17.5,
+      "z": 0.2
+    },
+    "enterLabel": "进家居小铺",
+    "size": [
+      10,
+      8
+    ],
+    "spawn": [
+      0,
+      2.6
+    ],
+    "exit": [
+      0,
+      3.6
+    ],
+    "height": 3.5,
+    "floor": "#c6b494",
+    "wall": "#f4ecdc",
+    "trim": "#a08a6a",
+    "roofBeam": "#8c7554",
+    "decoratable": false,
+    "window": [
+      -3.6,
+      3.6
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -2.4,
+      "label": "看看家具 · 布置你的家",
+      "shop": "homeware"
+    },
+    "stock": "homeware",
+    "fittings": [
+      {
+        "kind": "bedshow",
+        "x": -3,
+        "z": -0.4,
+        "rot": 0
+      },
+      {
+        "kind": "displaytable",
+        "x": 2.4,
+        "z": -0.6,
+        "rot": 0
+      },
+      {
+        "kind": "displaytable",
+        "x": 2.4,
+        "z": 1.9,
+        "rot": 0
+      },
+      {
+        "kind": "shelfunit",
+        "x": -4.4,
+        "z": 2.2,
+        "rot": 90
+      },
+      {
+        "kind": "cupshelf",
+        "x": 0,
+        "z": -3.4,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": 4.2,
+        "z": 3,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -0.6,
+        "z": 2.3,
+        "rot": 0
+      }
+    ]
+  },
+  "resale": {
+    "zh": "旧物铺",
+    "pinyin": "jiùwù pù",
+    "en": "Second-hand shop",
+    "building": "resale",
+    "door": {
+      "x": 15.5,
+      "z": 1.7
+    },
+    "enterLabel": "进旧物铺",
+    "size": [
+      9,
+      6
+    ],
+    "spawn": [
+      0,
+      1.8
+    ],
+    "exit": [
+      0,
+      2.6
+    ],
+    "height": 3.2,
+    "floor": "#bda88a",
+    "wall": "#efe0c4",
+    "trim": "#9c7a5c",
+    "roofBeam": "#8a6a4c",
+    "decoratable": false,
+    "window": [
+      -3,
+      3
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -1.7,
+      "label": "卖旧东西 · 老周收货",
+      "panel": "resale"
+    },
+    "opens": {
+      "flag": "purchase:first",
+      "zh": "买过东西以后再来",
+      "en": "Opens once you have bought something in town."
+    },
+    "fittings": [
+      {
+        "kind": "cratewall",
+        "x": -3.4,
+        "z": -1.4,
+        "rot": 90
+      },
+      {
+        "kind": "cratewall",
+        "x": 3.4,
+        "z": -1.4,
+        "rot": -90
+      },
+      {
+        "kind": "cratewall",
+        "x": -3.4,
+        "z": 1.4,
+        "rot": 90
+      },
+      {
+        "kind": "displaytable",
+        "x": 1.9,
+        "z": 1.1,
+        "rot": 0
+      },
+      {
+        "kind": "basketstack",
+        "x": -1.6,
+        "z": 1.2,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": 3.4,
+        "z": 1.8,
+        "rot": 0
+      }
+    ]
+  },
+  "bank": {
+    "zh": "青禾银行",
+    "pinyin": "Qīnghé yínháng",
+    "en": "Qinghe bank",
+    "building": "bank-branch",
+    "door": {
+      "x": -18,
+      "z": -8.8
+    },
+    "enterLabel": "进银行",
+    "size": [
+      10,
+      8
+    ],
+    "spawn": [
+      0,
+      2.6
+    ],
+    "exit": [
+      0,
+      3.6
+    ],
+    "height": 3.8,
+    "floor": "#c4c0b0",
+    "wall": "#f0efe4",
+    "trim": "#7f8b98",
+    "roofBeam": "#6d7d8c",
+    "decoratable": false,
+    "window": [
+      -3.4,
+      3.4
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -2.8,
+      "label": "柜台 · 存钱与借钱",
+      "panel": "bank"
+    },
+    "opens": {
+      "flag": "practice:first",
+      "zh": "先跟小美学几个词",
+      "en": "Opens after your first practice session with Xiaomei."
+    },
+    "fittings": [
+      {
+        "kind": "bankcounter",
+        "x": -4.2,
+        "z": 0,
+        "rot": 90
+      },
+      {
+        "kind": "atm",
+        "x": -4.4,
+        "z": -2.8,
+        "rot": 90
+      },
+      {
+        "kind": "atm",
+        "x": 4.4,
+        "z": -2.8,
+        "rot": -90
+      },
+      {
+        "kind": "sofa",
+        "x": 3.2,
+        "z": 2,
+        "rot": -90
+      },
+      {
+        "kind": "plantpot",
+        "x": 4.2,
+        "z": -1,
+        "rot": 0
+      },
+      {
+        "kind": "scroll",
+        "x": -3.4,
+        "z": -3.85,
+        "rot": 0
+      },
+      {
+        "kind": "scroll",
+        "x": 3.4,
+        "z": -3.85,
+        "rot": 0
+      }
+    ]
+  },
+  "bakery": {
+    "zh": "麦香面包",
+    "pinyin": "Màixiāng miànbāo",
+    "en": "Wheat-scent bakery",
+    "building": "bakery",
+    "door": {
+      "x": 39,
+      "z": -6.2
+    },
+    "enterLabel": "进面包店",
+    "size": [
+      10,
+      8
+    ],
+    "spawn": [
+      0,
+      2.6
+    ],
+    "exit": [
+      0,
+      3.6
+    ],
+    "height": 3.5,
+    "floor": "#c9ba86",
+    "wall": "#f6ecd8",
+    "trim": "#b5794f",
+    "roofBeam": "#96603f",
+    "decoratable": false,
+    "window": [
+      -3.4,
+      3.4
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -2.4,
+      "label": "看看今天的面包",
+      "shop": "bakery"
+    },
+    "stock": "bakery",
+    "fittings": [
+      {
+        "kind": "pastrycase",
+        "x": -3.2,
+        "z": -0.4,
+        "rot": 0
+      },
+      {
+        "kind": "breadshelf",
+        "x": -4.35,
+        "z": 2,
+        "rot": 90
+      },
+      {
+        "kind": "ovenbank",
+        "x": 3.6,
+        "z": -3,
+        "rot": 0
+      },
+      {
+        "kind": "displaytable",
+        "x": 2.6,
+        "z": 1.4,
+        "rot": 0
+      },
+      {
+        "kind": "cupshelf",
+        "x": 0,
+        "z": -3.5,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": 3.9,
+        "z": 2.9,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": -1.9,
+        "z": 3.3,
+        "rot": 0
+      }
+    ]
+  },
+  "library": {
+    "zh": "青禾书馆",
+    "pinyin": "Qīnghé shūguǎn",
+    "en": "Qinghe library",
+    "building": "bookshop",
+    "door": {
+      "x": 48.5,
+      "z": -4.2
+    },
+    "enterLabel": "进书馆",
+    "size": [
+      12,
+      9
+    ],
+    "spawn": [
+      0,
+      3.4
+    ],
+    "exit": [
+      0,
+      4.2
+    ],
+    "height": 4,
+    "floor": "#b9a888",
+    "wall": "#f2ece0",
+    "trim": "#8a7f6a",
+    "roofBeam": "#6f6555",
+    "decoratable": false,
+    "window": [
+      -4.2,
+      4.2
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -3,
+      "label": "借书 · 所有书架",
+      "panel": "library"
+    },
+    "fittings": [
+      {
+        "kind": "bookcase",
+        "x": -5,
+        "z": -1.5,
+        "rot": 90,
+        "action": "shelf:beginner",
+        "label": "入门架 · 看看书"
+      },
+      {
+        "kind": "bookcase",
+        "x": -5,
+        "z": 1,
+        "rot": 90,
+        "action": "shelf:everyday",
+        "label": "日常架 · 看看书"
+      },
+      {
+        "kind": "bookcase",
+        "x": 5,
+        "z": -1.5,
+        "rot": -90,
+        "action": "shelf:stories",
+        "label": "故事架 · 看看书"
+      },
+      {
+        "kind": "bookcase",
+        "x": 5,
+        "z": 1,
+        "rot": -90
+      },
+      {
+        "kind": "readingdesk",
+        "x": -2.4,
+        "z": 2.4,
+        "rot": 0
+      },
+      {
+        "kind": "diningchair",
+        "x": -2.4,
+        "z": 1.35,
+        "rot": 180
+      },
+      {
+        "kind": "readingdesk",
+        "x": 2.4,
+        "z": 2.4,
+        "rot": 0
+      },
+      {
+        "kind": "diningchair",
+        "x": 2.4,
+        "z": 1.35,
+        "rot": 180
+      },
+      {
+        "kind": "scroll",
+        "x": -2.2,
+        "z": -4.35,
+        "rot": 0
+      },
+      {
+        "kind": "scroll",
+        "x": 2.2,
+        "z": -4.35,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": -4.6,
+        "z": 3.6,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": 4.6,
+        "z": 3.6,
+        "rot": 0
+      }
+    ]
+  },
+  "teahouse": {
+    "zh": "青禾茶楼",
+    "pinyin": "Qīnghé chálóu",
+    "en": "Qinghe tea house",
+    "building": "teahouse",
+    "door": {
+      "x": 7,
+      "z": 10.2
+    },
+    "enterLabel": "进茶楼",
+    "size": [
+      10,
+      8
+    ],
+    "spawn": [
+      0,
+      2.6
+    ],
+    "exit": [
+      0,
+      3.6
+    ],
+    "height": 3.6,
+    "floor": "#c2a077",
+    "wall": "#f4ead4",
+    "trim": "#9c7a52",
+    "roofBeam": "#8a6a44",
+    "decoratable": false,
+    "window": [
+      -3.6,
+      3.6
+    ],
+    "lectern": {
+      "x": 0,
+      "z": -2.4,
+      "label": "点一壶茶",
+      "shop": "teahouse"
+    },
+    "stock": "teahouse",
+    "opens": {
+      "flag": "built:teahouse",
+      "zh": "工地盖好了才开门",
+      "en": "Opens once the build site is finished."
+    },
+    "fittings": [
+      {
+        "kind": "cupshelf",
+        "x": -3.4,
+        "z": -3.4,
+        "rot": 0
+      },
+      {
+        "kind": "coffeebar",
+        "x": 3.55,
+        "z": -1.2,
+        "rot": -90
+      },
+      {
+        "kind": "diningtable",
+        "x": -3,
+        "z": 0.6,
+        "rot": 0
+      },
+      {
+        "kind": "diningchair",
+        "x": -3,
+        "z": -0.5,
+        "rot": 0
+      },
+      {
+        "kind": "diningchair",
+        "x": -4.4,
+        "z": 0.6,
+        "rot": 90
+      },
+      {
+        "kind": "diningtable",
+        "x": 2.2,
+        "z": 1.4,
+        "rot": 0
+      },
+      {
+        "kind": "diningchair",
+        "x": 2.2,
+        "z": 0.2999999999999998,
+        "rot": 0
+      },
+      {
+        "kind": "scroll",
+        "x": -1,
+        "z": -3.85,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": 4.3,
+        "z": 3.2,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -1.6,
+        "z": 2.9,
+        "rot": 0
+      }
+    ]
+  },
+  "kitchen": {
+    "zh": "我家的厨房",
+    "pinyin": "wǒ jiā de chúfáng",
+    "en": "Home kitchen",
+    "building": "home",
+    "door": {
+      "x": 16.1,
+      "z": 15.6
+    },
+    "enterLabel": "进厨房",
+    "size": [
+      8,
+      8
+    ],
+    "spawn": [
+      0,
+      1.2
+    ],
+    "exit": [
+      0,
+      3.7
+    ],
+    "height": 3.3,
+    "floor": "#d9cbb3",
+    "wall": "#f2ead8",
+    "trim": "#719485",
+    "roofBeam": "#a58b69",
+    "window": [
+      -2.5,
+      2.5
+    ],
+    "interiorOnly": true,
+    "returnPlace": "home",
+    "returnLabel": "回屋里 · BACK INSIDE",
+    "returnSpawn": [
+      3.5,
+      2.5,
+      -90
+    ],
+    "fittings": [
+      {
+        "kind": "kitchen",
+        "x": 0,
+        "z": -2.8,
+        "action": "cook",
+        "label": "做饭 · 厨房"
+      },
+      {
+        "kind": "diningtable",
+        "x": -2,
+        "z": 0.2
+      },
+      {
+        "kind": "diningchair",
+        "x": -2,
+        "z": 1.4,
+        "rot": 0
+      }
+    ]
+  },
+  "hardware": {
+    "zh": "星光五金百货",
+    "pinyin": "Xīngguāng wǔjīn bǎihuò",
+    "en": "Starlight hardware & home",
+    "building": "city:department",
+    "door": {
+      "x": -10.5,
+      "z": 0
+    },
+    "interiorOnly": true,
+    "returnPlace": "city",
+    "returnSpawn": [
+      -9.4,
+      0,
+      90
+    ],
+    "returnLabel": "回到步行街",
+    "enterLabel": "进五金百货",
+    "size": [
+      18,
+      16
+    ],
+    "spawn": [
+      0,
+      6.5
+    ],
+    "exit": [
+      0,
+      7.6
+    ],
+    "height": 4.6,
+    "floor": "#d0cfc6",
+    "wall": "#e7e9df",
+    "trim": "#54776e",
+    "roofBeam": "#6b7b78",
+    "window": [
+      -6,
+      6
+    ],
+    "fittings": [
+      {
+        "kind": "hardwarebay",
+        "x": -5.5,
+        "z": -5,
+        "action": "shop:hardware",
+        "label": "建材 · 木材、砖、布料",
+        "sign": "建材部"
+      },
+      {
+        "kind": "hardwarebay",
+        "x": 0,
+        "z": -5,
+        "action": "shop:hardware",
+        "label": "五金建材 · 选购",
+        "sign": "五金部"
+      },
+      {
+        "kind": "lampdisplay",
+        "x": 5.6,
+        "z": -5,
+        "action": "shop:lights",
+        "label": "灯具部 · 选购",
+        "sign": "灯具部"
+      },
+      {
+        "kind": "bedshow",
+        "x": -5,
+        "z": 0,
+        "action": "shop:homeware",
+        "label": "家居部 · 床与家具",
+        "sign": "家居部"
+      },
+      {
+        "kind": "displaytable",
+        "x": 0,
+        "z": 0,
+        "action": "shop:hardware",
+        "label": "全店目录 · 加入购物车",
+        "sign": "全店目录"
+      },
+      {
+        "kind": "clothesrail",
+        "x": 5.5,
+        "z": 0,
+        "action": "shop:lifestyle",
+        "label": "生活用品部 · 选购",
+        "sign": "生活用品部"
+      },
+      {
+        "kind": "checkout",
+        "x": 5.5,
+        "z": 5,
+        "action": "shop:hardware",
+        "label": "收银台 · 五金百货",
+        "sign": "收银台"
+      },
+      {
+        "kind": "plantpot",
+        "x": -7.3,
+        "z": 5.8
+      }
+    ]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "id": "city-taxi",
+  "title": "打车",
+  "pinyin": "Dǎ chē",
+  "en": "Taking a taxi",
+  "target": "我要去 + a place",
+  "curriculumStatus": "Beginner prototype; HSK level mapping and native-speaker review pending",
+  "host": {"zh": "出租车司机", "pinyin": "chūzūchē sījī", "en": "a taxi driver", "color": "#d9b44a"},
+  "nodes": [
+    {
+      "id": "where",
+      "zh": "你好！去哪儿？",
+      "pinyin": "Nǐ hǎo! Qù nǎr?",
+      "en": "Hi! Where to?",
+      "note": "去 (qù) is to go, so 我要去… means 'I want to go to…'. Taxi drivers are usually addressed as 师傅 (shīfu): 师傅，去一号书店。",
+      "speaker": "driver",
+      "intent": "option",
+      "store": "destination",
+      "options": [
+        {"value": "云海银行", "choice": "我要去云海银行。", "accepted": ["我要去云海银行", "去云海银行", "云海银行", "到云海银行", "我去云海银行", "师傅，去云海银行", "去银行", "我要去银行"]},
+        {"value": "星光百货", "choice": "我要去星光百货。", "accepted": ["我要去星光百货", "去星光百货", "星光百货", "到星光百货", "我去星光百货", "师傅，去星光百货", "去百货大楼", "我要去百货大楼"]},
+        {"value": "一号书店", "choice": "我要去一号书店。", "accepted": ["我要去一号书店", "去一号书店", "一号书店", "到一号书店", "我去一号书店", "师傅，去一号书店", "去书店", "我要去书店"]},
+        {"value": "中山医院", "choice": "我要去中山医院。", "accepted": ["我要去中山医院", "去中山医院", "中山医院", "到中山医院", "我去中山医院", "师傅，去中山医院", "去医院", "我要去医院"]},
+        {"value": "海风面馆", "choice": "我要去海风面馆。", "accepted": ["我要去海风面馆", "去海风面馆", "海风面馆", "到海风面馆", "我去海风面馆", "师傅，去海风面馆", "去面馆", "我要去面馆"]},
+        {"value": "光明电影院", "choice": "我要去光明电影院。", "accepted": ["我要去光明电影院", "去光明电影院", "光明电影院", "到光明电影院", "我去光明电影院", "师傅，去光明电影院", "去电影院", "我要去电影院"]}
+      ],
+      "hint": "Say 我要去 and a place, for example 我要去一号书店。",
+      "audio": "city-taxi-where"
+    },
+    {
+      "id": "go",
+      "zh": "好嘞，上车吧！",
+      "pinyin": "Hǎo lei, shàng chē ba!",
+      "en": "Sure thing, hop in!",
+      "note": "好嘞 is a cheerful, casual 好的 (OK), common with drivers and shopkeepers.",
+      "register": "casual",
+      "speaker": "driver",
+      "intent": "none",
+      "audio": "city-taxi-go"
+    }
+  ],
+  "extraLines": {
+    "arrived": {
+      "zh": "到了！车费五块。",
+      "pinyin": "Dào le! Chēfèi wǔ kuài.",
+      "en": "Here we are! The fare is five.",
+      "speaker": "driver",
+      "audio": "city-taxi-arrived"
+    },
+    "broke": {
+      "zh": "车费是五块，你的钱好像不够。",
+      "pinyin": "Chēfèi shì wǔ kuài, nǐ de qián hǎoxiàng bú gòu.",
+      "en": "The fare is five, and you don't seem to have enough.",
+      "speaker": "driver",
+      "audio": "city-taxi-broke"
+    }
+  }
+}

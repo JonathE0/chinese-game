@@ -1,0 +1,659 @@
+{
+  "note": "Names for things in the world. Look at one in game to see its label; press F to hear it and keep it. hsk is the level the word belongs to, used for the discovery counter and area gating. Levels follow src/content/hsk.json and carry the same unverified caveat.",
+  "objects": {
+    "tree": {
+      "zh": "树",
+      "pinyin": "shù",
+      "en": "tree",
+      "hsk": 1
+    },
+    "flower": {
+      "zh": "花",
+      "pinyin": "huā",
+      "en": "flower",
+      "hsk": 1
+    },
+    "grass": {
+      "zh": "草",
+      "pinyin": "cǎo",
+      "en": "grass",
+      "hsk": 3
+    },
+    "bench": {
+      "zh": "长椅",
+      "pinyin": "cháng yǐ",
+      "en": "bench",
+      "hsk": 3
+    },
+    "chair": {
+      "zh": "椅子",
+      "pinyin": "yǐ zi",
+      "en": "chair",
+      "hsk": 1
+    },
+    "table": {
+      "zh": "桌子",
+      "pinyin": "zhuō zi",
+      "en": "table",
+      "hsk": 1
+    },
+    "bed": {
+      "zh": "床",
+      "pinyin": "chuáng",
+      "en": "bed",
+      "hsk": 2
+    },
+    "shelf": {
+      "zh": "书架",
+      "pinyin": "shū jià",
+      "en": "bookshelf",
+      "hsk": 3
+    },
+    "lamp": {
+      "zh": "灯",
+      "pinyin": "dēng",
+      "en": "lamp",
+      "hsk": 2
+    },
+    "rug": {
+      "zh": "地毯",
+      "pinyin": "dì tǎn",
+      "en": "rug",
+      "hsk": 4
+    },
+    "plant": {
+      "zh": "盆栽",
+      "pinyin": "pén zāi",
+      "en": "potted plant",
+      "hsk": 4
+    },
+    "lantern": {
+      "zh": "灯笼",
+      "pinyin": "dēng long",
+      "en": "lantern",
+      "hsk": 4
+    },
+    "fountain": {
+      "zh": "喷泉",
+      "pinyin": "pēn quán",
+      "en": "fountain",
+      "hsk": 5
+    },
+    "wall": {
+      "zh": "墙",
+      "pinyin": "qiáng",
+      "en": "wall",
+      "hsk": 3
+    },
+    "door": {
+      "zh": "门",
+      "pinyin": "mén",
+      "en": "door",
+      "hsk": 1
+    },
+    "window": {
+      "zh": "窗户",
+      "pinyin": "chuāng hu",
+      "en": "window",
+      "hsk": 2
+    },
+    "roof": {
+      "zh": "屋顶",
+      "pinyin": "wū dǐng",
+      "en": "roof",
+      "hsk": 4
+    },
+    "floor": {
+      "zh": "地板",
+      "pinyin": "dì bǎn",
+      "en": "floor",
+      "hsk": 4
+    },
+    "step": {
+      "zh": "台阶",
+      "pinyin": "tái jiē",
+      "en": "steps",
+      "hsk": 5
+    },
+    "stone": {
+      "zh": "石头",
+      "pinyin": "shí tou",
+      "en": "stone",
+      "hsk": 3
+    },
+    "wood": {
+      "zh": "木头",
+      "pinyin": "mù tou",
+      "en": "wood",
+      "hsk": 4
+    },
+    "sign": {
+      "zh": "招牌",
+      "pinyin": "zhāo pai",
+      "en": "shop sign",
+      "hsk": 5
+    },
+    "bin": {
+      "zh": "垃圾桶",
+      "pinyin": "lā jī tǒng",
+      "en": "rubbish bin",
+      "hsk": 3
+    },
+    "streetlight": {
+      "zh": "路灯",
+      "pinyin": "lù dēng",
+      "en": "street light",
+      "hsk": 4
+    },
+    "bicycle": {
+      "zh": "自行车",
+      "pinyin": "zì xíng chē",
+      "en": "bicycle",
+      "hsk": 2
+    },
+    "car": {
+      "zh": "汽车",
+      "pinyin": "qì chē",
+      "en": "car",
+      "hsk": 2
+    },
+    "bus-stop": {
+      "zh": "公交站",
+      "pinyin": "gōng jiāo zhàn",
+      "en": "bus stop",
+      "hsk": 3
+    },
+    "bridge": {
+      "zh": "桥",
+      "pinyin": "qiáo",
+      "en": "bridge",
+      "hsk": 3
+    },
+    "water": {
+      "zh": "水",
+      "pinyin": "shuǐ",
+      "en": "water",
+      "hsk": 1
+    },
+    "umbrella": {
+      "zh": "伞",
+      "pinyin": "sǎn",
+      "en": "umbrella",
+      "hsk": 3
+    },
+    "planter": {
+      "zh": "花坛",
+      "pinyin": "huā tán",
+      "en": "flower bed",
+      "hsk": 6
+    },
+    "awning": {
+      "zh": "雨棚",
+      "pinyin": "yǔ péng",
+      "en": "awning",
+      "hsk": 6
+    },
+    "counter": {
+      "zh": "柜台",
+      "pinyin": "guì tái",
+      "en": "counter",
+      "hsk": 5
+    },
+    "basket": {
+      "zh": "篮子",
+      "pinyin": "lán zi",
+      "en": "basket",
+      "hsk": 4
+    },
+    "box": {
+      "zh": "箱子",
+      "pinyin": "xiāng zi",
+      "en": "box",
+      "hsk": 3
+    },
+    "supermarket": {
+      "zh": "超市",
+      "pinyin": "chāo shì",
+      "en": "supermarket",
+      "hsk": 2
+    },
+    "cafe": {
+      "zh": "咖啡馆",
+      "pinyin": "kā fēi guǎn",
+      "en": "café",
+      "hsk": 2
+    },
+    "bakery": {
+      "zh": "面包店",
+      "pinyin": "miàn bāo diàn",
+      "en": "bakery",
+      "hsk": 3
+    },
+    "bookshop": {
+      "zh": "书店",
+      "pinyin": "shū diàn",
+      "en": "bookshop",
+      "hsk": 2
+    },
+    "clothes-shop": {
+      "zh": "服装店",
+      "pinyin": "fú zhuāng diàn",
+      "en": "clothes shop",
+      "hsk": 3
+    },
+    "lifestyle": {
+      "zh": "生活馆",
+      "pinyin": "shēng huó guǎn",
+      "en": "lifestyle store",
+      "hsk": 4
+    },
+    "pharmacy": {
+      "zh": "药店",
+      "pinyin": "yào diàn",
+      "en": "pharmacy",
+      "hsk": 3
+    },
+    "restaurant": {
+      "zh": "餐厅",
+      "pinyin": "cān tīng",
+      "en": "restaurant",
+      "hsk": 2
+    },
+    "bank": {
+      "zh": "银行",
+      "pinyin": "yín háng",
+      "en": "bank",
+      "hsk": 2
+    },
+    "teahouse": {
+      "zh": "茶铺",
+      "pinyin": "chá pù",
+      "en": "tea stall",
+      "hsk": 5
+    },
+    "home": {
+      "zh": "家",
+      "pinyin": "jiā",
+      "en": "home",
+      "hsk": 1
+    },
+    "school": {
+      "zh": "学校",
+      "pinyin": "xué xiào",
+      "en": "school",
+      "hsk": 1
+    },
+    "fruit": {
+      "zh": "水果",
+      "pinyin": "shuǐ guǒ",
+      "en": "fruit",
+      "hsk": 1
+    },
+    "vegetable": {
+      "zh": "蔬菜",
+      "pinyin": "shū cài",
+      "en": "vegetables",
+      "hsk": 4
+    },
+    "milk": {
+      "zh": "牛奶",
+      "pinyin": "niú nǎi",
+      "en": "milk",
+      "hsk": 2
+    },
+    "bread": {
+      "zh": "面包",
+      "pinyin": "miàn bāo",
+      "en": "bread",
+      "hsk": 2
+    },
+    "egg": {
+      "zh": "鸡蛋",
+      "pinyin": "jī dàn",
+      "en": "egg",
+      "hsk": 2
+    },
+    "rice": {
+      "zh": "米饭",
+      "pinyin": "mǐ fàn",
+      "en": "cooked rice",
+      "hsk": 1
+    },
+    "noodles": {
+      "zh": "面条",
+      "pinyin": "miàn tiáo",
+      "en": "noodles",
+      "hsk": 2
+    },
+    "coffee": {
+      "zh": "咖啡",
+      "pinyin": "kā fēi",
+      "en": "coffee",
+      "hsk": 2
+    },
+    "cake": {
+      "zh": "蛋糕",
+      "pinyin": "dàn gāo",
+      "en": "cake",
+      "hsk": 3
+    },
+    "cup": {
+      "zh": "杯子",
+      "pinyin": "bēi zi",
+      "en": "cup",
+      "hsk": 1
+    },
+    "menu": {
+      "zh": "菜单",
+      "pinyin": "cài dān",
+      "en": "menu",
+      "hsk": 3
+    },
+    "pen": {
+      "zh": "笔",
+      "pinyin": "bǐ",
+      "en": "pen",
+      "hsk": 1
+    },
+    "notebook": {
+      "zh": "本子",
+      "pinyin": "běn zi",
+      "en": "notebook",
+      "hsk": 2
+    },
+    "paper": {
+      "zh": "纸",
+      "pinyin": "zhǐ",
+      "en": "paper",
+      "hsk": 2
+    },
+    "book": {
+      "zh": "书",
+      "pinyin": "shū",
+      "en": "book",
+      "hsk": 1
+    },
+    "bag": {
+      "zh": "包",
+      "pinyin": "bāo",
+      "en": "bag",
+      "hsk": 2
+    },
+    "clothes": {
+      "zh": "衣服",
+      "pinyin": "yī fu",
+      "en": "clothes",
+      "hsk": 1
+    },
+    "shirt": {
+      "zh": "衬衫",
+      "pinyin": "chèn shān",
+      "en": "shirt",
+      "hsk": 3
+    },
+    "trousers": {
+      "zh": "裤子",
+      "pinyin": "kù zi",
+      "en": "trousers",
+      "hsk": 3
+    },
+    "shoes": {
+      "zh": "鞋",
+      "pinyin": "xié",
+      "en": "shoes",
+      "hsk": 2
+    },
+    "hat": {
+      "zh": "帽子",
+      "pinyin": "mào zi",
+      "en": "hat",
+      "hsk": 3
+    },
+    "mirror": {
+      "zh": "镜子",
+      "pinyin": "jìng zi",
+      "en": "mirror",
+      "hsk": 4
+    },
+    "clock": {
+      "zh": "钟",
+      "pinyin": "zhōng",
+      "en": "clock",
+      "hsk": 2
+    },
+    "shop": {
+      "zh": "商店",
+      "pinyin": "shāng diàn",
+      "en": "shop",
+      "hsk": 1
+    },
+    "square": {
+      "zh": "广场",
+      "pinyin": "guǎng chǎng",
+      "en": "town square",
+      "hsk": 3
+    },
+    "wordhall": {
+      "zh": "词语馆",
+      "pinyin": "cí yǔ guǎn",
+      "en": "the word hall",
+      "hsk": null
+    },
+    "guesthouse": {
+      "zh": "客栈",
+      "pinyin": "kè zhàn",
+      "en": "inn",
+      "hsk": null
+    },
+    "person": {
+      "zh": "人",
+      "pinyin": "rén",
+      "en": "person",
+      "hsk": 1
+    },
+    "pond": {
+      "zh": "池塘",
+      "pinyin": "chí táng",
+      "en": "pond",
+      "hsk": 6
+    },
+    "path": {
+      "zh": "小路",
+      "pinyin": "xiǎo lù",
+      "en": "path",
+      "hsk": 2
+    },
+    "patio": {
+      "zh": "露台",
+      "pinyin": "lù tái",
+      "en": "terrace",
+      "hsk": 6
+    },
+    "lotus": {
+      "zh": "荷花",
+      "pinyin": "hé huā",
+      "en": "lotus",
+      "hsk": 6
+    },
+    "fish": {
+      "zh": "鱼",
+      "pinyin": "yú",
+      "en": "fish",
+      "hsk": 2
+    },
+    "rock": {
+      "zh": "假山",
+      "pinyin": "jiǎ shān",
+      "en": "rockery",
+      "hsk": 6
+    },
+    "dresser": {
+      "zh": "五斗柜",
+      "pinyin": "wǔ dǒu guì",
+      "en": "chest of drawers",
+      "hsk": 6
+    },
+    "nightstand": {
+      "zh": "床头柜",
+      "pinyin": "chuáng tóu guì",
+      "en": "nightstand",
+      "hsk": 6
+    },
+    "desk": {
+      "zh": "书桌",
+      "pinyin": "shū zhuō",
+      "en": "desk",
+      "hsk": 3
+    },
+    "wardrobe": {
+      "zh": "衣柜",
+      "pinyin": "yī guì",
+      "en": "wardrobe",
+      "hsk": 4
+    },
+    "ceilinglamp": {
+      "zh": "吊灯",
+      "pinyin": "diào dēng",
+      "en": "ceiling lamp",
+      "hsk": 6
+    },
+    "waiter": {
+      "zh": "服务员",
+      "pinyin": "fú wù yuán",
+      "en": "waiter",
+      "hsk": 3
+    },
+    "poster": {
+      "zh": "海报",
+      "pinyin": "hǎibào",
+      "en": "poster",
+      "hsk": 4
+    },
+    "sofa": {
+      "zh": "沙发",
+      "pinyin": "shāfā",
+      "en": "sofa",
+      "hsk": 3
+    },
+    "stool": {
+      "zh": "凳子",
+      "pinyin": "dèngzi",
+      "en": "stool",
+      "hsk": 4
+    },
+    "money": {
+      "zh": "钱",
+      "pinyin": "qián",
+      "en": "money",
+      "hsk": 1
+    },
+    "atm": {
+      "zh": "取款机",
+      "pinyin": "qǔkuǎnjī",
+      "en": "cash machine",
+      "hsk": 5
+    },
+    "hedge": {
+      "zh": "树篱",
+      "pinyin": "shùlí",
+      "en": "hedge",
+      "hsk": 6
+    },
+    "oven": {
+      "zh": "烤箱",
+      "pinyin": "kǎoxiāng",
+      "en": "oven",
+      "hsk": 5
+    },
+    "donut": {
+      "zh": "甜甜圈",
+      "pinyin": "tiántiánquān",
+      "en": "doughnut",
+      "hsk": null
+    },
+    "eggtart": {
+      "zh": "蛋挞",
+      "pinyin": "dàntà",
+      "en": "egg tart",
+      "hsk": null
+    },
+    "skewer": {
+      "zh": "烤串",
+      "pinyin": "kǎochuàn",
+      "en": "grilled skewer",
+      "hsk": null
+    },
+    "hawthorn": {
+      "zh": "糖葫芦",
+      "pinyin": "tánghúlu",
+      "en": "candied hawthorn",
+      "hsk": null
+    },
+    "cart": {
+      "zh": "小推车",
+      "pinyin": "xiǎo tuīchē",
+      "en": "handcart",
+      "hsk": 4
+    },
+    "lantern-string": {
+      "zh": "灯串",
+      "pinyin": "dēngchuàn",
+      "en": "string of lights",
+      "hsk": null
+    },
+    "stove": {
+      "zh": "灶台",
+      "pinyin": "zàotái",
+      "en": "stove",
+      "hsk": null
+    },
+    "tower": {
+      "zh": "大楼",
+      "pinyin": "dàlóu",
+      "en": "tall building",
+      "hsk": 3
+    },
+    "metro-station": {
+      "zh": "地铁站",
+      "pinyin": "dìtiězhàn",
+      "en": "metro station",
+      "hsk": 3
+    },
+    "traffic-light": {
+      "zh": "红绿灯",
+      "pinyin": "hónglǜdēng",
+      "en": "traffic light",
+      "hsk": 4
+    },
+    "crossing": {
+      "zh": "斑马线",
+      "pinyin": "bānmǎxiàn",
+      "en": "zebra crossing",
+      "hsk": null
+    },
+    "screen": {
+      "zh": "大屏幕",
+      "pinyin": "dà píngmù",
+      "en": "big screen",
+      "hsk": null
+    },
+    "kiosk": {
+      "zh": "便利店",
+      "pinyin": "biànlìdiàn",
+      "en": "convenience store",
+      "hsk": null
+    },
+    "hardware-rack": {
+      "zh": "五金货架",
+      "pinyin": "wǔjīn huòjià",
+      "en": "hardware rack",
+      "hsk": null
+    },
+    "taxi": {
+      "zh": "出租车",
+      "pinyin": "chūzūchē",
+      "en": "taxi",
+      "hsk": 2
+    }
+  }
+}

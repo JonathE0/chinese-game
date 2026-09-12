@@ -1,0 +1,1398 @@
+{
+ "name": "青禾小镇",
+ "subtitle": "QINGHE · A LITTLE MANDARIN GETAWAY",
+ "bounds": 58,
+ "spawn": [
+  0,
+  9
+ ],
+ "districts": [
+  {
+   "id": "square",
+   "zh": "青禾广场",
+   "pinyin": "Qīnghé guǎngchǎng",
+   "en": "Qinghe Square",
+   "weather": "下午 · 微风",
+   "level": 1,
+   "bounds": {
+    "x": [
+     -21,
+     21
+    ],
+    "z": [
+     -19,
+     19
+    ]
+   }
+  },
+  {
+   "id": "market",
+   "zh": "商业街",
+   "pinyin": "Shāngyè jiē",
+   "en": "Shopping Street",
+   "weather": "傍晚 · 热闹",
+   "level": 2,
+   "bounds": {
+    "x": [
+     19,
+     64
+    ],
+    "z": [
+     -13,
+     13
+    ]
+   },
+   "gate": {
+    "x": 20,
+    "z": 0,
+    "axis": "x",
+    "half": 19,
+    "requires": {
+     "level": 1,
+     "words": 25
+    },
+    "span": 5
+   }
+  },
+  {
+   "id": "riverside",
+   "zh": "河边文化街",
+   "pinyin": "Hébiān wénhuà jiē",
+   "en": "Riverside Quarter",
+   "weather": "清晨 · 安静",
+   "level": 3,
+   "bounds": {
+    "x": [
+     -19,
+     19
+    ],
+    "z": [
+     -43,
+     -19
+    ]
+   },
+   "gate": {
+    "x": 0,
+    "z": -19,
+    "axis": "z",
+    "half": 19,
+    "requires": {
+     "level": 2,
+     "words": 30
+    },
+    "span": 5
+   }
+  }
+ ],
+ "buildings": [
+  {
+   "id": "tea-house",
+   "x": -10.5,
+   "z": -8,
+   "width": 7,
+   "depth": 5,
+   "height": 4.2,
+   "color": "#f0d9ae",
+   "roof": "#6c8c84",
+   "sign": "青禾茶铺",
+   "rotation": 0,
+   "object": "teahouse",
+   "district": "square",
+   "style": "tiled"
+  },
+  {
+   "id": "practice-house",
+   "x": 0,
+   "z": -12,
+   "width": 7,
+   "depth": 5,
+   "height": 4.7,
+   "color": "#e9c7a9",
+   "roof": "#c1775e",
+   "sign": "词语馆",
+   "rotation": 0,
+   "object": "wordhall",
+   "district": "square",
+   "style": "tiled"
+  },
+  {
+   "id": "souvenir-house",
+   "x": 11,
+   "z": -8,
+   "width": 7,
+   "depth": 5,
+   "height": 4,
+   "color": "#f1dbae",
+   "roof": "#608c90",
+   "sign": "小小商店",
+   "rotation": 0,
+   "object": "shop",
+   "district": "square",
+   "style": "shophouse",
+   "trim": "#f0e4cc"
+  },
+  {
+   "id": "guesthouse",
+   "x": -18,
+   "z": 12,
+   "width": 5,
+   "depth": 7,
+   "height": 5.2,
+   "color": "#dfb79f",
+   "roof": "#b77b65",
+   "sign": "客栈",
+   "rotation": 0,
+   "object": "guesthouse",
+   "district": "square",
+   "style": "tiled"
+  },
+  {
+   "id": "home",
+   "x": 16.1,
+   "z": 12,
+   "width": 5,
+   "depth": 7,
+   "height": 4.5,
+   "color": "#eadac1",
+   "roof": "#7b8d74",
+   "sign": "我的家",
+   "rotation": 0,
+   "object": "home",
+   "district": "square",
+   "style": "tiled"
+  },
+  {
+   "id": "supermarket",
+   "x": 28,
+   "z": -9,
+   "width": 10,
+   "depth": 6,
+   "height": 5,
+   "color": "#eddfc0",
+   "roof": "#5f8b93",
+   "sign": "青禾超市",
+   "rotation": 0,
+   "object": "supermarket",
+   "district": "market",
+   "style": "modern"
+  },
+  {
+   "id": "cafe",
+   "x": 28,
+   "z": 9,
+   "width": 8,
+   "depth": 6,
+   "height": 4.4,
+   "color": "#f0d8bd",
+   "roof": "#a9705d",
+   "sign": "慢慢咖啡",
+   "rotation": 180,
+   "object": "cafe",
+   "district": "market",
+   "style": "shophouse",
+   "trim": "#f2e2cd"
+  },
+  {
+   "id": "bakery",
+   "x": 39,
+   "z": -9,
+   "width": 7,
+   "depth": 5,
+   "height": 4.2,
+   "color": "#f2e2c2",
+   "roof": "#c48a5f",
+   "sign": "麦香面包",
+   "rotation": 0,
+   "object": "bakery",
+   "district": "market",
+   "style": "shophouse",
+   "trim": "#f6ecd8"
+  },
+  {
+   "id": "lifestyle",
+   "x": 39,
+   "z": 9,
+   "width": 9,
+   "depth": 6,
+   "height": 4.8,
+   "color": "#eee6d3",
+   "roof": "#8b9a86",
+   "sign": "生活馆",
+   "rotation": 180,
+   "object": "lifestyle",
+   "district": "market",
+   "style": "shophouse",
+   "trim": "#eef0e6"
+  },
+  {
+   "id": "bookshop",
+   "x": 48.5,
+   "z": -8,
+   "width": 9,
+   "depth": 7,
+   "height": 5.4,
+   "color": "#e8ddc4",
+   "roof": "#6f8891",
+   "sign": "青禾书馆",
+   "rotation": 0,
+   "object": "wordhall",
+   "district": "market",
+   "style": "tiled"
+  },
+  {
+   "id": "clothes-shop",
+   "x": 49,
+   "z": 8,
+   "width": 6,
+   "depth": 5,
+   "height": 4.4,
+   "color": "#f0d6c6",
+   "roof": "#9c7f9a",
+   "sign": "服装店",
+   "rotation": 180,
+   "object": "clothes-shop",
+   "district": "market",
+   "style": "modern"
+  },
+  {
+   "id": "restaurant",
+   "x": -11,
+   "z": -29,
+   "width": 8,
+   "depth": 6,
+   "height": 4.6,
+   "color": "#efd6b4",
+   "roof": "#b06a55",
+   "sign": "家常餐厅",
+   "rotation": 0,
+   "object": "restaurant",
+   "district": "riverside",
+   "style": "shophouse",
+   "trim": "#f3e3cf"
+  },
+  {
+   "id": "bank",
+   "x": 11,
+   "z": -29,
+   "width": 8,
+   "depth": 6,
+   "height": 5,
+   "color": "#e6e0cd",
+   "roof": "#6d7d8c",
+   "sign": "青禾邮局",
+   "rotation": 0,
+   "object": "shop",
+   "district": "riverside",
+   "style": "tiled"
+  },
+  {
+   "id": "pharmacy",
+   "x": 0,
+   "z": -37,
+   "width": 7,
+   "depth": 5,
+   "height": 4.2,
+   "color": "#e9e6d2",
+   "roof": "#7f9a76",
+   "sign": "青禾药店",
+   "rotation": 0,
+   "object": "pharmacy",
+   "district": "riverside",
+   "style": "tiled"
+  },
+  {
+   "id": "lights",
+   "x": 58,
+   "z": -8,
+   "width": 8,
+   "depth": 5,
+   "height": 4.6,
+   "color": "#f0e4cb",
+   "roof": "#8a7f9c",
+   "sign": "青禾灯具",
+   "rotation": 0,
+   "object": "shop",
+   "district": "market",
+   "style": "modern"
+  },
+  {
+   "id": "homeware",
+   "x": -17.5,
+   "z": 3,
+   "width": 6,
+   "depth": 5,
+   "height": 4.2,
+   "color": "#f2e6cd",
+   "roof": "#8c7f6c",
+   "sign": "家居小铺",
+   "rotation": 180,
+   "object": "shop",
+   "district": "square",
+   "style": "shophouse",
+   "trim": "#f2e6cd"
+  },
+  {
+   "id": "bank-branch",
+   "x": -18,
+   "z": -6,
+   "width": 5,
+   "depth": 5,
+   "height": 4.6,
+   "color": "#e8e4d4",
+   "roof": "#6d7d8c",
+   "sign": "青禾银行",
+   "rotation": 180,
+   "object": "bank",
+   "district": "square",
+   "style": "tiled"
+  },
+  {
+   "id": "resale",
+   "x": 15.5,
+   "z": 4,
+   "width": 6,
+   "depth": 4,
+   "height": 3.9,
+   "color": "#ecdcbe",
+   "roof": "#9c7a5c",
+   "sign": "旧物铺",
+   "rotation": 180,
+   "object": "shop",
+   "district": "square",
+   "style": "shophouse",
+   "trim": "#efe0c4"
+  },
+  {
+   "id": "teahouse",
+   "x": 7,
+   "z": 13,
+   "width": 8,
+   "depth": 5,
+   "height": 4.6,
+   "color": "#f2e2c8",
+   "roof": "#8c6a52",
+   "sign": "青禾茶楼",
+   "rotation": 180,
+   "object": "teahouse",
+   "district": "square",
+   "style": "shophouse",
+   "trim": "#f6ead6",
+   "site": "teahouse"
+  }
+ ],
+ "npcs": [
+  {
+   "id": "lin",
+   "x": -9,
+   "z": -2
+  },
+  {
+   "id": "mei",
+   "x": -2.9,
+   "z": -6.4
+  },
+  {
+   "id": "chen",
+   "x": 9,
+   "z": -2
+  }
+ ],
+ "props": [
+  {
+   "kind": "bench",
+   "x": -4.5,
+   "z": 2.35,
+   "rot": 180,
+   "district": "square"
+  },
+  {
+   "kind": "bench",
+   "x": 4.5,
+   "z": 2.35,
+   "rot": 180,
+   "district": "square"
+  },
+  {
+   "kind": "planter",
+   "x": -6.5,
+   "z": 7,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "planter",
+   "x": 6.5,
+   "z": 7,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "planter",
+   "x": -6.5,
+   "z": -4,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "planter",
+   "x": 6.5,
+   "z": -4,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "bin",
+   "x": -7.6,
+   "z": 2.4,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "bin",
+   "x": 7.6,
+   "z": 2.4,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "streetlight",
+   "x": -13.5,
+   "z": 13,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "streetlight",
+   "x": -13.5,
+   "z": -1,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "streetlight",
+   "x": 12.6,
+   "z": 16.8,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "streetlight",
+   "x": 13.5,
+   "z": -1,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "bicycle",
+   "x": -14.2,
+   "z": 9,
+   "rot": 20,
+   "district": "square"
+  },
+  {
+   "kind": "bicycle",
+   "x": 14,
+   "z": 7.2,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "bollard",
+   "x": -3.4,
+   "z": 16.5,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "bollard",
+   "x": 3.4,
+   "z": 16.5,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "streetlight",
+   "x": 22,
+   "z": -3.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 22,
+   "z": 3.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 26,
+   "z": -3.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 26,
+   "z": 3.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 30,
+   "z": -3.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 30,
+   "z": 3.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 34,
+   "z": -3.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 34,
+   "z": 3.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 38,
+   "z": -3.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 38,
+   "z": 3.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 42,
+   "z": -3.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 42,
+   "z": 3.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 46,
+   "z": -3.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 46,
+   "z": 3.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 50,
+   "z": -3.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 50,
+   "z": 3.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "bench",
+   "x": 24,
+   "z": -2.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "bench",
+   "x": 24,
+   "z": 2.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "bench",
+   "x": 31,
+   "z": -2.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "bench",
+   "x": 31,
+   "z": 2.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "bench",
+   "x": 42,
+   "z": -2.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "bench",
+   "x": 42,
+   "z": 2.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "bench",
+   "x": 47,
+   "z": -2.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "bench",
+   "x": 47,
+   "z": 2.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "bin",
+   "x": 27.1,
+   "z": 2.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "bin",
+   "x": 35,
+   "z": 3.4,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "bin",
+   "x": 45,
+   "z": 3.4,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "fruitstand",
+   "x": 24.5,
+   "z": -4.7,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "fruitstand",
+   "x": 31.5,
+   "z": -4.7,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "crate",
+   "x": 22,
+   "z": -6,
+   "rot": 15,
+   "district": "market"
+  },
+  {
+   "kind": "crate",
+   "x": 22,
+   "z": -7.4,
+   "rot": -10,
+   "district": "market"
+  },
+  {
+   "kind": "awning",
+   "x": 28,
+   "z": -5.4,
+   "rot": 0,
+   "district": "market",
+   "tint": "#5f8b93"
+  },
+  {
+   "kind": "cafetable",
+   "x": 25.5,
+   "z": 5,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "chair",
+   "x": 24.4,
+   "z": 5,
+   "rot": 90,
+   "district": "market"
+  },
+  {
+   "kind": "chair",
+   "x": 26.6,
+   "z": 5,
+   "rot": -90,
+   "district": "market"
+  },
+  {
+   "kind": "cafetable",
+   "x": 30.5,
+   "z": 5,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "chair",
+   "x": 29.4,
+   "z": 5,
+   "rot": 90,
+   "district": "market"
+  },
+  {
+   "kind": "chair",
+   "x": 31.6,
+   "z": 5,
+   "rot": -90,
+   "district": "market"
+  },
+  {
+   "kind": "cafetable",
+   "x": 22.2,
+   "z": 8.2,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "parasol",
+   "x": 22.2,
+   "z": 8.2,
+   "rot": 0,
+   "district": "market",
+   "tint": "#c98d76"
+  },
+  {
+   "kind": "chair",
+   "x": 21.1,
+   "z": 8.2,
+   "rot": 90,
+   "district": "market"
+  },
+  {
+   "kind": "chair",
+   "x": 23.3,
+   "z": 8.2,
+   "rot": -90,
+   "district": "market"
+  },
+  {
+   "kind": "sign",
+   "x": 21.5,
+   "z": -1.6,
+   "rot": 0,
+   "district": "market",
+   "tint": "#e6d3a4"
+  },
+  {
+   "kind": "sign",
+   "x": 22.2,
+   "z": 1,
+   "rot": 0,
+   "district": "market",
+   "tint": "#e6d3a4"
+  },
+  {
+   "kind": "bicycle",
+   "x": 35.1,
+   "z": -4.5,
+   "rot": 10,
+   "district": "market"
+  },
+  {
+   "kind": "bicycle",
+   "x": 43.8,
+   "z": 4.5,
+   "rot": -160,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": -5,
+   "z": -24,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "streetlight",
+   "x": -5,
+   "z": -33,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "streetlight",
+   "x": 5,
+   "z": -24,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "streetlight",
+   "x": 5,
+   "z": -33,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "bench",
+   "x": -3.4,
+   "z": -22.5,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "bench",
+   "x": 3.4,
+   "z": -22.5,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "bench",
+   "x": -3.4,
+   "z": -33.5,
+   "rot": 180,
+   "district": "riverside"
+  },
+  {
+   "kind": "bench",
+   "x": 3.4,
+   "z": -33.5,
+   "rot": 180,
+   "district": "riverside"
+  },
+  {
+   "kind": "planter",
+   "x": -7,
+   "z": -33,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "planter",
+   "x": 7,
+   "z": -33,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "planter",
+   "x": -7,
+   "z": -24,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "planter",
+   "x": 7,
+   "z": -24,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "bin",
+   "x": -5.6,
+   "z": -22.4,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "bin",
+   "x": 5.6,
+   "z": -22.4,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "cafetable",
+   "x": -3,
+   "z": -26.5,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "chair",
+   "x": -4.1,
+   "z": -26.5,
+   "rot": 90,
+   "district": "riverside"
+  },
+  {
+   "kind": "bollard",
+   "x": -2.6,
+   "z": -20.5,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "bollard",
+   "x": 2.6,
+   "z": -20.5,
+   "rot": 0,
+   "district": "riverside"
+  },
+  {
+   "kind": "streetlight",
+   "x": 54,
+   "z": -3.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 54,
+   "z": 3.6,
+   "rot": 180,
+   "district": "market"
+  },
+  {
+   "kind": "streetlight",
+   "x": 60,
+   "z": -3.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "bench",
+   "x": 57,
+   "z": -2.6,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "bin",
+   "x": 61,
+   "z": 3.2,
+   "rot": 0,
+   "district": "market"
+  },
+  {
+   "kind": "awning",
+   "x": 58,
+   "z": -4.4,
+   "rot": 0,
+   "tint": "#8a7f9c",
+   "district": "market"
+  },
+  {
+   "kind": "bicycle",
+   "x": 52,
+   "z": -2.6,
+   "rot": 15,
+   "district": "market"
+  },
+  {
+   "kind": "planter",
+   "x": -15.2,
+   "z": -1.45,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "bench",
+   "x": -16.2,
+   "z": -10.4,
+   "rot": 90,
+   "district": "square"
+  },
+  {
+   "kind": "bin",
+   "x": -20.2,
+   "z": -0.4,
+   "district": "square",
+   "rot": 0
+  },
+  {
+   "kind": "crate",
+   "x": 16,
+   "z": 1.15,
+   "rot": 12,
+   "district": "square"
+  },
+  {
+   "kind": "crate",
+   "x": 17.6,
+   "z": 1.15,
+   "rot": -8,
+   "district": "square"
+  },
+  {
+   "kind": "bicycle",
+   "x": 19,
+   "z": -1.6,
+   "rot": 104,
+   "district": "square"
+  },
+  {
+   "kind": "sign",
+   "x": -13.2,
+   "z": -1.5,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "fruitstand",
+   "x": -6.4,
+   "z": 0,
+   "rot": 0,
+   "district": "square"
+  },
+  {
+   "kind": "crate",
+   "x": -7.9,
+   "z": 1.4,
+   "rot": -14,
+   "district": "square"
+  },
+  {
+   "kind": "crate",
+   "x": 4,
+   "z": 9.1,
+   "rot": 8,
+   "district": "square"
+  },
+  {
+   "kind": "crate",
+   "x": 8.1,
+   "z": 9.1,
+   "rot": -12,
+   "district": "square"
+  },
+  {
+   "kind": "sign",
+   "x": 12.2,
+   "z": 10,
+   "rot": 0,
+   "district": "square"
+  }
+ ],
+ "trees": [
+  [
+   -18.7,
+   -13.2
+  ],
+  [
+   -5.7,
+   -13.2
+  ],
+  [
+   7.8,
+   -15.2
+  ],
+  [
+   17.8,
+   -13.2
+  ],
+  [
+   -11.7,
+   9.8
+  ],
+  [
+   10.3,
+   7.7
+  ],
+  [
+   -12.2,
+   15.3
+  ],
+  [
+   10.3,
+   2.8
+  ],
+  [
+   -13.7,
+   -12.7
+  ],
+  [
+   17.8,
+   -7.2
+  ],
+  [
+   54.3,
+   5.8
+  ],
+  [
+   54.3,
+   9.8
+  ],
+  [
+   56.3,
+   1.8
+  ],
+  [
+   57.3,
+   7.8
+  ],
+  [
+   60.3,
+   5.8
+  ],
+  [
+   59.3,
+   10.8
+  ],
+  [
+   -17.2,
+   -22.2
+  ],
+  [
+   14.8,
+   -23.7
+  ],
+  [
+   -15.2,
+   -34.2
+  ],
+  [
+   14.8,
+   -34.2
+  ],
+  [
+   -6.2,
+   -40.2
+  ],
+  [
+   5.8,
+   -40.2
+  ],
+  [
+   -8.7,
+   -21.2
+  ]
+ ],
+ "ambient": [
+  -5,
+  3
+ ],
+ "people": [
+  {
+   "x": -6.5,
+   "z": 11,
+   "rot": 150,
+   "color": "#c98a6d",
+   "district": "square"
+  },
+  {
+   "x": 5.5,
+   "z": 9.25,
+   "rot": -160,
+   "color": "#8fa2b8",
+   "district": "square"
+  },
+  {
+   "x": -13,
+   "z": -3,
+   "rot": 70,
+   "color": "#a9b48d",
+   "district": "square"
+  },
+  {
+   "x": 24.5,
+   "z": 1.4500000000000002,
+   "rot": -120,
+   "color": "#c9a06d",
+   "district": "market"
+  },
+  {
+   "x": 26.5,
+   "z": -2.4,
+   "rot": 40,
+   "color": "#94a8b5",
+   "district": "market"
+  },
+  {
+   "x": 32.75,
+   "z": 2.6,
+   "rot": 180,
+   "color": "#b98d9c",
+   "district": "market"
+  },
+  {
+   "x": 36.5,
+   "z": -3.2,
+   "rot": -30,
+   "color": "#8fa473",
+   "district": "market"
+  },
+  {
+   "x": 44,
+   "z": 1.65,
+   "rot": 110,
+   "color": "#c4896f",
+   "district": "market"
+  },
+  {
+   "x": 47,
+   "z": -1.2999999999999998,
+   "rot": -70,
+   "color": "#9d92b5",
+   "district": "market"
+  },
+  {
+   "x": -4,
+   "z": -24,
+   "rot": 20,
+   "color": "#b0a07a",
+   "district": "riverside"
+  },
+  {
+   "x": 4.5,
+   "z": -31,
+   "rot": -140,
+   "color": "#7f9aa5",
+   "district": "riverside"
+  },
+  {
+   "x": 54,
+   "z": 2.4,
+   "rot": -100,
+   "color": "#a9927f",
+   "district": "market"
+  }
+ ],
+ "ground": [
+  {
+   "kind": "gravel",
+   "x": 0,
+   "z": -16,
+   "w": 6,
+   "d": 8,
+   "district": "square"
+  },
+  {
+   "kind": "gravel",
+   "x": 15.5,
+   "z": -1,
+   "w": 9,
+   "d": 4,
+   "district": "square"
+  },
+  {
+   "kind": "patio",
+   "x": -6.5,
+   "z": 13.5,
+   "w": 9,
+   "d": 6,
+   "district": "square"
+  },
+  {
+   "kind": "grass",
+   "x": -15,
+   "z": -14,
+   "w": 10,
+   "d": 8,
+   "district": "square"
+  },
+  {
+   "kind": "grass",
+   "x": 15,
+   "z": -14,
+   "w": 10,
+   "d": 8,
+   "district": "square"
+  },
+  {
+   "kind": "patio",
+   "x": 28,
+   "z": 5.4,
+   "w": 11,
+   "d": 5,
+   "district": "market"
+  },
+  {
+   "kind": "grass",
+   "x": 45,
+   "z": -11,
+   "w": 16,
+   "d": 4,
+   "district": "market"
+  },
+  {
+   "kind": "pond",
+   "x": 0,
+   "z": -25,
+   "w": 13,
+   "d": 8,
+   "district": "riverside"
+  },
+  {
+   "kind": "gravel",
+   "x": 0,
+   "z": -20.5,
+   "w": 22,
+   "d": 3,
+   "district": "riverside"
+  },
+  {
+   "kind": "gravel",
+   "x": 0,
+   "z": -33.5,
+   "w": 22,
+   "d": 3,
+   "district": "riverside"
+  },
+  {
+   "kind": "grass",
+   "x": -14,
+   "z": -28,
+   "w": 8,
+   "d": 12,
+   "district": "riverside"
+  },
+  {
+   "kind": "grass",
+   "x": 14,
+   "z": -28,
+   "w": 8,
+   "d": 12,
+   "district": "riverside"
+  },
+  {
+   "kind": "gravel",
+   "x": 50,
+   "z": 0,
+   "w": 4,
+   "d": 14,
+   "district": "market"
+  },
+  {
+   "kind": "grass",
+   "x": 62,
+   "z": 0,
+   "w": 4,
+   "d": 10,
+   "district": "market"
+  }
+ ]
+}

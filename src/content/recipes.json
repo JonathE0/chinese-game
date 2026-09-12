@@ -1,0 +1,6 @@
+[
+  {"id":"noodle-bowl","zh":"鸡蛋汤面","pinyin":"Jīdàn tāngmiàn","en":"Egg noodle soup","seconds":25,"output":"home-noodle-bowl","ingredients":{"noodles":1,"egg":1}},
+  {"id":"vegetable-rice","zh":"青菜豆腐饭","pinyin":"Qīngcài dòufu fàn","en":"Greens and tofu rice","seconds":35,"output":"home-vegetable-rice","ingredients":{"rice-grain":1,"vegetable":1,"tofu":1}},
+  {"id":"tomato-rice","zh":"番茄豆腐盖饭","pinyin":"Fānqié dòufu gàifàn","en":"Tomato and tofu rice bowl","seconds":20,"output":"home-tomato-rice","ingredients":{"rice-grain":1,"tomato":1,"tofu":1}},
+  {"id":"tomato-egg-noodles","zh":"番茄鸡蛋面","pinyin":"Fānqié jīdàn miàn","en":"Tomato and egg noodles","seconds":25,"output":"home-tomato-egg-noodles","ingredients":{"noodles":1,"egg":1,"tomato":1},"learnedBy":"recipe:tomato-egg-noodles"}
+]

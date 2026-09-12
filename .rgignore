@@ -1,0 +1,6 @@
+# Hidden from default ripgrep searches (Claude Code's Grep uses ripgrep) because they are huge and
+# drown out real results. Searching one by passing its path explicitly still works.
+public/hsk/words.json
+public/audio/manifest.json
+src/content/hsk-chinese.json
+package-lock.json

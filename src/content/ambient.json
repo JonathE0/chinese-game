@@ -1,0 +1,6 @@
+[
+ {"id":"ambient-weather","zh":"今天天气真好！","pinyin":"Jīntiān tiānqì zhēn hǎo!","en":"The weather is lovely today!","speaker":"friend-a","audio":"ambient-weather","note":"真 adds emphasis: really / so."},
+ {"id":"ambient-walk","zh":"是啊，一起走走吧。","pinyin":"Shì a, yìqǐ zǒuzou ba.","en":"It is! Let's take a little walk together.","speaker":"friend-b","audio":"ambient-walk","note":"走走 makes the suggestion relaxed; 吧 softens it."},
+ {"id":"ambient-tea","zh":"喝杯茶怎么样？","pinyin":"Hē bēi chá zěnmeyàng?","en":"How about a cup of tea?","speaker":"friend-a","audio":"ambient-tea","note":"A conversational suggestion. The full form is 喝一杯茶怎么样？"},
+ {"id":"ambient-yes","zh":"好啊，走吧！","pinyin":"Hǎo a, zǒu ba!","en":"Sounds good. Let's go!","speaker":"friend-b","audio":"ambient-yes","note":"好啊 is a friendly way to agree."}
+]

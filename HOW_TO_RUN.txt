@@ -1,0 +1,318 @@
+===============================================================================
+ 青禾小镇 - Little Mandarin Town
+ How to run the game on this computer
+===============================================================================
+
+The game is RUNNING RIGHT NOW. Open this in your browser:
+
+    http://127.0.0.1:5174
+
+That address only works on this computer. It is a local server, not a website,
+so nobody else can open it and it does not work from your phone.
+
+If that link does not load, the server has been stopped. Start it again with
+the three steps in section 2.
+
+
+-------------------------------------------------------------------------------
+ 1. WHAT YOU NEED (one-time)
+-------------------------------------------------------------------------------
+
+Node.js version 22.12 or newer. Check what you have by opening a terminal and
+typing:
+
+    node --version
+
+This machine currently has v24.18.0, which is fine.
+
+If you ever need to reinstall Node, get it from https://nodejs.org (take the
+LTS build).
+
+You do NOT need Python, Unity, or a PlayCanvas account to play. Python is only
+needed if you want to regenerate the voice clips or word lists - see section 6.
+
+
+-------------------------------------------------------------------------------
+ 2. RUNNING THE GAME (the normal way)
+-------------------------------------------------------------------------------
+
+STEP 1 - Open a terminal in the project folder.
+
+    Easiest way: open File Explorer, go to
+
+        C:\Users\jonat\Documents\ChatGPT\Game
+
+    click in the address bar at the top, type  powershell  and press Enter.
+
+    (Or open PowerShell anywhere and run:
+        cd C:\Users\jonat\Documents\ChatGPT\Game
+    )
+
+STEP 2 - Install the dependencies. You only ever need to do this once, or
+         after the project's package.json changes.
+
+    npm install
+
+    This takes a minute or two the first time and creates a node_modules
+    folder. There is nothing to configure.
+
+STEP 3 - Start the game server.
+
+    npm run dev -- --port 5174
+
+    You will see something like:
+
+        VITE v7.3.6  ready in 400 ms
+        ->  Local:   http://127.0.0.1:5174/
+
+STEP 4 - Open http://127.0.0.1:5174 in your browser and click 开始旅行.
+
+Leave that terminal window open. The game runs for as long as it is open.
+To stop the server, click the terminal and press Ctrl+C.
+
+
+-------------------------------------------------------------------------------
+ 3. PLAYING
+-------------------------------------------------------------------------------
+
+  Click the town once   grab the mouse so you can look around
+  Mouse                 look
+  W A S D / arrows      walk (relative to where you are looking)
+  Shift                 run
+  Space                 jump (onto benches, planters, low walls) / stand up
+  F                     learn the Chinese name of whatever you are looking at
+  E                     talk / enter a door / use a counter / sit down / decorate
+  V                     third person (outdoors and at home only)
+  H                     hide or show the name that follows the crosshair
+  1 2 3 4 5             journal, bag, word bank, condition, settings
+                        (ignored while you are typing or mid-conversation)
+  Click / G             throw what you are holding / put it down
+  Esc                   release the mouse, or close a panel
+
+  ? buttons             reveal pinyin / English (choose which in Settings)
+  Settings              also has a mouse sensitivity slider, if the view turns
+                        faster or slower than you would like
+  Select any Chinese    pop-up dictionary with pinyin and meaning
+
+If the view stops turning, the mouse has been released - the dark "click the
+town" banner in the middle of the screen says so. Click once and it comes back.
+
+Tidying the screen up:
+  - The chevron on the mission card folds it away; the count stays visible.
+  - The eye button in the top bar (or H) hides the word in the middle.
+  - The button at the right end of the key hints switches them between
+    English, Chinese and both. English is the default; the Chinese is never
+    removed, only hidden.
+  All three choices are saved with your progress.
+
+On a touchscreen: drag the right half of the screen to look, and hold the lower
+left as a thumbstick to walk.
+
+Tap a mission in the card and the minimap draws a dashed line to where it
+happens. Tap it again to turn the line off.
+
+Where to go first:
+  - 林阿姨 at the tea stall on the left will say hello (quest 1).
+  - 小美 near the north building teaches four words (quest 2).
+  - 陈叔叔 on the right sells souvenirs and haggles (quest 3).
+  - 家居小铺 on the west side of the square sells beds, tables, rugs and shoes
+    from day one, so you can furnish your room before any district opens.
+  - 青禾银行 next to it lends money once 小美 has taught you your first words.
+  - 旧物铺 on the east side buys things back, once you have bought anything.
+    Its price for each item is rerolled every in-game day.
+  - The building marked 词语馆 is the HSK word hall - walk in and use the
+    lectern.
+  - The east street is gated. Learn 25 HSK level 1 words (drill in the word
+    hall, or walk around pressing F) and the gate opens.
+
+Picking things up:
+  - Press E at a fruit basket, a bakery case or a supermarket rack to lift one out.
+  - Click to throw it; G puts it down. It bounces, rolls and settles like a real object.
+  - The stall restocks the gap by itself, and the street is tidied when you leave.
+  - These are toys, not shopping: you cannot eat or sell them.
+
+Shopping:
+  - Fixed-price shops have a basket, shown at the top of the shop. Either use the
+    "加入购物车" button under any item, or open an item and set a quantity there.
+  - Cards show what is already in the basket. "看看清单" gives the itemised bill,
+    where you can still change quantities before paying for the lot at once.
+  - 陈叔叔's stall is the exception - haggling is one item at a time, and it says so.
+
+At the bank (青禾银行, west side of the square):
+  - Deposit money and it pays 2% interest every in-game morning, up to 25 a day.
+    You need about 1250 saved to reach that ceiling.
+  - Building permits for large projects: pay in full, or over four in-game weeks
+    for a surcharge. Instalments come out automatically.
+  - Loans are still there, on their own tab.
+
+Going into the city (the metro stair on the north side of the square):
+  - Press E at the stair to open the fare hall.
+  - Buy a single ticket (6) or a seven-day pass (40), then press the board button.
+  - The tunnel scene runs for about seven seconds; Space or Esc skips it.
+  - In 云海市中心: talk to the people on the pavement, look at things and press F for
+    city words the town does not have, and try the 便利店 on the west pavement.
+  - To come home, walk into the station hall at the south end and press E. It is free.
+
+Cooking at home (through the green door on the right-hand wall of your house):
+  - Buy groceries at 青禾超市: noodles, eggs, rice, tofu, a tomato, some greens.
+  - Walk through the kitchen door and press E at the stove.
+  - Pick a recipe and press 开火. It takes 20-35 seconds; you can leave and come back.
+  - Press 盛出来 when it is done, then eat it. One meal fills your hunger completely,
+    for roughly half what the same amount of restaurant food would cost.
+
+Building something (the hoarded lot north of the square):
+  - Get the shop permit from the bank first.
+  - Then gather timber, bricks and cloth. 家居小铺 sells all three.
+  - Hand them in a few at a time; the site remembers what you have given.
+  - When it is full, break ground. 青禾茶楼 goes up and pays you every morning.
+
+At the library (青禾书馆, shopping street):
+  - Books are shelved by difficulty and marked by whether you can read them yet.
+  - A book that is still too hard tells you which words you are missing and can
+    put six of them straight into your word bank.
+  - Highlight any line while reading to see what the whole sentence means.
+
+After dark:
+  - From 18:00 two food carts are pushed into the square and trade until 02:00:
+    candied hawthorn on one, skewers and tofu pudding on the other.
+
+Looking after yourself:
+  - You get hungry and tired, and both slow you down. The heart button in the
+    top bar shows how you are doing.
+  - Anything edible in your bag can be eaten from there or from that panel.
+  - Sleep in your own bed to choose the time of day: morning, midday, evening
+    or night. Sleeping fills your rest back up.
+  - Shoes change how fast you walk. Being well dressed, and not owing the bank
+    money, makes shopkeepers easier to haggle with.
+  - The journal has three errands a day. They refresh every in-game day and
+    pay coins when you collect them.
+  - A poster by the door at home repeats all of this whenever you forget it.
+
+
+-------------------------------------------------------------------------------
+ 4. YOUR SAVE FILE
+-------------------------------------------------------------------------------
+
+Progress is stored in your browser, not in a file. It survives closing the
+browser, but it is erased if you clear site data for 127.0.0.1, and it is
+per-browser (Chrome and Edge do not share it).
+
+Back it up: Settings (the sun icon, top right) -> 导出存档. That downloads
+qinghe-save.json. Use 导入存档 to load it back.
+
+Use one browser tab at a time. Two tabs will overwrite each other's save.
+
+
+-------------------------------------------------------------------------------
+ 5. RUNNING THE BUILT VERSION INSTEAD (optional)
+-------------------------------------------------------------------------------
+
+Section 2 runs a development server, which is what you want day to day. If you
+want the optimised build - what you would actually put on a website - run:
+
+    npm run build
+    npm run preview
+
+That serves the contents of the dist/ folder, usually on
+
+    http://127.0.0.1:4173
+
+It starts faster and loads faster, but you have to re-run "npm run build"
+after any change to the game's code or content.
+
+
+-------------------------------------------------------------------------------
+ 6. REGENERATING VOICES, WORD LISTS AND THE DICTIONARY (optional)
+-------------------------------------------------------------------------------
+
+Only needed if you edit the Chinese content. The generated files are already
+committed, so playing needs none of this.
+
+These three scripts need Python 3 and an internet connection. Set up once:
+
+    python -m venv .venv
+    .venv\Scripts\python.exe -m pip install edge-tts
+
+Then:
+
+    .venv\Scripts\python.exe scripts\generate-voice.py
+
+        Re-synthesises any voice clip whose text or voice changed. It skips
+        everything unchanged, so it is quick unless you added a lot.
+
+    (HSK cards: download the four sources into .cache\hsk-sources first;
+     README.md, "Regenerating the built data", has the exact commands. Then:)
+    .venv\Scripts\python.exe scripts\prepare-hsk-chinese.py
+    .venv\Scripts\python.exe scripts\build-hsk.py .cache\hsk-sources\hsk-source.json
+    .venv\Scripts\python.exe scripts\build-dictionary.py cedict.txt
+
+        These two need their source files downloaded first. The exact download
+        command is written at the top of each script.
+
+
+-------------------------------------------------------------------------------
+ 7. CHECKING NOTHING IS BROKEN (optional)
+-------------------------------------------------------------------------------
+
+    npm test                 10 rule tests (matching, review schedule, money)
+    npm run check:content    validates all the Chinese content and references
+    npm run build            makes sure it still compiles
+    npm run test:browser     19 tests that actually play the game in Edge
+
+The browser tests need Microsoft Edge installed and they use port 5174. They
+will start their own server if one is not already running.
+
+
+-------------------------------------------------------------------------------
+ 8. IF SOMETHING GOES WRONG
+-------------------------------------------------------------------------------
+
+"Port 5174 is already in use"
+    A server is already running on it - just open http://127.0.0.1:5174 and
+    play. If you want a fresh one, either use a different port:
+
+        npm run dev -- --port 5180
+
+    or find and stop the old one:
+
+        netstat -ano | findstr :5174
+        taskkill /PID <the number in the last column> /F
+
+"The 3D scene could not start"
+    Your browser needs WebGL2 and hardware acceleration. In Edge or Chrome go
+    to Settings -> System, turn on "Use graphics acceleration when available",
+    and restart the browser.
+
+No sound
+    Audio only starts after you click 开始旅行 - browsers block sound before
+    you interact with the page. Check the three volume sliders in Settings,
+    and that the browser tab is not muted (right-click the tab).
+
+The mouse will not look around
+    Click once on the town itself to lock the pointer. Press Esc to get the
+    cursor back.
+
+"npm is not recognised"
+    Node.js is not installed or not on your PATH. Install it from
+    https://nodejs.org and open a NEW terminal window.
+
+A blank white page
+    Press F12, open the Console tab, and read the first red error. Nine times
+    out of ten it is a missing node_modules - run "npm install" again.
+
+
+-------------------------------------------------------------------------------
+ 9. THINGS TO KNOW
+-------------------------------------------------------------------------------
+
+The Mandarin voices are AI generated (Microsoft Edge neural TTS), not native
+speaker recordings, and nobody has listened through all 2,318 of them. The game
+labels them AI 配音 wherever it plays one. Do not publish the game publicly
+without checking the licence terms - see docs\VOICE_PRODUCTION.md.
+
+The HSK levels come from a public dataset and have not been checked word by
+word against the official syllabus. The word hall says so on screen.
+
+The pop-up dictionary is CC-CEDICT, licensed CC BY-SA 4.0.
+
+Fuller documentation is in README.md.

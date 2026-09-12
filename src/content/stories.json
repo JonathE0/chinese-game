@@ -1,0 +1,119 @@
+{
+  "note": "The library's shelves. `level` is the HSK band a story is written for; `words` is the vocabulary the reading gate counts, so a book you cannot read yet can tell you exactly what you are missing. Lines carry their own pinyin and meaning, and are mirrored into translations.json so highlighting a sentence inside a book works like it does anywhere else.",
+  "stories": [
+    {
+      "id": "morning",
+      "zh": "早上",
+      "pinyin": "Zǎoshang",
+      "en": "Morning",
+      "level": 1,
+      "shelf": "beginner",
+      "blurb": "天亮了，一天开始了。",
+      "blurbEn": "It gets light, and the day begins.",
+      "words": ["天", "水", "妈妈", "早上", "好", "今天", "天气", "很", "我们", "去"],
+      "lines": [
+        {"zh": "天亮了。", "pinyin": "Tiān liàng le.", "en": "It has grown light."},
+        {"zh": "我起床，喝一杯水。", "pinyin": "Wǒ qǐchuáng, hē yì bēi shuǐ.", "en": "I get up and drink a glass of water."},
+        {"zh": "妈妈在做早饭。", "pinyin": "Māma zài zuò zǎofàn.", "en": "Mum is making breakfast."},
+        {"zh": "我说：早上好！", "pinyin": "Wǒ shuō: zǎoshang hǎo!", "en": "I say: good morning!"},
+        {"zh": "今天天气很好。", "pinyin": "Jīntiān tiānqì hěn hǎo.", "en": "The weather is lovely today."},
+        {"zh": "我们一起去公园。", "pinyin": "Wǒmen yìqǐ qù gōngyuán.", "en": "We go to the park together."}
+      ]
+    },
+    {
+      "id": "my-home",
+      "zh": "我的家",
+      "pinyin": "Wǒ de jiā",
+      "en": "My home",
+      "level": 1,
+      "shelf": "beginner",
+      "blurb": "不大，但是很干净。",
+      "blurbEn": "Not big, but very clean.",
+      "words": ["家", "人", "小", "猫", "喜欢", "睡觉", "房间", "大", "干净", "我"],
+      "lines": [
+        {"zh": "这是我的家。", "pinyin": "Zhè shì wǒ de jiā.", "en": "This is my home."},
+        {"zh": "家里有三个人。", "pinyin": "Jiā lǐ yǒu sān ge rén.", "en": "There are three people in it."},
+        {"zh": "我有一只小猫。", "pinyin": "Wǒ yǒu yì zhī xiǎo māo.", "en": "I have a little cat."},
+        {"zh": "小猫喜欢睡觉。", "pinyin": "Xiǎo māo xǐhuan shuìjiào.", "en": "The cat likes to sleep."},
+        {"zh": "我的房间不大，但是很干净。", "pinyin": "Wǒ de fángjiān bú dà, dànshì hěn gānjìng.", "en": "My room is not big, but it is very clean."},
+        {"zh": "我很喜欢我的家。", "pinyin": "Wǒ hěn xǐhuan wǒ de jiā.", "en": "I like my home very much."}
+      ]
+    },
+    {
+      "id": "shopping",
+      "zh": "买东西",
+      "pinyin": "Mǎi dōngxi",
+      "en": "Buying things",
+      "level": 2,
+      "shelf": "everyday",
+      "blurb": "去超市，回来的路上下雨了。",
+      "blurbEn": "A trip to the supermarket, and rain on the way home.",
+      "words": ["星期", "朋友", "超市", "水果", "面包", "苹果", "新鲜", "贵", "鸡蛋", "下雨"],
+      "lines": [
+        {"zh": "星期六，我和朋友去超市。", "pinyin": "Xīngqīliù, wǒ hé péngyou qù chāoshì.", "en": "On Saturday I go to the supermarket with a friend."},
+        {"zh": "我们要买水果和面包。", "pinyin": "Wǒmen yào mǎi shuǐguǒ hé miànbāo.", "en": "We want to buy fruit and bread."},
+        {"zh": "苹果很新鲜，也不贵。", "pinyin": "Píngguǒ hěn xīnxiān, yě bú guì.", "en": "The apples are fresh, and not expensive either."},
+        {"zh": "朋友说：再买一点鸡蛋吧。", "pinyin": "Péngyou shuō: zài mǎi yìdiǎn jīdàn ba.", "en": "My friend says: let us get some eggs as well."},
+        {"zh": "我们买了很多东西。", "pinyin": "Wǒmen mǎi le hěn duō dōngxi.", "en": "We buy a great deal."},
+        {"zh": "回家的时候，下雨了。", "pinyin": "Huí jiā de shíhou, xià yǔ le.", "en": "On the way home, it starts to rain."}
+      ]
+    },
+    {
+      "id": "umbrella",
+      "zh": "一把伞",
+      "pinyin": "Yì bǎ sǎn",
+      "en": "An umbrella",
+      "level": 2,
+      "shelf": "everyday",
+      "blurb": "一个老人，一把蓝色的伞。",
+      "blurbEn": "An old man, and a blue umbrella.",
+      "words": ["外面", "雨", "带", "伞", "老人", "给", "谢谢", "笑", "以后", "蓝色"],
+      "lines": [
+        {"zh": "外面下着雨。", "pinyin": "Wàimiàn xià zhe yǔ.", "en": "Outside, it is raining."},
+        {"zh": "我没有带伞。", "pinyin": "Wǒ méiyǒu dài sǎn.", "en": "I did not bring an umbrella."},
+        {"zh": "一个老人给了我一把伞。", "pinyin": "Yí ge lǎorén gěi le wǒ yì bǎ sǎn.", "en": "An old man gave me one."},
+        {"zh": "我说谢谢，他笑了笑。", "pinyin": "Wǒ shuō xièxie, tā xiào le xiào.", "en": "I said thank you, and he smiled."},
+        {"zh": "雨停了以后，天空很干净。", "pinyin": "Yǔ tíng le yǐhòu, tiānkōng hěn gānjìng.", "en": "After the rain stopped, the sky was very clear."},
+        {"zh": "我记住了那把蓝色的伞。", "pinyin": "Wǒ jìzhù le nà bǎ lánsè de sǎn.", "en": "I have not forgotten that blue umbrella."}
+      ]
+    },
+    {
+      "id": "photographs",
+      "zh": "老照片",
+      "pinyin": "Lǎo zhàopiàn",
+      "en": "Old photographs",
+      "level": 3,
+      "shelf": "stories",
+      "blurb": "奶奶的箱子里，每张照片后面都有一个故事。",
+      "blurbEn": "In grandmother's box, every photograph has a story behind it.",
+      "words": ["奶奶", "箱子", "照片", "穿", "旧", "衣服", "爷爷", "年轻", "发现", "故事"],
+      "lines": [
+        {"zh": "奶奶的箱子里有很多老照片。", "pinyin": "Nǎinai de xiāngzi lǐ yǒu hěn duō lǎo zhàopiàn.", "en": "There are many old photographs in grandmother's box."},
+        {"zh": "照片上的人穿着旧衣服。", "pinyin": "Zhàopiàn shàng de rén chuān zhe jiù yīfu.", "en": "The people in them are wearing old clothes."},
+        {"zh": "她指着一张说：这是你爷爷。", "pinyin": "Tā zhǐ zhe yì zhāng shuō: zhè shì nǐ yéye.", "en": "She points at one and says: this is your grandfather."},
+        {"zh": "那时候他还很年轻。", "pinyin": "Nà shíhou tā hái hěn niánqīng.", "en": "He was still very young then."},
+        {"zh": "我发现奶奶的眼睛亮了起来。", "pinyin": "Wǒ fāxiàn nǎinai de yǎnjing liàng le qǐlái.", "en": "I notice grandmother's eyes light up."},
+        {"zh": "每一张照片后面都有一个故事。", "pinyin": "Měi yì zhāng zhàopiàn hòumiàn dōu yǒu yí ge gùshi.", "en": "Behind every photograph there is a story."}
+      ]
+    },
+    {
+      "id": "night-market",
+      "zh": "夜市",
+      "pinyin": "Yèshì",
+      "en": "The night market",
+      "level": 4,
+      "shelf": "stories",
+      "blurb": "天黑以后，街上反而更热闹。",
+      "blurbEn": "After dark the street somehow gets busier.",
+      "words": ["天黑", "街", "热闹", "摊主", "香味", "糖葫芦", "排队", "味道", "酸", "想念"],
+      "lines": [
+        {"zh": "天黑以后，街上反而更热闹。", "pinyin": "Tiān hēi yǐhòu, jiē shàng fǎn'ér gèng rènao.", "en": "After dark, the street is busier rather than quieter."},
+        {"zh": "摊主们把灯打开，香味到处都是。", "pinyin": "Tānzhǔ men bǎ dēng dǎkāi, xiāngwèi dàochù dōu shì.", "en": "The stallholders switch on their lights, and the smell is everywhere."},
+        {"zh": "糖葫芦在灯下亮得像红色的宝石。", "pinyin": "Tánghúlu zài dēng xià liàng de xiàng hóngsè de bǎoshí.", "en": "Under the lamps the candied hawthorns shine like red stones."},
+        {"zh": "我排了很久的队，才买到一串。", "pinyin": "Wǒ pái le hěn jiǔ de duì, cái mǎi dào yí chuàn.", "en": "I queue a long time before I get one."},
+        {"zh": "味道又酸又甜，和小时候一样。", "pinyin": "Wèidào yòu suān yòu tián, hé xiǎo shíhou yíyàng.", "en": "It is sour and sweet at once, exactly as it was in childhood."},
+        {"zh": "有些东西离开了才知道有多想念。", "pinyin": "Yǒuxiē dōngxi líkāi le cái zhīdào yǒu duō xiǎngniàn.", "en": "Some things you only miss once you have left them."}
+      ]
+    }
+  ]
+}

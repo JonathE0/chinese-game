@@ -1,0 +1,9 @@
+{
+ "id":"introductions","title":"初次见面","pinyin":"Chūcì jiànmiàn","en":"A first hello","target":"greeting and introducing yourself","curriculumStatus":"Beginner prototype; exact HSK mapping pending review",
+ "nodes":[
+  {"id":"greeting","zh":"林阿姨正在泡茶。你想怎么打招呼？","pinyin":"Lín āyí zhèngzài pào chá. Nǐ xiǎng zěnme dǎ zhāohu?","en":"Auntie Lin is making tea. How would you greet her?","speaker":"narrator","intent":"variants","accepted":["你好","您好","你好啊","嗨","阿姨好","林阿姨好"],"choices":["您好！","你好！","阿姨好！"],"hint":"Try 你好 or the more polite 您好. You are starting the conversation.","audio":"intro-greeting"},
+  {"id":"name","zh":"你好呀！我姓林。你叫什么名字？","pinyin":"Nǐ hǎo ya! Wǒ xìng Lín. Nǐ jiào shénme míngzi?","en":"Hello there! My surname is Lin. What is your name?","speaker":"lin","intent":"name","choices":["我叫安娜。","我的名字是小明。"],"hint":"Use 我叫 + your name. A name by itself also works. 呀 makes the greeting warm and casual.","register":"casual","audio":"intro-name"},
+  {"id":"holiday","zh":"欢迎你！你是来旅游的吗？","pinyin":"Huānyíng nǐ! Nǐ shì lái lǚyóu de ma?","en":"Welcome! Are you here on vacation?","speaker":"lin","intent":"variants","accepted":["是","是的","对","对啊","是啊","我是来旅游的","对我是来旅游的","我来旅游","不是","不是的","不我是来看朋友的","我是来看朋友的"],"choices":["对，我是来旅游的。","我是来看朋友的。"],"hint":"You can say 对 (that's right), 是的 (yes), or 我是来看朋友的 (I am visiting friends). This vacation phrase is enrichment.","audio":"intro-holiday"},
+  {"id":"bye","zh":"慢慢逛，有空来喝茶！","pinyin":"Mànman guàng, yǒu kòng lái hē chá!","en":"Enjoy looking around. Come have tea when you have time!","speaker":"lin","intent":"variants","accepted":["谢谢","谢谢您","谢谢阿姨","好的谢谢","好啊","好","好的","再见","拜拜","谢谢再见"],"choices":["好的，谢谢！","谢谢，再见！"],"hint":"A friendly 谢谢 or 好啊 is enough. 慢慢逛 is a relaxed way to say 'enjoy looking around'.","register":"casual","audio":"intro-bye"}
+ ]
+}

@@ -1,0 +1,6 @@
+[
+ {"id":"water","zh":"水","pinyin":"shuǐ","en":"water","visual":"water","color":"#7cbac8","accepted":["水","一瓶水","我要水"],"level":"beginner","audio":"word-water"},
+ {"id":"tea","zh":"茶","pinyin":"chá","en":"tea","visual":"tea","color":"#78966b","accepted":["茶","一杯茶","我要茶"],"level":"beginner","audio":"word-tea"},
+ {"id":"apple","zh":"苹果","pinyin":"píngguǒ","en":"apple","visual":"apple","color":"#cd705f","accepted":["苹果","一个苹果","我要苹果"],"level":"beginner","audio":"word-apple"},
+ {"id":"book","zh":"书","pinyin":"shū","en":"book","visual":"book","color":"#dbb86a","accepted":["书","一本书","我要书"],"level":"beginner","audio":"word-book"}
+]
