@@ -5,6 +5,7 @@ import {dueCount} from '../core/review.js';
 import questData from '../content/quests.json' with {type:'json'};
 import {dailyReady} from '../core/daily.js';
 import {closeHook} from '../core/conversation.js';
+import {TUTORIAL_UI,shouldAutoStart} from '../core/tutorial.js';
 
 export function languageLine(line,settings,{className='',help=true}={}) {
   const pinyin=settings.pinyin?`<div class="pinyin">${esc(line.pinyin)}</div>`:'';
@@ -44,6 +45,7 @@ export class Shell {
   <div id="interact" hidden><button id="interact-button"><kbd>E</kbd> <span></span></button></div>
   <div class="controls" id="controls" data-lang="${esc(hud.controls??'en')}">${CONTROLS.map(c=>
     `<span class="ctl">${c.keys.map(k=>`<kbd>${esc(k)}</kbd>`).join('')}<em data-en>${esc(c.en)}</em><em data-zh>${esc(c.zh)}</em></span><i></i>`).join('')}<button class="lang-toggle" id="controls-lang" title="按键说明的语言 · Language of these hints">中 / EN</button></div>
+  <aside id="tutorial-card" class="tutorial-card" hidden aria-live="polite" aria-label="新手教程"></aside>
   <div id="crosshair" hidden aria-hidden="true"></div>
   <div id="nameplate" hidden aria-live="polite"></div>
   <div id="carrying" hidden><b></b><small><kbd>点击</kbd> 扔出去 · <kbd>G</kbd> 放下</small><i>Click to throw · G to put down</i></div>
@@ -51,7 +53,7 @@ export class Shell {
   <div id="placing" hidden><b></b><span class="placing-state"></span><small><kbd>点击</kbd> 放下 · <kbd>R</kbd> 转向 · <kbd>X</kbd> 取消</small></div>
   <div id="look-hint" hidden>点击画面转身 · Click the town to look around, Esc to free the cursor</div>
   <aside class="mini-map"><div class="map-heading">青禾广场 <span>N ↑</span></div><svg id="map-svg" viewBox="-24 -24 48 48"><g id="map-content"></g><g id="map-route"></g><g id="map-facing" transform="translate(0,9)"><path d="M0 -5.4L2.7 -1.4L-2.7 -1.4Z" fill="#345f51" opacity=".45"/></g><circle id="map-player" cx="0" cy="9" r="1.4" fill="#345f51" stroke="#fff8de" stroke-width=".6"/></svg><div class="map-caption" id="map-caption">一段属于你的旅程</div></aside>
-  <section id="arrival"><span class="arrival-stamp">旅</span><div class="eyebrow">WELCOME TO YOUR LITTLE GETAWAY</div><h2>你好，旅人。</h2><p>你的中文之旅，从这里开始。</p><p class="arrival-en">You see the town through your own eyes. Walk up to someone and say hello.<br>Chinese comes first. Tap <b>?</b> whenever you need a hand.</p><button class="primary" id="start-button">开始旅行 ${icon('arrow')}</button><div class="arrival-note">WASD to move · Move the mouse to look · E to talk · V for third person<br>Playable prototype · Mandarin voices are AI generated</div></section>
+  <section id="arrival"><span class="arrival-stamp">旅</span><div class="eyebrow">WELCOME TO YOUR LITTLE GETAWAY</div><h2>你好，旅人。</h2><p>你的中文之旅，从这里开始。</p>${shouldAutoStart(ctx.profile)?`<p class="arrival-tutorial">${esc(TUTORIAL_UI.arrival.zh)}<small>${esc(TUTORIAL_UI.arrival.en)}</small></p>`:''}<p class="arrival-en">You see the town through your own eyes. Walk up to someone and say hello.<br>Chinese comes first. Tap <b>?</b> whenever you need a hand.</p><button class="primary" id="start-button">开始旅行 ${icon('arrow')}</button><div class="arrival-note">WASD to move · Move the mouse to look · E to talk · V for third person<br>Playable prototype · Mandarin voices are AI generated</div></section>
   <div id="scrim" hidden></div><section id="panel" hidden role="dialog" aria-modal="true" aria-labelledby="panel-title"></section><div id="toast" role="status" hidden></div>`;
   document.addEventListener('click',e=>{const b=e.target.closest('[data-help]');if(b){const target=b.parentElement.querySelector('.help-content');target.hidden=!target.hidden;b.setAttribute('aria-expanded',String(!target.hidden));if(!target.hidden)this.ctx.hinted=true;}});
   document.addEventListener('keydown',e=>{if(e.code==='Escape'&&!e.repeat&&this.panelId)this.close();if(e.key==='Tab'&&this.panelId){const els=[...document.querySelector('#panel').querySelectorAll('button,input,select,a,textarea')].filter(x=>!x.disabled&&x.offsetParent!==null);if(!els.length)return;const first=els[0],last=els.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
@@ -99,7 +101,10 @@ export class Shell {
   this.returnFocus=document.activeElement;this.panelId=id;this.ctx.hinted=false;this.ctx.town?.setPaused(true);this.ctx.voice.stop();this.ctx.voice.duck(true);this.ctx.music?.duck(true);this.ctx.speech.stop();
   const panel=document.querySelector('#panel');panel.hidden=false;panel.className=`panel panel-${id}`;
   panel.innerHTML=`<header class="panel-header"><div><div class="eyebrow">${esc(subtitle)}</div><h2 id="panel-title">${esc(title)}</h2></div><button class="close-button" aria-label="关闭">${icon('close')}</button></header><div id="panel-body"></div>`;
-  document.querySelector('#scrim').hidden=false;panel.querySelector('.close-button').onclick=()=>this.close();panel.querySelector('.close-button').focus();return document.querySelector('#panel-body');
+  document.querySelector('#scrim').hidden=false;panel.querySelector('.close-button').onclick=()=>this.close();panel.querySelector('.close-button').focus();
+  const body=document.querySelector('#panel-body');
+  this.ctx.tutorial?.event('panel',{id});
+  return body;
  }
  /** Arm the open panel's one-shot close hook after it has opened (a conversation's completion
   *  screen, say). */
@@ -168,7 +173,16 @@ export class Shell {
   if(this.route?.quest===id){this.clearRoute();return this.notice('已取消带路。 / Guidance off.');}
   this.route={quest:id,...quest.where,label:quest.zh};
   this.update();
+  this.ctx.tutorial?.event('route');
   this.notice(`带路：${quest.zh} → ${quest.where.zh??''} / Follow the dashed line on the map.`);
+ }
+ /** Lead the way to any spot in town — a shop door, the metro, your home — the same way a
+  *  mission does. `key` says what the route is for (a room id, 'metro', 'tutorial'), so whoever
+  *  set it can recognise it later and clear it on arrival. */
+ showWay({key,district,x,z,label}){
+  this.route={key,district,x,z,label};
+  this.update();
+  this.notice(`带路：${label} / Follow the dashed line on the map.`);
  }
  clearRoute(){this.route=null;document.querySelector('#map-route').innerHTML='';document.querySelector('#map-caption').textContent='一段属于你的旅程';this.update();}
  /** Redraw the dashed line each frame. Another district is reached through its gate first. */

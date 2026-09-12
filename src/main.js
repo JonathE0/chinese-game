@@ -45,10 +45,12 @@ import {settleDays,debtOf,savingsOf,interestOn,INTEREST_HOUR,settleWeeks} from '
 import {calendarOf,claimPeriod} from './core/calendar.js';
 import {syncDay,bump} from './core/daily.js';
 import {isTyping,shortcutAllowed} from './core/input.js';
+import {shouldAutoStart} from './core/tutorial.js';
+import {Tutorial} from './ui/tutorial.js';
 
 const loaded=loadProfile(localStorage);
 const ctx={profile:loaded.profile,hinted:false,town:null};
-ctx.voice=new VoicePlayer(ctx.profile.settings,t=>ctx.ui.notice(t));ctx.music=new Ambience(ctx.profile.settings);ctx.speech=new SpeechInput();ctx.dictionary=new Dictionary();ctx.ui=new Shell(ctx);ctx.lookup=installLookup(ctx);
+ctx.voice=new VoicePlayer(ctx.profile.settings,t=>ctx.ui.notice(t));ctx.music=new Ambience(ctx.profile.settings);ctx.speech=new SpeechInput();ctx.dictionary=new Dictionary();ctx.ui=new Shell(ctx);ctx.lookup=installLookup(ctx);ctx.tutorial=new Tutorial(ctx);
 ctx.save=()=>{try{saveProfile(localStorage,ctx.profile);}catch{ctx.ui.notice('无法保存到浏览器。请在设置中导出存档。 / Could not save; export a backup in Settings.');}ctx.ui.update();};
 let started=false,lastAmbient=-1;
 function interact(id){
@@ -65,6 +67,11 @@ function interact(id){
   return;
  }
  if(id==='stand')return void ctx.town.stand();
+ // Led here — to a stall keeper or the metro stair? Then you have arrived.
+ if(ctx.ui.route?.key===id)ctx.ui.clearRoute();
+ // Saying hello to someone is a tutorial step; the id is who, without any city:/staff: prefix.
+ const person=id==='lin'||id==='mei'||id==='chen'?id:/^(city|staff):/.test(id)?id.replace(/^(city|staff):/,''):null;
+ if(person)ctx.tutorial.event('talk',{id:person});
  if(id==='lin'){bump(ctx.profile,'talks');return openDialogue(ctx,npcs.find(n=>n.id==='lin').lesson);}
  if(id==='mei'){bump(ctx.profile,'talks');return openPractice(ctx);}
  if(id==='chen'){bump(ctx.profile,'talks');return openShop(ctx,'chen');}
@@ -88,7 +95,7 @@ function interact(id){
  if(id.startsWith('taxi:'))return openTaxi(ctx);
  if(id==='noodles')return openNoodles(ctx);
  if(id==='decorate')return openDecorate(ctx);
- if(id==='studydesk')return openWordBank(ctx);
+ if(id==='studydesk')return openWordBank(ctx,{venue:'desk'});
  if(id==='menu')return openMenu(ctx,'tablet');
  if(id.startsWith('staff:')){bump(ctx.profile,'talks');return openMenu(ctx,'waiter');}
 }
@@ -105,6 +112,7 @@ function collect(name){
   ctx.music.cue('collect');
   ctx.save();
   ctx.ui.notice(`记住了 ${name.zh} ${name.pinyin} · ${name.en}　（第 ${ctx.profile.discovered.length} 个）`);
+  ctx.tutorial.event('collect',{id:name.id});
  }
  ctx.ui.nameplate(name,{known:true,reveal:true});
 }
@@ -141,11 +149,14 @@ function enterPlace(id){
  if(id==='town')ctx.town.leaveRoom();
  else{
   if(!ctx.town.enterRoom(id))return;
+  // Being led to this door? Then you have arrived.
+  if(ctx.ui.route?.key===id)ctx.ui.clearRoute();
   // One count per shop per day, so walking in and out is not a way to farm the errand.
   const daily=syncDay(ctx.profile,ctx.profile.dayIndex??0);
   if(!daily.counts['seen-'+id]){daily.counts['seen-'+id]=1;bump(ctx.profile,'visits');ctx.save();}
  }
  syncPlace();
+ if(id!=='town')ctx.tutorial.event('enter',{id});
 }
 /** Whatever just moved us, say where we are now. */
 function syncPlace(){
@@ -277,6 +288,7 @@ try{
   town.speedScale=speedFactor(ctx.profile);
   const crosshair=document.querySelector('#crosshair'),hint=document.querySelector('#look-hint');
   const playing=started&&!ctx.ui.panelId;crosshair.hidden=!playing;hint.hidden=!(playing&&!town.locked()&&matchMedia('(pointer:fine)').matches);
+  ctx.tutorial.frame(town,started);
  }});
  ctx.town.equip(outfit(ctx.profile));
  ctx.town.onNotice=message=>ctx.ui.notice(message);
@@ -307,7 +319,11 @@ const saveProfileAndGates=ctx.save;ctx.save=()=>{saveProfileAndGates();refreshGa
 refreshShops();
 // Anything already built is standing when the town loads.
 if(ctx.town)for(const site of builtSites(ctx.profile))ctx.town.revealSite(site.id);
-document.querySelector('#start-button').onclick=()=>{started=true;document.querySelector('#arrival').hidden=true;document.body.classList.add('playing');ctx.town.setPaused(false);ctx.music.start();if(loaded.warning)ctx.ui.notice(loaded.warning);};
+document.querySelector('#start-button').onclick=()=>{started=true;document.querySelector('#arrival').hidden=true;document.body.classList.add('playing');ctx.town.setPaused(false);ctx.music.start();if(loaded.warning)ctx.ui.notice(loaded.warning);
+ // A brand-new traveller is walked through the basics; a save already mid-way picks up where it was.
+ ctx.tutorial.started=true;
+ if(shouldAutoStart(ctx.profile))ctx.tutorial.start();else ctx.tutorial.sync();
+};
 document.querySelector('#status-button').onclick=()=>{if(started)openStatus(ctx);};
 document.querySelector('#review-button').onclick=()=>{if(started)openWordBank(ctx);};
 document.querySelector('#journal-button').onclick=()=>{if(started)openJournal(ctx);};document.querySelector('#inventory-button').onclick=()=>{if(started)openInventory(ctx);};document.querySelector('#settings-button').onclick=()=>{if(started)openSettings(ctx);};

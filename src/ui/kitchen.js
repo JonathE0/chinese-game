@@ -5,6 +5,7 @@ import {languageLine} from './shell.js';
 import {RECIPES,recipeById,recipeCost,preparedMealCost,cookingProblem,startCooking,collectMeal} from '../core/cooking.js';
 import {readStats,eat,hungerNote} from '../core/stats.js';
 import {bump} from '../core/daily.js';
+import {openBuyGuide} from './buyguide.js';
 
 /**
  * Your own stove.
@@ -33,6 +34,7 @@ export function openKitchen(ctx){
   // The pot keeps simmering while you stand at it, so the panel has to keep counting down.
   const timer=setInterval(()=>{
     if(ctx.ui.panelId!=='kitchen')return clearInterval(timer);
+    if(body.dataset.buyGuide)return;                    // leave the where-to-buy guide alone
     const job=ctx.profile.cooking;
     if(!job)return;
     const bar=body.querySelector('[data-pot-bar]');
@@ -86,8 +88,12 @@ function render(ctx,body){
             <span>${icon('clock',13)} ${recipe.seconds} 秒</span>
           </div>`}
         </div>
-        <button class="${reason?'secondary':'primary'} recipe-go" data-cook="${esc(recipe.id)}" ${reason?'disabled':''}>
-          ${reason==='busy'?'锅在用':reason==='ingredients'?'材料不够':locked?'还没学会':'开火'}</button>
+        <div class="recipe-buttons">
+          <button class="${reason?'secondary':'primary'} recipe-go" data-cook="${esc(recipe.id)}" ${reason?'disabled':''}>
+            ${reason==='busy'?'锅在用':reason==='ingredients'?'材料不够':locked?'还没学会':'开火'}</button>
+          ${!locked&&Object.entries(recipe.ingredients).some(([id,count])=>(p.inventory[id]??0)<count)
+            ?`<button class="secondary buy-guide-btn" data-buy="${esc(recipe.id)}">哪儿有卖<small>where to buy</small></button>`:''}
+        </div>
       </article>`;}).join('')}</div>
 
     <p class="microcopy">食材在青禾超市买，一顿自己做的饭能把肚子填满，比在外面吃便宜一半。做饭要一点时间，火开着也可以先去忙别的。<br>
@@ -101,6 +107,14 @@ function render(ctx,body){
     ctx.music?.cue('place');ctx.save();
     ctx.ui.notice(`${recipeById(button.dataset.cook).zh}下锅了。 / It is on the stove.`);
     render(ctx,body);
+  });
+  body.querySelectorAll('[data-buy]').forEach(button=>button.onclick=()=>{
+    const recipe=recipeById(button.dataset.buy);
+    const needs=Object.entries(recipe.ingredients)
+      .filter(([id,count])=>(p.inventory[id]??0)<count)
+      .map(([id,count])=>({id,short:count-(p.inventory[id]??0)}));
+    body.dataset.buyGuide='1';
+    openBuyGuide(ctx,body,needs,{back:()=>{delete body.dataset.buyGuide;render(ctx,body);}});
   });
   body.querySelector('[data-collect]')?.addEventListener('click',()=>{
     const got=collectMeal(p);

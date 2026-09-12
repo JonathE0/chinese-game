@@ -1,0 +1,115 @@
+{
+  "note": "The first-run tutorial, one card at a time. A step with `done` finishes itself when the player does it (and still offers 下一步 so nobody gets stuck); a step without `done` waits for 下一步. `where` puts a route on the minimap while the step is showing. {anywhere}, {desk} and {hallNew} are filled in from balance.json by cardCoins(). Instruction text, like mission text, has no voice clip.",
+  "ui": {
+    "eyebrow": {"zh": "新手教程", "en": "TUTORIAL"},
+    "next": {"zh": "下一步", "en": "Next"},
+    "finish": {"zh": "完成", "en": "Done"},
+    "skip": {"zh": "跳过教程", "en": "Skip tutorial"},
+    "didIt": {"zh": "做到了！", "en": "Done it!"},
+    "skipped": {"zh": "教程已跳过。想再看，就去设置里重新开始。", "en": "Tutorial skipped. Replay it any time from Settings."},
+    "replay": {"zh": "重新开始新手教程", "en": "Replay the tutorial"},
+    "arrival": {"zh": "第一次来？出发以后，新手教程会一步一步带你玩。", "en": "First time here? Once you set off, a tutorial takes you through it step by step."}
+  },
+  "steps": [
+    {
+      "id": "look",
+      "zh": "点一下画面，再移动鼠标，看看四周。",
+      "pinyin": "Diǎn yíxià huàmiàn, zài yídòng shǔbiāo, kànkan sìzhōu.",
+      "en": "Click the town, then move the mouse to look around. On a touch screen, drag with a finger.",
+      "done": {"event": "look", "amount": 90}
+    },
+    {
+      "id": "walk",
+      "zh": "按 W A S D 走几步。按住 Shift 可以走得快一点。",
+      "pinyin": "Àn W A S D zǒu jǐ bù. Ànzhù Shift kěyǐ zǒu de kuài yìdiǎn.",
+      "en": "Walk a few steps with W A S D. Hold Shift to walk faster.",
+      "done": {"event": "walk", "amount": 6}
+    },
+    {
+      "id": "view",
+      "zh": "按 V 换成第三人称，就能看见自己。再按一次就换回来了。",
+      "pinyin": "Àn V huànchéng dì-sān rénchēng, jiù néng kànjiàn zìjǐ. Zài àn yí cì jiù huàn huílái le.",
+      "en": "Press V to switch to third person and see yourself. Press it again to switch back.",
+      "done": {"event": "view"}
+    },
+    {
+      "id": "word",
+      "zh": "把准星对准一样东西，看到它的名字以后按 F，这个词就记下来了。",
+      "pinyin": "Bǎ zhǔnxīng duìzhǔn yí yàng dōngxi, kàndào tā de míngzi yǐhòu àn F, zhège cí jiù jì xiàlái le.",
+      "en": "Aim the crosshair at something. When its name appears, press F to keep the word.",
+      "done": {"event": "collect"}
+    },
+    {
+      "id": "bank",
+      "zh": "按 3 打开生词本。你记下来的词都在这里，随时可以复习。",
+      "pinyin": "Àn 3 dǎkāi shēngcíběn. Nǐ jì xiàlái de cí dōu zài zhèlǐ, suíshí kěyǐ fùxí.",
+      "en": "Press 3 to open your word bank. Every word you keep is here, ready to review any time.",
+      "done": {"event": "panel", "id": "wordbank"}
+    },
+    {
+      "id": "coins",
+      "zh": "复习的时候答对了，就能拿到学习币：随身复习每张 +{anywhere}，在家里的书桌前 +{desk}，在词语馆学新词每个 +{hallNew}。",
+      "pinyin": "Fùxí de shíhou dá duì le, jiù néng nádào xuéxíbì: suíshēn fùxí měi zhāng +{anywhere}, zài jiā lǐ de shūzhuō qián +{desk}, zài cíyǔguǎn xué xīn cí měi ge +{hallNew}.",
+      "en": "Right answers earn study coins: {anywhere} a card on the go, {desk} at the study desk at home, and {hallNew} for each new word you learn at the word hall. Coins pay for everything in town."
+    },
+    {
+      "id": "missions",
+      "zh": "左上角是你的任务。点一个任务，小地图上就会出现一条虚线，带你过去。",
+      "pinyin": "Zuǒshàngjiǎo shì nǐ de rènwu. Diǎn yí ge rènwu, xiǎo dìtú shàng jiù huì chūxiàn yì tiáo xūxiàn, dài nǐ guòqù.",
+      "en": "Your missions are in the card at the top left. Click one and a dashed line appears on the minimap to lead you there.",
+      "done": {"event": "route"}
+    },
+    {
+      "id": "listen",
+      "zh": "跟人说话的时候，先听，再用中文回答。听不懂就点 ?，看看拼音和英文。",
+      "pinyin": "Gēn rén shuōhuà de shíhou, xiān tīng, zài yòng Zhōngwén huídá. Tīng bù dǒng jiù diǎn ?, kànkan pīnyīn hé Yīngwén.",
+      "en": "In a conversation, listen first, then answer in Chinese. Stuck? Tap ? for the pinyin and English. It pays a few coins less, and that is fine."
+    },
+    {
+      "id": "talk",
+      "zh": "去茶铺找林阿姨。走到她面前，按 E 跟她打个招呼。",
+      "pinyin": "Qù chápù zhǎo Lín āyí. Zǒu dào tā miànqián, àn E gēn tā dǎ ge zhāohu.",
+      "en": "Find Auntie Lin at the tea stall. Walk up to her and press E to say hello.",
+      "where": {"district": "square", "x": -9, "z": -2, "zh": "茶铺 · 林阿姨"},
+      "done": {"event": "talk", "id": "lin"}
+    },
+    {
+      "id": "home",
+      "zh": "你的家在广场的东南角，门朝南。跟着虚线走到门口，按 E 进去。",
+      "pinyin": "Nǐ de jiā zài guǎngchǎng de dōngnánjiǎo, mén cháo nán. Gēnzhe xūxiàn zǒu dào ménkǒu, àn E jìnqù.",
+      "en": "Your home is in the southeast corner of the square, and its door faces south. Follow the dashed line to the door and press E to go in.",
+      "where": {"district": "square", "x": 16.1, "z": 17.2, "zh": "我的家"},
+      "done": {"event": "enter", "id": "home"}
+    },
+    {
+      "id": "inside",
+      "zh": "这是你的家。书桌可以复习，床可以睡觉，里面还有厨房。门边的海报上写着怎么玩。",
+      "pinyin": "Zhè shì nǐ de jiā. Shūzhuō kěyǐ fùxí, chuáng kěyǐ shuìjiào, lǐmiàn hái yǒu chúfáng. Ménbiān de hǎibào shàng xiězhe zěnme wán.",
+      "en": "This is your home. Review at the study desk ({desk} coins a card), sleep in the bed, and cook in the kitchen through the side door. The poster by the door explains how things work."
+    },
+    {
+      "id": "needs",
+      "zh": "你会饿，也会累。按 4 看看自己的状态。饿了就吃点东西，累了就回家睡一觉。",
+      "pinyin": "Nǐ huì è, yě huì lèi. Àn 4 kànkan zìjǐ de zhuàngtài. È le jiù chī diǎn dōngxi, lèi le jiù huí jiā shuì yí jiào.",
+      "en": "You get hungry and tired, and both slow you down. Press 4 to check how you are. Eat when you are hungry; go home and sleep when you are tired."
+    },
+    {
+      "id": "shops",
+      "zh": "买东西的时候，走到柜台前按 E。陈叔叔的小摊可以讲价。做饭或者工地缺材料，就点「哪儿有卖」，地图会告诉你去哪儿买。",
+      "pinyin": "Mǎi dōngxi de shíhou, zǒu dào guìtái qián àn E. Chén shūshu de xiǎotān kěyǐ jiǎngjià. Zuò fàn huòzhě gōngdì quē cáiliào, jiù diǎn “Nǎr yǒu mài”, dìtú huì gàosu nǐ qù nǎr mǎi.",
+      "en": "To buy something, walk up to the counter and press E. Uncle Chen's stall lets you haggle. When a recipe or a build site is short of something, tap 哪儿有卖 and the map shows where to buy it."
+    },
+    {
+      "id": "gates",
+      "zh": "别的街区有门。认识的词够多了，门就会开。在词语馆复习 HSK 的词，或者用 F 记住看到的东西，两种都算。",
+      "pinyin": "Bié de jiēqū yǒu mén. Rènshi de cí gòu duō le, mén jiù huì kāi. Zài cíyǔguǎn fùxí HSK de cí, huòzhě yòng F jìzhù kàndào de dōngxi, liǎng zhǒng dōu suàn.",
+      "en": "The other districts are behind gates that open once you know enough words. Drilling HSK words at the word hall and pressing F on things around town both count."
+    },
+    {
+      "id": "done",
+      "zh": "教程结束了！按 1 打开旅行手册，看看今天的日常小事。祝你玩得开心！",
+      "pinyin": "Jiàochéng jiéshù le! Àn 1 dǎkāi lǚxíng shǒucè, kànkan jīntiān de rìcháng xiǎoshì. Zhù nǐ wán de kāixīn!",
+      "en": "That is the tutorial! Press 1 to open your travel journal and see today's daily errands. Have fun!"
+    }
+  ]
+}
