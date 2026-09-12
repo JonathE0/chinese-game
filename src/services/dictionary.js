@@ -2,6 +2,7 @@
 // Data is CC-CEDICT (CC BY-SA 4.0), built by scripts/build-dictionary.py and shipped
 // gzipped so the browser downloads ~2.7 MB once instead of ~11 MB of JSON.
 import {sanitizeDictionaryEntry} from '../content/dictionary-policy.js';
+import {assetUrl} from './asset-url.js';
 const SOURCE='/dictionary/cedict.tsv.gz';
 const MAX_WORD=4;                       // longest headword the build script keeps
 const isHan=ch=>/[㐀-䶿一-鿿豈-﫿]/.test(ch);
@@ -14,7 +15,7 @@ export class Dictionary {
     if(this.pending)return this.pending;
     this.pending=(async()=>{
       try{
-        const response=await fetch(SOURCE);
+        const response=await fetch(assetUrl(SOURCE));
         if(!response.ok)throw Error('HTTP '+response.status);
         // Some servers send the .gz with Content-Encoding: gzip and the browser has already
         // unwrapped it, so sniff the magic number rather than assuming either way.
