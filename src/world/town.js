@@ -114,7 +114,9 @@ export class Town {
       return {...def,...made};
     });
     const [ax,az]=this.data.ambient;this.friends=[person(p,'#d1a075',[ax,0,az]),person(p,'#a2ad8d',[ax-1.3,0,az+.5])];this.friends[0].entity.setEulerAngles(0,-60,0);this.friends[1].entity.setEulerAngles(0,110,0);
-    label(p,'欢迎来到青禾',[0,2.35,17],4,.7);for(const x of [-2.2,2.2])box(p,[x,1.25,17],[.17,2.5,.17],'#8b795b');
+    // A gateway on the way to your front door: the board hangs well above head height.
+    label(p,'欢迎来到青禾',[0,3.3,17],4,.7);box(p,[0,3.72,17],[4.75,.14,.22],'#8b795b');
+    for(const x of [-2.2,2.2])box(p,[x,1.9,17],[.17,3.8,.17],'#8b795b');
     this.buildGates();
     this.buildClosedSigns();
     for(let i=0;i<9;i++)this.m.shape(p,'cone',[-60+i*16,-.5,-58],[16,10+(i%3)*4,18],i%2?'#91a88d':'#9bb196');
@@ -308,7 +310,9 @@ export class Town {
       this.mark('town',mark.x,mark.z,mark.hw,mark.hd,mark.y0,mark.y1,mark.name);
     this.markDisc('town',0,1.8,2.12,0,.46,'fountain');
     this.markDisc('town',0,1.8,.95,.46,1.75,'fountain',false);
-    this.mark('town',0,17,2.7,.7,0,3,'sign');
+    // Only the posts are in the way; the board is high enough to walk under.
+    for(const x of [-2.2,2.2])this.mark('town',x,17,.14,.14,0,3.8,'sign');
+    this.mark('town',0,17,2,.12,2.95,3.8,'sign');
     for(const x of [-10,10])this.mark('town',x,-4.1,1.75,.7,0,1.5,'counter');
     for(const x of [-12,12]){
       this.markDisc('town',x,0,.3,0,4.6,'streetlight');

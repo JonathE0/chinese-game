@@ -3,6 +3,7 @@ import {icon,itemArt} from './art.js';
 import {languageLine} from './shell.js';
 import {siteById,requirements,siteState,completion,contribute,raise,isBuilt} from '../core/construction.js';
 import {holdsPermit} from '../core/finance.js';
+import {openBuyGuide} from './buyguide.js';
 
 /**
  * The hoarding around a build site.
@@ -62,6 +63,7 @@ function render(ctx,body,site){
           :`<button class="secondary" data-give="${esc(row.id)}" ${row.held?'':'disabled'}>
              交 ${Math.min(row.short,row.held)}</button>`}
       </article>`).join('')}</div>
+    ${rows.some(row=>row.short-row.held>0)?`<button class="secondary wide buy-guide-btn" id="buy-guide">哪儿有卖<small>where to buy</small></button>`:''}
     <p class="microcopy">交出去的材料收不回来。木料、砖和布匹在家居小铺有卖，帮工地干活也会给一些。<br>
       Materials handed over are gone for good. The builders' merchant at 家居小铺 sells all three,
       and helping on site as a daily errand earns you some.</p>
@@ -74,6 +76,11 @@ function render(ctx,body,site){
     ctx.music?.cue('place');ctx.save();
     ctx.ui.notice(`交了 ${moved} 份材料。 / Handed over ${moved}.`);
     render(ctx,body,site);
+  });
+  body.querySelector('#buy-guide')?.addEventListener('click',()=>{
+    // What is still to buy: owed to the site, less what you are already carrying.
+    const needs=rows.filter(row=>row.short-row.held>0).map(row=>({id:row.id,short:row.short-row.held}));
+    openBuyGuide(ctx,body,needs,{back:()=>render(ctx,body,site)});
   });
   body.querySelector('#raise-it')?.addEventListener('click',()=>{
     const result=raise(ctx.profile,site);

@@ -1,7 +1,7 @@
 import {escapeHtml as esc} from '../core/language.js';
 import {languageLine} from './shell.js';
 import {icon} from './art.js';
-import {familiarity,reviewWord} from '../core/review.js';
+import {familiarity,reviewWord,cardCoins} from '../core/review.js';
 import {dueWords} from '../core/bank.js';
 import {openGames} from './games.js';
 import {definitions} from './definitions.js';
@@ -10,13 +10,23 @@ const statusNames={new:'初见',learning:'学习中',familiar:'熟悉',due:'待�
 const SESSION=8;
 const shuffle=list=>list.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(([,v])=>v);
 
-/** The study desk at home: everything you have picked up around town, ready to review. */
-export function openBank(ctx){
-  const body=ctx.ui.open('wordbank','生词本','随身复习 · YOUR WORD BANK');
-  list(ctx,body);
+/** Everything you have picked up around town, ready to review: from the top bar anywhere, or at
+ *  the study desk at home (`venue:'desk'`), which pays better for the trip home. */
+export function openBank(ctx,{venue=null}={}){
+  const body=ctx.ui.open('wordbank','生词本',venue==='desk'?'在家复习 · STUDY DESK':'随身复习 · YOUR WORD BANK');
+  list(ctx,body,venue);
 }
 
-function list(ctx,body){
+/** What a right answer pays here, and where it pays more. */
+function rateNote(venue){
+  const here=cardCoins(venue,false),desk=cardCoins('desk',false),hall=cardCoins('hall',true);
+  return venue==='desk'
+    ?`在书桌前复习，每答对一张 +${here} 学习币。<br>At your desk, every right answer pays ${here} coins.`
+    :`随身复习每答对一张 +${here}。回家在书桌前 +${desk}，去词语馆学新词每个 +${hall}。<br>
+      On the go a card pays ${here} — ${desk} at your desk at home, ${hall} for each new word at the word hall.`;
+}
+
+function list(ctx,body,venue=null){
   const words=ctx.profile.saved??[];
   const due=dueWords(ctx.profile);
   const fresh=words.filter(w=>!ctx.profile.words[w.id]?.recognition);
@@ -30,6 +40,7 @@ function list(ctx,body){
       ? `<p class="panel-intro">再收集几个词就可以复习了。走在城里看着东西按 <kbd>F</kbd>，或者在任何中文上划选。<br>Collect a few more words first — press F while looking at things, or highlight any Chinese.</p>`
       : `<button class="primary wide" id="bank-review">复习 ${Math.min(SESSION,due.length+fresh.length)} 个词 ${icon('arrow',15)}</button>
          <p class="microcopy">优先复习到期的词，再加上还没练过的。</p>`}
+    <p class="microcopy bank-rate">${rateNote(venue)}</p>
     <button class="secondary wide" id="bank-games">小游戏 · 用这些词玩一玩</button>
     <div class="bank-list">${words.length?words.map((w,i)=>{
       const record=ctx.profile.words[w.id]?.recognition;
@@ -44,18 +55,18 @@ function list(ctx,body){
 
   body.querySelectorAll('[data-audio]').forEach(b=>b.onclick=()=>ctx.voice.play(b.dataset.audio));
   body.querySelectorAll('[data-forget]').forEach(b=>b.onclick=()=>{
-    ctx.profile.saved.splice(Number(b.dataset.forget),1);ctx.save();list(ctx,body);
+    ctx.profile.saved.splice(Number(b.dataset.forget),1);ctx.save();list(ctx,body,venue);
   });
-  body.querySelector('#bank-review')?.addEventListener('click',()=>drill(ctx,body));
+  body.querySelector('#bank-review')?.addEventListener('click',()=>drill(ctx,body,venue));
   body.querySelector('#bank-games').onclick=()=>openGames(ctx);
 }
 
-function drill(ctx,body){
+function drill(ctx,body,venue=null){
   const words=ctx.profile.saved;
   const due=dueWords(ctx.profile);
   const fresh=shuffle(words.filter(w=>!ctx.profile.words[w.id]?.recognition));
   const queue=[...due,...fresh].slice(0,SESSION);
-  if(queue.length<1)return list(ctx,body);
+  if(queue.length<1)return list(ctx,body,venue);
   let index=0,earned=0,right=0;
 
   const step=()=>{
@@ -65,7 +76,7 @@ function drill(ctx,body){
     const others=shuffle(words.filter(w=>w.id!==word.id&&w.en&&w.en!==word.en)).slice(0,3);
     const options=shuffle([word,...others]);
     body.innerHTML=`
-      <div class="drill-head"><span class="step-label">${index+1} / ${queue.length}</span><span class="drill-mode">生词本 · YOUR WORDS</span></div>
+      <div class="drill-head"><span class="step-label">${index+1} / ${queue.length}</span><span class="drill-mode">${venue==='desk'?'书桌 · STUDY DESK':'生词本 · YOUR WORDS'}</span></div>
       <div class="step-track">${queue.map((_,i)=>`<i class="${i<=index?'active':''}"></i>`).join('')}</div>
       <div class="drill-prompt" data-word="${esc(word.id)}">
         <div class="drill-zh">${esc(word.zh)}</div>
@@ -88,7 +99,7 @@ function drill(ctx,body){
       body.querySelectorAll('[data-pick]').forEach(b=>{b.disabled=true;if(b.dataset.pick===word.id)b.classList.add('correct');});
       const correct=button.dataset.pick===word.id;
       if(!correct)button.classList.add('wrong');
-      const {coins,practiceOnly}=reviewWord(ctx.profile,word.id,'recognition',{correct,hinted});
+      const {coins,practiceOnly}=reviewWord(ctx.profile,word.id,'recognition',{correct,hinted,venue});
       earned+=coins;if(correct)right++;
       ctx.save();
       body.querySelector('#drill-feedback').innerHTML=`<div class="feedback ${correct?'success':'gentle'}">
@@ -105,8 +116,8 @@ function drill(ctx,body){
       <p>答对 ${right} / ${queue.length}${earned?` · 获得 ${earned} 学习币`:''}</p>
       <p class="microcopy">到期的词会自动排进下一次复习。</p>
       <div class="completion-actions"><button class="primary" id="again">再来一组</button><button class="secondary" id="back">回到生词本</button></div></div>`;
-    body.querySelector('#again').onclick=()=>drill(ctx,body);
-    body.querySelector('#back').onclick=()=>list(ctx,body);
+    body.querySelector('#again').onclick=()=>drill(ctx,body,venue);
+    body.querySelector('#back').onclick=()=>list(ctx,body,venue);
   };
   step();
 }

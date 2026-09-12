@@ -1,6 +1,7 @@
 import {normaliseBank} from './bank.js';
 import {normalizeCooking} from './cooking.js';
 import {normalizeMetro} from './metro.js';
+import {normalizeTutorial} from './tutorial.js';
 export const SAVE_KEY='little-mandarin-town.v1';
 export function freshProfile() {
   return {version:1,wallet:0,inventory:{},equipped:{},claims:{},words:{},completed:[],phrases:[],saved:[],home:[],discovered:[],read:[],clock:15,dayIndex:0,vendors:{},settings:{pinyin:true,english:true,dialogueVolume:0.9,ambientVolume:0.35,musicVolume:0.5,sensitivity:0.12,hud:{quests:true,names:true,controls:'en'}},playerName:'旅人'};
@@ -18,7 +19,7 @@ export function decodeProfile(raw) {
   for (const skills of Object.values(p.words)) {
     if (!skills || typeof skills!=='object'||Array.isArray(skills)) throw Error('Invalid skills');
     for (const [skill,r] of Object.entries(skills)) {
-      if (!['recognition','production','listening'].includes(skill) || !r || !Number.isInteger(r.stage)||r.stage<0||r.stage>6 || !Number.isFinite(r.due)||r.due<0||!Number.isFinite(r.last)||r.last<0||!Number.isSafeInteger(r.reviews)||r.reviews<0) throw Error('Invalid review');
+      if (!['recognition','production','listening'].includes(skill) || !r || !Number.isInteger(r.stage)||r.stage<0||r.stage>6 || !Number.isFinite(r.due)||r.due<0||!Number.isFinite(r.last)||r.last<0||!Number.isSafeInteger(r.reviews)||r.reviews<0||(r.learned!==undefined&&r.learned!==true)) throw Error('Invalid review');
     }
   }
   if (!Array.isArray(p.discovered)) p.discovered=[];  // saves written before objects had names
@@ -116,12 +117,13 @@ export function decodeProfile(raw) {
   const s=p.settings;
   const cooking=normalizeCooking(p.cooking);
   const metro=normalizeMetro(p.metro);
+  const tutorial=normalizeTutorial(p.tutorial);
   if (!s || typeof s.pinyin!=='boolean'||typeof s.english!=='boolean') throw Error('Invalid settings');
   if(s.musicVolume===undefined)s.musicVolume=0.5;  // saves written before music existed
   if(s.sensitivity===undefined)s.sensitivity=0.12; // ...and before the mouse could be tuned
   if(!Number.isFinite(s.sensitivity)||s.sensitivity<0.02||s.sensitivity>0.5) throw Error('Invalid sensitivity');
   for(const key of ['dialogueVolume','ambientVolume','musicVolume']) if(!Number.isFinite(s[key])||s[key]<0||s[key]>1) throw Error('Invalid volume');
-  return {version:1,...(cooking?{cooking}:{}),...(metro?{metro}:{}),wallet:p.wallet,inventory:p.inventory,equipped:{...p.equipped},claims:p.claims,words:p.words,completed:p.completed,phrases:p.phrases,discovered:p.discovered,read:p.read,clock:p.clock,dayIndex:p.dayIndex,vendors:p.vendors,saved:normaliseBank(p.saved),...(p.stats?{stats:p.stats}:{}),...(p.debt?{debt:p.debt}:{}),...(p.daily?{daily:p.daily}:{}),...(p.savings?{savings:p.savings}:{}),...(p.permitPlans?.length?{permitPlans:p.permitPlans}:{}),...(p.builds?{builds:p.builds}:{}),home:p.home.map(r=>({uid:r.uid,item:r.item,kind:r.kind,color:r.color,footprint:[r.footprint[0],r.footprint[1]],x:r.x,z:r.z,rot:r.rot,...(r.slot?{slot:r.slot}:{}),...(r.on?{on:r.on}:{})})),settings:s,playerName:p.playerName};
+  return {version:1,...(cooking?{cooking}:{}),...(metro?{metro}:{}),...(tutorial?{tutorial}:{}),wallet:p.wallet,inventory:p.inventory,equipped:{...p.equipped},claims:p.claims,words:p.words,completed:p.completed,phrases:p.phrases,discovered:p.discovered,read:p.read,clock:p.clock,dayIndex:p.dayIndex,vendors:p.vendors,saved:normaliseBank(p.saved),...(p.stats?{stats:p.stats}:{}),...(p.debt?{debt:p.debt}:{}),...(p.daily?{daily:p.daily}:{}),...(p.savings?{savings:p.savings}:{}),...(p.permitPlans?.length?{permitPlans:p.permitPlans}:{}),...(p.builds?{builds:p.builds}:{}),home:p.home.map(r=>({uid:r.uid,item:r.item,kind:r.kind,color:r.color,footprint:[r.footprint[0],r.footprint[1]],x:r.x,z:r.z,rot:r.rot,...(r.slot?{slot:r.slot}:{}),...(r.on?{on:r.on}:{})})),settings:s,playerName:p.playerName};
 }
 export function loadProfile(storage) {
   try { const raw=storage.getItem(SAVE_KEY);return {profile:raw?decodeProfile(raw):freshProfile(),warning:null}; }

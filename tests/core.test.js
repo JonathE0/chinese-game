@@ -49,6 +49,46 @@ test('hints and errors return sooner without erasing prior learning', () => {
   assert.equal(p.wallet,1);
   assert.equal(familiarity(p.words.tea.recognition,721000),'due');
 });
+test('the word hall pays five for a new word and the usual three for a review', () => {
+  const p = freshProfile();
+  const first = reviewWord(p,'water','recognition',{correct:true,hinted:false,now:1000,venue:'hall'});
+  assert.equal(first.coins,5);
+  assert.equal(first.fresh,true);
+  const again = reviewWord(p,'water','recognition',{correct:true,hinted:false,now:601000,venue:'hall'});
+  assert.equal(again.coins,3);
+  assert.equal(again.fresh,false);
+  assert.equal(p.wallet,8);
+});
+test('a new word missed or hinted at first keeps its bonus until it is answered right unaided', () => {
+  const p = freshProfile();
+  reviewWord(p,'tea','recognition',{correct:false,hinted:false,now:1000,venue:'hall'});
+  assert.equal(p.wallet,0);
+  assert.equal(reviewWord(p,'tea','recognition',{correct:true,hinted:true,now:121000,venue:'hall'}).coins,1);
+  assert.equal(reviewWord(p,'tea','recognition',{correct:true,hinted:false,now:721000,venue:'hall'}).coins,5);
+});
+test('forgetting a learned word never makes it new again', () => {
+  const p = freshProfile();
+  reviewWord(p,'rice','recognition',{correct:true,hinted:false,now:1000,venue:'hall'});
+  reviewWord(p,'rice','recognition',{correct:false,hinted:false,now:601000,venue:'hall'});
+  assert.equal(p.words.rice.recognition.stage,0);
+  assert.equal(reviewWord(p,'rice','recognition',{correct:true,hinted:false,now:721000,venue:'hall'}).coins,3);
+  // Learning survives a save and reload.
+  const loaded = decodeProfile(JSON.stringify(p));
+  assert.equal(loaded.words.rice.recognition.learned,true);
+});
+test('the study desk at home pays four for every card, new or due', () => {
+  const p = freshProfile();
+  assert.equal(reviewWord(p,'bread','recognition',{correct:true,hinted:false,now:1000,venue:'desk'}).coins,4);
+  assert.equal(reviewWord(p,'bread','recognition',{correct:true,hinted:false,now:601000,venue:'desk'}).coins,4);
+  assert.equal(reviewWord(p,'milk','recognition',{correct:true,hinted:true,now:1000,venue:'desk'}).coins,1);
+  // Anywhere else keeps the ordinary rate.
+  assert.equal(reviewWord(p,'egg','recognition',{correct:true,hinted:false,now:1000}).coins,3);
+});
+test('a word record with a malformed learned mark is rejected', () => {
+  const p = freshProfile();
+  p.words.water = {recognition:{stage:1,due:1,last:1,reviews:1,learned:'yes'}};
+  assert.throws(()=>decodeProfile(JSON.stringify(p)));
+});
 test('grant is replay-safe and purchase is atomic for insufficient funds', () => {
   const p = freshProfile(); const item = {id:'hat',price:24,minPrice:18,negotiable:true};
   grant(p,'lesson:intro',20); grant(p,'lesson:intro',20);

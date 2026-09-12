@@ -4,6 +4,10 @@
   "retryMinutes": 2,
   "reviewCoins": 3,
   "supportedCoins": 1,
+  "venueCoins": {
+    "hall": {"new": 5},
+    "desk": {"new": 4, "review": 4}
+  },
   "lessonCoins": 20,
   "supportedLessonCoins": 10,
   "practiceCompletionCoins": 8

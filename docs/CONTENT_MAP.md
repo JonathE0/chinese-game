@@ -144,7 +144,7 @@ Prices in 学习币; `~` marks a negotiable price. An item sold in several shops
 
 ## Town props and passers-by
 
-- **square**: bench ×3, planter ×5, bin ×3, streetlight ×4, bicycle ×3, bollard ×2, crate ×5, sign ×2, fruitstand; 3 passers-by
+- **square**: bench ×3, planter ×5, bin ×3, streetlight ×4, bicycle ×3, bollard ×2, crate ×5, sign, fruitstand; 3 passers-by
 - **market**: streetlight ×19, bench ×9, bin ×4, fruitstand ×2, crate ×2, awning ×2, cafetable ×3, chair ×6, parasol, sign ×2, bicycle ×3; 7 passers-by
 - **riverside**: streetlight ×4, bench ×4, planter ×4, bin ×2, cafetable, chair, bollard ×2; 2 passers-by
 

@@ -53,9 +53,11 @@ test('looking at something names it in Chinese, and F remembers it',async({page}
   expect(saved.discovered).toEqual(['fountain']);
   expect(saved.saved.map(w=>w.zh)).toContain('喷泉');
 
-  // Different things have different names.
+  // Different things have different names: turn round and look up at the welcome sign, whose
+  // board hangs high enough to walk under.
   await warp(page,0,7,180);
-  await expect.poll(()=>plate(page),{timeout:6000}).not.toContain('喷泉');
+  await page.evaluate(()=>{window.__qinghe.town.pitch=9;});
+  await expect.poll(()=>plate(page),{timeout:6000}).toContain('招牌');
   expect(errors).toEqual([]);
 });
 

@@ -2,7 +2,7 @@ import {meta,loadWords} from '../services/hsk-data.js';
 import {languageLine} from './shell.js';
 import {icon} from './art.js';
 import {escapeHtml as esc} from '../core/language.js';
-import {familiarity,reviewWord} from '../core/review.js';
+import {familiarity,reviewWord,cardCoins} from '../core/review.js';
 import {addWord} from '../core/bank.js';
 import {openGames} from './games.js';
 import {definitions} from './definitions.js';
@@ -47,6 +47,8 @@ function browse(ctx,body,query=''){
     ${listenable?'<button class="secondary" id="hsk-listen" data-mode="listening">听力练习</button>':'<span class="microcopy no-audio">这一级还没有录音</span>'}
     <button class="secondary" id="hsk-games">小游戏</button>
   </div>
+  <p class="microcopy hall-rate">在这里学会一个新词 +${cardCoins('hall',true)} 学习币，复习一个 +${cardCoins('hall',false)}。<br>
+    Each new word you learn here pays ${cardCoins('hall',true)} coins; a review pays ${cardCoins('hall',false)}.</p>
   <div class="hsk-list">${shown.map(w=>{
     const record=ctx.profile.words[w.id]?.recognition;
     return `<article class="hsk-row" data-word="${esc(w.id)}">
@@ -128,13 +130,13 @@ function drill(ctx,body,mode){
       body.querySelectorAll('[data-pick]').forEach(b=>{b.disabled=true;if(b.dataset.pick===word.id)b.classList.add('correct');});
       const correct=button.dataset.pick===word.id;
       if(!correct)button.classList.add('wrong');
-      const {coins,practiceOnly}=reviewWord(ctx.profile,word.id,mode,{correct,hinted});
+      const {coins,practiceOnly,fresh}=reviewWord(ctx.profile,word.id,mode,{correct,hinted,venue:'hall'});
       earned+=coins;
       if(correct)right++;
       ctx.save();
       body.querySelector('#drill-feedback').innerHTML=`<div class="feedback ${correct?'success':'gentle'}">
         <div>${correct?'对了！':'再看一眼。'} <b>${esc(word.zh)}</b> · ${esc(word.pinyin)} · ${esc(word.en)}${definitions(word,{open:true})}
-        <small>${practiceOnly?'还没到复习时间，这次不计入进度。':coins?`+${coins} 学习币`:'已记录，未获得学习币。'}</small></div>
+        <small>${practiceOnly?'还没到复习时间，这次不计入进度。':coins?`+${coins} 学习币${fresh&&!hinted?' · 新词':''}`:'已记录，未获得学习币。'}</small></div>
         <div class="feedback-actions">${word.audio?`<button class="subtle" id="drill-replay" aria-label="再听一次">${icon('sound',15)}</button>`:''}<button class="primary" id="drill-next">${index===queue.length-1?'完成':'下一个'}</button></div></div>`;
       body.querySelector('#drill-replay')?.addEventListener('click',play);
       if(!listening&&word.audio)play();
