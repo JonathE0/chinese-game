@@ -47,12 +47,15 @@ import {syncDay,bump} from './core/daily.js';
 import {isTyping,shortcutAllowed} from './core/input.js';
 import {shouldAutoStart} from './core/tutorial.js';
 import {Tutorial} from './ui/tutorial.js';
+import {AmbientConversations} from './core/social.js';
+import {openNpcGreeting} from './ui/social.js';
 
 const loaded=loadProfile(localStorage);
 const ctx={profile:loaded.profile,hinted:false,town:null};
 ctx.voice=new VoicePlayer(ctx.profile.settings,t=>ctx.ui.notice(t));ctx.music=new Ambience(ctx.profile.settings);ctx.speech=new SpeechInput();ctx.dictionary=new Dictionary();ctx.ui=new Shell(ctx);ctx.lookup=installLookup(ctx);ctx.tutorial=new Tutorial(ctx);
 ctx.save=()=>{try{saveProfile(localStorage,ctx.profile);}catch{ctx.ui.notice('无法保存到浏览器。请在设置中导出存档。 / Could not save; export a backup in Settings.');}ctx.ui.update();};
-let started=false,lastAmbient=-1;
+let started=false,ambientShownUntil=0;
+const ambientConversation=new AmbientConversations(ambient);
 function interact(id){
  if(!started||ctx.ui.panelId||!id)return;
  // Sitting and standing happen in the world, not in a panel.
@@ -70,11 +73,12 @@ function interact(id){
  // Led here — to a stall keeper or the metro stair? Then you have arrived.
  if(ctx.ui.route?.key===id)ctx.ui.clearRoute();
  // Saying hello to someone is a tutorial step; the id is who, without any city:/staff: prefix.
- const person=id==='lin'||id==='mei'||id==='chen'?id:/^(city|staff):/.test(id)?id.replace(/^(city|staff):/,''):null;
+ const person=['lin','mei','chen','friend-a','friend-b'].includes(id)?id:/^(city|staff):/.test(id)?id.replace(/^(city|staff):/,''):null;
  if(person)ctx.tutorial.event('talk',{id:person});
- if(id==='lin'){bump(ctx.profile,'talks');return openDialogue(ctx,npcs.find(n=>n.id==='lin').lesson);}
- if(id==='mei'){bump(ctx.profile,'talks');return openPractice(ctx);}
- if(id==='chen'){bump(ctx.profile,'talks');return openShop(ctx,'chen');}
+ if(id==='lin'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,'lin',()=>openDialogue(ctx,npcs.find(n=>n.id==='lin').lesson));}
+ if(id==='mei'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,ctx.profile.completed.includes('practice:first')?'mei':'mei-first',()=>openPractice(ctx));}
+ if(id==='chen'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,'chen',()=>openShop(ctx,'chen'));}
+ if(id==='friend-a'||id==='friend-b'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,id);}
  if(id.startsWith('gate:'))return showGate(id.slice(5));
  if(id.startsWith('closed:'))return openClosed(ctx,id.slice(7));
  if(id.startsWith('door:'))return enterPlace(id.slice(5));
@@ -91,13 +95,13 @@ function interact(id){
  if(id==='cook')return openKitchen(ctx);
  if(id==='metro')return openMetro(ctx);
  if(id==='metro:home')return rideHome(ctx);
- if(id.startsWith('city:')){bump(ctx.profile,'talks');return openCityTalk(ctx,id.slice(5));}
+ if(id.startsWith('city:')){const who=id.slice(5);bump(ctx.profile,'talks');return openNpcGreeting(ctx,who,()=>openCityTalk(ctx,who));}
  if(id.startsWith('taxi:'))return openTaxi(ctx);
  if(id==='noodles')return openNoodles(ctx);
  if(id==='decorate')return openDecorate(ctx);
  if(id==='studydesk')return openWordBank(ctx,{venue:'desk'});
  if(id==='menu')return openMenu(ctx,'tablet');
- if(id.startsWith('staff:')){bump(ctx.profile,'talks');return openMenu(ctx,'waiter');}
+ if(id.startsWith('staff:')){bump(ctx.profile,'talks');return openNpcGreeting(ctx,'staff',()=>openMenu(ctx,'waiter'));}
 }
 // Looking at something and pressing F is the main way to pick up everyday words.
 function collect(name){
@@ -240,14 +244,17 @@ try{
   const carrying=document.querySelector('#carrying'),held=town.toys.held;
   carrying.hidden=!held;
   if(held)carrying.querySelector('b').textContent=held.name?(objectNames.objects[held.name]?.zh??'东西'):'东西';
-  const bubble=document.querySelector('#ambient-bubble'),[ax,az]=town.data.ambient;const s=town.screen(ax,2.5,az);
-  const visible=started&&outside&&!ctx.ui.panelId&&Math.hypot(pos.x-ax,pos.z-az)<13&&s.z>0&&s.x>-120&&s.x<innerWidth+120;
+  const bubble=document.querySelector('#ambient-bubble'),[ax,az]=town.data.ambient;const s=town.screen(ax,2.5,az),now=performance.now()/1000;
+  const eligible=started&&outside&&!ctx.ui.panelId&&Math.hypot(pos.x-ax,pos.z-az)<13&&s.z>0&&s.x>-120&&s.x<innerWidth+120;
+  const ambientLine=ambientConversation.update(now,eligible);
+  if(ambientLine){bubble.querySelector('span').textContent=ambientLine.zh;ambientShownUntil=now+6;ctx.voice.play(ambientLine.audio,{ambient:true});}
+  const visible=eligible&&now<ambientShownUntil;
   bubble.hidden=!visible;
   if(visible){
    // Keep the chatter clear of the mission card: behind it, you could neither read it nor tap it.
    const card=ctx.ui.hudBox();
    const clash=card&&s.x-118<card.right&&s.x+118>card.left&&s.y>card.top-4&&s.y-46<card.bottom;
-   bubble.style.left=(clash?Math.min(innerWidth-126,card.right+126):s.x)+'px';bubble.style.top=s.y+'px';const index=Math.floor(town.clock/7)%ambient.length;bubble.querySelector('span').textContent=ambient[index].zh;if(index!==lastAmbient){lastAmbient=index;ctx.voice.play(ambient[index].audio,{ambient:true});}}
+   bubble.style.left=(clash?Math.min(innerWidth-126,card.right+126):s.x)+'px';bubble.style.top=s.y+'px';}
   const placing=document.querySelector('#placing');
   placing.hidden=!town.ghost;
   if(town.ghost){

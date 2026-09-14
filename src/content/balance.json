@@ -10,5 +10,6 @@
   },
   "lessonCoins": 20,
   "supportedLessonCoins": 10,
-  "practiceCompletionCoins": 8
+  "practiceCompletionCoins": 8,
+  "dailyPracticeWordCoins": 10
 }

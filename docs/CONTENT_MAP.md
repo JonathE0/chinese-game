@@ -152,7 +152,7 @@ Prices in 学习币; `~` marks a negotiable price. An item sold in several shops
 
 - Town words (vocabulary.json): 水 water, 茶 tea, 苹果 apple, 书 book
 - Nameable objects (objects.json): 109 (HSK 1 ×17, HSK 3 ×24, HSK 2 ×23, HSK 4 ×16, HSK 5 ×7, HSK 6 ×10, no level ×12)
-- Lessons: city-directions 问路 (3 nodes), city-noodles 来一碗面 (5 nodes), city-taxi 打车 (2 nodes), introductions 初次见面 (4 nodes)
-- Ambient lines: ambient-weather, ambient-walk, ambient-tea, ambient-yes
+- Lessons: city-directions 问路 (3 nodes), city-noodles 来一碗面 (5 nodes), city-taxi 打车 (2 nodes), introductions 初次见面 (4 nodes), npc-smalltalk 聊一会儿 (0 nodes)
+- Ambient lines: ambient-weather, ambient-walk, ambient-tea, ambient-yes, ambient-bread, ambient-breakfast, ambient-reading, ambient-story, ambient-lunch, ambient-noodles, ambient-river, ambient-later
 - Library stories: 早上 morning (level 1, 6 lines), 我的家 my-home (level 1, 6 lines), 买东西 shopping (level 2, 6 lines), 一把伞 umbrella (level 2, 6 lines), 老照片 photographs (level 3, 6 lines), 夜市 night-market (level 4, 6 lines)
 - HSK word lists: `public/hsk/words.json` and `src/content/hsk*.json` (large: query them, never read them whole)

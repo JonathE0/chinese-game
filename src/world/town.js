@@ -365,6 +365,11 @@ export class Town {
   targets() {
     if(this.place==='town') {
       const list=[...this.actors].map(([id,actor])=>{const p=actor.entity.getPosition();return {id,x:p.x,z:p.z,radius:3.2,label:npcs.find(n=>n.id===id)?.zh??id};});
+      // The two neighbors who provide background chatter can also be greeted, but only when the
+      // player chooses to walk over and interact with them.
+      const [ax,az]=this.data.ambient;
+      list.push({id:'friend-a',x:ax,z:az,radius:2.8,label:'和邻居打招呼'});
+      list.push({id:'friend-b',x:ax-1.3,z:az+.5,radius:2.8,label:'和邻居打招呼'});
       for(const room of this.rooms.values()){
         // A back room is reached from inside; the city is reached by train. Neither has a door
         // on the square, and asking for one is how you get an exception every frame.

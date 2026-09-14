@@ -1,7 +1,7 @@
 import {escapeHtml as esc} from '../core/language.js';
 import {languageLine} from './shell.js';
 import {icon} from './art.js';
-import {familiarity,reviewWord,cardCoins} from '../core/review.js';
+import {familiarity,reviewWord,cardCoins,pickReviewWords} from '../core/review.js';
 import {dueWords} from '../core/bank.js';
 import {openGames} from './games.js';
 import {definitions} from './definitions.js';
@@ -63,9 +63,7 @@ function list(ctx,body,venue=null){
 
 function drill(ctx,body,venue=null){
   const words=ctx.profile.saved;
-  const due=dueWords(ctx.profile);
-  const fresh=shuffle(words.filter(w=>!ctx.profile.words[w.id]?.recognition));
-  const queue=[...due,...fresh].slice(0,SESSION);
+  const queue=pickReviewWords(ctx.profile,words,'recognition',{limit:SESSION});
   if(queue.length<1)return list(ctx,body,venue);
   let index=0,earned=0,right=0;
 
