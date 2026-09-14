@@ -716,3 +716,18 @@ body.riding .controls,body.riding #crosshair,body.riding #interact,body.riding #
   .tutorial-actions-row{flex-wrap:wrap-reverse;justify-content:flex-end;gap:4px 10px}
   .tutorial-skip small,.tutorial-next small{display:none}
 }
+.music-playlist{margin:18px 0;padding:18px;border:1px solid #d8dfd3;border-radius:16px;background:#f6f7ef}
+.music-playlist h3{margin-top:0}.music-now{font-weight:600;color:#345f51;font-size:14px}
+.music-playlist ol{list-style:none;padding:0;margin:14px 0}
+.music-playlist li{display:flex;justify-content:space-between;gap:12px;padding:10px 8px;border-bottom:1px solid #e1e5db;font-size:13px;border-radius:6px}
+.music-playlist li[aria-current]{background:#e2ecdf;color:#294f40}
+.music-playlist li span:last-child{text-align:right}.music-playlist li small{display:block;font-size:11px;opacity:.7;margin-top:3px}
+.music-next:disabled{opacity:.45;cursor:default}
+
+/* Keep transient word feedback in normal flow above the interaction action. */
+.interaction-stack{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);z-index:40;display:flex;flex-direction:column;align-items:center;gap:10px;width:min(600px,calc(100% - 28px));pointer-events:none}
+.interaction-stack #toast,.interaction-stack #interact{position:static;transform:none;margin:0;max-width:100%;width:auto}
+.interaction-stack #interact{pointer-events:auto}
+.interaction-stack #toast{overflow-wrap:anywhere}
+@media(max-width:720px){.interaction-stack{bottom:85px}}
+@media(max-height:760px){.interaction-stack{bottom:76px}}

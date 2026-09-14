@@ -1,0 +1,33 @@
+{
+ "id":"npc-smalltalk","title":"聊一会儿","en":"A little conversation","nodes":[],
+ "ui":{"continue":"继续","skip":"先办正事","skipEn":"Continue with my visit","street":"路上","practice":"用学过的词聊一聊"},
+ "people":{
+  "friend-a":{"id":"friend-a","zh":"散步的邻居","en":"A neighbor out walking","pinyin":"Sànbù de línjū","color":"#d1a075"},
+  "friend-b":{"id":"friend-b","zh":"休息的邻居","en":"A neighbor taking a break","pinyin":"Xiūxi de línjū","color":"#a2ad8d"},
+  "staff":{"id":"staff","zh":"服务员","en":"Server","pinyin":"Fúwùyuán","color":"#8d9f7b"}
+ },
+ "topics":[
+  {"id":"tea","requires":["茶"],"prompt":"tea-question","reply":"tea-reply"},
+  {"id":"book","requires":["书"],"prompt":"book-question","reply":"book-reply"},
+  {"id":"apple","requires":["苹果"],"prompt":"apple-question","reply":"apple-reply"},
+  {"id":"water","requires":["水"],"prompt":"water-question","reply":"water-reply"}
+ ],
+ "extraLines":{
+  "lin":{"zh":"你好呀！今天过得怎么样？","pinyin":"Nǐ hǎo ya! Jīntiān guò de zěnmeyàng?","en":"Hello there! How is your day going?","speaker":"lin","audio":"hello-lin"},
+  "mei":{"zh":"你好！很高兴又见到你。一起看看今天的词吧！","pinyin":"Nǐ hǎo! Hěn gāoxìng yòu jiàn dào nǐ. Yìqǐ kànkan jīntiān de cí ba!","en":"Hello! It's lovely to see you again. Let's look at today's words!","speaker":"mei","audio":"hello-mei"},
+  "mei-first":{"zh":"你好！我叫小美。我们一起认识四个词吧！","pinyin":"Nǐ hǎo! Wǒ jiào Xiǎoměi. Wǒmen yìqǐ rènshi sì ge cí ba!","en":"Hello! I'm Xiaomei. Let's learn four words together!","speaker":"mei","audio":"hello-mei-first"},
+  "chen":{"zh":"你好啊！随便看看，有喜欢的就跟我说。","pinyin":"Nǐ hǎo a! Suíbiàn kànkan, yǒu xǐhuan de jiù gēn wǒ shuō.","en":"Hi! Have a look around. Let me know if anything catches your eye.","speaker":"chen","audio":"hello-chen"},
+  "friend-a":{"zh":"你好！出来走走啊？","pinyin":"Nǐ hǎo! Chūlái zǒuzou a?","en":"Hi! Out for a little walk?","speaker":"friend-a","audio":"hello-friend-a"},
+  "friend-b":{"zh":"你好呀！在这儿休息一会儿吧。","pinyin":"Nǐ hǎo ya! Zài zhèr xiūxi yíhuìr ba.","en":"Hello there! Take a little break here.","speaker":"friend-b","audio":"hello-friend-b"},
+  "default":{"zh":"你好！很高兴见到你。","pinyin":"Nǐ hǎo! Hěn gāoxìng jiàn dào nǐ.","en":"Hello! Nice to see you.","speaker":"friend-a","audio":"hello-neighbor"},
+  "staff":{"zh":"你好！欢迎光临。请坐，慢慢看。","pinyin":"Nǐ hǎo! Huānyíng guānglín. Qǐng zuò, mànman kàn.","en":"Hello! Welcome. Please sit and take your time looking.","speaker":"cook","audio":"hello-staff"},
+  "tea-question":{"zh":"我今天在茶铺坐了一会儿，喝了一杯茶。那里很安静，坐着看看书也不错。你平时喜欢喝茶吗？","pinyin":"Wǒ jīntiān zài chápù zuò le yíhuìr, hē le yì bēi chá. Nàli hěn ānjìng, zuòzhe kànkan shū yě búcuò. Nǐ píngshí xǐhuan hē chá ma?","en":"I spent a little time at the tea shop today and had a cup of tea. It's quiet there, a nice place to sit and read, too. Do you usually like drinking tea?","speaker":"friend-a","audio":"chat-tea-question","intent":"variants","register":"casual","accepted":["喜欢","喜欢喝茶","我喜欢喝茶","很喜欢","我很喜欢","是的","喜欢啊","还可以","不喜欢","我不喜欢喝茶","不太喜欢","我喜欢喝水","我喜欢咖啡","有时候喝","偶尔喝","不喝茶"],"choices":["我喜欢喝茶。","不太喜欢。","有时候喝。"],"hint":"Tell them your preference: 喜欢, 不太喜欢, or 有时候喝. This is optional stretch practice, with some new linking phrases."},
+  "tea-reply":{"zh":"每个人喜欢的都不一样。逛累了，就找个地方坐坐，慢慢来。","pinyin":"Měi ge rén xǐhuan de dōu bù yíyàng. Guàng lèi le, jiù zhǎo ge dìfang zuòzuo, mànman lái.","en":"Everyone has different tastes. When you get tired of walking, find somewhere to sit. Take your time.","speaker":"friend-a","audio":"chat-tea-reply","intent":"none"},
+  "book-question":{"zh":"我最近在看一本故事书。每天晚上看几页，不着急看完。你喜欢看书，还是喜欢出去走走？","pinyin":"Wǒ zuìjìn zài kàn yì běn gùshi shū. Měitiān wǎnshang kàn jǐ yè, bù zháojí kàn wán. Nǐ xǐhuan kàn shū, háishi xǐhuan chūqù zǒuzou?","en":"I've been reading a storybook, a few pages every evening. I'm in no hurry to finish. Do you prefer reading or going out for a walk?","speaker":"friend-a","audio":"chat-book-question","intent":"variants","register":"casual","accepted":["看书","我喜欢看书","喜欢看书","走走","出去走走","我喜欢出去走走","喜欢散步","散步","都喜欢","我都喜欢","都可以","看情况","不一定","都不喜欢"],"choices":["我喜欢看书。","出去走走。","都喜欢！"],"hint":"You can choose either activity, both (都喜欢), or say it depends (看情况)."},
+  "book-reply":{"zh":"有空做点自己喜欢的事，挺好的。今天也别太忙，好好休息一下。","pinyin":"Yǒu kòng zuò diǎn zìjǐ xǐhuan de shì, tǐng hǎo de. Jīntiān yě bié tài máng, hǎohāo xiūxi yíxià.","en":"It's nice to make time for things you enjoy. Don't keep too busy today. Have a good rest.","speaker":"friend-a","audio":"chat-book-reply","intent":"none"},
+  "apple-question":{"zh":"我刚买了几个苹果，准备带回家。水果店就在前面，走几步就到了。你喜欢吃苹果吗？","pinyin":"Wǒ gāng mǎi le jǐ ge píngguǒ, zhǔnbèi dài huí jiā. Shuǐguǒ diàn jiù zài qiánmiàn, zǒu jǐ bù jiù dào le. Nǐ xǐhuan chī píngguǒ ma?","en":"I just bought a few apples to take home. The fruit shop is up ahead, only a few steps away. Do you like apples?","speaker":"friend-a","audio":"chat-apple-question","intent":"variants","register":"casual","accepted":["喜欢","喜欢啊","我喜欢","我喜欢吃苹果","很喜欢","还可以","不喜欢","我不喜欢","我不喜欢吃苹果","不太喜欢","一般","我喜欢香蕉","我喜欢橙子"],"choices":["我喜欢吃苹果。","还可以。","不太喜欢。"],"hint":"A short preference is enough: 喜欢, 还可以, or 不太喜欢."},
+  "apple-reply":{"zh":"有喜欢吃的就买一点儿，不用买太多。新鲜的最好吃。","pinyin":"Yǒu xǐhuan chī de jiù mǎi yìdiǎnr, búyòng mǎi tài duō. Xīnxiān de zuì hǎochī.","en":"Buy a little of whatever you enjoy. No need to buy too much. Fresh is best.","speaker":"friend-a","audio":"chat-apple-reply","intent":"none"},
+  "water-question":{"zh":"我出来走路，总会带一瓶水。走累了就坐下来喝几口，再慢慢往前走。你今天带水了吗？","pinyin":"Wǒ chūlái zǒulù, zǒng huì dài yì píng shuǐ. Zǒu lèi le jiù zuò xiàlái hē jǐ kǒu, zài mànman wǎng qián zǒu. Nǐ jīntiān dài shuǐ le ma?","en":"I always bring a bottle of water when I go walking. When I get tired, I sit down for a few sips before continuing. Did you bring water today?","speaker":"friend-a","audio":"chat-water-question","intent":"variants","register":"casual","accepted":["带了","我带了","带水了","我带水了","带了水","有","有水","有啊","没有","没带","我没带","没带水","没有带水","还没有","我要去买水"],"choices":["带了。","我没带。","我要去买水。"],"hint":"Answer 带了 (I brought some) or 没带 (I didn't), or say you plan to buy water."},
+  "water-reply":{"zh":"路上记得喝水，别走得太急。出来玩，舒服最重要。","pinyin":"Lùshang jìde hē shuǐ, bié zǒu de tài jí. Chūlái wán, shūfu zuì zhòngyào.","en":"Remember to drink water along the way, and don't rush. When you're out enjoying yourself, being comfortable matters most.","speaker":"friend-a","audio":"chat-water-reply","intent":"none"}
+ }
+}

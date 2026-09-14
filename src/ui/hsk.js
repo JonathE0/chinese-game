@@ -2,7 +2,7 @@ import {meta,loadWords} from '../services/hsk-data.js';
 import {languageLine} from './shell.js';
 import {icon} from './art.js';
 import {escapeHtml as esc} from '../core/language.js';
-import {familiarity,reviewWord,cardCoins} from '../core/review.js';
+import {familiarity,reviewWord,cardCoins,pickReviewWords} from '../core/review.js';
 import {addWord} from '../core/bank.js';
 import {openGames} from './games.js';
 import {definitions} from './definitions.js';
@@ -84,10 +84,7 @@ function browse(ctx,body,query=''){
 
 /** Due words first, then unseen ones, matching how the town practice corner chooses. */
 function pickSession(ctx,level,mode){
-  const now=Date.now(),pool=levelWords(level).filter(w=>mode!=='listening'||w.audio);
-  const due=pool.filter(w=>{const r=ctx.profile.words[w.id]?.[mode];return r&&r.due<=now;});
-  const fresh=shuffle(pool.filter(w=>!ctx.profile.words[w.id]?.[mode]));
-  return [...due,...fresh].slice(0,SESSION);
+  return pickReviewWords(ctx.profile,levelWords(level).filter(w=>mode!=='listening'||w.audio),mode,{limit:SESSION});
 }
 
 function drill(ctx,body,mode){

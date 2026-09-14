@@ -42,7 +42,7 @@ export class Shell {
   <div id="world-labels">${npcs.map(n=>`<div class="npc-label" id="label-${n.id}"><span class="label-dot" style="background:${n.color}"></span>${n.zh}<small>${n.role}</small></div>`).join('')}</div>
   <button id="ambient-bubble" class="ambient-bubble" hidden aria-label="听听闲聊"><span>今天天气真好！</span><small>···</small></button>
   <div class="location"><span class="location-icon">${icon('map',17)}</span><div><b>青禾广场</b><span id="place-time">下午 · 15:00</span></div></div>
-  <div id="interact" hidden><button id="interact-button"><kbd>E</kbd> <span></span></button></div>
+  <div class="interaction-stack"><div id="toast" role="status" hidden></div><div id="interact" hidden><button id="interact-button"><kbd>E</kbd> <span></span></button></div></div>
   <div class="controls" id="controls" data-lang="${esc(hud.controls??'en')}">${CONTROLS.map(c=>
     `<span class="ctl">${c.keys.map(k=>`<kbd>${esc(k)}</kbd>`).join('')}<em data-en>${esc(c.en)}</em><em data-zh>${esc(c.zh)}</em></span><i></i>`).join('')}<button class="lang-toggle" id="controls-lang" title="按键说明的语言 · Language of these hints">中 / EN</button></div>
   <aside id="tutorial-card" class="tutorial-card" hidden aria-live="polite" aria-label="新手教程"></aside>
@@ -54,7 +54,7 @@ export class Shell {
   <div id="look-hint" hidden>点击画面转身 · Click the town to look around, Esc to free the cursor</div>
   <aside class="mini-map"><div class="map-heading">青禾广场 <span>N ↑</span></div><svg id="map-svg" viewBox="-24 -24 48 48"><g id="map-content"></g><g id="map-route"></g><g id="map-facing" transform="translate(0,9)"><path d="M0 -5.4L2.7 -1.4L-2.7 -1.4Z" fill="#345f51" opacity=".45"/></g><circle id="map-player" cx="0" cy="9" r="1.4" fill="#345f51" stroke="#fff8de" stroke-width=".6"/></svg><div class="map-caption" id="map-caption">一段属于你的旅程</div></aside>
   <section id="arrival"><span class="arrival-stamp">旅</span><div class="eyebrow">WELCOME TO YOUR LITTLE GETAWAY</div><h2>你好，旅人。</h2><p>你的中文之旅，从这里开始。</p>${shouldAutoStart(ctx.profile)?`<p class="arrival-tutorial">${esc(TUTORIAL_UI.arrival.zh)}<small>${esc(TUTORIAL_UI.arrival.en)}</small></p>`:''}<p class="arrival-en">You see the town through your own eyes. Walk up to someone and say hello.<br>Chinese comes first. Tap <b>?</b> whenever you need a hand.</p><button class="primary" id="start-button">开始旅行 ${icon('arrow')}</button><div class="arrival-note">WASD to move · Move the mouse to look · E to talk · V for third person<br>Playable prototype · Mandarin voices are AI generated</div></section>
-  <div id="scrim" hidden></div><section id="panel" hidden role="dialog" aria-modal="true" aria-labelledby="panel-title"></section><div id="toast" role="status" hidden></div>`;
+  <div id="scrim" hidden></div><section id="panel" hidden role="dialog" aria-modal="true" aria-labelledby="panel-title"></section>`;
   document.addEventListener('click',e=>{const b=e.target.closest('[data-help]');if(b){const target=b.parentElement.querySelector('.help-content');target.hidden=!target.hidden;b.setAttribute('aria-expanded',String(!target.hidden));if(!target.hidden)this.ctx.hinted=true;}});
   document.addEventListener('keydown',e=>{if(e.code==='Escape'&&!e.repeat&&this.panelId)this.close();if(e.key==='Tab'&&this.panelId){const els=[...document.querySelector('#panel').querySelectorAll('button,input,select,a,textarea')].filter(x=>!x.disabled&&x.offsetParent!==null);if(!els.length)return;const first=els[0],last=els.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
   // The three pieces of screen furniture the player is most likely to want out of the way.
@@ -99,6 +99,7 @@ export class Shell {
  open(id,title,subtitle='',{onClose}={}){
   this.closeHook.arm(onClose);
   this.returnFocus=document.activeElement;this.panelId=id;this.ctx.hinted=false;this.ctx.town?.setPaused(true);this.ctx.voice.stop();this.ctx.voice.duck(true);this.ctx.music?.duck(true);this.ctx.speech.stop();
+  document.querySelector('#interact').hidden=true;
   const panel=document.querySelector('#panel');panel.hidden=false;panel.className=`panel panel-${id}`;
   panel.innerHTML=`<header class="panel-header"><div><div class="eyebrow">${esc(subtitle)}</div><h2 id="panel-title">${esc(title)}</h2></div><button class="close-button" aria-label="关闭">${icon('close')}</button></header><div id="panel-body"></div>`;
   document.querySelector('#scrim').hidden=false;panel.querySelector('.close-button').onclick=()=>this.close();panel.querySelector('.close-button').focus();
@@ -209,6 +210,9 @@ export class Shell {
   return {x:hop.gate.x,z:hop.gate.z,via:hop===target?target.zh:'青禾广场'};
  }
  nearby(target){
+  // The world keeps evaluating proximity while paused. A panel always owns the keyboard and
+  // pointer, so its underlying E prompt must stay out of the modal layer.
+  if(this.panelId)target=null;
   const el=document.querySelector('#interact');el.hidden=!target;
   if(!target)return;
   const npc=npcs.find(n=>n.id===target.id);

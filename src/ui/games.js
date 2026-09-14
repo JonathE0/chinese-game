@@ -1,7 +1,7 @@
 import {escapeHtml as esc} from '../core/language.js';
 import {icon} from './art.js';
 import {grant} from '../core/economy.js';
-import {reviewWord} from '../core/review.js';
+import {reviewWord,pickReviewWords} from '../core/review.js';
 import {loadWords} from '../services/hsk-data.js';
 
 const shuffle=list=>list.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(([,v])=>v);
@@ -73,7 +73,7 @@ function payout(ctx,game,right,total){
 
 // ------------------------------------------------------------ matching pairs
 function matchGame(ctx,body,pool){
-  const picks=shuffle(pool).slice(0,PAIRS);
+  const picks=pickReviewWords(ctx.profile,pool,'recognition',{limit:PAIRS,includeResting:true});
   const cards=shuffle([
     ...picks.map(w=>({key:w.zh,face:w.zh,side:'zh',word:w})),
     ...picks.map(w=>({key:w.zh,face:w.en.split(';')[0],side:'en',word:w})),
@@ -130,7 +130,7 @@ function matchGame(ctx,body,pool){
 
 // ----------------------------------------------------------- listen and find
 function listenGame(ctx,body,pool){
-  const queue=shuffle(pool).slice(0,ROUNDS);
+  const queue=pickReviewWords(ctx.profile,pool,'listening',{limit:ROUNDS,includeResting:true});
   let index=0,right=0;
 
   const step=()=>{

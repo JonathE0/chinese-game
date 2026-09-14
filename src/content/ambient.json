@@ -1,6 +1,14 @@
 [
- {"id":"ambient-weather","zh":"今天天气真好！","pinyin":"Jīntiān tiānqì zhēn hǎo!","en":"The weather is lovely today!","speaker":"friend-a","audio":"ambient-weather","note":"真 adds emphasis: really / so."},
- {"id":"ambient-walk","zh":"是啊，一起走走吧。","pinyin":"Shì a, yìqǐ zǒuzou ba.","en":"It is! Let's take a little walk together.","speaker":"friend-b","audio":"ambient-walk","note":"走走 makes the suggestion relaxed; 吧 softens it."},
- {"id":"ambient-tea","zh":"喝杯茶怎么样？","pinyin":"Hē bēi chá zěnmeyàng?","en":"How about a cup of tea?","speaker":"friend-a","audio":"ambient-tea","note":"A conversational suggestion. The full form is 喝一杯茶怎么样？"},
- {"id":"ambient-yes","zh":"好啊，走吧！","pinyin":"Hǎo a, zǒu ba!","en":"Sounds good. Let's go!","speaker":"friend-b","audio":"ambient-yes","note":"好啊 is a friendly way to agree."}
+ {"id":"ambient-weather","exchange":"weather","zh":"今天天气真好！","pinyin":"Jīntiān tiānqì zhēn hǎo!","en":"The weather is lovely today!","speaker":"friend-a","audio":"ambient-weather","note":"真 adds emphasis: really / so."},
+ {"id":"ambient-walk","exchange":"weather","zh":"是啊，一起走走吧。","pinyin":"Shì a, yìqǐ zǒuzou ba.","en":"It is! Let's take a little walk together.","speaker":"friend-b","audio":"ambient-walk","note":"走走 makes the suggestion relaxed; 吧 softens it."},
+ {"id":"ambient-tea","exchange":"tea","zh":"喝杯茶怎么样？","pinyin":"Hē bēi chá zěnmeyàng?","en":"How about a cup of tea?","speaker":"friend-a","audio":"ambient-tea","note":"A conversational suggestion. The full form is 喝一杯茶怎么样？"},
+ {"id":"ambient-yes","exchange":"tea","zh":"好啊，走吧！","pinyin":"Hǎo a, zǒu ba!","en":"Sounds good. Let's go!","speaker":"friend-b","audio":"ambient-yes","note":"好啊 is a friendly way to agree."},
+ {"id":"ambient-bread","exchange":"bread","zh":"那家店的面包真香。","pinyin":"Nà jiā diàn de miànbāo zhēn xiāng.","en":"The bread from that shop smells so good.","speaker":"friend-a","audio":"ambient-bread"},
+ {"id":"ambient-breakfast","exchange":"bread","zh":"我早上买了一个，还不错。","pinyin":"Wǒ zǎoshang mǎi le yí ge, hái búcuò.","en":"I bought one this morning. It was pretty good.","speaker":"friend-b","audio":"ambient-breakfast","note":"还不错 is a relaxed way to say pretty good."},
+ {"id":"ambient-reading","exchange":"reading","zh":"你最近在看什么书？","pinyin":"Nǐ zuìjìn zài kàn shénme shū?","en":"What have you been reading lately?","speaker":"friend-a","audio":"ambient-reading"},
+ {"id":"ambient-story","exchange":"reading","zh":"一本故事书。每天看一点儿。","pinyin":"Yì běn gùshi shū. Měitiān kàn yìdiǎnr.","en":"A storybook. I read a little every day.","speaker":"friend-b","audio":"ambient-story"},
+ {"id":"ambient-lunch","exchange":"lunch","zh":"中午吃什么？我有点儿饿了。","pinyin":"Zhōngwǔ chī shénme? Wǒ yǒudiǎnr è le.","en":"What shall we eat for lunch? I'm getting a little hungry.","speaker":"friend-a","audio":"ambient-lunch"},
+ {"id":"ambient-noodles","exchange":"lunch","zh":"吃面吧，那边有家小店。","pinyin":"Chī miàn ba, nàbiān yǒu jiā xiǎo diàn.","en":"Let's have noodles. There's a little place over there.","speaker":"friend-b","audio":"ambient-noodles"},
+ {"id":"ambient-river","exchange":"river","zh":"晚上去河边走走？","pinyin":"Wǎnshang qù hébiān zǒuzou?","en":"Shall we take a walk by the river tonight?","speaker":"friend-a","audio":"ambient-river"},
+ {"id":"ambient-later","exchange":"river","zh":"好啊，吃完饭再去。","pinyin":"Hǎo a, chī wán fàn zài qù.","en":"Sure. Let's go after dinner.","speaker":"friend-b","audio":"ambient-later"}
 ]

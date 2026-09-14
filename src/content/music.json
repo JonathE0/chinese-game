@@ -1,0 +1,46 @@
+{
+  "ui": {
+    "title": "小镇歌单", "subtitle": "TOWN PLAYLIST",
+    "next": "下一首", "nextHelp": "Next track",
+    "quiet": "听一会儿风声", "quietHelp": "A little quiet before the next song",
+    "unavailable": "音乐暂时无法播放", "unavailableHelp": "Music is unavailable in this browser",
+    "note": "随机播放 · 曲间稍作休息", "noteHelp": "All five songs play before the playlist reshuffles. Short quiet breaks between songs."
+  },
+  "tracks": [
+    {
+      "id": "morning-window", "title": "窗边的早晨", "en": "Morning by the Window",
+      "genre": "轻柔钢琴", "genreEn": "Soft piano", "instrument": "piano",
+      "bpm": 68, "swing": 0.5, "brush": 0, "level": 0.78,
+      "chords": [[0,4,7,14],[-3,0,4,7],[-7,0,4,9],[-5,2,7,11],[-8,-1,4,7],[-3,0,4,9],[-7,0,4,7],[0,4,7,14]],
+      "melody": [[12,null,null,16,19,null,16,null],[16,null,12,null,null,null,7,null],[9,null,null,12,16,null,null,null],[14,null,11,null,7,null,null,null],[11,null,16,null,19,null,16,null],[21,null,null,19,16,null,12,null],[16,null,12,null,9,null,null,null],[7,null,null,12,null,null,null,null]]
+    },
+    {
+      "id": "river-path", "title": "河边慢步", "en": "Along the River",
+      "genre": "木弦民谣", "genreEn": "Plucked folk", "instrument": "pluck",
+      "bpm": 78, "swing": 0.52, "brush": 0, "level": 0.72,
+      "chords": [[2,6,9,14],[-3,2,6,9],[-1,2,6,11],[-5,2,7,11],[2,6,9,14],[-1,2,6,11],[-5,2,7,11],[2,6,9,14]],
+      "melody": [[14,null,18,21,null,18,14,null],[9,14,null,18,14,null,null,null],[18,null,14,11,null,14,18,null],[19,null,14,null,11,null,null,null],[21,null,26,null,21,18,null,14],[18,null,14,null,11,14,null,null],[14,19,null,21,19,null,14,null],[18,null,14,null,null,null,null,null]]
+    },
+    {
+      "id": "afternoon-tea", "title": "茶馆午后", "en": "Afternoon Tea",
+      "genre": "慵懒爵士", "genreEn": "Mellow jazz", "instrument": "mallet",
+      "bpm": 84, "swing": 0.63, "brush": 0.2, "level": 0.65,
+      "chords": [[-7,0,4,9],[-5,2,5,11],[-8,-1,4,7],[-3,0,4,7],[-10,-3,0,5],[-5,2,5,11],[0,4,7,11],[0,4,7,14]],
+      "melody": [[16,null,12,9,null,12,16,null],[14,null,11,null,17,14,null,null],[11,16,null,19,null,16,11,null],[12,null,16,19,null,16,null,null],[17,null,12,null,9,12,null,17],[14,null,17,14,null,11,null,null],[11,12,null,16,19,null,23,null],[19,null,16,14,12,null,null,null]]
+    },
+    {
+      "id": "cloud-lanterns", "title": "云上的灯", "en": "Lanterns Above the Clouds",
+      "genre": "空灵氛围", "genreEn": "Spacious ambient", "instrument": "air",
+      "bpm": 56, "swing": 0.5, "brush": 0, "level": 0.7,
+      "chords": [[-7,0,7,9],[-3,4,7,12],[-10,-3,5,12],[0,7,11,14],[-7,0,4,12],[-3,4,7,14],[-5,2,7,14],[0,4,7,14]],
+      "melody": [[19,null,null,null,null,null,null,null],[16,null,null,null,19,null,null,null],[17,null,null,null,null,null,null,null],[14,null,null,null,19,null,null,null],[24,null,null,null,null,null,null,null],[19,null,null,null,16,null,null,null],[14,null,null,null,null,null,null,null],[12,null,null,null,null,null,null,null]]
+    },
+    {
+      "id": "home-at-dusk", "title": "夜色归途", "en": "Home at Dusk",
+      "genre": "低保真小调", "genreEn": "Gentle lo-fi", "instrument": "keys",
+      "bpm": 72, "swing": 0.57, "brush": 0.12, "level": 0.7,
+      "chords": [[-3,0,4,7],[-7,0,4,9],[0,4,7,11],[-5,2,7,11],[-10,-3,0,5],[-3,0,4,7],[-7,0,4,9],[-3,0,4,7]],
+      "melody": [[16,null,12,null,9,null,null,12],[16,null,null,19,16,null,12,null],[11,null,14,null,16,null,null,null],[14,null,11,7,null,null,null,null],[12,null,17,null,21,null,17,null],[16,null,12,9,null,12,null,null],[12,null,9,null,7,null,null,null],[9,null,null,null,null,null,null,null]]
+    }
+  ]
+}
