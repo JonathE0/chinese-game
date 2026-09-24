@@ -14,9 +14,9 @@ import {todaysTasks,claimTask,bump} from '../core/daily.js';
 import {readStats,eat} from '../core/stats.js';
 import {TUTORIAL_UI} from '../core/tutorial.js';
 import {moreProgress} from '../core/backup.js';
-import {syncCloud,keepLoser} from '../core/cloudsync.js';
+import {syncCloud,keepLoser,arrivalChoice} from '../core/cloudsync.js';
 import {SAVE_KEY} from '../core/profile.js';
-import {user,signIn,signOut,deleteSave,cloudApi} from '../services/cloud.js';
+import {user,signIn,signOut,deleteSave,cloudApi,renderGoogleButton} from '../services/cloud.js';
 import {folderSupported,folderStatus,chooseFolder,reconnectFolder,stopSync,readFolderSave,readLog,listBackups,syncSave,keepFolderCopy,keepCopy} from '../services/filesync.js';
 
 export function download(name,data){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
@@ -183,6 +183,36 @@ function offerCloudRestore(ctx,{action,profile:p,raw}){
   else{ctx.ui.close();cloudSync(ctx);}
  });
 }
+/**
+ * The arrival screen, with the cloud on and nobody signed in: sign in with Google (which starts the
+ * game at once, and the usual start-up check then offers any cloud save) or play as a guest, which
+ * is exactly 开始旅行. Signed in already: just who. Without the cloud this is never called.
+ */
+export async function mountArrivalCloud(ctx){
+ const arrival=document.querySelector('#arrival'),start=document.querySelector('#start-button');
+ const who=await user().catch(()=>null);
+ const mode=arrivalChoice(!!ctx.cloud&&!ctx.readOnly,who);
+ if(mode==='plain'||arrival.hidden)return;   // already on the way
+ if(mode==='signed-in'){
+  const email=esc(who.email??'');
+  start.insertAdjacentHTML('beforebegin',`<p class="arrival-signed">已登录：${email}<small>Signed in as ${email}</small></p>`);
+  return;
+ }
+ const card=document.createElement('div');
+ card.className='arrival-cloud';
+ card.innerHTML=`<p>登录后，进度保存在云端，换浏览器、换电脑都能接着玩。<small>Sign in and your progress is kept in the cloud, so you can carry on in any browser or on any computer.</small></p><div class="arrival-google"></div><button class="secondary wide" id="guest-start">以游客身份开始 <small>Play as a guest</small></button><p class="microcopy">游客的进度只保存在这个浏览器里。<br>As a guest, your progress is saved in this browser only.</p>`;
+ const guest=card.querySelector('#guest-start'),slot=card.querySelector('.arrival-google');
+ guest.disabled=start.disabled;   // the 3D scene could not start: neither can the game
+ guest.onclick=()=>start.click();
+ start.before(card);start.hidden=true;
+ const redirect=()=>{
+  slot.innerHTML='<button class="primary" id="arrival-sign-in">用 Google 登录 <small>Sign in with Google</small></button>';
+  slot.querySelector('button').onclick=()=>signIn().catch(()=>{});
+ };
+ // A failed attempt redraws the button with a fresh nonce; the guest button works throughout.
+ const google=()=>renderGoogleButton(slot,error=>{if(error)google();else if(!arrival.hidden)start.click();}).catch(redirect);
+ google();
+}
 async function renderCloud(ctx,el){
  const c=ctx.cloud,who=await user().catch(()=>null);
  if(!el.isConnected)return;
@@ -190,8 +220,19 @@ async function renderCloud(ctx,el){
  const privacy='<p class="microcopy">只保存你的游戏进度，不会公开。<br>Only your game progress is stored, and it\'s never shown to anyone.</p>';
  const failed=c.failed?'<p class="microcopy">同步失败，稍后会再试。<br>Sync failed; will try again later.</p>':'';
  if(!who){
-  el.innerHTML=`<button class="secondary wide" id="cloud-sign-in">用 Google 登录 <small>Sign in with Google</small></button>${failed}${privacy}`;
-  el.querySelector('#cloud-sign-in').onclick=()=>signIn().catch(()=>{c.failed=true;again();});
+  el.innerHTML=`<div id="cloud-sign-in-slot"></div>${failed}${privacy}`;
+  const slot=el.querySelector('#cloud-sign-in-slot');
+  // Without Google's own button (no client id, script blocked or offline), the redirect sign-in.
+  const redirect=()=>{
+   if(!slot.isConnected)return;
+   slot.innerHTML='<button class="secondary wide" id="cloud-sign-in">用 Google 登录 <small>Sign in with Google</small></button>';
+   slot.querySelector('#cloud-sign-in').onclick=()=>signIn().catch(()=>{c.failed=true;again();});
+  };
+  // Signed in: the same checks as after the redirect (restore or choose), then the signed-in view.
+  renderGoogleButton(slot,error=>{
+   if(error){c.failed=true;again();return;}
+   c.failed=false;cloudSync(ctx,{asked:true}).finally(()=>{if(el.isConnected)again();});
+  }).catch(redirect);
   return;
  }
  const email=esc(who.email??''),time=c.at&&esc(new Date(c.at).toLocaleTimeString());

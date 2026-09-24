@@ -1,6 +1,6 @@
 # 青禾小镇 · Little Mandarin Town
 
-**[Play in your browser](https://inquisitive-beignet-0c4bd9.netlify.app)**
+**[Play in your browser](https://mini-chinese-game.netlify.app)**
 
 A local, playable browser game for learning Mandarin by living in a small Chinese city, seen through your own eyes. Walk the streets, look at things to learn their names, talk to people, shop, and furnish your own home. Built with the PlayCanvas standalone engine and modular JavaScript. No Unity or hosted editor account required.
 

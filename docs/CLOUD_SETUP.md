@@ -14,7 +14,7 @@ lets each signed-in player see only their own row.
 | --- | --- | --- |
 | Supabase project URL (`https://<reference>.supabase.co`) | Public | `.env.local` and Netlify |
 | Supabase anon (publishable) key | Public | `.env.local` and Netlify |
-| Google OAuth client ID | Public | The Supabase dashboard only |
+| Google OAuth client ID (`…apps.googleusercontent.com`) | Public | The Supabase dashboard, `.env.local` and Netlify (`VITE_GOOGLE_CLIENT_ID`) |
 | Google OAuth client secret | **Secret** | The Supabase dashboard only. Never in the repository, `.env.local` or Netlify |
 | Supabase `service_role` (secret) key | **Secret** | Nowhere. The game never needs it |
 | Database password | **Secret** | Your password manager |
@@ -48,16 +48,20 @@ designed. What protects the saves is the Row Level Security set up in step 2.
    2. **APIs & Services** → **Credentials** → **Create credentials** → **OAuth client ID**.
       Application type: **Web application**. Name it `Supabase`.
    3. Under **Authorised JavaScript origins** add your Netlify address (for example
-      `https://your-site.netlify.app`), `http://127.0.0.1:5174` and `http://localhost:5174`.
+      `https://your-site.netlify.app`), `http://localhost`, `http://localhost:5174` and
+      `http://127.0.0.1:5174`. Google's sign-in button only works on pages served from these
+      addresses, and for local testing Google asks for `http://localhost` with and without the port.
    4. Under **Authorised redirect URIs** add exactly
       `https://<reference>.supabase.co/auth/v1/callback`.
-      Google sends players back to Supabase, and Supabase then sends them back to the game.
+      This is for the fallback sign-in (see "How sign-in works" below): Google sends players back
+      to Supabase, and Supabase then sends them back to the game.
    5. Press **Create**, then copy the **Client ID** and the **Client secret**. The secret goes only
       into the Supabase dashboard in the next step; do not save it anywhere else.
 
 4. **Turn on Google in Supabase, and every other way in off.** In the Supabase dashboard:
    1. **Authentication** → **Sign In / Providers** (older dashboards: **Providers**) → **Google**:
-      switch it on, paste the **Client ID** and **Client secret**, and save.
+      switch it on, paste the **Client ID** (into **Client IDs**) and the **Client secret**, and
+      save. Leave **Skip nonce checks** off: the game sends a nonce with every sign-in.
    2. On the same page open **Email** and switch the provider **off**, and switch **Phone** off too
       if it is on. Leave the separate **Allow new users to sign up** setting (under **Authentication**
       → **Settings** or **Sign In / Providers**) switched **on**: in hosted Supabase it applies to
@@ -79,30 +83,49 @@ designed. What protects the saves is the Row Level Security set up in step 2.
    After signing in, players are sent back to the game's page, and Supabase only allows addresses
    on this list. Dev mode (`/?dev`) never uses the cloud, so it needs no entry.
 
-6. **Give the game the two public values.** In Supabase open **Project Settings** → **API**
+6. **Give the game the three public values.** In Supabase open **Project Settings** → **API**
    (newer dashboards: **Project Settings** → **Data API** for the URL and **API Keys** for the
    key). Copy the **Project URL** and the **anon public** key (called the **publishable** key in
-   newer dashboards). Do **not** copy the `service_role` or secret key.
-   1. For the dev server: copy `.env.example` in the repository to `.env.local` and fill in both
+   newer dashboards). Do **not** copy the `service_role` or secret key. The third value is the
+   Google **Client ID** from step 3.
+   1. For the dev server: copy `.env.example` in the repository to `.env.local` and fill in the
       lines:
       ```
       VITE_SUPABASE_URL=https://<reference>.supabase.co
       VITE_SUPABASE_ANON_KEY=<the anon or publishable key>
+      VITE_GOOGLE_CLIENT_ID=<the client id>.apps.googleusercontent.com
       ```
       `.env.local` is ignored by git. Restart `npm run dev` after changing it.
    2. For the live site: Netlify → your site → **Site configuration** → **Environment variables**
-      → **Add a variable**. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` with the same two
-      values. Then **Deploys** → **Trigger deploy** → **Deploy site**, because the values are built
+      → **Add a variable**. Add `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and
+      `VITE_GOOGLE_CLIENT_ID` with the same three values. Then **Deploys** → **Trigger deploy** → **Deploy site**, because the values are built
       into the page.
 
-7. **Try it.** Open the game, press 开始旅行, open settings (key 5) and scroll to **云端存档**.
-   Press **用 Google 登录**, choose your Google account, and you come back to the game signed in.
+7. **Try it.** Open the game. While nobody is signed in, the arrival screen offers Google's sign-in
+   button or **以游客身份开始** (play as a guest, which keeps the save in this browser only, as
+   before). Sign in, choose your Google account, and the game starts straight away. Once signed in,
+   the arrival screen shows 已登录 with your address, and settings (key 5) → **云端存档** has the
+   rest.
    Press **立即同步**; **上次同步** then shows the time. In Supabase **Table Editor** → `saves`
    there is now one row. Open the game in another browser, sign in there, and it offers to restore
    the save with more progress.
 
 The Playwright tests and a dev server without `.env.local` run with no cloud save at all; that is
-expected.
+expected. Playwright starts its own dev server with the three values blanked, so stop any
+`npm run dev` already on port 5174 before running the tests.
+
+## How sign-in works
+
+- With `VITE_GOOGLE_CLIENT_ID` set, the 云端存档 section shows Google's own sign-in button. It is
+  served on the game's own address, so Google's window names your site rather than the
+  `<reference>.supabase.co` address. Google hands the game a signed ID token, and Supabase checks it
+  (and a one-time nonce) before signing the player in. Google's script is only loaded when a player
+  opens that section.
+- Without the client ID, or when Google's script cannot load (blocked by an extension, or offline),
+  the section shows the game's own **用 Google 登录** button instead. That one leaves for Google,
+  which names the Supabase address, and comes back through the redirect URLs in step 5.
+- Both ways sign in through Google only, and the login session is kept by the Supabase library in
+  the browser's storage.
 
 ## How the game treats your saves
 

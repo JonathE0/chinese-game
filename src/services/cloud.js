@@ -1,10 +1,15 @@
 /**
  * A thin wrapper over supabase-js for the cloud save (see docs/CLOUD_SETUP.md). Unless both
  * VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set at build time, supabase-js is never loaded
- * and no request is ever made. Sign-in is Google only, through the PKCE flow; supabase-js keeps the
- * session in its own storage and exchanges the returned ?code= itself when the page loads again.
+ * and no request is ever made. Sign-in is Google only. With VITE_GOOGLE_CLIENT_ID set, Google's own
+ * button (Google Identity Services, served on this page's origin) hands over an ID token that
+ * signInWithIdToken exchanges; otherwise, or when that script cannot load, the redirect (PKCE) flow,
+ * where supabase-js exchanges the returned ?code= itself when the page loads again. Either way
+ * supabase-js keeps the session in its own storage.
  */
-const url=import.meta.env.VITE_SUPABASE_URL,key=import.meta.env.VITE_SUPABASE_ANON_KEY;
+import {newNonce} from '../core/cloudsync.js';
+
+const url=import.meta.env.VITE_SUPABASE_URL,key=import.meta.env.VITE_SUPABASE_ANON_KEY,googleId=import.meta.env.VITE_GOOGLE_CLIENT_ID;
 export const cloudConfigured=!!(url&&key);
 
 let client=null;
@@ -17,6 +22,30 @@ export async function user(){return ok(await (await sb()).auth.getSession()).ses
 /** Leaves for Google and comes back to this page. Must run from a click. */
 export async function signIn(){ok(await (await sb()).auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}}));}
 /** Signs out on this device only; other devices stay signed in. */
+let gis=null;
+/** Google Identity Services, loaded once and only on demand; rejects when unset, blocked or offline. */
+function loadGis(){
+  return gis??=new Promise((resolve,reject)=>{
+    if(!googleId)return reject(Error('No Google client id'));
+    const script=document.createElement('script');
+    script.src='https://accounts.google.com/gsi/client';script.async=true;
+    script.onload=()=>window.google?.accounts?.id?resolve(window.google.accounts.id):reject(Error('No GIS'));
+    script.onerror=()=>{script.remove();reject(Error('GIS did not load'));};
+    document.head.append(script);
+  }).catch(error=>{gis=null;throw error;});
+}
+/**
+ * Draws Google's sign-in button into `el`. `done(error)` runs after each sign-in attempt, with null
+ * on success. Rejects when Google's script is unavailable, so the caller can fall back to signIn().
+ */
+export async function renderGoogleButton(el,done){
+  const id=await loadGis(),{raw,hashed}=await newNonce();
+  id.initialize({client_id:googleId,nonce:hashed,use_fedcm_for_prompt:true,callback:async({credential})=>{
+    try{ok(await (await sb()).auth.signInWithIdToken({provider:'google',token:credential,nonce:raw}));done(null);}
+    catch(error){done(error);}
+  }});
+  id.renderButton(el,{type:'standard',theme:'outline',size:'large',shape:'pill',text:'signin_with',locale:'zh-CN'});
+}
 export async function signOut(){ok(await (await sb()).auth.signOut({scope:'local'}));}
 
 const saves=async()=>(await sb()).from('saves');

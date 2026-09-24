@@ -4,6 +4,7 @@ test-results/
 playwright-report/
 .env*
 !.env.example
+!.env.e2e
 .worktrees/
 *.log
 .venv/
@@ -13,3 +14,7 @@ __pycache__/
 
 # Agent progress checkpoints for resuming after a limit or outage
 .claude/checkpoints/
+
+# Netlify agent skills written by the Netlify MCP tool; local tooling, not part of the game
+.claude/skills/netlify-*/
+skills-lock.json

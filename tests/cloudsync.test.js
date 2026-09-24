@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {freshProfile,SAVE_VERSION} from '../src/core/profile.js';
-import {syncCloud,keepLoser} from '../src/core/cloudsync.js';
+import {syncCloud,keepLoser,sha256Hex,newNonce,arrivalChoice} from '../src/core/cloudsync.js';
 import {addCopy,rotateBackups,BACKUP_LIMIT} from '../src/core/backup.js';
 
 // An in-memory stand-in for the saves row, behaving like the migration: updated_at is the server's,
@@ -158,4 +158,20 @@ test('a kept copy is dated and labelled, capped, and does not take the place of 
   assert.equal(list.at(-1).coins,42);
   assert.equal(list.at(-1).raw,raw);
   assert.notEqual(rotateBackups(list,freshProfile(),now),list);   // today's own snapshot still happens
+});
+
+test('the sign-in nonce: Google gets the SHA-256 hex of a fresh random value, Supabase the value',async()=>{
+  assert.equal(await sha256Hex('abc'),'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  const a=await newNonce(),b=await newNonce();
+  assert.notEqual(a.raw,b.raw);
+  assert.ok(a.raw.length>=40);
+  assert.equal(a.hashed,await sha256Hex(a.raw));
+  assert.match(a.hashed,/^[0-9a-f]{64}$/);
+});
+
+test('the arrival screen offers sign-in or guest only with the cloud on and nobody signed in',()=>{
+  assert.equal(arrivalChoice(false,null),'plain');                 // no env, ?dev, read-only, e2e
+  assert.equal(arrivalChoice(false,{email:'a@b.c'}),'plain');
+  assert.equal(arrivalChoice(true,{email:'a@b.c'}),'signed-in');
+  assert.equal(arrivalChoice(true,null),'choose');
 });
