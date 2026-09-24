@@ -7,6 +7,9 @@ test('without Supabase settings there is no cloud save and nothing reaches Supab
   const requests=[];
   page.on('request',r=>requests.push(r.url()));
   await page.goto('/');
+  // The arrival screen is unchanged: no sign-in-or-guest card, and 开始旅行 as always.
+  await expect(page.getByRole('button',{name:'开始旅行'})).toBeVisible();
+  await expect(page.locator('#arrival .arrival-cloud, #arrival .arrival-signed')).toHaveCount(0);
   await page.getByRole('button',{name:'开始旅行'}).click();
   await page.locator('#settings-button').click();
   await expect(page.locator('#folder-sync')).toBeAttached();

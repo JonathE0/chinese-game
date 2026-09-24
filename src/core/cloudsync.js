@@ -71,3 +71,7 @@ export async function newNonce(){
   const raw=btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
   return {raw,hashed:await sha256Hex(raw)};
 }
+
+/** What the arrival screen adds: nothing without the cloud (`cloudOn` false: not configured, ?dev,
+ *  read-only), the signed-in address, or the choice between signing in and playing as a guest. */
+export const arrivalChoice=(cloudOn,who)=>!cloudOn?'plain':who?'signed-in':'choose';

@@ -14,7 +14,7 @@ import {todaysTasks,claimTask,bump} from '../core/daily.js';
 import {readStats,eat} from '../core/stats.js';
 import {TUTORIAL_UI} from '../core/tutorial.js';
 import {moreProgress} from '../core/backup.js';
-import {syncCloud,keepLoser} from '../core/cloudsync.js';
+import {syncCloud,keepLoser,arrivalChoice} from '../core/cloudsync.js';
 import {SAVE_KEY} from '../core/profile.js';
 import {user,signIn,signOut,deleteSave,cloudApi,renderGoogleButton} from '../services/cloud.js';
 import {folderSupported,folderStatus,chooseFolder,reconnectFolder,stopSync,readFolderSave,readLog,listBackups,syncSave,keepFolderCopy,keepCopy} from '../services/filesync.js';
@@ -182,6 +182,36 @@ function offerCloudRestore(ctx,{action,profile:p,raw}){
   if(pick==='cloud')replaceProfile(ctx,p);   // saved at once, so it goes up at the next upload
   else{ctx.ui.close();cloudSync(ctx);}
  });
+}
+/**
+ * The arrival screen, with the cloud on and nobody signed in: sign in with Google (which starts the
+ * game at once, and the usual start-up check then offers any cloud save) or play as a guest, which
+ * is exactly 开始旅行. Signed in already: just who. Without the cloud this is never called.
+ */
+export async function mountArrivalCloud(ctx){
+ const arrival=document.querySelector('#arrival'),start=document.querySelector('#start-button');
+ const who=await user().catch(()=>null);
+ const mode=arrivalChoice(!!ctx.cloud&&!ctx.readOnly,who);
+ if(mode==='plain'||arrival.hidden)return;   // already on the way
+ if(mode==='signed-in'){
+  const email=esc(who.email??'');
+  start.insertAdjacentHTML('beforebegin',`<p class="arrival-signed">已登录：${email}<small>Signed in as ${email}</small></p>`);
+  return;
+ }
+ const card=document.createElement('div');
+ card.className='arrival-cloud';
+ card.innerHTML=`<p>登录后，进度保存在云端，换浏览器、换电脑都能接着玩。<small>Sign in and your progress is kept in the cloud, so you can carry on in any browser or on any computer.</small></p><div class="arrival-google"></div><button class="secondary wide" id="guest-start">以游客身份开始 <small>Play as a guest</small></button><p class="microcopy">游客的进度只保存在这个浏览器里。<br>As a guest, your progress is saved in this browser only.</p>`;
+ const guest=card.querySelector('#guest-start'),slot=card.querySelector('.arrival-google');
+ guest.disabled=start.disabled;   // the 3D scene could not start: neither can the game
+ guest.onclick=()=>start.click();
+ start.before(card);start.hidden=true;
+ const redirect=()=>{
+  slot.innerHTML='<button class="primary" id="arrival-sign-in">用 Google 登录 <small>Sign in with Google</small></button>';
+  slot.querySelector('button').onclick=()=>signIn().catch(()=>{});
+ };
+ // A failed attempt redraws the button with a fresh nonce; the guest button works throughout.
+ const google=()=>renderGoogleButton(slot,error=>{if(error)google();else if(!arrival.hidden)start.click();}).catch(redirect);
+ google();
 }
 async function renderCloud(ctx,el){
  const c=ctx.cloud,who=await user().catch(()=>null);

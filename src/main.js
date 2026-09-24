@@ -17,7 +17,7 @@ import {openMenu} from './ui/menu.js';
 import {openDialogue,showLine} from './ui/dialogue.js';
 import {openPractice} from './ui/practice.js';
 import {openShop} from './ui/shop.js';
-import {openJournal,openInventory,openSettings,openAmbient,offerFolderRestore,cloudSoon,cloudSync} from './ui/panels.js';
+import {openJournal,openInventory,openSettings,openAmbient,offerFolderRestore,cloudSoon,cloudSync,mountArrivalCloud} from './ui/panels.js';
 import {cloudConfigured} from './services/cloud.js';
 import {syncSave,keepUnreadable} from './services/filesync.js';
 import {openHsk} from './ui/hsk.js';
@@ -397,6 +397,8 @@ document.querySelector('#start-button').onclick=()=>{started=true;document.query
  // The cloud is checked after that, against whichever save the player kept.
  if(!DEV)offerFolderRestore(ctx).then(offered=>{if(!offered){ctx.holdSync=false;cloudSync(ctx);}},()=>{ctx.holdSync=false;cloudSync(ctx);});
 };
+// With the cloud on, the arrival screen offers signing in or playing as a guest.
+if(ctx.cloud&&!ctx.readOnly)mountArrivalCloud(ctx);
 document.querySelector('#status-button').onclick=()=>{if(started)openStatus(ctx);};
 document.querySelector('#review-button').onclick=()=>{if(started)openWordBank(ctx);};
 document.querySelector('#journal-button').onclick=()=>{if(started)openJournal(ctx);};document.querySelector('#inventory-button').onclick=()=>{if(started)openInventory(ctx);};document.querySelector('#settings-button').onclick=()=>{if(started)openSettings(ctx);};

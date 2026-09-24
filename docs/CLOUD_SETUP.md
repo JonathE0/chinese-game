@@ -101,9 +101,11 @@ designed. What protects the saves is the Row Level Security set up in step 2.
       `VITE_GOOGLE_CLIENT_ID` with the same three values. Then **Deploys** → **Trigger deploy** → **Deploy site**, because the values are built
       into the page.
 
-7. **Try it.** Open the game, press 开始旅行, open settings (key 5) and scroll to **云端存档**.
-   Press Google's sign-in button there, choose your Google account, and you are signed in without
-   leaving the page.
+7. **Try it.** Open the game. While nobody is signed in, the arrival screen offers Google's sign-in
+   button or **以游客身份开始** (play as a guest, which keeps the save in this browser only, as
+   before). Sign in, choose your Google account, and the game starts straight away. Once signed in,
+   the arrival screen shows 已登录 with your address, and settings (key 5) → **云端存档** has the
+   rest.
    Press **立即同步**; **上次同步** then shows the time. In Supabase **Table Editor** → `saves`
    there is now one row. Open the game in another browser, sign in there, and it offers to restore
    the save with more progress.
