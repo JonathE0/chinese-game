@@ -12,8 +12,9 @@ recipes) is indexed in `docs/CONTENT_MAP.md`, which is generated; never edit it 
 ## Commands
 - `npm run verify` — unit tests, content check, content map and build in one go, with quiet
   output. Run this after changes.
-- `npm run dev` — Vite dev server. The Browser pane config `town` runs it on port 5174, which
-  Playwright also uses.
+- `npm run dev` — Vite dev server. The Browser pane config `town` runs it on port 5174 for playing
+  (with `.env.local`, so cloud saves are live there). Playwright uses its own server on 5175 in e2e
+  mode (`.env.e2e` blanks the cloud settings); config `town-test` starts that one for parallel runs.
 - `http://127.0.0.1:5174/?dev` — dev mode for previewing (dev server only): every district gate
   open, wallet topped up to 1000, the save folder never touched.
 - `npm test` — unit tests (`node --test tests/*.test.js`)

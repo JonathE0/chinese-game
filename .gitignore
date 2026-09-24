@@ -4,6 +4,7 @@ test-results/
 playwright-report/
 .env*
 !.env.example
+!.env.e2e
 .worktrees/
 *.log
 .venv/
