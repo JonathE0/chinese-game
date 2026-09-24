@@ -75,6 +75,7 @@ function render(ctx,body){
     if(ctx.profile.inventory[item.id]<=0)delete ctx.profile.inventory[item.id];
     eat(ctx.profile,item);
     bump(ctx.profile,'meals');
+    bump(ctx.profile,'ate-'+item.id);
     if(item.audio&&ctx.voice.available(item.audio))ctx.voice.play(item.audio);
     ctx.save();
     ctx.ui.notice(`吃了${item.zh}。 / Ate the ${item.en}.`);

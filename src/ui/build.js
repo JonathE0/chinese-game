@@ -1,6 +1,6 @@
 import {escapeHtml as esc} from '../core/language.js';
 import {icon,itemArt} from './art.js';
-import {languageLine} from './shell.js';
+import {languageLine,pinyinWith} from './shell.js';
 import {siteById,requirements,siteState,completion,contribute,raise,isBuilt} from '../core/construction.js';
 import {holdsPermit} from '../core/finance.js';
 import {openBuyGuide} from './buyguide.js';
@@ -55,7 +55,7 @@ function render(ctx,body,site){
         <div class="site-art">${itemArt(row.item?.visual??'postcard')}</div>
         <div class="site-info">
           <b>${esc(row.item?.zh??row.id)}</b>
-          <small>${esc(row.item?.pinyin??'')} · ${esc(row.item?.en??'')}</small>
+          <small>${pinyinWith(row.item?.pinyin,row.item?.zh,row.item?.en)}</small>
           <div class="gate-bar site-bar"><i style="width:${Math.round(row.done/row.count*100)}%"></i></div>
           <span class="site-count">${row.done} / ${row.count}${row.held?` · 身上有 ${row.held}`:''}</span>
         </div>

@@ -8,7 +8,7 @@ import {Toybox,Container} from '../src/world/physics.js';
 import {deposit,withdraw,savingsOf,interestOn,balanceForCap,INTEREST_CAP,
   permitById,permitTotal,buyPermit,holdsPermit,permitPlan,settleWeeks} from '../src/core/finance.js';
 import {readiness,shelves,allStories,finishStory,hasRead} from '../src/core/reading.js';
-import {addWord} from '../src/core/bank.js';
+import {addWord,collectLook,knowsLook} from '../src/core/bank.js';
 import {sanitizeDictionaryEntry} from '../src/content/dictionary-policy.js';
 import {siteById,siteState,completion,contribute,raise,isBuilt,progressOf,builtSites,collectIncome} from '../src/core/construction.js';
 
@@ -349,5 +349,26 @@ test('a built shop pays once each morning, and the ledger survives a save', () =
   const back=decodeProfile(JSON.stringify(p));
   assert.equal(back.builds.teahouse.done,true);
   assert.equal(back.builds.teahouse.given.timber,8);
-  assert.throws(()=>decodeProfile(JSON.stringify({...p,builds:{teahouse:{given:{timber:-1},done:true}}})));
+  const repairs=[];
+  // One bad count goes; the site stays built, so its income keeps coming.
+  assert.deepEqual(decodeProfile(JSON.stringify({...p,builds:{teahouse:{given:{timber:-1,stone:4},done:true}}}),repairs).builds,{teahouse:{given:{stone:4},done:true}});
+  assert.deepEqual(repairs,['builds']);
+});
+
+test('F on a sign saves its phrase to the word bank without counting it as a named object', () => {
+  const p=freshProfile();
+  const sign={id:'sign:welcome-qinghe',zh:'欢迎来到青禾',pinyin:'huānyíng láidào Qīnghé',en:'Welcome to Qinghe',sign:true};
+  assert.equal(knowsLook(p,sign),false);
+  assert.deepEqual(collectLook(p,sign),{clip:'sign-welcome-qinghe',isNew:true});
+  assert.equal(p.saved.at(-1).zh,'欢迎来到青禾');
+  assert.equal(p.saved.at(-1).audio,'sign-welcome-qinghe');
+  assert.deepEqual(p.discovered,[]);
+  assert.equal(knowsLook(p,sign),true);
+  assert.equal(collectLook(p,sign).isNew,false);
+  // An object still joins the discovered list, once.
+  const cup={id:'cup',zh:'杯子',pinyin:'bēizi',en:'cup'};
+  assert.deepEqual(collectLook(p,cup),{clip:'obj-cup',isNew:true});
+  assert.deepEqual(p.discovered,['cup']);
+  assert.equal(collectLook(p,cup).isNew,false);
+  assert.equal(knowsLook(p,cup),true);
 });

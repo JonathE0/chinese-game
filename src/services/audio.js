@@ -19,7 +19,8 @@ export class VoicePlayer {
     const a=new Audio(assetUrl(clip.src));a.preservesPitch=true;a.playbackRate=slow?.78:1;a.volume=ambient?this.settings.ambientVolume:this.settings.dialogueVolume;this[lane]=a;
     if(!ambient&&this.ambient)this.ambient.volume=this.settings.ambientVolume*.18;
     a.onended=()=>{if(!ambient&&this.ambient)this.ambient.volume=this.settings.ambientVolume;};
-    try{await a.play();}catch{if(!ambient)this.onNotice('录音暂时无法播放 · Recording could not be played.');}
+    // A clip cut short by the next one rejects with AbortError; that is not a failure to report.
+    try{await a.play();}catch(error){if(!ambient&&error?.name!=='AbortError')this.onNotice('录音暂时无法播放 · Recording could not be played.');}
   }
   stop(){this.foreground?.pause();this.foreground=null;}
   duck(active){if(this.ambient)this.ambient.volume=this.settings.ambientVolume*(active?.18:1);}

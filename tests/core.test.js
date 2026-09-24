@@ -84,10 +84,12 @@ test('the study desk at home pays four for every card, new or due', () => {
   // Anywhere else keeps the ordinary rate.
   assert.equal(reviewWord(p,'egg','recognition',{correct:true,hinted:false,now:1000}).coins,3);
 });
-test('a word record with a malformed learned mark is rejected', () => {
+test('a word record with a malformed learned mark is dropped on load', () => {
   const p = freshProfile();
   p.words.water = {recognition:{stage:1,due:1,last:1,reviews:1,learned:'yes'}};
-  assert.throws(()=>decodeProfile(JSON.stringify(p)));
+  const repairs = [];
+  assert.deepEqual(decodeProfile(JSON.stringify(p),repairs).words,{});
+  assert.deepEqual(repairs,['words']);
 });
 test('grant is replay-safe and purchase is atomic for insufficient funds', () => {
   const p = freshProfile(); const item = {id:'hat',price:24,minPrice:18,negotiable:true};
@@ -109,9 +111,14 @@ test('negotiation holds floor and asks clarification without consuming rounds', 
   assert.equal(negotiate(item,24,0,'十五还是二十').round,0);
   assert.equal(negotiate({...item,negotiable:false},24,0,'十八').quote,24);
 });
-test('profiles restore valid progress and reject corrupted or dangerous shapes', () => {
+test('profiles restore valid progress, repair corrupted values and reject what is not a save', () => {
   const p = freshProfile(); grant(p,'a',20);
   assert.equal(decodeProfile(JSON.stringify(p)).wallet,20);
-  for (const raw of ['bad', '{"version":1,"wallet":-9}', '{"version":1,"wallet":1e99}', '{"__proto__":{"polluted":true}}']) assert.throws(()=>decodeProfile(raw));
+  for (const raw of ['bad', '[]', '{"wallet":5}', '{"__proto__":{"polluted":true}}']) assert.throws(()=>decodeProfile(raw));
+  for (const [raw,wallet] of [['{"version":1,"wallet":-9}',0],['{"version":1,"wallet":1e99}',1000000]]) {
+    const repairs = [];
+    assert.equal(decodeProfile(raw,repairs).wallet,wallet);
+    assert.ok(repairs.includes('wallet'));
+  }
   assert.equal({}.polluted,undefined);
 });

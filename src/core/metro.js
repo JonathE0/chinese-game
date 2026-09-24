@@ -1,4 +1,5 @@
 import city from '../content/city.json' with {type:'json'};
+import metro from '../content/metro.json' with {type:'json'};
 
 /**
  * The metro line between 青禾 and 云海市中心.
@@ -18,10 +19,11 @@ export const FARE=city.fare;
 export function metroOf(profile){
   const m=profile.metro;
   return {rides:Math.max(0,Math.trunc(m?.rides??0)),passUntil:Number.isSafeInteger(m?.passUntil)?m.passUntil:null,
-    trips:Math.max(0,Math.trunc(m?.trips??0))};
+    trips:Math.max(0,Math.trunc(m?.trips??0)),heard:Number.isSafeInteger(m?.heard)?m.heard:null};
 }
 function write(profile,next){
-  profile.metro={rides:next.rides,...(next.passUntil===null?{}:{passUntil:next.passUntil}),trips:next.trips};
+  profile.metro={rides:next.rides,...(next.passUntil===null?{}:{passUntil:next.passUntil}),trips:next.trips,
+    ...(next.heard===null?{}:{heard:next.heard})};
   return profile.metro;
 }
 
@@ -82,6 +84,18 @@ export function returnTrip(profile){
   return {ok:true,how:'free'};
 }
 
+/**
+ * Picking the stop the announcement named pays a coin, once per ride. `heard` is the number of
+ * the trip already paid for, so the next journey (out or home) can pay again.
+ */
+export function announcementReward(profile){
+  const state=metroOf(profile);
+  if(state.heard===state.trips)return 0;
+  write(profile,{...state,heard:state.trips});
+  profile.wallet+=metro.reward;
+  return metro.reward;
+}
+
 /** What a save is allowed to say about your travel. */
 export function normalizeMetro(m){
   if(m===undefined||m===null)return undefined;
@@ -89,5 +103,7 @@ export function normalizeMetro(m){
   const whole=(v,hi)=>Number.isSafeInteger(v)&&v>=0&&v<=hi;
   if(!whole(m.rides??0,999)||!whole(m.trips??0,100000))throw Error('Invalid metro');
   if(m.passUntil!==undefined&&!whole(m.passUntil,1000000))throw Error('Invalid metro');
-  return {rides:m.rides??0,...(m.passUntil===undefined?{}:{passUntil:m.passUntil}),trips:m.trips??0};
+  if(m.heard!==undefined&&!whole(m.heard,100000))throw Error('Invalid metro');
+  return {rides:m.rides??0,...(m.passUntil===undefined?{}:{passUntil:m.passUntil}),trips:m.trips??0,
+    ...(m.heard===undefined?{}:{heard:m.heard})};
 }

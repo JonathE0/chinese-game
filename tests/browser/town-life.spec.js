@@ -160,7 +160,7 @@ test('the poster by the door explains furnishing, and the bed sets the time of d
   await enter(page,'home',3.0);
   const home=await offsetOf(page,'home');
 
-  await warp(page,home-3.9,0.3,0);
+  await warp(page,home+3.3,-1.2,-90);
   await expect(page.locator('#interact span')).toHaveText('看看布置指南');
   await page.keyboard.press('e');
   await expect(page.locator('#panel-title')).toHaveText('布置指南');
@@ -169,7 +169,9 @@ test('the poster by the door explains furnishing, and the bed sets the time of d
   await expect(page.locator('.guide-section').first()).toHaveAttribute('open','');
   await page.locator('.close-button').click();
 
-  await warp(page,home+2.9,-0.8,0);
+  // The starter bed is upstairs.
+  await page.evaluate(x=>window.__qinghe.town.warp(x,-2.6,0,2.9),home+3.6);
+  await page.waitForTimeout(200);
   await expect(page.locator('#interact span')).toHaveText('睡觉 · 选时间');
   await page.keyboard.press('e');
   await expect(page.locator('[data-sleep]')).toHaveCount(4);
@@ -294,7 +296,7 @@ test('the errands refresh daily and pay out once, from the journal',async({page}
 
   await page.evaluate(()=>{
     const p=window.__qinghe.profile;
-    p.daily={day:p.dayIndex??0,claimed:[],counts:{reviews:99,discovered:99,'bought-food':99,meals:99,visits:99,talks:99,sits:99,furnished:99}};
+    p.daily={day:p.dayIndex??0,claimed:[],counts:{reviews:99,discovered:99,'bought-food':99,meals:99,visits:99,talks:99,sits:99,furnished:99,cooked:99,ordered:99,'hunt-found':99}};
     window.__qinghe.save();
   });
   await page.getByRole('button',{name:'旅行手册'}).click();

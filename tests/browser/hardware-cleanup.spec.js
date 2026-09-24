@@ -45,6 +45,7 @@ test('independent world objects and full tree canopies have clear footprints',as
     const a=boxes[i],b=boxes[j],an=a.name?.id,bn=b.name?.id;
     // Connected structural parts and deliberate assemblies share a footprint.
     if(an==='metro-station'&&bn===an||[an,bn].sort().join() === 'door,hedge')continue;
+    if(a.group&&a.group===b.group)continue;   // a building and its own wings
     if(a.x===b.x&&a.z===b.z&&(an===bn||[an,bn].sort().join()==='table,umbrella'||[an,bn].sort().join()==='teahouse,wall'))continue;
     if(a.y0<b.y1&&b.y0<a.y1&&Math.abs(a.x-b.x)<a.hw+b.hw-.02&&Math.abs(a.z-b.z)<a.hd+b.hd-.02)conflicts.push([place,an,a.x,a.z,bn,b.x,b.z]);
    }

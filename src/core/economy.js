@@ -4,6 +4,11 @@ export function grant(p,key,amount) {
   if(p.claims[key] || !Number.isSafeInteger(amount)||amount<0) return 0;
   p.claims[key]=true;p.wallet+=amount;return amount;
 }
+/** Pays without recording a claim, for a payout that cannot repeat anyway (see reviewWord). */
+export function pay(p,amount) {
+  if(!Number.isSafeInteger(amount)||amount<0) return 0;
+  p.wallet+=amount;return amount;
+}
 /**
  * Haggle one round. Passing a `vendor` (see core/vendor.js) makes the outcome depend on their
  * mood: a sour vendor holds a higher floor, allows fewer rounds, and can put the price up if

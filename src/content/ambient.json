@@ -10,5 +10,17 @@
  {"id":"ambient-lunch","exchange":"lunch","zh":"中午吃什么？我有点儿饿了。","pinyin":"Zhōngwǔ chī shénme? Wǒ yǒudiǎnr è le.","en":"What shall we eat for lunch? I'm getting a little hungry.","speaker":"friend-a","audio":"ambient-lunch"},
  {"id":"ambient-noodles","exchange":"lunch","zh":"吃面吧，那边有家小店。","pinyin":"Chī miàn ba, nàbiān yǒu jiā xiǎo diàn.","en":"Let's have noodles. There's a little place over there.","speaker":"friend-b","audio":"ambient-noodles"},
  {"id":"ambient-river","exchange":"river","zh":"晚上去河边走走？","pinyin":"Wǎnshang qù hébiān zǒuzou?","en":"Shall we take a walk by the river tonight?","speaker":"friend-a","audio":"ambient-river"},
- {"id":"ambient-later","exchange":"river","zh":"好啊，吃完饭再去。","pinyin":"Hǎo a, chī wán fàn zài qù.","en":"Sure. Let's go after dinner.","speaker":"friend-b","audio":"ambient-later"}
+ {"id":"ambient-later","exchange":"river","zh":"好啊，吃完饭再去。","pinyin":"Hǎo a, chī wán fàn zài qù.","en":"Sure. Let's go after dinner.","speaker":"friend-b","audio":"ambient-later"},
+ {"id":"ambient-park-view","exchange":"park-view","zh":"这个公园真漂亮！","pinyin":"Zhège gōngyuán zhēn piàoliang!","en":"This park is really pretty!","speaker":"friend-a","audio":"ambient-park-view"},
+ {"id":"ambient-park-lotus","exchange":"park-view","zh":"是啊，荷花开得正好。","pinyin":"Shì a, héhuā kāi de zhènghǎo.","en":"Yeah, the lotus flowers are blooming just right.","speaker":"friend-b","audio":"ambient-park-lotus"},
+ {"id":"ambient-park-fish","exchange":"park-fish","zh":"你看，那些鱼！","pinyin":"Nǐ kàn, nàxiē yú!","en":"Look at those fish!","speaker":"friend-a","audio":"ambient-park-fish"},
+ {"id":"ambient-park-feed","exchange":"park-fish","zh":"它们好像在等人喂食。","pinyin":"Tāmen hǎoxiàng zài děng rén wèishí.","en":"They look like they're waiting to be fed.","speaker":"friend-b","audio":"ambient-park-feed"},
+ {"id":"ambient-snack-wonton","exchange":"snack-wonton","zh":"这家馄饨摊看起来不错。","pinyin":"Zhè jiā húntun tān kànqǐlái búcuò.","en":"This wonton stall looks good.","speaker":"friend-a","audio":"ambient-snack-wonton"},
+ {"id":"ambient-snack-try","exchange":"snack-wonton","zh":"我们去尝尝吧。","pinyin":"Wǒmen qù chángchang ba.","en":"Let's go try it.","speaker":"friend-b","audio":"ambient-snack-try","note":"尝尝 (chángchang) — to have a taste."},
+ {"id":"ambient-snack-breakfast","exchange":"snack-morning","zh":"早点吃了吗？","pinyin":"Zǎodiǎn chī le ma?","en":"Have you had breakfast yet?","speaker":"friend-a","audio":"ambient-snack-breakfast"},
+ {"id":"ambient-snack-youtiao","exchange":"snack-morning","zh":"还没，我们去买油条吧。","pinyin":"Hái méi, wǒmen qù mǎi yóutiáo ba.","en":"Not yet — let's go buy some youtiao.","speaker":"friend-b","audio":"ambient-snack-youtiao"},
+ {"id":"ambient-study-words","exchange":"study-words","zh":"你今天背了多少生词？","pinyin":"Nǐ jīntiān bèi le duōshao shēngcí?","en":"How many new words did you memorize today?","speaker":"friend-a","audio":"ambient-study-words","note":"背 (bèi) — to memorize."},
+ {"id":"ambient-study-count","exchange":"study-words","zh":"差不多十个吧。","pinyin":"Chàbuduō shí ge ba.","en":"About ten, I'd guess.","speaker":"friend-b","audio":"ambient-study-count"},
+ {"id":"ambient-study-quiet","exchange":"study-quiet","zh":"这里很安静，适合看书。","pinyin":"Zhè lǐ hěn ānjìng, shìhé kànshū.","en":"It's quiet here — good for reading.","speaker":"friend-a","audio":"ambient-study-quiet"},
+ {"id":"ambient-study-like","exchange":"study-quiet","zh":"对啊，我最喜欢来这儿学习。","pinyin":"Duì a, wǒ zuì xǐhuan lái zhèr xuéxí.","en":"Right, I like coming here to study best of all.","speaker":"friend-b","audio":"ambient-study-like"}
 ]

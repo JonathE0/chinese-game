@@ -62,5 +62,7 @@ test('daily boundary uses local midnight and a stale set cannot collect rewards 
 test('invalid persisted sets are rejected while old profiles remain compatible',()=>{
  const p=freshProfile();assert.ok(decodeProfile(JSON.stringify(p)));
  p.dailyPractice={date:'2026-09-13',ids:['water','water','tea','book']};
- assert.throws(()=>decodeProfile(JSON.stringify(p)),/Invalid daily practice/);
+ const repairs=[];
+ assert.equal(decodeProfile(JSON.stringify(p),repairs).dailyPractice,undefined);
+ assert.deepEqual(repairs,['dailyPractice']);
 });

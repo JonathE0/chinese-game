@@ -7,7 +7,7 @@ export const recipeById=id=>recipes.find(recipe=>recipe.id===id);
 export const recipeCost=recipe=>Object.entries(recipe.ingredients).reduce((total,[id,count])=>total+itemById(id).price*count,0);
 // Cheapest complete-hunger purchase using any combination of prepared meals (whole portions).
 export function preparedMealCost(){
-  const foods=catalog.filter(item=>item.nutrition&&[].concat(item.shop).some(shop=>['restaurant','bakery','cafe','nightstall'].includes(shop)));
+  const foods=catalog.filter(item=>item.nutrition&&[].concat(item.shop).some(shop=>['restaurant','bakery','cafe','nightstall','wonton','noodlestall','breakfast'].includes(shop)));
   const cost=Array(101).fill(Infinity);cost[0]=0;
   for(let hunger=1;hunger<=100;hunger++)for(const food of foods)cost[hunger]=Math.min(cost[hunger],food.price+cost[Math.max(0,hunger-food.nutrition)]);
   return cost[100];

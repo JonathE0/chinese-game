@@ -1,6 +1,6 @@
 import catalog from '../content/catalog.json' with {type:'json'};
 import rooms from '../content/rooms.json' with {type:'json'};
-import {languageLine} from './shell.js';
+import {languageLine,pinyinHtml} from './shell.js';
 import {icon,itemArt} from './art.js';
 import {escapeHtml as esc} from '../core/language.js';
 import {purchase} from '../core/economy.js';
@@ -11,12 +11,23 @@ import {decorOn,canStack} from '../core/surfaces.js';
 const furniture=catalog.filter(item=>item.category==='furniture');
 const byId=id=>catalog.find(item=>item.id===id);
 const slotsOf=roomId=>rooms[roomId]?.slots??{};
+/** The slots on the floor the tourist is standing on: upstairs slots carry the floor's height. */
+const slotsHere=ctx=>{
+  const floor=ctx.town?.place===here(ctx)?ctx.town.floorY?.()??0:0;
+  return Object.entries(slotsOf(here(ctx))).filter(([,slot])=>(slot.y??0)===floor);
+};
+/** Only something a shop sells can be ordered; anything else (a certificate) only if it is owned. */
+const orderable=item=>(item.shop?.length??0)>0;
+/** Which room a furnishing stands in: saves from before the bedroom had only the living room. */
+const roomOf=record=>record.room??'home';
+/** The decoratable room the tourist is standing in, or the living room. */
+const here=ctx=>rooms[ctx.town?.place]?.decoratable?ctx.town.place:'home';
 
 /** Owned but not currently standing in the room. */
 function spare(ctx,id){
   return (ctx.profile.inventory[id]??0)-ctx.profile.home.filter(r=>r.item===id).length;
 }
-const inSlot=(ctx,slotId)=>ctx.profile.home.find(r=>r.slot===slotId);
+const inSlot=(ctx,slotId,room=here(ctx))=>ctx.profile.home.find(r=>r.slot===slotId&&roomOf(r)===room);
 
 /** Put a piece away, and anything standing on it. The world already removes an assembly as a
  *  unit; the save has to agree, or the decor comes back as a ghost on the next reload. */
@@ -24,7 +35,7 @@ function putAway(ctx,record){
   if(!record)return false;
   const uids=new Set([record.uid,...decorOn(ctx.profile.home,record.uid).map(part=>part.uid)]);
   ctx.profile.home=ctx.profile.home.filter(kept=>!uids.has(kept.uid));
-  for(const uid of uids)ctx.town.removeProp('home',uid);
+  for(const uid of uids)ctx.town.removeProp(roomOf(record),uid);
   ctx.save();
   return true;
 }
@@ -37,7 +48,7 @@ export function openDecorate(ctx){
 // ---------------------------------------------------------------- tutorial
 const STEPS=[
   {zh:'这是你的家。',pinyin:'Zhè shì nǐ de jiā.',en:'This is your home.',
-   body:'房间已经放好了床、床头柜和地毯。书桌是固定的，你在那里复习生词。<br>Your room already has a bed, a nightstand and a rug. The desk is fixed — that is where you review the words you collect.'},
+   body:'楼上的卧室已经放好了床和床头柜，客厅里有一块地毯。书桌在书房里，你在那里复习生词。<br>Upstairs, your bedroom already has a bed and a nightstand, and there is a rug in the living room. The desk is in the study — that is where you review the words you collect.'},
   {zh:'按位置布置。',pinyin:'Àn wèizhì bùzhì.',en:'Furnish by position.',
    body:'每件家具都有自己的位置：床位、五斗柜、衣柜、灯……点一个位置就能订购或更换。<br>Every piece has its own spot. Click a position to order something for it, or swap what is there. It is delivered straight to the room — nothing to carry.'},
   {zh:'也可以自己摆。',pinyin:'Yě kěyǐ zìjǐ bǎi.',en:'Or place it yourself.',
@@ -76,12 +87,11 @@ function slotView(ctx){
 }
 
 function render(ctx,body){
-  const slots=slotsOf('home');
   // Anything placed by hand has no slot, so it needs its own way back into the box.
-  const loose=ctx.profile.home.map((record,index)=>({record,index})).filter(({record})=>!record.slot);
+  const loose=ctx.profile.home.map((record,index)=>({record,index})).filter(({record})=>!record.slot&&roomOf(record)===here(ctx));
   body.innerHTML=`
     <p class="panel-intro">点一个位置，选一件家具。买下的会直接送到房间里。<br>Pick a spot, choose a piece. It is delivered straight into the room.</p>
-    <div class="slot-grid">${Object.entries(slots).map(([id,slot])=>{
+    <div class="slot-grid">${slotsHere(ctx).map(([id,slot])=>{
       const record=inSlot(ctx,id);
       const item=record&&byId(record.item);
       return `<button class="slot-card ${item?'filled':''}" data-slot="${esc(id)}">
@@ -127,10 +137,10 @@ function render(ctx,body){
 }
 
 function slotPicker(ctx,body,slotId){
-  const slot=slotsOf('home')[slotId];
+  const slot=slotsOf(here(ctx))[slotId];
   const record=inSlot(ctx,slotId);
   const current=record&&byId(record.item);
-  const options=furniture.filter(item=>slot.accepts.includes(item.kind));
+  const options=catalog.filter(item=>item.kind&&slot.accepts.includes(item.kind)&&(orderable(item)||(ctx.profile.inventory[item.id]??0)>0));
   body.innerHTML=`
     <button class="subtle" id="slot-back">← 回到房间</button>
     <h3 class="slot-title">${esc(slot.zh)}</h3>
@@ -139,25 +149,27 @@ function slotPicker(ctx,body,slotId){
     <div class="decorate-grid">${options.map(item=>{
       const owned=spare(ctx,item.id)>0,here=record?.item===item.id;
       const afford=ctx.profile.wallet>=item.price;
-      return `<button class="shop-card" data-choose="${esc(item.id)}" ${here||(!owned&&!afford)?'disabled':''}>
+      const buy=!owned&&orderable(item);
+      return `<button class="shop-card" data-choose="${esc(item.id)}" ${here||(!owned&&(!buy||!afford))?'disabled':''}>
         ${itemArt(item.visual)}<b>${esc(item.zh)}</b>
-        <span>${here?'已放好':owned?'放这里':`${icon('coin',13)} ${item.price}`}</span>
-        <small>${esc(item.pinyin)}</small></button>`;}).join('')}</div>
+        <span>${here||(!owned&&!buy)?'已放好':owned?'放这里':`${icon('coin',13)} ${item.price}`}</span>
+        <small>${pinyinHtml(item.pinyin,item.zh)}</small></button>`;}).join('')}</div>
     <p class="microcopy">${options.length?'买下的家具会直接送到这个位置。':'暂时没有适合这个位置的家具。'}</p>`;
 
   body.querySelector('#slot-back').onclick=()=>render(ctx,body);
   body.querySelector('#slot-clear')?.addEventListener('click',()=>{
-    putAway(ctx,ctx.profile.home.find(r=>r.slot===slotId));
+    putAway(ctx,inSlot(ctx,slotId));
     slotPicker(ctx,body,slotId);
   });
   body.querySelectorAll('[data-choose]').forEach(b=>b.onclick=()=>{
     const item=byId(b.dataset.choose);
     if(spare(ctx,item.id)<1){
+      if(!orderable(item))return;
       const result=purchase(ctx.profile,item,item.price);
       if(!result.ok)return ctx.ui.notice('学习币不够。 / Not enough coins.');
       ctx.ui.notice(`买好了：${item.zh}。 / Bought.`);
     }
-    fillSlot(ctx,slotId,item);
+    fillSlot(ctx,slotId,item,here(ctx));
     bump(ctx.profile,'furnished');
     ctx.music?.cue('place');
     ctx.save();
@@ -165,28 +177,28 @@ function slotPicker(ctx,body,slotId){
   });
 }
 
-/** Put an item into a named position, replacing whatever was there. */
-export function fillSlot(ctx,slotId,item){
-  const slot=slotsOf('home')[slotId];
+/** Put an item into a named position in a room, replacing whatever was there. */
+export function fillSlot(ctx,slotId,item,room='home'){
+  const slot=slotsOf(room)[slotId];
   if(!slot)return null;
   // Swapping what is in a slot takes whatever was standing on the old piece with it.
-  putAway(ctx,ctx.profile.home.find(r=>r.slot===slotId));
+  putAway(ctx,inSlot(ctx,slotId,room));
   const record={uid:`${item.id}-${slotId}-${Date.now().toString(36)}`,item:item.id,kind:item.kind,
-    color:item.color,footprint:item.footprint,x:slot.x,z:slot.z,rot:slot.rot??0,slot:slotId};
+    color:item.color,footprint:item.footprint,x:slot.x,z:slot.z,...(slot.y?{y:slot.y}:{}),rot:slot.rot??0,slot:slotId,room};
   ctx.profile.home.push(record);
-  ctx.town.addProp('home',record);
+  ctx.town.addProp(room,record);
   return record;
 }
 
-/** A new home is not an empty box: it comes with a bed, a nightstand and a rug. */
+/** A new home is not an empty box: a bed and a nightstand upstairs, and a rug in the living room. */
 export function applyStarterHome(ctx){
   if(ctx.profile.completed.includes('home:starter'))return false;
   ctx.profile.completed.push('home:starter');
-  for(const [slotId,itemId] of [['bed','wooden-bed'],['nightstand','nightstand'],['rug','floor-rug']]){
+  for(const [room,slotId,itemId] of [['home','up-bed','wooden-bed'],['home','up-nightstand','nightstand'],['home','rug','floor-rug']]){
     const item=byId(itemId);
     if(!item)continue;
     ctx.profile.inventory[itemId]=(ctx.profile.inventory[itemId]??0)+1;
-    fillSlot(ctx,slotId,item);
+    fillSlot(ctx,slotId,item,room);
   }
   ctx.save();
   return true;

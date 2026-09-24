@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {pastGreeting} from './greeting.js';
 
 const SAVE_KEY='little-mandarin-town.v1';
 
@@ -41,7 +42,7 @@ test('asking the way: only the student offers it, and finding the bookstore is o
 
   // Someone else on the street has a line to keep, but nothing to ask about directions.
   await warp(page,x-4.2,13.6,0);                   // the office worker, per city.json
-  await page.keyboard.press('e');
+  await page.keyboard.press('e');await pastGreeting(page);
   await expect(page.locator('.panel-citytalk')).toBeVisible();
   await expect(page.locator('#ask-directions')).toHaveCount(0);
   await page.keyboard.press('Escape');
@@ -54,7 +55,7 @@ test('asking the way: only the student offers it, and finding the bookstore is o
   // The student, and only the student, offers directions.
   await warp(page,x+4.6,-3.4,0);                   // the student sits at (4.6,-6); radius 3
   await expect(page.locator('#interact span')).toHaveText('和学生说话');
-  await page.keyboard.press('e');
+  await page.keyboard.press('e');await pastGreeting(page);
   await expect(page.locator('.panel-citytalk')).toBeVisible();
   await page.locator('#ask-directions').click();
   await expect(page.locator('#panel-title')).toHaveText('问路');

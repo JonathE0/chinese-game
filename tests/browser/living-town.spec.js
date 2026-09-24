@@ -150,7 +150,9 @@ test('night stalls stay away by day and are pushed into place after dark',async(
 
 test('a tea set goes on the table, never on the bed, and the two become one piece',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await seed(page,{inventory:{'low-table':1,'tea-set':1},completed:['home:tutorial']});
+  // A new player's starter bed is upstairs now, so this living room keeps a bed from an older save.
+  const bed={uid:'bed-old',item:'wooden-bed',kind:'bed',color:'#b98b5f',footprint:[2.1,1.4],x:2.9,z:-2.6,rot:0,slot:'bed'};
+  await seed(page,{inventory:{'low-table':1,'tea-set':1,'wooden-bed':1},home:[bed],completed:['home:tutorial','home:starter']});
   await start(page);
   await enter(page,'home',3.0);
   const home=await offsetOf(page,'home');
@@ -166,7 +168,7 @@ test('a tea set goes on the table, never on the bed, and the two become one piec
   await place(table);
   await page.evaluate(()=>window.__qinghe.town.tryPlace());
   await page.waitForTimeout(200);
-  // The room already came with a bed, a nightstand and a rug; the table joins them.
+  // The table joins the bed already in the room.
   const afterTable=await saved(page);
   const tableRecord=afterTable.home.at(-1);
   expect(tableRecord.item).toBe('low-table');
@@ -195,7 +197,7 @@ test('a tea set goes on the table, never on the bed, and the two become one piec
   expect(composed.home.at(-1).on).toBe(tableRecord.uid);
 
   // The furnishing panel calls the pair one thing, and putting the base away takes both.
-  await warp(page,home,-2.0,180);
+  await warp(page,home-1.6,-1.6,180);
   await page.keyboard.press('e');
   await expect(page.locator('#panel-title')).toHaveText('布置房间');
   await expect(page.locator('.placed-row.assembly')).toHaveCount(1);

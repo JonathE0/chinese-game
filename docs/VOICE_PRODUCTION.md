@@ -49,7 +49,7 @@ Clip sources, in the order the script reads them:
 
 ## Getting to reviewed audio
 
-The honest gap is listening review, not coverage. To close it:
+The honest gap is listening review, not coverage. `npm run audit:voice` writes [`docs/VOICE_REVIEW.md`](VOICE_REVIEW.md), a ranked list of the clips most likely to be misread; start there. To close it:
 
 1. Listen to every clip against the displayed Chinese. Check tones, word boundaries, and that particles (呀, 吧, 啊) sound conversational rather than spelled out.
 2. Re-cast or re-record anything that fails. Prosody is adjustable per speaker via `rate` and `pitch` in `voices.json`; a single line can be replaced by hand as long as the manifest entry keeps its `hash`.

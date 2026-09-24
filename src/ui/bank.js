@@ -1,10 +1,12 @@
 import {escapeHtml as esc} from '../core/language.js';
-import {languageLine} from './shell.js';
+import {languageLine,pinyinHtml} from './shell.js';
 import {icon} from './art.js';
 import {familiarity,reviewWord,cardCoins,pickReviewWords} from '../core/review.js';
 import {dueWords} from '../core/bank.js';
 import {openGames} from './games.js';
 import {definitions} from './definitions.js';
+import {openConfusables,seenAt,wireSeenAt} from './practice.js';
+import confusables from '../content/confusables.json' with {type:'json'};
 
 const statusNames={new:'初见',learning:'学习中',familiar:'熟悉',due:'待复习'};
 const SESSION=8;
@@ -42,6 +44,7 @@ function list(ctx,body,venue=null){
          <p class="microcopy">优先复习到期的词，再加上还没练过的。</p>`}
     <p class="microcopy bank-rate">${rateNote(venue)}</p>
     <button class="secondary wide" id="bank-games">小游戏 · 用这些词玩一玩</button>
+    <button class="secondary wide" id="bank-confusables">${confusables.ui.title} · ${confusables.ui.titleEn}</button>
     <div class="bank-list">${words.length?words.map((w,i)=>{
       const record=ctx.profile.words[w.id]?.recognition;
       return `<article class="bank-row">
@@ -59,6 +62,7 @@ function list(ctx,body,venue=null){
   });
   body.querySelector('#bank-review')?.addEventListener('click',()=>drill(ctx,body,venue));
   body.querySelector('#bank-games').onclick=()=>openGames(ctx);
+  body.querySelector('#bank-confusables').onclick=()=>openConfusables(ctx);
 }
 
 function drill(ctx,body,venue=null){
@@ -80,7 +84,7 @@ function drill(ctx,body,venue=null){
         <div class="drill-zh">${esc(word.zh)}</div>
         ${word.audio?`<button class="subtle drill-play" id="drill-play" aria-label="听读音">${icon('sound',16)} 读音</button>`:''}
         <button class="help-toggle" id="drill-help" aria-label="显示帮助">?</button>
-        <div class="help-content" id="drill-hint" hidden><div class="pinyin">${esc(word.pinyin)}</div></div>
+        <div class="help-content" id="drill-hint" hidden><div class="pinyin">${pinyinHtml(word.pinyin,word.zh,{always:true})}</div></div>
       </div>
       <div class="drill-options">${options.map(o=>`<button class="choice drill-choice" data-pick="${esc(o.id)}">${esc(o.en||o.zh)}</button>`).join('')}</div>
       <div id="drill-feedback" aria-live="polite"></div>`;
@@ -101,9 +105,10 @@ function drill(ctx,body,venue=null){
       earned+=coins;if(correct)right++;
       ctx.save();
       body.querySelector('#drill-feedback').innerHTML=`<div class="feedback ${correct?'success':'gentle'}">
-        <div>${correct?'对了！':'再看一眼。'} <b>${esc(word.zh)}</b> · ${esc(word.pinyin)} · ${esc(word.en)}
-        <small>${practiceOnly?'还没到复习时间，这次不计入进度。':coins?`+${coins} 学习币`:'已记录，未获得学习币。'}</small></div>
+        <div>${correct?'对了！':'再看一眼。'} <b>${esc(word.zh)}</b> · ${pinyinHtml(word.pinyin,word.zh,{always:true})} · ${esc(word.en)}
+        <small>${practiceOnly?'还没到复习时间，这次不计入进度。':coins?`+${coins} 学习币`:'已记录，未获得学习币。'}</small>${seenAt(ctx,word.zh)}</div>
         <button class="primary" id="drill-next">${index===queue.length-1?'完成':'下一个'}</button></div>`;
+      wireSeenAt(ctx,body);
       body.querySelector('#drill-next').onclick=()=>{index++;step();};
     });
   };

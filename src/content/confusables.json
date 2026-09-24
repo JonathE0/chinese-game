@@ -1,0 +1,249 @@
+{
+ "note": "The 易混词 practice deck (docs/superpowers/plans/2026-09-24-learning-features.md, Task E-review). `look` groups show a meaning and ask which character it is; `sound` groups play one member and ask which character was heard. Members that are HSK words take their clip and review record from public/hsk/words.json at run time; the rest carry a `conf-` clip of their own and pay nothing. Homophones share one clip (木 and 目 are both mù).",
+ "ui": {
+  "title": "易混词",
+  "titleEn": "easily confused words",
+  "seenAt": "在「X」见过",
+  "seenAtEn": "seen at X",
+  "find": "去找找",
+  "findEn": "go and find it"
+ },
+ "prompts": {
+  "look": {"zh":"哪个字是这个意思？","pinyin":"Nǎge zì shì zhège yìsi?","en":"Which character has this meaning?","audio":"conf-look"},
+  "sound": {"zh":"听一听，是哪个字？","pinyin":"Tīng yi tīng, shì nǎge zì?","en":"Listen: which character is it?","audio":"conf-sound"}
+ },
+ "groups": [
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"买","pinyin":"mǎi","en":"buy"},
+    {"zh":"卖","pinyin":"mài","en":"sell"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"大","pinyin":"dà","en":"big"},
+    {"zh":"太","pinyin":"tài","en":"too"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"人","pinyin":"rén","en":"person"},
+    {"zh":"入","pinyin":"rù","en":"enter","audio":"conf-ru4"},
+    {"zh":"八","pinyin":"bā","en":"eight"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"天","pinyin":"tiān","en":"sky, day"},
+    {"zh":"夫","pinyin":"fū","en":"man, husband","audio":"conf-fu1"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"午","pinyin":"wǔ","en":"noon","audio":"conf-wu3"},
+    {"zh":"牛","pinyin":"niú","en":"cow"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"已","pinyin":"yǐ","en":"already"},
+    {"zh":"己","pinyin":"jǐ","en":"oneself","audio":"conf-ji3"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"问","pinyin":"wèn","en":"ask"},
+    {"zh":"间","pinyin":"jiān","en":"room, between"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"木","pinyin":"mù","en":"wood","audio":"conf-mu4"},
+    {"zh":"本","pinyin":"běn","en":"root; measure word for books"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"千","pinyin":"qiān","en":"thousand"},
+    {"zh":"干","pinyin":"gān","en":"dry"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"找","pinyin":"zhǎo","en":"look for"},
+    {"zh":"我","pinyin":"wǒ","en":"I, me"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"休","pinyin":"xiū","en":"rest","audio":"conf-xiu1"},
+    {"zh":"体","pinyin":"tǐ","en":"body","audio":"conf-ti3"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"刀","pinyin":"dāo","en":"knife"},
+    {"zh":"力","pinyin":"lì","en":"strength"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"目","pinyin":"mù","en":"eye","audio":"conf-mu4"},
+    {"zh":"自","pinyin":"zì","en":"self","audio":"conf-zi4"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"土","pinyin":"tǔ","en":"earth"},
+    {"zh":"士","pinyin":"shì","en":"scholar","audio":"conf-shi4"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"未","pinyin":"wèi","en":"not yet","audio":"conf-wei4"},
+    {"zh":"末","pinyin":"mò","en":"end","audio":"conf-mo4"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"贝","pinyin":"bèi","en":"shell","audio":"conf-bei4"},
+    {"zh":"见","pinyin":"jiàn","en":"see"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"晴","pinyin":"qíng","en":"sunny"},
+    {"zh":"睛","pinyin":"jīng","en":"eye","audio":"conf-jing1"},
+    {"zh":"请","pinyin":"qǐng","en":"please"},
+    {"zh":"情","pinyin":"qíng","en":"feeling","audio":"conf-qing2"},
+    {"zh":"清","pinyin":"qīng","en":"clear","audio":"conf-qing1"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"左","pinyin":"zuǒ","en":"left"},
+    {"zh":"右","pinyin":"yòu","en":"right"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"住","pinyin":"zhù","en":"live"},
+    {"zh":"往","pinyin":"wǎng","en":"towards"}
+   ]
+  },
+  {
+   "kind": "look",
+   "members": [
+    {"zh":"儿","pinyin":"ér","en":"child","audio":"conf-er2"},
+    {"zh":"几","pinyin":"jǐ","en":"how many"},
+    {"zh":"九","pinyin":"jiǔ","en":"nine"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"买","pinyin":"mǎi","en":"buy"},
+    {"zh":"卖","pinyin":"mài","en":"sell"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"四","pinyin":"sì","en":"four"},
+    {"zh":"十","pinyin":"shí","en":"ten"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"汤","pinyin":"tāng","en":"soup"},
+    {"zh":"糖","pinyin":"táng","en":"sugar, sweets"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"水饺","pinyin":"shuǐjiǎo","en":"boiled dumplings","audio":"conf-shuijiao3"},
+    {"zh":"睡觉","pinyin":"shuìjiào","en":"sleep"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"书","pinyin":"shū","en":"book"},
+    {"zh":"树","pinyin":"shù","en":"tree"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"在","pinyin":"zài","en":"at"},
+    {"zh":"再","pinyin":"zài","en":"again"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"做","pinyin":"zuò","en":"do, make"},
+    {"zh":"坐","pinyin":"zuò","en":"sit"},
+    {"zh":"作","pinyin":"zuò","en":"do, work","audio":"conf-zuo4"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"他","pinyin":"tā","en":"he"},
+    {"zh":"她","pinyin":"tā","en":"she"},
+    {"zh":"它","pinyin":"tā","en":"it"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"哪","pinyin":"nǎ","en":"which"},
+    {"zh":"那","pinyin":"nà","en":"that"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"几","pinyin":"jǐ","en":"how many"},
+    {"zh":"鸡","pinyin":"jī","en":"chicken"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"包","pinyin":"bāo","en":"bag, bun"},
+    {"zh":"饱","pinyin":"bǎo","en":"full"},
+    {"zh":"报","pinyin":"bào","en":"newspaper"}
+   ]
+  },
+  {
+   "kind": "sound",
+   "members": [
+    {"zh":"进","pinyin":"jìn","en":"enter"},
+    {"zh":"近","pinyin":"jìn","en":"near"}
+   ]
+  }
+ ]
+}

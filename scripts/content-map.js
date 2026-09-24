@@ -38,7 +38,7 @@ function shopLine(shop){
   return `- **${shop}**${where?` (${where})`:''}: `+catalog.filter(i=>shopsOf(i).includes(shop)).map(item).join(', ');
 }
 function roomNotes(r){
-  return [r.interiorOnly&&'inside only',r.annex&&`annex → ${r.annex.room}`,r.decoratable&&'decoratable',
+  return [r.interiorOnly&&'inside only',r.annexes?.length&&`annexes → ${r.annexes.map(a=>a.room).join(', ')}`,r.decoratable&&'decoratable',
     r.lectern?.panel&&`${r.lectern.panel} panel`,r.staff?.length&&`${r.staff.length} staff`].filter(Boolean).join(', ');
 }
 
@@ -49,7 +49,7 @@ const out=[
 'the city uses its own coordinates.','',
 '## Districts','',
 table(['id','zh','en','level','gate'],world.districts.map(d=>[d.id,d.zh,d.en,d.level,
-  d.gate?Object.entries(d.gate.requires).map(([k,v])=>`${k} ${v}`).join(' + '):'open'])),'',
+  d.gate?.requires?Object.entries(d.gate.requires).map(([k,v])=>`${k} ${v}`).join(' + '):'open'])),'',
 '## Buildings','',
 table(['sign','id','district','x,z','interior','build site'],
   world.buildings.map(b=>[b.sign,b.id,b.district,at(b.x,b.z),roomsIn(b.id),b.site])),'',

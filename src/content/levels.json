@@ -1,0 +1,20 @@
+{
+  "placement": {"questions": 8, "pass": 6, "top": 6},
+  "mock": {"meaning": 10, "listening": 10, "pass": 16},
+  "knownStage": 3,
+  "lines": {
+    "ask": {"zh": "这个词是什么意思？", "pinyin": "Zhège cí shì shénme yìsi?", "en": "What does this word mean?", "audio": "level-ask"},
+    "listen": {"zh": "听一听，是哪个词？", "pinyin": "Tīng yi tīng, shì nǎge cí?", "en": "Listen: which word is it?", "audio": "level-listen"},
+    "pass": {"zh": "通过了！", "pinyin": "Tōngguò le!", "en": "Passed!", "audio": "level-pass"},
+    "fail": {"zh": "还差一点，再努力！", "pinyin": "Hái chà yìdiǎn, zài nǔlì!", "en": "Almost there. Keep at it!", "audio": "level-fail"}
+  },
+  "labels": {
+    "placement": {"zh": "水平测试", "en": "level test"},
+    "mock": {"zh": "模拟考试", "en": "mock exam"},
+    "dontKnow": {"zh": "我不知道", "en": "I don't know"},
+    "score": {"zh": "得分", "en": "score"},
+    "certificate": {"zh": "证书", "en": "certificate"},
+    "yourLevel": {"zh": "你的水平", "en": "your level"},
+    "starting": {"zh": "刚开始", "en": "just starting"}
+  }
+}

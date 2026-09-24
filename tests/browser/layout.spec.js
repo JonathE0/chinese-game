@@ -51,7 +51,6 @@ function overlapsIn(place){
     t.root.children.filter(e=>e.name==='tree').forEach(e=>{const p=e.getPosition();add(`tree@${p.x.toFixed(1)},${p.z.toFixed(1)}`,e,'tree');});
     for(const [id,entity] of t.buildings)add('building:'+id,entity,'building');
     for(const [id,entity] of t.hoardings??[])add('site:'+id,entity,'site');
-    add('metro-entrance',t.root.findByName('metro-entrance'),'station');
     for(const pitch of t.market.pitches){
       if(pitch.cart)add('cart:'+pitch.id,pitch.cart,'cart');
       if(pitch.vendor)add('vendor:'+pitch.id,pitch.vendor.entity,'vendor');

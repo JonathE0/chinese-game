@@ -1,6 +1,6 @@
 import {escapeHtml as esc} from '../core/language.js';
 import {icon} from './art.js';
-import {languageLine} from './shell.js';
+import {languageLine,pinyinWith} from './shell.js';
 import {addWord,hasWord} from '../core/bank.js';
 import {shelves,readiness,storyById,finishStory,hasRead,SHELVES,STATE_LABELS,OFFER} from '../core/reading.js';
 
@@ -38,7 +38,7 @@ function renderShelves(ctx,body,only=null){
           <span class="book-spine"></span>
           <span class="book-face">
             <b>${esc(story.zh)}</b>
-            <small>${esc(story.pinyin)} · ${esc(story.en)}</small>
+            <small>${pinyinWith(story.pinyin,story.zh,story.en)}</small>
             <span class="book-blurb">${esc(story.blurb)}</span>
             <span class="book-meter"><i style="width:${Math.round(ratio*100)}%"></i></span>
             <span class="book-state">${esc(STATE_LABELS[state].zh)} · 认识 ${known}/${total}${hasRead(ctx.profile,story.id)?' · 读过':''}</span>
@@ -62,7 +62,7 @@ function openBook(ctx,body,storyId){
 function lockedBook(ctx,body,story,ready){
   const offered=ready.missing.slice(0,OFFER);
   body.innerHTML=`<button class="subtle" id="back-shelf">← 回到书架</button>
-    <div class="book-head"><h3>${esc(story.zh)}</h3><small>${esc(story.pinyin)} · ${esc(story.en)}</small></div>
+    <div class="book-head"><h3>${esc(story.zh)}</h3><small>${pinyinWith(story.pinyin,story.zh,story.en)}</small></div>
     <div class="gate-note"><b>还差 ${ready.missing.length} 个词。 / ${ready.missing.length} words short.</b>
       <div class="gate-bar"><i style="width:${Math.round(ready.ratio*100)}%"></i></div>
       <p class="microcopy">这本书里有 ${ready.total} 个关键词，你认识 ${ready.known} 个。认识 ${Math.ceil(ready.total*.6)} 个就可以试着读。<br>
@@ -93,7 +93,7 @@ function read(ctx,body,story,ready,page){
   const line=story.lines[page],last=page===story.lines.length-1;
   body.innerHTML=`<button class="subtle" id="back-shelf">← 回到书架</button>
     <div class="book-head"><h3>${esc(story.zh)}</h3>
-      <small>${esc(story.pinyin)} · ${esc(story.en)} · HSK ${story.level}</small></div>
+      <small>${pinyinWith(story.pinyin,story.zh,story.en,`HSK ${story.level}`)}</small></div>
     ${ready.state==='stretch'?`<p class="microcopy stretch-note">这本对你来说有点难，慢慢读。缺 ${ready.missing.length} 个词。<br>
       A stretch at your level — ${ready.missing.length} of its key words are new. Take it slowly.</p>`:''}
     <div class="step-track">${story.lines.map((_,i)=>`<i class="${i<=page?'active':''}"></i>`).join('')}</div>

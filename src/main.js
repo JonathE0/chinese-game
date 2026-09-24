@@ -1,6 +1,6 @@
 import './style.css';
 import {Town} from './world/town.js';
-import {Shell} from './ui/shell.js';
+import {Shell,pinyinText,pinyinWith} from './ui/shell.js';
 import {VoicePlayer} from './services/audio.js';
 import {Ambience} from './services/music.js';
 import {Dictionary} from './services/dictionary.js';
@@ -10,13 +10,16 @@ import {loadProfile,saveProfile} from './core/profile.js';
 import {escapeHtml as esc} from './core/language.js';
 import {outfit} from './core/inventory.js';
 import {clockText} from './world/daylight.js';
-import {addWord} from './core/bank.js';
+import {collectLook,knowsLook} from './core/bank.js';
+import {noteSource} from './core/learning.js';
 import {openBank as openWordBank} from './ui/bank.js';
 import {openMenu} from './ui/menu.js';
 import {openDialogue,showLine} from './ui/dialogue.js';
 import {openPractice} from './ui/practice.js';
 import {openShop} from './ui/shop.js';
-import {openJournal,openInventory,openSettings,openAmbient} from './ui/panels.js';
+import {openJournal,openInventory,openSettings,openAmbient,offerFolderRestore,cloudSoon,cloudSync} from './ui/panels.js';
+import {cloudConfigured} from './services/cloud.js';
+import {syncSave,keepUnreadable} from './services/filesync.js';
 import {openHsk} from './ui/hsk.js';
 import {openDecorate,installPlacement,applyStarterHome} from './ui/decorate.js';
 import ambient from './content/ambient.json' with {type:'json'};
@@ -44,18 +47,56 @@ import {tickStats,speedFactor} from './core/stats.js';
 import {settleDays,debtOf,savingsOf,interestOn,INTEREST_HOUR,settleWeeks} from './core/finance.js';
 import {calendarOf,claimPeriod} from './core/calendar.js';
 import {syncDay,bump} from './core/daily.js';
+import {inAnyHunt} from './core/collection.js';
 import {isTyping,shortcutAllowed} from './core/input.js';
 import {shouldAutoStart} from './core/tutorial.js';
 import {Tutorial} from './ui/tutorial.js';
+import {installTouch} from './ui/touch.js';
 import {AmbientConversations} from './core/social.js';
 import {openNpcGreeting} from './ui/social.js';
+import {festivalFrame} from './world/festivals.js';
+import {openFestival} from './ui/festivals.js';
+import {openPostcard} from './ui/postcard.js';
+import {friends,pinned,noteVisit} from './core/friends.js';
 
 const loaded=loadProfile(localStorage);
-const ctx={profile:loaded.profile,hinted:false,town:null};
+// holdSync keeps the folder copy untouched until the start-up check below has compared it.
+// readOnly: the save comes from a newer build, so nothing may be written over it this session.
+// holdSave: a damaged save's original did not fit beside it, so it goes to IndexedDB before any save.
+const ctx={profile:loaded.profile,hinted:false,town:null,holdSync:true,readOnly:!!loaded.readOnly,holdSave:!!loaded.unkept};
+// Dev mode, for previewing (`?dev`, and only on the Vite dev server): every district gate stands open
+// and the wallet is topped up to 1000. The save folder is never read or written in this mode, so none
+// of it can leak into a real save.
+const DEV=import.meta.env.DEV&&new URLSearchParams(location.search).has('dev');
+// The cloud save exists only when configured, and never in dev mode (like the folder).
+if(cloudConfigured&&!DEV)ctx.cloud={};
+if(DEV){ctx.profile.wallet=Math.max(ctx.profile.wallet??0,1000);document.body.classList.add('dev');}
+if(loaded.unkept)keepUnreadable(loaded.unkept).then(()=>{loaded.warning=loaded.keptWarning;},()=>{}).finally(()=>{ctx.holdSave=false;});
 ctx.voice=new VoicePlayer(ctx.profile.settings,t=>ctx.ui.notice(t));ctx.music=new Ambience(ctx.profile.settings);ctx.speech=new SpeechInput();ctx.dictionary=new Dictionary();ctx.ui=new Shell(ctx);ctx.lookup=installLookup(ctx);ctx.tutorial=new Tutorial(ctx);
-ctx.save=()=>{try{saveProfile(localStorage,ctx.profile);}catch{ctx.ui.notice('无法保存到浏览器。请在设置中导出存档。 / Could not save; export a backup in Settings.');}ctx.ui.update();};
-let started=false,ambientShownUntil=0;
-const ambientConversation=new AmbientConversations(ambient);
+// Backups, the progress log and the folder copy follow a save within 5 s, at most one write per 5 s
+// (a timer that keeps being reset could starve under steady saving). Also runs when the browser
+// save itself fails, since the folder copy then matters most.
+let syncTimer=null;
+const syncSoon=()=>{cloudSoon(ctx);syncTimer??=setTimeout(()=>{syncTimer=null;if(!ctx.holdSync&&!ctx.readOnly)syncSave(ctx.profile,ctx.hskWords);},5000);};
+// Where each word was first met: any word that joined the bank since this profile was loaded
+// (F on an object or sign, saving from dialogue or a lookup) is pinned to where the player stands.
+// Words already in a loaded or imported save have no known spot, so they stay without one.
+let metBaseline={of:null,zh:null};
+function noteNewSources(){
+ const p=ctx.profile;
+ if(metBaseline.of!==p){metBaseline={of:p,zh:new Set((p.saved??[]).map(w=>w.zh))};return;}
+ const pos=ctx.town?.player?.entity?.getPosition?.();
+ if(!pos)return;
+ const spot={place:ctx.town.place??'town',x:Math.round(pos.x*10)/10,z:Math.round(pos.z*10)/10};
+ for(const w of p.saved??[])if(!metBaseline.zh.has(w.zh)){metBaseline.zh.add(w.zh);noteSource(p,w.zh,spot);}
+}
+noteNewSources();
+ctx.save=()=>{noteNewSources();if(!ctx.readOnly&&!ctx.holdSave)try{saveProfile(localStorage,ctx.profile);}catch{ctx.ui.notice('无法保存到浏览器。请在设置中导出存档。 / Could not save; export a backup in Settings.');}syncSoon();ctx.ui.update();};
+// Ask the browser once (Firefox prompts every time) not to clear this site's storage under pressure.
+try{if(!localStorage.getItem('little-mandarin-town.persist-asked')&&navigator.storage?.persist){localStorage.setItem('little-mandarin-town.persist-asked','1');navigator.storage.persist().catch(()=>{});}}catch{}
+let started=false,ambientShownUntil=0,ambientSpot=0;
+// One conversation per chat spot in world.json, made when the loop first reaches it.
+const ambientConversations=ctx.ambientConversations=[];
 function interact(id){
  if(!started||ctx.ui.panelId||!id)return;
  // Sitting and standing happen in the world, not in a panel.
@@ -84,13 +125,16 @@ function interact(id){
  if(id.startsWith('door:'))return enterPlace(id.slice(5));
  if(id==='leave')return enterPlace('town');
  if(id==='lectern')return openHsk(ctx);
+ if(id==='listen')return openHsk(ctx,{mode:'listening'});
  if(id.startsWith('shop:'))return openShop(ctx,id.slice(5));
+ if(id.startsWith('fest:'))return openFestival(ctx,id.slice(5));
  if(id==='panel:bank')return openBank(ctx);
  if(id==='panel:resale')return openResale(ctx);
  if(id==='panel:library')return openLibrary(ctx);
  if(id.startsWith('shelf:'))return openLibrary(ctx,id.slice(6));
  if(id.startsWith('site:'))return openSite(ctx,id.slice(5));
  if(id==='guide')return openGuide(ctx);
+ if(id==='postbox')return openPostcard(ctx);
  if(id==='sleep')return openSleep(ctx);
  if(id==='cook')return openKitchen(ctx);
  if(id==='metro')return openMetro(ctx);
@@ -106,17 +150,19 @@ function interact(id){
 // Looking at something and pressing F is the main way to pick up everyday words.
 function collect(name){
  if(!name)return;
- const clip='obj-'+name.id;
+ const {clip,isNew}=collectLook(ctx.profile,name);
  if(ctx.voice.available(clip))ctx.voice.play(clip);
- const known=ctx.profile.discovered.includes(name.id);
- if(!known){
-  ctx.profile.discovered.push(name.id);
-  bump(ctx.profile,'discovered');
-  addWord(ctx.profile,{zh:name.zh,pinyin:name.pinyin,en:name.en,audio:clip});
+ if(isNew){
   ctx.music.cue('collect');
   ctx.save();
-  ctx.ui.notice(`记住了 ${name.zh} ${name.pinyin} · ${name.en}　（第 ${ctx.profile.discovered.length} 个）`);
-  ctx.tutorial.event('collect',{id:name.id});
+  // A sign's phrase goes to 生词本 only: it is not one more named object.
+  if(name.sign)ctx.ui.notice(`记住了 ${name.zh} ${[pinyinText(name.pinyin,name.zh),name.en].filter(Boolean).join(' · ')}`);
+  else{
+   bump(ctx.profile,'discovered');
+   if(inAnyHunt(name))bump(ctx.profile,'hunt-found');
+   ctx.ui.notice(`记住了 ${name.zh} ${[pinyinText(name.pinyin,name.zh),name.en].filter(Boolean).join(' · ')}　（第 ${ctx.profile.discovered.length} 个）`);
+   ctx.tutorial.event('collect',{id:name.id});
+  }
  }
  ctx.ui.nameplate(name,{known:true,reveal:true});
 }
@@ -124,7 +170,7 @@ function collect(name){
 let hskWords=null;
 function refreshGates(){
  if(!ctx.town?.gates)return;
- const states=districtStates(ctx.profile,ctx.town.data.districts,hskWords);
+ const states=districtStates(ctx.profile,ctx.town.data.districts,hskWords).map(s=>DEV?{...s,unlocked:true}:s);
  ctx.gateStates=states;
  for(const state of states)ctx.town.setUnlocked(state.id,state.unlocked);
 }
@@ -142,7 +188,7 @@ function showGate(id){
  const d=state.district;
  const body=ctx.ui.open('gate',d.zh,'区域告示 · DISTRICT NOTICE');
  const percent=Math.min(100,Math.round(state.have/state.need*100));
- body.innerHTML=`<p class="panel-intro">${esc(d.pinyin)} · ${esc(d.en)}</p>
+ body.innerHTML=`<p class="panel-intro">${pinyinWith(d.pinyin,d.zh,d.en)}</p>
   <div class="gate-note"><b>${esc(gateMessage(state))}</b>
   <div class="gate-bar"><i style="width:${percent}%"></i></div>
   <p class="microcopy">在词语馆复习 HSK ${state.level} 的词，或在城里用 <kbd>F</kbd> 记住看到的东西。两种都算。<br>
@@ -153,6 +199,8 @@ function enterPlace(id){
  if(id==='town')ctx.town.leaveRoom();
  else{
   if(!ctx.town.enterRoom(id))return;
+  // The word hall is one of the places a postcard can say you went to.
+  if(noteVisit(ctx.profile,id))ctx.save();
   // Being led to this door? Then you have arrived.
   if(ctx.ui.route?.key===id)ctx.ui.clearRoute();
   // One count per shop per day, so walking in and out is not a way to farm the errand.
@@ -217,13 +265,14 @@ function reportSettlement(events){
 }
 try{
  ctx.town=new Town(document.querySelector('#world'),{onInteract:interact,onNear:target=>ctx.ui.nearby(target),
-  onLook:name=>ctx.ui.nameplate(name,{known:!!name&&ctx.profile.discovered.includes(name.id)}),
+  onLook:name=>ctx.ui.nameplate(name,{known:!!name&&knowsLook(ctx.profile,name)}),
   onCollect:name=>collect(name),onFrame:town=>{
   const pos=town.player.entity.getPosition(),outside=town.place==='town';
   ctx.music.setPlace(town.place);
+  const dot=document.querySelector('#map-player');
+  dot.dataset.y=pos.y.toFixed(3);   // height is read indoors too: up the stairs at home
   if(outside){
-   const dot=document.querySelector('#map-player');
-   dot.setAttribute('cx',pos.x);dot.setAttribute('cy',pos.z);dot.dataset.y=pos.y.toFixed(3);
+   dot.setAttribute('cx',pos.x);dot.setAttribute('cy',pos.z);
    document.querySelector('#map-facing').setAttribute('transform',`translate(${pos.x} ${pos.z}) rotate(${-town.yaw})`);
   }
   // A first-person camera can have people behind it, where worldToScreen would mirror the label onto the screen.
@@ -236,7 +285,7 @@ try{
   }
   if(outside){
    const district=town.districtAt(pos.x,pos.z);
-   if(district.id!==ctx.district){ctx.district=district.id;ctx.ui.setPlace('town',district);ctx.ui.drawMap(town.data,district);}
+   if(district.id!==ctx.district){ctx.district=district.id;ctx.ui.setPlace('town',district);ctx.ui.drawMap(town.data,district);if(noteVisit(ctx.profile,district.id))ctx.save();}
    ctx.ui.drawRoute(town.data,district,pos);
   }
   checkCityArrival(pos);
@@ -244,9 +293,14 @@ try{
   const carrying=document.querySelector('#carrying'),held=town.toys.held;
   carrying.hidden=!held;
   if(held)carrying.querySelector('b').textContent=held.name?(objectNames.objects[held.name]?.zh??'东西'):'东西';
-  const bubble=document.querySelector('#ambient-bubble'),[ax,az]=town.data.ambient;const s=town.screen(ax,2.5,az),now=performance.now()/1000;
+  // Only the chat spot nearest the player can talk; the others keep their own silence.
+  const spots=town.data.ambient,away=([x,z])=>Math.hypot(pos.x-x,pos.z-z);
+  const spot=spots.reduce((best,xz,i)=>away(xz)<away(spots[best])?i:best,0);
+  if(spot!==ambientSpot){ambientSpot=spot;ambientShownUntil=0;}
+  const bubble=document.querySelector('#ambient-bubble'),[ax,az]=spots[spot];const s=town.screen(ax,2.5,az),now=performance.now()/1000;
   const eligible=started&&outside&&!ctx.ui.panelId&&Math.hypot(pos.x-ax,pos.z-az)<13&&s.z>0&&s.x>-120&&s.x<innerWidth+120;
-  const ambientLine=ambientConversation.update(now,eligible);
+  let ambientLine=null;
+  spots.forEach((_,i)=>{const line=(ambientConversations[i]??=new AmbientConversations(ambient)).update(now,eligible&&i===spot);if(i===spot)ambientLine=line;});
   if(ambientLine){bubble.querySelector('span').textContent=ambientLine.zh;ambientShownUntil=now+6;ctx.voice.play(ambientLine.audio,{ambient:true});}
   const visible=eligible&&now<ambientShownUntil;
   bubble.hidden=!visible;
@@ -296,6 +350,7 @@ try{
   const crosshair=document.querySelector('#crosshair'),hint=document.querySelector('#look-hint');
   const playing=started&&!ctx.ui.panelId;crosshair.hidden=!playing;hint.hidden=!(playing&&!town.locked()&&matchMedia('(pointer:fine)').matches);
   ctx.tutorial.frame(town,started);
+  festivalFrame(ctx,town);
  }});
  ctx.town.equip(outfit(ctx.profile));
  ctx.town.onNotice=message=>ctx.ui.notice(message);
@@ -303,9 +358,15 @@ try{
  // Losing pointer lock without noticing is what makes the view feel stuck; say so plainly.
  ctx.town.onLockChange=locked=>{document.body.classList.toggle('unlocked',!locked);};
  document.body.classList.add('unlocked');
+ installTouch(ctx.town);
  installPlacement(ctx);
  ctx.town.daylight.setHour(ctx.profile.clock??15);
- ctx.profile.home=ctx.town.furnish('home',ctx.profile.home);
+ // Place the day stalls at the real saved hour, before the first frame — not the constructor's
+ // default 15:00, or a save from the night would open them and walk them straight back out again.
+ ctx.town.dayMarket.openInstantly(ctx.town.daylight.hour);
+ // Every decoratable room gets its own furniture back; a record with no room is the living room's.
+ ctx.profile.home=[...ctx.town.rooms.values()].filter(room=>room.data.decoratable)
+  .flatMap(room=>ctx.town.furnish(room.id,ctx.profile.home.filter(record=>(record.room??'home')===room.id)));
  applyStarterHome(ctx);
 }catch(error){console.error(error);document.querySelector('#start-button').disabled=true;document.querySelector('.arrival-en').textContent='The 3D scene could not start. Please enable hardware acceleration and use a WebGL2-capable browser.';}
 ctx.ui.update();ctx.voice.load();
@@ -326,10 +387,15 @@ const saveProfileAndGates=ctx.save;ctx.save=()=>{saveProfileAndGates();refreshGa
 refreshShops();
 // Anything already built is standing when the town loads.
 if(ctx.town)for(const site of builtSites(ctx.profile))ctx.town.revealSite(site.id);
-document.querySelector('#start-button').onclick=()=>{started=true;document.querySelector('#arrival').hidden=true;document.body.classList.add('playing');ctx.town.setPaused(false);ctx.music.start();if(loaded.warning)ctx.ui.notice(loaded.warning);
+// A postcard 陈叔叔 has received stays pinned up on his shop.
+if(ctx.town)for(const [npc,person] of Object.entries(friends.people))if(person.pin&&pinned(ctx.profile,npc))ctx.town.pinPostcard(person.pin);
+document.querySelector('#start-button').onclick=()=>{started=true;document.querySelector('#arrival').hidden=true;document.body.classList.add('playing');ctx.town.setPaused(false);ctx.music.start();if(loaded.warning||loaded.notice)ctx.ui.notice([loaded.warning,loaded.notice].filter(Boolean).join(' '));
  // A brand-new traveller is walked through the basics; a save already mid-way picks up where it was.
  ctx.tutorial.started=true;
  if(shouldAutoStart(ctx.profile))ctx.tutorial.start();else ctx.tutorial.sync();
+ // A connected folder with more progress than this browser's save is offered before anything overwrites it.
+ // The cloud is checked after that, against whichever save the player kept.
+ if(!DEV)offerFolderRestore(ctx).then(offered=>{if(!offered){ctx.holdSync=false;cloudSync(ctx);}},()=>{ctx.holdSync=false;cloudSync(ctx);});
 };
 document.querySelector('#status-button').onclick=()=>{if(started)openStatus(ctx);};
 document.querySelector('#review-button').onclick=()=>{if(started)openWordBank(ctx);};

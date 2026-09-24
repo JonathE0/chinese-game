@@ -1,7 +1,7 @@
 import rooms from '../content/rooms.json' with {type:'json'};
 import {escapeHtml as esc} from '../core/language.js';
 import {icon} from './art.js';
-import {languageLine} from './shell.js';
+import {languageLine,pinyinWith} from './shell.js';
 import {readStats,sleep,energyNote} from '../core/stats.js';
 import {clockText} from '../world/daylight.js';
 
@@ -29,7 +29,7 @@ export function openSleep(ctx){
     <div class="sleep-grid">${TIMES.map(time=>`
       <button class="sleep-card" data-sleep="${esc(time.id)}">
         <span class="sleep-hour">${esc(clockText(time.hour))}</span>
-        <b>${esc(time.zh)}</b><small>${esc(time.pinyin)} · ${esc(time.en)}</small>
+        <b>${esc(time.zh)}</b><small>${pinyinWith(time.pinyin,time.zh,time.en)}</small>
         <span class="sleep-note">${esc(time.note)}<br><i>${esc(time.noteEn)}</i></span>
       </button>`).join('')}</div>
     <p class="microcopy">睡觉会稍微消耗一点肚子里的存货。 ${icon('clock',13)} 十二分钟是游戏里的一整天。<br>
@@ -60,5 +60,5 @@ export function openClosed(ctx,roomId){
   body.innerHTML=`${languageLine(line,ctx.profile.settings,{className:'dialogue-line'})}
     <div class="gate-note"><b>${esc(room.opens?.zh??'再过一阵子来看看')}</b>
       <p class="microcopy">${esc(room.opens?.en??'Come back a little later in your journey.')}</p></div>
-    <p class="microcopy">${esc(room.zh)} · ${esc(room.pinyin)} · ${esc(room.en)}</p>`;
+    <p class="microcopy">${esc(room.zh)} · ${pinyinWith(room.pinyin,room.zh,room.en)}</p>`;
 }

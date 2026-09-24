@@ -38,7 +38,7 @@ export function dailyPractice(p,now=Date.now()) {
 export const dailyPracticeWords=session=>session.ids.map(id=>byId.get(id));
 export function answerDailyWord(p,session,id,skill,{correct,hinted=false,now=Date.now()}) {
   if(!p.dailyPractice||p.dailyPractice.date!==session.date||!p.dailyPractice.ids.includes(id))return {coins:0,practiceOnly:true};
-  const result=reviewWord(p,id,skill,{correct,hinted,now,reward:false});
+  const result=reviewWord(p,id,skill,{correct,hinted,now,reward:false,zh:byId.get(id)?.zh});
   const coins=correct?grant(p,`practice:daily:${session.date}:${id}`,balance.dailyPracticeWordCoins):0;
   return {...result,coins};
 }

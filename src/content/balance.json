@@ -11,5 +11,7 @@
   "lessonCoins": 20,
   "supportedLessonCoins": 10,
   "practiceCompletionCoins": 8,
-  "dailyPracticeWordCoins": 10
+  "dailyPracticeWordCoins": 10,
+  "orderBonus": {"spoken": 2, "built": 1},
+  "huntCoins": 5
 }

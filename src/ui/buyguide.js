@@ -84,7 +84,7 @@ export function openBuyGuide(ctx,body,needs,{back}={}){
     const group=sellers.find(g=>g.seller.shop===button.dataset.way);
     if(!group)return;
     const seller=group.seller;
-    const key=seller.city?'metro':seller.shop;
+    const key=seller.city?'metro-platform':seller.shop;
     const label=seller.city?`青禾地铁站 → ${seller.zh}`:seller.zh;
     ctx.ui.showWay({key,district:seller.district,x:seller.x,z:seller.z,label});
     ctx.ui.close();

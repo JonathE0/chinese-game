@@ -8,6 +8,9 @@ const cup=(x,y)=>path(`M${x} ${y}h22l-3 17q-8 8-16 0z`,'#c2d3bd')+ellipse(x+11,y
 const pot=path('M56 73q-10 8-10 24 0 21 31 21t32-21q0-16-13-24z','#9eb795')+path('M48 88L30 77l5 30 15 2','#9eb795')+path('M105 85q33-10 17 25h-14','none','#799675')+ellipse(77,73,22,5,'#819b78')+rect(72,62,11,10,'#819b78');
 const tofuPieces=rect(44,58,46,30,'#f9f1d5')+path('M44 58l17-12h46L90 58z','#fff9e5')+path('M90 58l17-12v30L90 88z','#dfd1ad');
 const toppings=(kind)=>kind==='beef'?path('M48 69l15-7 12 12-19 8z M87 64l17 2 8 12-22 2z','#996449'):ellipse(65,73,18,12,'#fff7df')+ellipse(65,73,9,7,'#eac259');
+const wontonPiece=(x,y)=>ellipse(x,y,13,8,'#f7efd9')+path(`M${x-13} ${y}q13 9 26 0`,'none','#d8bd85')+ellipse(x,y-5,3,2,'#e8d5a5');
+const bunPiece=(x,y)=>ellipse(x,y,15,12,'#f7f0dd')+path(`M${x} ${y-12}q3 3 0 5`,'none','#e4d3a0')+ellipse(x,y-11,3,2,'#d9c48f');
+const stick=(x,y,rot)=>`<g transform="translate(${x} ${y}) rotate(${rot})">${rect(-9,-46,18,92,'#dba653',9)}${path('M-9 -46q9 8 18 0M-9 -21q9 8 18 0M-9 4q9 8 18 0M-9 29q9 8 18 0','none','#b9793f')}</g>`;
 
 export const itemDrawings={
  'paper-lantern':shadow+rect(76,16,8,19,'#8b7452')+ellipse(80,74,40,45,'#f3da9d')+path('M57 36q-16 39 0 76M80 30v88M103 36q16 39 0 76','none','#d7b97f')+rect(62,29,36,8,'#947953')+rect(62,113,36,8,'#947953')+path('M80 122v15','none','#b57b58'),
@@ -36,5 +39,17 @@ export const itemDrawings={
  map:shadow+path('M22 47l38-15 40 14 38-15v88l-38 15-40-14-38 15z','#e9dfb9')+path('M60 33v87M100 46v88','none','#c9bb90')+path('M28 72l31 13 35-23 37 11M35 124l12-43 21-27 43 49 20 6','none','#b9c7a0')+path('M94 55q-17-25-1-30 20 0 1 30z','#b96350')+ellipse(94,33,4,4,'#f8e9ce'),
  'beef-noodles':shadow+bowl('#d6b477')+path('M45 81q10-8 20 0t20 0 25 0','none','#f0d59d')+toppings('beef'),
  'egg-noodles':shadow+bowl('#d6b477')+path('M75 81q10-8 20 0t22 0','none','#f0d59d')+toppings('egg'),
- 'cooked-greens':shadow+ellipse(80,102,57,23,'#e6ece1')+path('M37 97q12-31 26-12 3-32 24-9 30-16 37 20-23 22-40 5-21 20-47-4z','#8da368')+path('M48 96l20 5M77 88l9 11M101 87l9 9','none','#c2d6a2')
+  'cooked-greens':shadow+ellipse(80,102,57,23,'#e6ece1')+path('M37 97q12-31 26-12 3-32 24-9 30-16 37 20-23 22-40 5-21 20-47-4z','#8da368')+path('M48 96l20 5M77 88l9 11M101 87l9 9','none','#c2d6a2'),
+ wonton:shadow+bowl('#e2d1a0')+[[62,78],[80,84],[99,77]].map(([x,y])=>wontonPiece(x,y)).join('')+path('M50 68l12 8M110 68l-11 8','none','#37432f')+ellipse(72,66,4,2,'#8fae5a')+ellipse(93,69,4,2,'#8fae5a'),
+ 'yangchun-noodles':shadow+bowl('#e8dfc4')+path('M46 81q10-8 20 0t20 0 22 0','none','#f0d59d')+ellipse(66,73,4,2,'#8fae5a')+ellipse(90,75,4,2,'#8fae5a'),
+ 'zhajiang-noodles':shadow+bowl('#e6dcc0')+path('M48 80q10-7 20 0t20 0 20 0','none','#f0d59d')+ellipse(80,72,21,9,'#6b4a34')+path('M62 64l9-11M79 61l6-13M96 65l8-12','none','#a9c17e'),
+ tangyuan:shadow+bowl('#f1e6d0')+[[62,76],[82,82],[100,75]].map(([x,y])=>ellipse(x,y,11,10,'#fbf8f1')+ellipse(x-3,y-3,3,2,'#ffffff')).join(''),
+ zongzi:shadow+path('M40 122L80 42l40 80z','#6f9a52','#4f7439')+path('M80 42l10 80','none','#5b8043')+path('M50 102h60M62 78h36','none','#d8c79a'),
+ mooncake:shadow+ellipse(80,100,46,14,'#b87a3d')+rect(34,74,92,26,'#c98b48',4)+ellipse(80,74,46,14,'#dca05e')+ellipse(80,74,30,9,'#c98b48')+path('M66 74h28M80 67v14','none','#b87a3d'),
+ baozi:shadow+path('M26 88h108v20q0 14-16 14H42q-16 0-16-14z','#c2a077')+ellipse(80,88,54,14,'#d5b489')+[[54,84],[80,88],[106,84]].map(([x,y])=>bunPiece(x,y)).join(''),
+ 'soy-milk':shadow+path('M58 52h44l-7 64q-2 10-15 10t-15-10z','#f5f1e0')+ellipse(80,52,22,6,'#e7dfc5')+ellipse(80,55,17,4,'#fdfaf0')+path('M68 40q4-10 0-18M92 40q-4-10 0-18','none','#d9d4bf'),
+ youtiao:shadow+ellipse(80,122,52,9,'#e8dcc0')+stick(64,78,-9)+stick(97,80,9),
+ // A framed certificate: wooden frame, paper, lines of text and a red seal.
+ certificate:shadow+rect(30,22,100,112,'#8d6b4d',4)+rect(38,30,84,96,'#f6efdc',2)+path('M52 48h56','none','#c9a24e')+path('M52 66h56M52 80h56M52 94h36','none','#b9ae95')+ellipse(104,108,11,11,'#c0463c')+path('M99 104l10 8M109 104l-10 8','none','#f3c9b8'),
+ jianbing:shadow+ellipse(80,92,54,28,'#e8c26c')+path('M28 92q52 22 104 0','none','#c9a24e')+ellipse(58,76,19,10,'#f3d879')+path('M40 96l15-8M104 93l16-7','none','#d9b06a')+path('M55 101l9 13M103 99l-8 14','none','#7f9c50')
 };

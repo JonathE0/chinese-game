@@ -1,12 +1,16 @@
 import catalog from '../content/catalog.json' with {type:'json'};
 import {purchase,negotiate} from '../core/economy.js';
-import {languageLine} from './shell.js';
+import {languageLine,pinyinHtml} from './shell.js';
 import {icon,itemArt} from './art.js';
 import {toggleWear,wearable} from '../core/inventory.js';
 import {vendorState,buildRapport,moodNote,floorFor} from '../core/vendor.js';
 import {bump} from '../core/daily.js';
+import {priced} from '../core/friends.js';
 import {escapeHtml as esc} from '../core/language.js';
 import {newCart,cartLines,cartTotal,cartCount,addToCart,setQuantity,clearCart,cartProblem,checkout} from '../core/cart.js';
+import {ordersAt,mountOrder} from './order.js';
+import festivals from '../content/festivals.json' with {type:'json'};
+import market from '../content/market.json' with {type:'json'};
 
 /** A shop can share stock with another: the square carries the basics the market also sells. */
 export const shopsOf=item=>[].concat(item.shop??'chen');
@@ -33,11 +37,20 @@ const SHOPS={
    foot:'城里的小店，二十四小时开着，价格比青禾贵一点。'},
  nightstall:{title:'夜市小摊',sub:'糖葫芦 · 烤串 · 豆花',greeting:{zh:'来一串吗？刚烤好的。',pinyin:'Lái yí chuàn ma? Gāng kǎo hǎo de.',en:'Fancy a skewer? Just off the grill.',note:'来一串 is how you order one of something on a stick — 来 stands in for give me.'},
    foot:'夜里才出摊，天亮以前就收了。'},
+ wonton:{title:'馄饨摊',sub:'馄饨 · 小笼包',greeting:{zh:'刚包好的馄饨，来一碗吗？',pinyin:'Gāng bāo hǎo de húntun, lái yì wǎn ma?',en:'Freshly wrapped wontons. Fancy a bowl?',note:'来一碗 is how you order a bowl of something; 碗 (wǎn) is the measure word for bowls.'},
+   foot:'白天出摊，天黑以前收摊。'},
+ noodlestall:{title:'面摊',sub:'阳春面 · 炸酱面',greeting:{zh:'想吃什么面？我们的面都是现做的。',pinyin:'Xiǎng chī shénme miàn? Wǒmen de miàn dōu shì xiàn zuò de.',en:'What noodles would you like? Ours are all made fresh.',note:'现做 (xiàn zuò) means made on the spot, right now.'},
+   foot:'白天出摊，天黑以前收摊。'},
+ breakfast:{title:'早点摊',sub:'包子 · 豆浆 · 油条 · 煎饼',greeting:{zh:'包子刚出锅，热乎着呢！来几个？',pinyin:'Bāozi gāng chū guō, rèhu zhe ne! Lái jǐ ge?',en:'The buns have just come out of the steamer, nice and hot! How many would you like?',note:'出锅 (chū guō) is taking food out of the pot or steamer; 来几个 asks how many you want.'},
+   foot:'白天出摊，天黑以前收摊。'},
 };
+// A festival's stall is named for the festival and greets you the way the snack stalls do.
+for(const f of festivals.festivals)SHOPS['fest-'+f.id]={title:f.zh,sub:festivals.ui.festival.zh,greeting:market.lines.greet,foot:''};
 
 export function openShop(ctx,shopId='chen'){
  const shop=SHOPS[shopId]??SHOPS.chen;
- const stock=catalog.filter(item=>shopsOf(item).includes(shopId));
+ // A friend's discount (陈叔叔's 九折) is already in the price, so haggling and paying both see it.
+ const stock=catalog.filter(item=>shopsOf(item).includes(shopId)).map(item=>priced(ctx.profile,shopId,item));
  const body=ctx.ui.open('shop',shop.title,shop.sub);
  const vendor=vendorState(ctx.profile,shopId);
  const haggles=stock.some(i=>i.negotiable);
@@ -50,7 +63,7 @@ export function openShop(ctx,shopId='chen'){
   const inCart=cartFor(ctx,shopId).lines[item.id]??0;
   return `<div class="shop-card-wrap"><button class="shop-card" data-shop-item="${item.id}">${itemArt(item.visual)}<b>${item.zh}</b><span>${icon('coin',15)} ${item.price}</span><small>${item.negotiable?'可商量':item.nutrition?`吃了 +${item.nutrition} 饱`:'固定价格'}</small>${inCart?`<span class="card-badge">购物车 × ${inCart}</span>`:''}</button>${item.negotiable?'':`<button class="cart-add" data-add="${item.id}" aria-label="把${item.zh}加入购物车">${icon('bag',13)} 加入购物车</button>`}</div>`;
  }).join('')}</div><p class="microcopy">${shop.foot}</p>`;
- body.querySelectorAll('[data-shop-item]').forEach(b=>b.onclick=()=>openItem(ctx,catalog.find(i=>i.id===b.dataset.shopItem),shopId));
+ body.querySelectorAll('[data-shop-item]').forEach(b=>b.onclick=()=>openItem(ctx,stock.find(i=>i.id===b.dataset.shopItem),shopId));
  body.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{
   addToCart(cartFor(ctx,shopId),b.dataset.add);
   ctx.music?.cue('place');
@@ -85,7 +98,7 @@ function openCart(ctx,shopId){
   body.innerHTML=`<button class="subtle" id="back-shop">← 继续逛逛</button>
    ${lines.length?`<table class="cart-table"><thead><tr><th>东西</th><th>单价</th><th>数量</th><th>小计</th></tr></thead>
      <tbody>${lines.map(line=>`<tr>
-       <td><b>${esc(line.item.zh)}</b><small>${esc(line.item.pinyin)}</small></td>
+       <td><b>${esc(line.item.zh)}</b><small>${pinyinHtml(line.item.pinyin,line.item.zh)}</small></td>
        <td>${line.each}</td>
        <td><div class="stepper"><button data-less="${esc(line.item.id)}" aria-label="少一个">−</button><span>${line.quantity}</span><button data-more="${esc(line.item.id)}" aria-label="多一个">+</button></div></td>
        <td>${line.total}</td></tr>`).join('')}</tbody>
@@ -104,11 +117,7 @@ function openCart(ctx,shopId){
   body.querySelector('#cart-pay')?.addEventListener('click',()=>{
    const paid=checkout(ctx.profile,cartFor(ctx,shopId));
    if(!paid.ok)return ctx.ui.notice('暂时无法结账，请检查余额。 / Checkout could not complete.');
-   if(!ctx.profile.completed.includes('purchase:first'))ctx.profile.completed.push('purchase:first');
-   if(shopId==='homeware'&&!ctx.profile.completed.includes('homeware:first'))ctx.profile.completed.push('homeware:first');
-   buildRapport(ctx.profile,shopId,1);
-   for(const line of paid.lines)if(line.item.nutrition)bump(ctx.profile,'bought-food',line.quantity);
-   ctx.music?.cue('purchase');ctx.save();
+   recordSale(ctx,shopId,paid.lines);
    body.innerHTML=`<div class="completion"><div class="completion-seal">谢</div><h3>谢谢，欢迎再来！</h3>
      <p>${paid.lines.map(l=>`${esc(l.item.zh)} × ${l.quantity}`).join('、')}</p>
      <p class="microcopy">一共 ${paid.total} 学习币，都放进背包了。</p>
@@ -119,19 +128,30 @@ function openCart(ctx,shopId){
  };
  render();
 }
+/** Bookkeeping shared by every multi-item sale: the basket and a spoken or built order. */
+function recordSale(ctx,shopId,lines){
+ if(!ctx.profile.completed.includes('purchase:first'))ctx.profile.completed.push('purchase:first');
+ if(shopId==='homeware'&&!ctx.profile.completed.includes('homeware:first'))ctx.profile.completed.push('homeware:first');
+ buildRapport(ctx.profile,shopId,1);
+ for(const line of lines)if(line.item.nutrition)bump(ctx.profile,'bought-food',line.quantity);
+ ctx.music?.cue('purchase');ctx.save();
+}
 function openItem(ctx,item,shopId='chen'){
  const shop=SHOPS[shopId]??SHOPS.chen;
  const body=ctx.ui.open('shop',item.zh,shop.sub);let quote=item.price,round=0;
  const vendor=vendorState(ctx.profile,shopId);
  body.innerHTML=`<button class="subtle" id="back-shop">← 继续逛逛</button><div class="product-detail">${itemArt(item.visual)}<div>${languageLine(item,ctx.profile.settings)}<p>${item.description}</p><div class="product-price">${icon('coin')} <strong id="quoted-price">${quote}</strong> <span>学习币</span></div></div></div>${item.negotiable?`<div class="negotiation"><h3>商量一下？ <small>最低 ${floorFor(item,vendor)} 左右</small></h3><div class="bargain-suggestions"><button class="choice" data-bargain="能便宜一点吗？">能便宜一点吗？</button><button class="choice" data-bargain="我只有${ctx.profile.wallet}，够吗？">我只有${ctx.profile.wallet}，够吗？</button></div><form id="offer-form"><div class="answer-row"><input id="offer" aria-label="你的出价" placeholder="例如：十八可以吗？" maxlength="80"><button type="button" id="offer-mic" class="mic-button" aria-label="麦克风出价">${icon('mic')}</button><button class="secondary" type="submit">出价</button></div></form><p id="offer-status" class="microcopy"></p><div id="vendor-answer" aria-live="polite"></div></div>`:`<p class="microcopy fixed-price">这里明码标价，不讲价。 / Prices here are fixed.</p>
-   <div class="item-basket" id="item-basket">
+   ${ordersAt(shopId)?'<div id="order-host"></div>':`<div class="item-basket" id="item-basket">
      <span class="item-basket-label">要几个？ <small>How many?</small></span>
      <div class="stepper"><button id="item-less" aria-label="少一个">−</button><span id="item-count">1</span><button id="item-more" aria-label="多一个">+</button></div>
      <button class="primary" id="item-add">${icon('bag',14)} 加入购物车</button>
-   </div>`}<button class="${item.negotiable?'primary':'secondary'} wide" id="buy-quote">${item.negotiable?'按这个价格购买':'只买一个，马上结账'} ${icon('arrow')}</button><button class="subtle wide" id="leave-shop">谢谢，我再看看。</button><div id="confirmation"></div>`;
+   </div>`}`}<button class="${item.negotiable?'primary':'secondary'} wide" id="buy-quote">${item.negotiable?'按这个价格购买':'只买一个，马上结账'} ${icon('arrow')}</button><button class="subtle wide" id="leave-shop">谢谢，我再看看。</button><div id="confirmation"></div>`;
  body.querySelector('#back-shop').onclick=()=>openShop(ctx,shopId);body.querySelector('#leave-shop').onclick=()=>ctx.ui.close();
+ // At a snack stall the quantity comes from ordering in Chinese instead of a stepper.
+ if(!item.negotiable&&ordersAt(shopId))mountOrder(ctx,{body,host:body.querySelector('#order-host'),item,shopId,
+  onSale:paid=>recordSale(ctx,shopId,paid.lines),back:()=>openShop(ctx,shopId)});
  // Somebody who opened an item is exactly the person who wants two of them.
- if(!item.negotiable){
+ else if(!item.negotiable){
   const basket=body.querySelector('#item-basket');
   let wanted=1;
   const paint=()=>{basket.querySelector('#item-count').textContent=wanted;};

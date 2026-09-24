@@ -1,7 +1,8 @@
 import balance from '../content/balance.json' with {type:'json'};
-import {grant} from './economy.js';
+import {pay} from './economy.js';
 import {bump} from './daily.js';
 import {wordId} from './bank.js';
+import {addMiss} from './learning.js';
 export function familiarity(record,now=Date.now()) {
   if(!record) return 'new';
   if(record.due<=now) return 'due';
@@ -12,7 +13,9 @@ export function familiarity(record,now=Date.now()) {
 export function cardCoins(venue,fresh) {
   return balance.venueCoins[venue]?.[fresh?'new':'review']??balance.reviewCoins;
 }
-export function reviewWord(p,id,skill,{correct,hinted,now=Date.now(),venue=null,reward=true}) {
+export function reviewWord(p,id,skill,{correct,hinted,now=Date.now(),venue=null,reward=true,zh}) {
+  // Every wrong answer counts toward the confusables deck, even a retry that changes nothing else.
+  if(!correct)addMiss(p,zh??p.saved?.find(w=>w.id===id)?.zh);
   const skills=p.words[id]??={}; const old=skills[skill];
   // A lapse during optional early practice still matters, but repeated guesses in the
   // same two-minute retry window must not repeatedly reduce the stage.
@@ -24,7 +27,8 @@ export function reviewWord(p,id,skill,{correct,hinted,now=Date.now(),venue=null,
   const minutes=!correct?balance.retryMinutes:hinted?balance.hintMinutes:balance.reviewIntervalsMinutes[stage-1];
   const learned=known||(correct&&!hinted);
   skills[skill]={stage,due:now+minutes*60000,last:now,reviews:(old?.reviews??0)+1,...(learned?{learned:true}:{})};
-  const coins=correct&&reward?grant(p,`review:${id}:${skill}:${old?.due??0}`,hinted?balance.supportedCoins:cardCoins(venue,fresh)):0;
+  // No claim needed: only a due card pays (see above), and answering moves its due time on.
+  const coins=correct&&reward?pay(p,hinted?balance.supportedCoins:cardCoins(venue,fresh)):0;
   bump(p,'reviews');            // every card answered counts toward today's errand
   return {coins,practiceOnly:false,fresh};
 }
@@ -43,4 +47,13 @@ export function pickReviewWords(p,pool,skill='recognition',{now=Date.now(),limit
       return rank(a.record)-rank(b.record)||
         (a.record&&b.record ? a.record.stage-b.record.stage : 0)||a.tie-b.tie;
     }).slice(0,limit).map(({word})=>word);
+}
+
+/** Confusable groups with at least one member the player has met (in the bank, seen somewhere,
+ *  missed, or reviewed as an HSK word via `idOf(zh)`), most-missed first. */
+export function confusableDeck(p,groups,idOf=()=>null){
+  const misses=p.learning?.misses??{},saved=new Set((p.saved??[]).map(w=>w.zh));
+  const met=zh=>saved.has(zh)||!!p.learning?.sources?.[zh]||!!misses[zh]||!!p.words[idOf(zh)];
+  const missed=g=>g.members.reduce((n,m)=>n+(misses[m.zh]??0),0);
+  return groups.filter(g=>g.members.some(m=>met(m.zh))).sort((a,b)=>missed(b)-missed(a));
 }

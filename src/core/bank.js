@@ -40,3 +40,19 @@ export function normaliseBank(saved){
 
 export const dueWords=(profile,now=Date.now())=>
   (profile.saved??[]).filter(w=>{const r=profile.words[w.id]?.recognition;return r&&r.due<=now;});
+
+/**
+ * F on whatever the crosshair names. An object joins `discovered` (and the bank) once; a sign's
+ * exact phrase only joins the bank, so reading signs never counts as naming objects.
+ */
+export function collectLook(profile,name){
+  const clip=name.sign?'sign-'+name.id.replace(/^sign:/,''):'obj-'+name.id;
+  if(knowsLook(profile,name))return {clip,isNew:false};
+  if(!name.sign)profile.discovered.push(name.id);
+  const added=addWord(profile,{zh:name.zh,pinyin:name.pinyin,en:name.en,audio:clip});
+  return {clip,isNew:!name.sign||!!added};
+}
+/** A sign is known once its phrase is in the bank; an object once it has been named. */
+export function knowsLook(profile,name){
+  return name.sign?(profile.saved??[]).some(word=>word.zh===name.zh):profile.discovered.includes(name.id);
+}

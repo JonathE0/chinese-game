@@ -523,6 +523,60 @@
       "en": "waiter",
       "hsk": 3
     },
+    "clerk": {
+      "zh": "营业员",
+      "pinyin": "yíngyèyuán",
+      "en": "shop assistant",
+      "hsk": null
+    },
+    "pharmacist": {
+      "zh": "药剂师",
+      "pinyin": "yàojìshī",
+      "en": "pharmacist",
+      "hsk": null
+    },
+    "scales": {
+      "zh": "秤",
+      "pinyin": "chèng",
+      "en": "scales",
+      "hsk": null
+    },
+    "parcel": {
+      "zh": "包裹",
+      "pinyin": "bāoguǒ",
+      "en": "parcel",
+      "hsk": 4
+    },
+    "stamp": {
+      "zh": "邮票",
+      "pinyin": "yóupiào",
+      "en": "stamp",
+      "hsk": 3
+    },
+    "medicine-cabinet": {
+      "zh": "药柜",
+      "pinyin": "yàoguì",
+      "en": "medicine cabinet",
+      "hsk": null
+    },
+    "reception": {
+      "zh": "前台",
+      "pinyin": "qiántái",
+      "en": "reception desk",
+      "hsk": null
+    },
+    "key": {
+      "zh": "钥匙",
+      "pinyin": "yàoshi",
+      "en": "key",
+      "hsk": null
+    },
+    "fitting-room": {
+      "zh": "试衣间",
+      "pinyin": "shìyījiān",
+      "en": "fitting room",
+      "hsk": null
+    },
     "poster": {
       "zh": "海报",
       "pinyin": "hǎibào",
@@ -654,6 +708,378 @@
       "pinyin": "chūzūchē",
       "en": "taxi",
       "hsk": 2
+    },
+    "kitchen": {
+      "zh": "厨房",
+      "pinyin": "chúfáng",
+      "en": "kitchen",
+      "hsk": 5
+    },
+    "chimney": {
+      "zh": "烟囱",
+      "pinyin": "yāncōng",
+      "en": "chimney",
+      "hsk": null
+    },
+    "balcony": {
+      "zh": "阳台",
+      "pinyin": "yángtái",
+      "en": "balcony",
+      "hsk": 4
+    },
+    "study": {
+      "zh": "书房",
+      "pinyin": "shūfáng",
+      "en": "study",
+      "hsk": 6
+    },
+    "pavilion": {
+      "zh": "亭子",
+      "pinyin": "tíngzi",
+      "en": "pavilion",
+      "hsk": null
+    },
+    "watermill": {
+      "zh": "水车",
+      "pinyin": "shuǐchē",
+      "en": "water wheel",
+      "hsk": null
+    },
+    "stream": {
+      "zh": "小河",
+      "pinyin": "xiǎohé",
+      "en": "stream",
+      "hsk": null
+    },
+    "waterfall": {
+      "zh": "瀑布",
+      "pinyin": "pùbù",
+      "en": "waterfall",
+      "hsk": null
+    },
+    "pine": {
+      "zh": "松树",
+      "pinyin": "sōngshù",
+      "en": "pine tree",
+      "hsk": 4
+    },
+    "moongate": {
+      "zh": "月亮门",
+      "pinyin": "yuèliangmén",
+      "en": "moon gate",
+      "hsk": null
+    },
+    "paifang": {
+      "zh": "牌坊",
+      "pinyin": "páifāng",
+      "en": "memorial archway",
+      "hsk": null
+    },
+    "lion": {
+      "zh": "石狮子",
+      "pinyin": "shíshīzi",
+      "en": "stone lion",
+      "hsk": null
+    },
+    "pillar": {
+      "zh": "柱子",
+      "pinyin": "zhùzi",
+      "en": "pillar",
+      "hsk": 6
+    },
+    "plaque": {
+      "zh": "牌匾",
+      "pinyin": "páibiǎn",
+      "en": "name plaque",
+      "hsk": null
+    },
+    "headphones": {
+      "zh": "耳机",
+      "pinyin": "ěrjī",
+      "en": "headphones",
+      "hsk": 4
+    },
+    "stairs": {
+      "zh": "楼梯",
+      "pinyin": "lóutī",
+      "en": "stairs",
+      "hsk": 4
+    },
+    "sink": {
+      "zh": "水池",
+      "pinyin": "shuǐchí",
+      "en": "sink",
+      "hsk": null
+    },
+    "tap": {
+      "zh": "水龙头",
+      "pinyin": "shuǐlóngtóu",
+      "en": "tap",
+      "hsk": null
+    },
+    "pot": {
+      "zh": "锅",
+      "pinyin": "guō",
+      "en": "pot",
+      "hsk": 5
+    },
+    "rangehood": {
+      "zh": "抽油烟机",
+      "pinyin": "chōuyóuyānjī",
+      "en": "range hood",
+      "hsk": null
+    },
+    "cupboard": {
+      "zh": "柜子",
+      "pinyin": "guìzi",
+      "en": "cupboard",
+      "hsk": 5
+    },
+    "teapot": {
+      "zh": "茶壶",
+      "pinyin": "cháhú",
+      "en": "teapot",
+      "hsk": null
+    },
+    "plate": {
+      "zh": "盘子",
+      "pinyin": "pánzi",
+      "en": "plate",
+      "hsk": 4
+    },
+    "bowl": {
+      "zh": "碗",
+      "pinyin": "wǎn",
+      "en": "bowl",
+      "hsk": 2
+    },
+    "pillow": {
+      "zh": "枕头",
+      "pinyin": "zhěntou",
+      "en": "pillow",
+      "hsk": null
+    },
+    "quilt": {
+      "zh": "被子",
+      "pinyin": "bèizi",
+      "en": "quilt",
+      "hsk": 3
+    },
+    "cushion": {
+      "zh": "靠垫",
+      "pinyin": "kàodiàn",
+      "en": "cushion",
+      "hsk": null
+    },
+    "till": {
+      "zh": "收银机",
+      "pinyin": "shōuyínjī",
+      "en": "cash register",
+      "hsk": null
+    },
+    "coffee-machine": {
+      "zh": "咖啡机",
+      "pinyin": "kāfēijī",
+      "en": "coffee machine",
+      "hsk": null
+    },
+    "jar": {
+      "zh": "罐子",
+      "pinyin": "guànzi",
+      "en": "jar",
+      "hsk": null
+    },
+    "calligraphy": {
+      "zh": "书法",
+      "pinyin": "shūfǎ",
+      "en": "calligraphy",
+      "hsk": 5
+    },
+    "postbox": {
+      "zh": "邮筒",
+      "pinyin": "yóutǒng",
+      "en": "postbox",
+      "hsk": null
+    },
+    "postcard": {
+      "zh": "明信片",
+      "pinyin": "míngxìnpiàn",
+      "en": "postcard",
+      "hsk": null
+    },
+    "trolley": {
+      "zh": "购物车",
+      "pinyin": "gòuwùchē",
+      "en": "shopping trolley",
+      "hsk": null
+    },
+    "mannequin": {
+      "zh": "模特",
+      "pinyin": "mótè",
+      "en": "mannequin",
+      "hsk": null
+    },
+    "desklamp": {
+      "zh": "台灯",
+      "pinyin": "táidēng",
+      "en": "desk lamp",
+      "hsk": 6
+    },
+    "teaset": {
+      "zh": "茶具",
+      "pinyin": "chájù",
+      "en": "tea set",
+      "hsk": null
+    },
+    "ceiling": {
+      "zh": "天花板",
+      "pinyin": "tiānhuābǎn",
+      "en": "ceiling",
+      "hsk": null
+    },
+    "beam": {
+      "zh": "房梁",
+      "pinyin": "fángliáng",
+      "en": "roof beam",
+      "hsk": null
+    },
+    "monitor": {
+      "zh": "显示器",
+      "pinyin": "xiǎnshìqì",
+      "en": "monitor",
+      "hsk": null
+    },
+    "garlic": {
+      "zh": "大蒜",
+      "pinyin": "dàsuàn",
+      "en": "garlic",
+      "hsk": null
+    },
+    "chilli": {
+      "zh": "辣椒",
+      "pinyin": "làjiāo",
+      "en": "chilli",
+      "hsk": null
+    },
+    "railing": {
+      "zh": "栏杆",
+      "pinyin": "lángān",
+      "en": "railing",
+      "hsk": null
+    },
+    "vendor": {
+      "zh": "摊主",
+      "pinyin": "tānzhǔ",
+      "en": "stall keeper",
+      "hsk": null
+    },
+    "goods": {
+      "zh": "商品",
+      "pinyin": "shāngpǐn",
+      "en": "goods",
+      "hsk": 3
+    },
+    "fridge": {
+      "zh": "冰箱",
+      "pinyin": "bīngxiāng",
+      "en": "fridge",
+      "hsk": 4
+    },
+    "walkway": {
+      "zh": "走廊",
+      "pinyin": "zǒuláng",
+      "en": "covered walkway",
+      "hsk": null
+    },
+    "lattice": {
+      "zh": "花窗",
+      "pinyin": "huāchuāng",
+      "en": "lattice window",
+      "hsk": null
+    },
+    "waterside": {
+      "zh": "水榭",
+      "pinyin": "shuǐxiè",
+      "en": "waterside pavilion",
+      "hsk": null
+    },
+    "eaves": {
+      "zh": "屋檐",
+      "pinyin": "wūyán",
+      "en": "eaves",
+      "hsk": null
+    },
+    "certificate": {
+      "zh": "证书",
+      "pinyin": "zhèngshū",
+      "en": "certificate",
+      "hsk": 5
+    },
+    "chunlian": {
+      "zh": "春联",
+      "pinyin": "chūnlián",
+      "en": "spring couplets",
+      "hsk": null
+    },
+    "fuzi": {
+      "zh": "福字",
+      "pinyin": "fú zì",
+      "en": "the character 福",
+      "hsk": null
+    },
+    "hongbao": {
+      "zh": "红包",
+      "pinyin": "hóngbāo",
+      "en": "red envelope",
+      "hsk": 4
+    },
+    "huadeng": {
+      "zh": "花灯",
+      "pinyin": "huādēng",
+      "en": "festive lantern",
+      "hsk": null
+    },
+    "dengmi": {
+      "zh": "灯谜",
+      "pinyin": "dēngmí",
+      "en": "lantern riddle",
+      "hsk": null
+    },
+    "longzhou": {
+      "zh": "龙舟",
+      "pinyin": "lóngzhōu",
+      "en": "dragon boat",
+      "hsk": null
+    },
+    "yueliang": {
+      "zh": "月亮",
+      "pinyin": "yuèliang",
+      "en": "moon",
+      "hsk": 2
+    },
+    "ticket-machine": {
+      "zh": "售票机",
+      "pinyin": "shòupiàojī",
+      "en": "ticket machine",
+      "hsk": null
+    },
+    "wallclock": {
+      "zh": "挂钟",
+      "pinyin": "guàzhōng",
+      "en": "wall clock",
+      "hsk": null
+    },
+    "noticeboard": {
+      "zh": "布告栏",
+      "pinyin": "bùgàolán",
+      "en": "noticeboard",
+      "hsk": null
+    },
+    "goods-shelf": {
+      "zh": "货架",
+      "pinyin": "huòjià",
+      "en": "shelf (in a shop)",
+      "hsk": null
     }
   }
 }

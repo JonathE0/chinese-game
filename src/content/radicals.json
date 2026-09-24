@@ -1,0 +1,15 @@
+{
+  "note": "Component hunts for the 找部首 tab of the collection book. A hunt's targets are the named objects in the world whose Chinese name contains any of its characters, worked out at run time from the live registry. Finishing a hunt pays huntCoins from balance.json once. Titles are UI labels and have no voice clip.",
+  "hunts": [
+    {"id": "water", "mark": "氵", "zh": "带“氵”的字", "en": "water", "chars": "河湖海池洗汤油沙泳酒汁游渴澡浴温清满没汉江注法活深浅港泡淡流漂演源济"},
+    {"id": "wood", "mark": "木", "zh": "带“木”的字", "en": "wood, tree", "chars": "木树林森桌椅床柜架板桥楼梯杯枕松桃桶机果相箱植标样格棵模"},
+    {"id": "grass", "mark": "艹", "zh": "带“艹”的字", "en": "grass, plants", "chars": "花草茶菜药荷莲苹萝蒜葱蕉芽蔬薯葡萄莓菠落蓝英苦节"},
+    {"id": "fire", "mark": "火", "zh": "带“火”或“灬”的字", "en": "fire", "chars": "火灯烤炒炸烟烧炉煎热煮点照蒸熟燃"},
+    {"id": "metal", "mark": "钅", "zh": "带“钅”的字", "en": "metal", "chars": "钱钟锅银铁钢镜钥锁铃针钉链铺错"},
+    {"id": "food", "mark": "饣", "zh": "带“饣”的字", "en": "food", "chars": "饭饺馆饼饿饱饮馄饨馒馅"},
+    {"id": "bamboo", "mark": "⺮", "zh": "带“⺮”的字", "en": "bamboo", "chars": "笔笑等第篮筷箱算答简管筒笼签篇"},
+    {"id": "stone", "mark": "石", "zh": "带“石”的字", "en": "stone", "chars": "石碗砖碟码砂破硬碎础研磨"},
+    {"id": "earth", "mark": "土", "zh": "带“土”的字", "en": "earth", "chars": "土地场城块坐墙塔坡堆垃圾坛在"},
+    {"id": "mouth", "mark": "口", "zh": "带“口”的字", "en": "mouth", "chars": "口吃喝叫唱吗呢吧听味咖啡嘴员品器号只句可哈喂啊哪哭"}
+  ]
+}
