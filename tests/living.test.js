@@ -150,6 +150,35 @@ test('a round hitbox follows the stone instead of a square that sticks out past 
   assert.equal(registry.look('town',at(-6,3,0),at(1,0,0)),null);      // passes over the top
 });
 
+test('look ignores a box around the eye and lets a smaller box inside a bigger one win', () => {
+  const registry = new Registry();
+  // A pine canopy the eye stands inside, and a bench beyond it.
+  registry.add({place:'town',x:0,z:0,hw:2,hd:2,y0:0,y1:3,name:{id:'tree'}});
+  registry.add({place:'town',x:6,z:0,hw:.5,hd:.5,y0:0,y1:3,name:{id:'bench'}});
+  assert.equal(registry.look('town',at(0,1.5,0),at(1,0,0)).box.name.id,'bench');
+  // A sink inside the kitchen fitting's box: the ray enters the fitting first, but the sink wins.
+  registry.add({place:'town',x:0,z:10,hw:2,hd:.5,y0:0,y1:1,name:{id:'stove'}});
+  const sink = registry.addLook({place:'town',x:.5,z:10,hw:.3,hd:.3,y0:.8,y1:1,name:{id:'sink'},owner:'kitchen'});
+  assert.equal(sink.solid,false);
+  assert.equal(registry.boxes.includes(sink),false);                  // look boxes never collide
+  const seen = registry.look('town',at(.5,1.2,8),at(0,-.3,2));
+  assert.equal(seen.box.name.id,'sink');
+  // A smaller box behind the bigger one, past where the ray leaves it, loses: nearest wins.
+  registry.addLook({place:'town',x:0,z:14,hw:.2,hd:.2,y0:0,y1:1,name:{id:'cup'}});
+  assert.equal(registry.look('town',at(0,.5,5),at(0,0,1)).box.name.id,'stove');
+  // A look box whose entity is hidden cannot be seen.
+  registry.addLook({place:'town',x:0,z:7,hw:.2,hd:.2,y0:0,y1:1,name:{id:'sign'},entity:{enabled:false}});
+  assert.equal(registry.look('town',at(0,.5,5),at(0,0,1)).box.name.id,'stove');
+  // A loose box round a slanted slab is only a first check: the slab itself decides.
+  registry.addLook({place:'town',x:0,z:6,hw:.5,hd:.5,y0:0,y1:1,name:{id:'roof'},refine:()=>null});
+  assert.equal(registry.look('town',at(0,.5,5),at(0,0,1)).box.name.id,'stove');
+  registry.clearLooks('town','kitchen');
+  assert.equal(registry.looks.includes(sink),false);
+  assert.equal(registry.looks.length,3);
+  registry.clearLooks('town');
+  assert.equal(registry.looks.length,0);
+});
+
 test('saves survive hunger, debts and errands, and reject impossible ones', () => {
   const p = freshProfile();
   p.stats = {hunger:42.5,energy:60,hour:11.25};
@@ -162,5 +191,10 @@ test('saves survive hunger, debts and errands, and reject impossible ones', () =
   for(const broken of [{...p,stats:{hunger:-4,energy:10,hour:1}},
                        {...p,debt:{loan:'small',owed:-1,perDay:5,nextDay:1,missed:0}},
                        {...p,daily:{day:-1,counts:{},claimed:[]}}])
-    assert.throws(()=>decodeProfile(JSON.stringify(broken)));
+  {
+    const repairs = [], fixed = decodeProfile(JSON.stringify(broken),repairs);
+    assert.equal(repairs.length,1);                         // only the broken record goes
+    assert.equal(fixed[repairs[0]],undefined);
+    assert.equal(fixed.wallet,p.wallet);
+  }
 });

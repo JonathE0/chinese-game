@@ -1,5 +1,6 @@
 import {STEPS,TUTORIAL_UI as UI,currentStep,tutorialEvent,nextStep,skipTutorial,startTutorial,fillText} from '../core/tutorial.js';
 import {escapeHtml as esc} from '../core/language.js';
+import {pinyinHtml} from './shell.js';
 
 /** How long 做到了！ stays up before the next step appears. */
 const CELEBRATE_MS=1100;
@@ -117,7 +118,7 @@ export class Tutorial {
    <div class="tutorial-head"><span class="eyebrow">${esc(UI.eyebrow.zh)} · ${esc(UI.eyebrow.en)}</span><span class="tutorial-count">${index+1} / ${STEPS.length}</span></div>
    <div class="tutorial-line"><b>${esc(fillText(step.zh))}</b>
     <button class="help-toggle tutorial-help" data-help aria-label="显示拼音">?</button>
-    <div class="help-content" hidden><div class="pinyin">${esc(fillText(step.pinyin))}</div></div></div>
+    <div class="help-content" hidden><div class="pinyin">${pinyinHtml(fillText(step.pinyin),'',{always:true})}</div></div></div>
    <small class="tutorial-en">${esc(fillText(step.en))}</small>
    <div class="tutorial-actions-row">
     <button class="tutorial-skip" data-tutorial="skip">${esc(UI.skip.zh)} <small>${esc(UI.skip.en)}</small></button>

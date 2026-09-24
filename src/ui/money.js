@@ -1,7 +1,7 @@
 import catalog from '../content/catalog.json' with {type:'json'};
 import {escapeHtml as esc} from '../core/language.js';
 import {icon,itemArt} from './art.js';
-import {languageLine} from './shell.js';
+import {languageLine,pinyinWith} from './shell.js';
 import {LOANS,loanById,totalDue,takeLoan,repay,debtOf,
   savingsOf,deposit,withdraw,interestOn,balanceForCap,INTEREST_RATE,INTEREST_CAP,
   PERMITS,permitById,permitTotal,holdsPermit,permitPlan,buyPermit} from '../core/finance.js';
@@ -92,7 +92,7 @@ function permitView(ctx,body){
     <div class="permit-grid">${PERMITS.map(permit=>{
       const held=holdsPermit(p,permit.id),plan=permitPlan(p,permit.id);
       return `<article class="permit-card ${held?'held':''}">
-        <div class="permit-head"><b>${esc(permit.zh)}</b><small>${esc(permit.pinyin)} · ${esc(permit.en)}</small></div>
+        <div class="permit-head"><b>${esc(permit.zh)}</b><small>${pinyinWith(permit.pinyin,permit.zh,permit.en)}</small></div>
         <p>${esc(permit.note)}<br><small>${esc(permit.noteEn)}</small></p>
         ${held?`<span class="permit-state">已办好${plan?` · 还剩 ${plan.owed} 分 ${Math.ceil(plan.owed/plan.perWeek)} 周付清`:''}</span>`
           :`<div class="button-row">

@@ -11,8 +11,8 @@ async function approach(page,x,z,yaw=0){
   await page.evaluate(([x,z,yaw])=>window.__qinghe.town.warp(x,z,yaw),[x,z,yaw]);
   await page.waitForTimeout(120);
 }
-async function walkToHall(page){await approach(page,0,-6.2);await hold(page,'w',900);}
-async function walkToHome(page){await approach(page,18,19,0);await hold(page,'w',900);}
+async function walkToHall(page){await approach(page,0,-12.5);await hold(page,'w',1300);}   // up the hall's stairs
+async function walkToHome(page){await approach(page,11,7.8,180);await hold(page,'w',900);}
 
 async function seed(page,profile){
   // addInitScript runs on every navigation, so only seed when there is nothing saved yet:
@@ -150,23 +150,26 @@ test('touch drives the same first-person controls: drag to look, thumbstick to w
 
   // Dragging the right of the screen looks around; the mouse is never locked on touch.
   // Dragging leftwards turns the view left, which is a negative rotation on the map.
-  expect(await heading()).toBe(0);
+  const facing=await heading();              // you arrive facing your home, not north
   await touch('pointerdown',300,300);
   await touch('pointermove',230,300);
   await touch('pointerup',230,300);
-  await expect.poll(heading,{timeout:5000}).toBeLessThan(-5);
+  await expect.poll(heading,{timeout:5000}).toBeLessThan(facing-5);
   expect(await page.evaluate(()=>document.pointerLockElement?.id??null)).toBeNull();
 
-  // Holding the lower left walks; releasing stops.
-  const startY=await at('cy');
+  // Holding the lower left walks; releasing slides briefly, then stops.
+  const startX=await at('cx'),startY=await at('cy');
   await touch('pointerdown',80,700,9);
   await touch('pointermove',80,630,9);
   await page.waitForTimeout(900);
   await touch('pointerup',80,630,9);
-  const walked=await at('cy');
-  expect(walked).toBeLessThan(startY-.5);
+  await page.waitForTimeout(700);
+  // You walk the way you face, which is towards your home rather than north.
+  const walked=await at('cy'),walkedX=await at('cx');
+  expect(Math.hypot(walkedX-startX,walked-startY)).toBeGreaterThan(.5);
   await page.waitForTimeout(500);
   expect(await at('cy')).toBeCloseTo(walked,2);
+  expect(await at('cx')).toBeCloseTo(walkedX,2);
   expect(errors).toEqual([]);
   await context.close();
 });

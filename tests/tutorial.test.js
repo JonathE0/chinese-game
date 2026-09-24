@@ -109,7 +109,7 @@ test('fillText uses the same coin rates as the review',()=>{
 
 test('every step that finishes itself names an event, and the ids are unique',()=>{
   const events=['look','walk','view','collect','panel','route','talk','enter'];
-  assert.equal(steps.length,15);
+  assert.equal(steps.length,16);
   assert.equal(new Set(steps.map(s=>s.id)).size,steps.length);
   for(const s of steps)if(s.done)assert.ok(events.includes(s.done.event),s.id);
 });

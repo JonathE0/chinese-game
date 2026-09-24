@@ -1,0 +1,81 @@
+{
+  "note": "Friendship with the three townspeople (docs/superpowers/plans/2026-09-24-friends-and-postcards.md). Points reach a level; each level after the first unlocks the lines whose key starts with its id, played once the next time you talk. The last level also brings the person's present. Every line in `lines` and `shared` is voiced in that person's voice as friend-<npc>-<key>. Postcard tiles are written by the player and have no clips.",
+  "levels": [
+    {"id": "renshi", "zh": "认识", "pinyin": "rènshi", "en": "acquaintance", "points": 0},
+    {"id": "shuren", "zh": "熟人", "pinyin": "shúrén", "en": "familiar face", "points": 10},
+    {"id": "pengyou", "zh": "朋友", "pinyin": "péngyou", "en": "friend", "points": 25},
+    {"id": "hao", "zh": "好朋友", "pinyin": "hǎo péngyou", "en": "good friend", "points": 50}
+  ],
+  "points": {"chat": 2, "gift": 3, "liked": 5, "postcard": 4, "mission": 5},
+  "giftCategories": ["food", "dish", "stationery", "keepsake", "souvenir"],
+  "people": {
+    "lin": {"liked": ["pot-tea", "red-bean-bun", "egg-tart", "tofu-pudding"], "missions": ["greet"], "present": {"item": "tea-set"}},
+    "mei": {"liked": ["strawberry-donut", "candied-hawthorn", "cake", "coffee"], "missions": ["four-words"], "present": {"item": "notebook"}},
+    "chen": {"liked": ["lamb-skewer", "jianbing", "youtiao", "soy-milk"], "missions": ["souvenir"], "present": {"discount": 0.9, "shop": "chen"}, "pin": "souvenir-house"}
+  },
+  "lines": {
+    "lin": {
+      "shuren-1": {"zh": "我在青禾住了三十年了。", "pinyin": "Wǒ zài Qīnghé zhù le sānshí nián le.", "en": "I've lived in Qinghe for thirty years."},
+      "shuren-2": {"zh": "年轻的时候，我在云海开过一家小茶馆。", "pinyin": "Niánqīng de shíhou, wǒ zài Yúnhǎi kāi guo yì jiā xiǎo cháguǎn.", "en": "When I was young, I ran a little teahouse in Yunhai."},
+      "pengyou-1": {"zh": "你的中文越来越好了！", "pinyin": "Nǐ de Zhōngwén yuè lái yuè hǎo le!", "en": "Your Chinese keeps getting better!"},
+      "pengyou-2": {"zh": "有空常来喝茶，我请客。", "pinyin": "Yǒu kòng cháng lái hē chá, wǒ qǐngkè.", "en": "Come by for tea whenever you're free. It's on me."},
+      "hao-1": {"zh": "这套茶具送给你，回家也能泡茶。", "pinyin": "Zhè tào chájù sòng gěi nǐ, huí jiā yě néng pào chá.", "en": "This tea set is for you, so you can make tea at home too."},
+      "post-reply": {"zh": "收到你的明信片了，写得真好！", "pinyin": "Shōudào nǐ de míngxìnpiàn le, xiě de zhēn hǎo!", "en": "I got your postcard. It's beautifully written!"}
+    },
+    "mei": {
+      "shuren-1": {"zh": "我在大学学英语，所以常来练习角。", "pinyin": "Wǒ zài dàxué xué Yīngyǔ, suǒyǐ cháng lái liànxí jiǎo.", "en": "I study English at university, so I often come to the practice corner."},
+      "shuren-2": {"zh": "我们可以互相学习！", "pinyin": "Wǒmen kěyǐ hùxiāng xuéxí!", "en": "We can learn from each other!"},
+      "pengyou-1": {"zh": "我最喜欢去莲池公园看书。", "pinyin": "Wǒ zuì xǐhuan qù Liánchí Gōngyuán kàn shū.", "en": "My favourite thing is reading in Lotus Pond Park."},
+      "pengyou-2": {"zh": "下次我们一起去吧！", "pinyin": "Xià cì wǒmen yìqǐ qù ba!", "en": "Let's go together next time!"},
+      "hao-1": {"zh": "这个本子送给你，学中文的时候用吧！", "pinyin": "Zhège běnzi sòng gěi nǐ, xué Zhōngwén de shíhou yòng ba!", "en": "This notebook is for you. Use it when you study Chinese!"},
+      "post-reply": {"zh": "谢谢你的明信片！我也想去看看！", "pinyin": "Xièxie nǐ de míngxìnpiàn! Wǒ yě xiǎng qù kànkan!", "en": "Thanks for your postcard! I want to go and see too!"}
+    },
+    "chen": {
+      "shuren-1": {"zh": "这家小商店是我爸爸开的。", "pinyin": "Zhè jiā xiǎo shāngdiàn shì wǒ bàba kāi de.", "en": "My dad opened this little shop."},
+      "shuren-2": {"zh": "我每天早上六点就开门了。", "pinyin": "Wǒ měitiān zǎoshang liù diǎn jiù kāi mén le.", "en": "I open up at six every morning."},
+      "pengyou-1": {"zh": "你是我们这儿的老顾客了！", "pinyin": "Nǐ shì wǒmen zhèr de lǎo gùkè le!", "en": "You're one of our regulars now!"},
+      "pengyou-2": {"zh": "有什么需要，跟我说一声。", "pinyin": "Yǒu shénme xūyào, gēn wǒ shuō yì shēng.", "en": "If you need anything, just let me know."},
+      "hao-1": {"zh": "以后你来买东西，我给你打九折！", "pinyin": "Yǐhòu nǐ lái mǎi dōngxi, wǒ gěi nǐ dǎ jiǔ zhé!", "en": "From now on you get 10% off here!"},
+      "post-reply": {"zh": "你的明信片我贴在店里了！", "pinyin": "Nǐ de míngxìnpiàn wǒ tiē zài diàn lǐ le!", "en": "I've put your postcard up in the shop!"}
+    }
+  },
+  "shared": {
+    "gift-liked": {"zh": "哇，我最喜欢这个了！谢谢你！", "pinyin": "Wā, wǒ zuì xǐhuan zhège le! Xièxie nǐ!", "en": "Wow, this is my favourite! Thank you!"},
+    "gift-plain": {"zh": "谢谢你，你太客气了。", "pinyin": "Xièxie nǐ, nǐ tài kèqi le.", "en": "Thank you, that's very kind of you."},
+    "gift-again": {"zh": "今天已经收过你的礼物啦，明天再说吧！", "pinyin": "Jīntiān yǐjīng shōu guo nǐ de lǐwù la, míngtiān zài shuō ba!", "en": "You've already given me something today. Let's leave it till tomorrow!"}
+  },
+  "postcard": {
+    "to": [
+      {"id": "to-lin", "to": "lin", "zh": "林阿姨，你好！", "pinyin": "Lín āyí, nǐ hǎo!", "en": "Hello, Auntie Lin!"},
+      {"id": "to-mei", "to": "mei", "zh": "小美，你好！", "pinyin": "Xiǎoměi, nǐ hǎo!", "en": "Hello, Xiaomei!"},
+      {"id": "to-chen", "to": "chen", "zh": "陈叔叔，你好！", "pinyin": "Chén shūshu, nǐ hǎo!", "en": "Hello, Uncle Chen!"}
+    ],
+    "went": {"zh": "我今天去了", "pinyin": "Wǒ jīntiān qù le", "en": "Today I went to"},
+    "places": [
+      {"id": "garden", "zh": "莲池公园", "pinyin": "Liánchí Gōngyuán", "en": "Lotus Pond Park"},
+      {"id": "market", "zh": "商业街", "pinyin": "Shāngyè jiē", "en": "the Shopping Street"},
+      {"id": "riverside", "zh": "河边文化街", "pinyin": "Hébiān wénhuà jiē", "en": "the Riverside Quarter"},
+      {"id": "city", "zh": "云海市中心", "pinyin": "Yúnhǎi shì zhōngxīn", "en": "Downtown Yunhai", "flag": "metro:first"},
+      {"id": "hall", "zh": "词语馆", "pinyin": "cíyǔ guǎn", "en": "the word hall"}
+    ],
+    "ate": {"zh": "我吃了", "pinyin": "Wǒ chī le", "en": "I ate"},
+    "notEaten": ["coffee", "milk", "pot-tea", "hot-soup", "city-water", "city-tea-can", "soy-milk", "rice-grain"],
+    "learned": {"id": "learned", "zh": "我学了新词。", "pinyin": "Wǒ xué le xīn cí.", "en": "I learned new words."},
+    "bought": {"zh": "我买了", "pinyin": "Wǒ mǎi le", "en": "I bought"},
+    "feel": [
+      {"id": "happy", "zh": "我很开心！", "pinyin": "Wǒ hěn kāixīn!", "en": "I'm very happy!"},
+      {"id": "tired", "zh": "有点儿累，但是很好玩。", "pinyin": "Yǒudiǎnr lèi, dànshì hěn hǎowán.", "en": "A bit tired, but it was fun."},
+      {"id": "come", "zh": "希望你也来！", "pinyin": "Xīwàng nǐ yě lái!", "en": "I hope you'll come too!"}
+    ],
+    "close": [
+      {"id": "wish", "zh": "祝你天天开心！", "pinyin": "Zhù nǐ tiāntiān kāixīn!", "en": "Wishing you a happy day, every day!"},
+      {"id": "bye", "zh": "下次见！", "pinyin": "Xià cì jiàn!", "en": "See you next time!"}
+    ]
+  },
+  "ui": {
+    "gift": {"zh": "送礼物", "en": "give a gift"},
+    "write": {"zh": "写明信片", "en": "write a postcard"},
+    "send": {"zh": "寄出", "en": "send"},
+    "postcard": {"zh": "明信片", "pinyin": "míngxìnpiàn", "en": "postcard"}
+  }
+}

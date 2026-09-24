@@ -1,6 +1,6 @@
 import catalog from '../content/catalog.json' with {type:'json'};
 import {normalize,escapeHtml as esc} from '../core/language.js';
-import {languageLine} from './shell.js';
+import {languageLine,pinyinHtml} from './shell.js';
 import {icon,itemArt} from './art.js';
 import {purchase} from '../core/economy.js';
 import {grant} from '../core/economy.js';
@@ -32,7 +32,7 @@ function list(ctx,body,from){
     <div class="menu-grid">${dishes.map(dish=>`
       <button class="menu-card" data-dish="${esc(dish.id)}">
         ${itemArt(dish.visual)}
-        <div class="menu-text"><b>${esc(dish.zh)}</b><small>${esc(dish.pinyin)}</small></div>
+        <div class="menu-text"><b>${esc(dish.zh)}</b><small>${pinyinHtml(dish.pinyin,dish.zh)}</small></div>
         <span class="menu-price">${icon('coin',14)} ${dish.price}</span>
       </button>`).join('')}</div>
     <p class="microcopy">点一道菜，然后用中文说出你要什么。第一次用中文点每道菜，多给 ${ORDER_BONUS} 学习币。<br>

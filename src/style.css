@@ -633,6 +633,7 @@ body.riding .controls,body.riding #crosshair,body.riding #interact,body.riding #
 #metro-ride.speaking .announce{border-color:#6d9ac4;box-shadow:0 0 0 1px #6d9ac455}
 .announce-zh{font-family:'Noto Serif SC',serif;font-size:21px;letter-spacing:2px;color:#e9f1f8;line-height:1.7}
 .announce-en{font-size:11px;color:#9fb3c4;margin-top:7px;line-height:1.7}
+#metro-ride .announce-quiz{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}
 .metro-skip{margin-top:20px;padding:9px 16px;border:1px solid #4d5a64;background:transparent;
   color:#9fb3c4;border-radius:8px;font-size:11px}
 .metro-skip:hover{background:#20282f}
@@ -731,3 +732,28 @@ body.riding .controls,body.riding #crosshair,body.riding #interact,body.riding #
 .interaction-stack #toast{overflow-wrap:anywhere}
 @media(max-width:720px){.interaction-stack{bottom:85px}}
 @media(max-height:760px){.interaction-stack{bottom:76px}}
+.order-builder{border-top:1px solid #e1e2ca;padding-top:16px;margin-bottom:14px}
+.order-builder h3,.order-pay h3{font-size:14px;font-weight:500;margin:12px 0 8px}
+.order-sentence{font-family:'Noto Serif SC',serif;font-size:22px;letter-spacing:1px;margin:10px 0}
+.order-sentence b{font-weight:600;color:#738f68}
+.order-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.order-tile{min-width:52px;font-size:17px;display:inline-flex;gap:5px;align-items:center;justify-content:center}
+.order-tile.picked{background:#dfe8cc;border-color:#99ad83}
+.order-tile.hint{outline:2px solid #c9a24f}
+.order-tile:disabled{opacity:.45}
+.friend-level{display:inline-block;padding:2px 8px;border-radius:10px;background:#e6edda;color:#6f8a64;font-size:11px;letter-spacing:1px}
+.postcard-row{margin:0 0 8px}
+.postcard-card{position:relative;margin:16px 0;padding:18px 62px 14px 20px;background:#fffdf3;border:1px solid #dfd6bb;border-radius:6px;box-shadow:0 6px 18px #2e45381f;transform:rotate(-.6deg)}
+.postcard-card::after{content:'';position:absolute;top:12px;right:12px;width:32px;height:38px;border:2px dashed #c9a24f;border-radius:3px}
+.postcard-name{text-align:right;font-family:'Noto Serif SC',serif;font-size:15px;color:#6f5a47;margin-top:10px}
+/* Tone colours (setting 声调颜色): the tone marks stay, so colour is never the only cue. These are
+   the plan's hexes. On the cream panels they measure 2.4-4.4:1 (tone 2 lowest), below WCAG AA for
+   small text; darken the variables if that matters. */
+/* Tone colours, darkened from the plan's set to pass WCAG AA (4.5:1) on the cream panels; the dark
+   metro ride board gets lighter ones. Tone marks stay on, so colour is never the only cue. */
+:root{--tone-1:#bc3d3d;--tone-2:#985c16;--tone-3:#247845;--tone-4:#3666c7;--tone-0:#6a6a6a}
+#metro-ride{--tone-1:#de6a6a;--tone-2:#d9831f;--tone-3:#2f9e5b;--tone-4:#628ce0;--tone-0:#8a8a8a}
+.tone-1{color:var(--tone-1)}.tone-2{color:var(--tone-2)}.tone-3{color:var(--tone-3)}.tone-4{color:var(--tone-4)}.tone-0{color:var(--tone-0)}
+.setting-row select{padding:7px 9px;background:#f2efdf;border:1px solid #ccd2b9;border-radius:7px;color:#58694f;font-size:12px}
+/* Dev mode badge (?dev on the dev server). */
+body.dev::after{content:'DEV';position:fixed;left:8px;bottom:8px;z-index:50;padding:2px 7px;border-radius:6px;background:#b8463a;color:#fff;font:600 11px/1.4 system-ui,sans-serif;letter-spacing:1px;pointer-events:none}

@@ -31,7 +31,8 @@ export function offerFor(profile,item,dayIndex=profile.dayIndex??0){
 export function sellable(profile,dayIndex=profile.dayIndex??0){
   const placed=new Set((profile.home??[]).map(record=>record.item));
   return catalog
-    .filter(item=>(profile.inventory[item.id]??0)>0)
+    // Some things are earned rather than bought (the HSK certificates) and are marked not for sale.
+    .filter(item=>(profile.inventory[item.id]??0)>0&&item.sellable!==false)
     .map(item=>{
       const owned=profile.inventory[item.id];
       // Furniture standing in your room is not in the bag to sell.

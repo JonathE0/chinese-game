@@ -1,4 +1,5 @@
 import {escapeHtml as esc} from '../core/language.js';
+import {pinyinHtml} from './shell.js';
 import {icon} from './art.js';
 import {grant} from '../core/economy.js';
 import {reviewWord,pickReviewWords} from '../core/review.js';
@@ -151,10 +152,10 @@ function listenGame(ctx,body,pool){
       const correct=button.dataset.pick===word.zh;
       if(!correct)button.classList.add('wrong');
       if(correct)right++;
-      reviewWord(ctx.profile,word.id??('bank-'+word.zh),'listening',{correct,hinted:false});
+      reviewWord(ctx.profile,word.id??('bank-'+word.zh),'listening',{correct,hinted:false,zh:word.zh});
       ctx.save();
       body.querySelector('#game-feedback').innerHTML=`<div class="feedback ${correct?'success':'gentle'}">
-        <div>${correct?'对了！':'是这个：'} <b>${esc(word.zh)}</b> · ${esc(word.pinyin)} · ${esc(word.en)}</div>
+        <div>${correct?'对了！':'是这个：'} <b>${esc(word.zh)}</b> · ${pinyinHtml(word.pinyin,word.zh,{always:true})} · ${esc(word.en)}</div>
         <button class="primary" id="next">${index===queue.length-1?'完成':'下一个'}</button></div>`;
       body.querySelector('#next').onclick=()=>{index++;step();};
     });

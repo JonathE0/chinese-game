@@ -1,11 +1,14 @@
 import {meta,loadWords} from '../services/hsk-data.js';
-import {languageLine} from './shell.js';
+import {languageLine,pinyinHtml} from './shell.js';
 import {icon} from './art.js';
 import {escapeHtml as esc} from '../core/language.js';
 import {familiarity,reviewWord,cardCoins,pickReviewWords} from '../core/review.js';
 import {addWord} from '../core/bank.js';
 import {openGames} from './games.js';
 import {definitions} from './definitions.js';
+import {openPlacement,openMock} from './levels.js';
+import {canPlace} from '../core/levels.js';
+import levelText from '../content/levels.json' with {type:'json'};
 
 const statusNames={new:'初见',learning:'学习中',familiar:'熟悉',due:'待复习'};
 const LIST_LIMIT=60;
@@ -15,12 +18,18 @@ let words=null;
 const shuffle=list=>list.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(([,v])=>v);
 const levelWords=level=>words.filter(w=>w.level===level);
 
-export async function openHsk(ctx){
+/** `mode:'listening'` goes straight into a listening drill at the current level, as the word hall's
+ *  listening booths do; a level without recordings falls back to the word list. */
+export async function openHsk(ctx,{mode=null}={}){
   const body=ctx.ui.open('hsk','词语馆','HSK 词表 · VOCABULARY HALL');
   body.innerHTML='<p class="panel-intro">正在载入词表… / Loading the word list…</p>';
   try{words=await loadWords();}
   catch(error){body.innerHTML=`<p class="panel-intro">词表无法载入。 / Word list unavailable: ${esc(error.message)}</p>`;return;}
   ctx.hskLevel??=1;
+  if(mode==='listening'){
+    if(meta.audioLevels.includes(ctx.hskLevel))return drill(ctx,body,mode);
+    ctx.ui.notice('这一级还没有录音，先看看词表吧。 / This level has no recordings yet, so here is the word list.');
+  }
   browse(ctx,body);
 }
 
@@ -46,6 +55,8 @@ function browse(ctx,body,query=''){
     <button class="primary compact" id="hsk-review" data-mode="recognition">复习这一级 ${icon('arrow',15)}</button>
     ${listenable?'<button class="secondary" id="hsk-listen" data-mode="listening">听力练习</button>':'<span class="microcopy no-audio">这一级还没有录音</span>'}
     <button class="secondary" id="hsk-games">小游戏</button>
+    <button class="secondary" id="hsk-placement" ${canPlace(ctx.profile)?'':'disabled'}>${esc(levelText.labels.placement.zh)}</button>
+    <button class="secondary" id="hsk-mock">${esc(levelText.labels.mock.zh)} · ${esc(meta.levels.find(l=>l.level===level)?.zh??'')}</button>
   </div>
   <p class="microcopy hall-rate">在这里学会一个新词 +${cardCoins('hall',true)} 学习币，复习一个 +${cardCoins('hall',false)}。<br>
     Each new word you learn here pays ${cardCoins('hall',true)} coins; a review pays ${cardCoins('hall',false)}.</p>
@@ -76,6 +87,8 @@ function browse(ctx,body,query=''){
     next.focus();next.setSelectionRange(value.length,value.length);
   };
   body.querySelector('#hsk-games').onclick=()=>openGames(ctx);
+  body.querySelector('#hsk-placement').onclick=()=>openPlacement(ctx,body,()=>browse(ctx,body));
+  body.querySelector('#hsk-mock').onclick=()=>openMock(ctx,body,level,()=>browse(ctx,body));
   for(const id of ['#hsk-review','#hsk-listen']){
     const button=body.querySelector(id);
     if(button)button.onclick=()=>drill(ctx,body,button.dataset.mode);
@@ -109,7 +122,7 @@ function drill(ctx,body,mode){
       <div class="step-track">${queue.map((_,i)=>`<i class="${i<=index?'active':''}"></i>`).join('')}</div>
       ${listening
         ? `<div class="drill-prompt drill-audio" data-word="${esc(word.id)}"><button class="primary compact" id="drill-play">${icon('sound',18)} 播放</button><p class="microcopy">听一听，选出对应的词。</p></div>`
-        : `<div class="drill-prompt" data-word="${esc(word.id)}"><div class="drill-zh" id="hsk-prompt">${esc(word.zh)}</div>${word.audio?`<button class="subtle drill-play" id="drill-play" aria-label="听「${esc(word.zh)}」的读音">${icon('sound',16)} 读音</button>`:'<p class="microcopy">这一级还没有录音。</p>'}<button class="help-toggle" id="drill-help" aria-label="显示帮助">?</button><div class="help-content" id="drill-hint" hidden><div class="pinyin">${esc(word.pinyin)}</div></div></div>`}
+        : `<div class="drill-prompt" data-word="${esc(word.id)}"><div class="drill-zh" id="hsk-prompt">${esc(word.zh)}</div>${word.audio?`<button class="subtle drill-play" id="drill-play" aria-label="听「${esc(word.zh)}」的读音">${icon('sound',16)} 读音</button>`:'<p class="microcopy">这一级还没有录音。</p>'}<button class="help-toggle" id="drill-help" aria-label="显示帮助">?</button><div class="help-content" id="drill-hint" hidden><div class="pinyin">${pinyinHtml(word.pinyin,word.zh,{always:true})}</div></div></div>`}
       <div class="drill-options">${options.map(o=>`<button class="choice drill-choice" data-pick="${esc(o.id)}">${esc(listening?o.zh:o.en)}</button>`).join('')}</div>
       <div id="drill-feedback" aria-live="polite"></div>`;
 
@@ -127,12 +140,12 @@ function drill(ctx,body,mode){
       body.querySelectorAll('[data-pick]').forEach(b=>{b.disabled=true;if(b.dataset.pick===word.id)b.classList.add('correct');});
       const correct=button.dataset.pick===word.id;
       if(!correct)button.classList.add('wrong');
-      const {coins,practiceOnly,fresh}=reviewWord(ctx.profile,word.id,mode,{correct,hinted,venue:'hall'});
+      const {coins,practiceOnly,fresh}=reviewWord(ctx.profile,word.id,mode,{correct,hinted,venue:'hall',zh:word.zh});
       earned+=coins;
       if(correct)right++;
       ctx.save();
       body.querySelector('#drill-feedback').innerHTML=`<div class="feedback ${correct?'success':'gentle'}">
-        <div>${correct?'对了！':'再看一眼。'} <b>${esc(word.zh)}</b> · ${esc(word.pinyin)} · ${esc(word.en)}${definitions(word,{open:true})}
+        <div>${correct?'对了！':'再看一眼。'} <b>${esc(word.zh)}</b> · ${pinyinHtml(word.pinyin,word.zh,{always:true})} · ${esc(word.en)}${definitions(word,{open:true})}
         <small>${practiceOnly?'还没到复习时间，这次不计入进度。':coins?`+${coins} 学习币${fresh&&!hinted?' · 新词':''}`:'已记录，未获得学习币。'}</small></div>
         <div class="feedback-actions">${word.audio?`<button class="subtle" id="drill-replay" aria-label="再听一次">${icon('sound',15)}</button>`:''}<button class="primary" id="drill-next">${index===queue.length-1?'完成':'下一个'}</button></div></div>`;
       body.querySelector('#drill-replay')?.addEventListener('click',play);

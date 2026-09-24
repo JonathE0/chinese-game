@@ -297,6 +297,10 @@
   {
     "id": "coffee",
     "zh": "咖啡",
+    "measure": "杯",
+    "alsoOk": [
+      "壶"
+    ],
     "pinyin": "kāfēi",
     "en": "coffee",
     "description": "慢慢喝，慢慢想。",
@@ -315,6 +319,10 @@
   {
     "id": "cake",
     "zh": "蛋糕",
+    "measure": "块",
+    "alsoOk": [
+      "个"
+    ],
     "pinyin": "dàngāo",
     "en": "cake",
     "description": "今天也值得一块蛋糕。",
@@ -336,6 +344,7 @@
   {
     "id": "bread",
     "zh": "面包",
+    "measure": "个",
     "pinyin": "miànbāo",
     "en": "bread",
     "description": "刚出炉的。",
@@ -357,6 +366,7 @@
   {
     "id": "fruit",
     "zh": "水果",
+    "measure": "份",
     "pinyin": "shuǐguǒ",
     "en": "fruit",
     "description": "今天的水果很新鲜。",
@@ -375,6 +385,11 @@
   {
     "id": "milk",
     "zh": "牛奶",
+    "measure": "瓶",
+    "alsoOk": [
+      "盒",
+      "杯"
+    ],
     "pinyin": "niúnǎi",
     "en": "milk",
     "description": "一瓶牛奶。",
@@ -393,6 +408,7 @@
   {
     "id": "egg",
     "zh": "鸡蛋",
+    "measure": "个",
     "pinyin": "jīdàn",
     "en": "eggs",
     "description": "一盒鸡蛋。",
@@ -411,6 +427,7 @@
   {
     "id": "noodles",
     "zh": "面条",
+    "measure": "包",
     "pinyin": "miàntiáo",
     "en": "noodles",
     "description": "煮一碗面。",
@@ -429,6 +446,7 @@
   {
     "id": "vegetable",
     "zh": "蔬菜",
+    "measure": "份",
     "pinyin": "shūcài",
     "en": "vegetables",
     "description": "绿绿的青菜。",
@@ -632,6 +650,11 @@
   {
     "id": "dumplings",
     "zh": "饺子",
+    "measure": "盘",
+    "alsoOk": [
+      "份",
+      "碗"
+    ],
     "pinyin": "jiǎozi",
     "en": "dumplings",
     "description": "一屉刚出锅的饺子。",
@@ -642,14 +665,79 @@
     "price": 12,
     "minPrice": 12,
     "negotiable": false,
-    "shop": "restaurant",
+    "shop": [
+      "restaurant",
+      "fest-chunjie"
+    ],
     "vocabulary": [],
     "audio": "shop-dumplings",
     "nutrition": 42
   },
   {
+    "id": "tangyuan",
+    "zh": "汤圆",
+    "measure": "碗",
+    "pinyin": "tāngyuán",
+    "en": "sweet rice balls",
+    "description": "元宵节吃的汤圆，甜甜的，圆圆的。",
+    "category": "food",
+    "visual": "tangyuan",
+    "color": "#f3ece0",
+    "price": 6,
+    "minPrice": 6,
+    "negotiable": false,
+    "shop": "fest-yuanxiao",
+    "vocabulary": [],
+    "audio": "shop-tangyuan",
+    "nutrition": 30,
+    "descriptionEn": "Sweet rice balls for the Lantern Festival: sweet and round."
+  },
+  {
+    "id": "zongzi",
+    "zh": "粽子",
+    "measure": "个",
+    "pinyin": "zòngzi",
+    "en": "sticky rice dumpling",
+    "description": "端午节吃的粽子，用叶子包着米。",
+    "category": "food",
+    "visual": "zongzi",
+    "color": "#7fa05a",
+    "price": 5,
+    "minPrice": 5,
+    "negotiable": false,
+    "shop": "fest-duanwu",
+    "vocabulary": [],
+    "audio": "shop-zongzi",
+    "nutrition": 35,
+    "descriptionEn": "Zongzi for the Dragon Boat Festival: rice wrapped in leaves."
+  },
+  {
+    "id": "mooncake",
+    "zh": "月饼",
+    "measure": "块",
+    "pinyin": "yuèbǐng",
+    "en": "mooncake",
+    "description": "中秋节吃的月饼，一家人一起分着吃。",
+    "category": "food",
+    "visual": "mooncake",
+    "color": "#c9904a",
+    "price": 8,
+    "minPrice": 8,
+    "negotiable": false,
+    "shop": "fest-zhongqiu",
+    "vocabulary": [],
+    "audio": "shop-mooncake",
+    "nutrition": 25,
+    "descriptionEn": "A mooncake for the Mid-Autumn Festival, shared by the whole family."
+  },
+  {
     "id": "fried-rice",
     "zh": "炒饭",
+    "measure": "盘",
+    "alsoOk": [
+      "份",
+      "碗"
+    ],
     "pinyin": "chǎofàn",
     "en": "fried rice",
     "description": "蛋炒饭，最实在。",
@@ -668,6 +756,10 @@
   {
     "id": "hot-soup",
     "zh": "汤",
+    "measure": "碗",
+    "alsoOk": [
+      "份"
+    ],
     "pinyin": "tāng",
     "en": "soup",
     "description": "热热的一碗汤。",
@@ -686,6 +778,10 @@
   {
     "id": "greens",
     "zh": "青菜",
+    "measure": "盘",
+    "alsoOk": [
+      "份"
+    ],
     "pinyin": "qīngcài",
     "en": "greens",
     "description": "清炒时蔬。",
@@ -704,6 +800,10 @@
   {
     "id": "steamed-rice",
     "zh": "米饭",
+    "measure": "碗",
+    "alsoOk": [
+      "份"
+    ],
     "pinyin": "mǐfàn",
     "en": "steamed rice",
     "description": "一碗白米饭。",
@@ -722,6 +822,10 @@
   {
     "id": "pot-tea",
     "zh": "茶",
+    "measure": "壶",
+    "alsoOk": [
+      "杯"
+    ],
     "pinyin": "chá",
     "en": "pot of tea",
     "description": "一壶热茶，慢慢喝。",
@@ -863,6 +967,7 @@
   {
     "id": "egg-tart",
     "zh": "蛋挞",
+    "measure": "个",
     "pinyin": "dàntà",
     "en": "egg tart",
     "description": "刚出炉，还烫手。",
@@ -881,6 +986,7 @@
   {
     "id": "red-bean-bun",
     "zh": "豆沙包",
+    "measure": "个",
     "pinyin": "dòushā bāo",
     "en": "red bean bun",
     "description": "里面是甜甜的豆沙。",
@@ -899,6 +1005,7 @@
   {
     "id": "strawberry-donut",
     "zh": "草莓甜甜圈",
+    "measure": "个",
     "pinyin": "cǎoméi tiántiánquān",
     "en": "strawberry doughnut",
     "description": "草莓糖霜，中间夹果酱。",
@@ -917,6 +1024,7 @@
   {
     "id": "pineapple-bun",
     "zh": "菠萝包",
+    "measure": "个",
     "pinyin": "bōluó bāo",
     "en": "pineapple bun",
     "description": "表面酥酥的，里面很软。",
@@ -935,6 +1043,10 @@
   {
     "id": "candied-hawthorn",
     "zh": "糖葫芦",
+    "measure": "串",
+    "alsoOk": [
+      "根"
+    ],
     "pinyin": "tánghúlu",
     "en": "candied hawthorn",
     "description": "一串山楂，外面裹着糖。",
@@ -953,6 +1065,7 @@
   {
     "id": "lamb-skewer",
     "zh": "烤串",
+    "measure": "串",
     "pinyin": "kǎochuàn",
     "en": "grilled skewer",
     "description": "炭火烤的，孜然味很香。",
@@ -971,6 +1084,10 @@
   {
     "id": "tofu-pudding",
     "zh": "豆花",
+    "measure": "碗",
+    "alsoOk": [
+      "份"
+    ],
     "pinyin": "dòuhuā",
     "en": "sweet tofu pudding",
     "description": "热热的，加一勺糖水。",
@@ -1076,6 +1193,7 @@
   {
     "id": "rice-grain",
     "zh": "大米",
+    "measure": "袋",
     "pinyin": "dàmǐ",
     "en": "uncooked rice",
     "description": "带回厨房，和其他食材一起烹饪。",
@@ -1093,6 +1211,7 @@
   {
     "id": "tomato",
     "zh": "番茄",
+    "measure": "个",
     "pinyin": "fānqié",
     "en": "tomato",
     "description": "带回厨房，和其他食材一起烹饪。",
@@ -1110,6 +1229,7 @@
   {
     "id": "tofu",
     "zh": "豆腐",
+    "measure": "块",
     "pinyin": "dòufu",
     "en": "tofu",
     "description": "带回厨房，和其他食材一起烹饪。",
@@ -1127,6 +1247,10 @@
   {
     "id": "home-noodle-bowl",
     "zh": "家常鸡蛋汤面",
+    "measure": "碗",
+    "alsoOk": [
+      "份"
+    ],
     "pinyin": "jiācháng jīdàn tāngmiàn",
     "en": "homemade egg noodle soup",
     "description": "在家做好的一餐，吃完恢复全部饥饿值。",
@@ -1144,6 +1268,7 @@
   {
     "id": "home-vegetable-rice",
     "zh": "家常青菜豆腐饭",
+    "measure": "份",
     "pinyin": "jiācháng qīngcài dòufu fàn",
     "en": "homemade greens and tofu rice",
     "description": "在家做好的一餐，吃完恢复全部饥饿值。",
@@ -1161,6 +1286,7 @@
   {
     "id": "home-tomato-rice",
     "zh": "家常番茄豆腐饭",
+    "measure": "份",
     "pinyin": "jiācháng fānqié dòufu fàn",
     "en": "homemade tomato and tofu rice",
     "description": "在家做好的一餐，吃完恢复全部饥饿值。",
@@ -1178,6 +1304,10 @@
   {
     "id": "home-tomato-egg-noodles",
     "zh": "家常番茄鸡蛋面",
+    "measure": "碗",
+    "alsoOk": [
+      "份"
+    ],
     "pinyin": "jiācháng fānqié jīdàn miàn",
     "en": "homemade tomato and egg noodles",
     "description": "自己做的番茄鸡蛋面，酸酸甜甜的。",
@@ -1195,6 +1325,7 @@
   {
     "id": "city-water",
     "zh": "矿泉水",
+    "measure": "瓶",
     "pinyin": "kuàngquánshuǐ",
     "en": "bottled water",
     "description": "城里走路渴了就喝一口。",
@@ -1212,6 +1343,7 @@
   {
     "id": "city-sandwich",
     "zh": "三明治",
+    "measure": "个",
     "pinyin": "sānmíngzhì",
     "en": "sandwich",
     "description": "便利店的三明治，凑合一顿。",
@@ -1229,6 +1361,10 @@
   {
     "id": "city-tea-can",
     "zh": "冰红茶",
+    "measure": "瓶",
+    "alsoOk": [
+      "罐"
+    ],
     "pinyin": "bīng hóngchá",
     "en": "iced black tea",
     "description": "冰的，甜的，城里到处都在喝。",
@@ -1262,6 +1398,8 @@
   {
     "id": "city-beef-noodles-small",
     "zh": "小碗牛肉面",
+    "measure": "小碗",
+    "orderName": "牛肉面",
     "pinyin": "xiǎo wǎn niúròu miàn",
     "en": "small bowl of beef noodles",
     "description": "一小碗牛肉面，汤很香。",
@@ -1280,6 +1418,8 @@
   {
     "id": "city-beef-noodles-large",
     "zh": "大碗牛肉面",
+    "measure": "大碗",
+    "orderName": "牛肉面",
     "pinyin": "dà wǎn niúròu miàn",
     "en": "large bowl of beef noodles",
     "description": "一大碗牛肉面，肉多面也多。",
@@ -1298,6 +1438,8 @@
   {
     "id": "city-egg-noodles-small",
     "zh": "小碗鸡蛋面",
+    "measure": "小碗",
+    "orderName": "鸡蛋面",
     "pinyin": "xiǎo wǎn jīdàn miàn",
     "en": "small bowl of egg noodles",
     "description": "一小碗鸡蛋面，清淡好吃。",
@@ -1316,6 +1458,8 @@
   {
     "id": "city-egg-noodles-large",
     "zh": "大碗鸡蛋面",
+    "measure": "大碗",
+    "orderName": "鸡蛋面",
     "pinyin": "dà wǎn jīdàn miàn",
     "en": "large bowl of egg noodles",
     "description": "一大碗鸡蛋面，吃得饱饱的。",
@@ -1330,5 +1474,319 @@
     "audio": "shop-city-egg-noodles-large",
     "vocabulary": [],
     "nutrition": 40
+  },
+  {
+    "id": "wonton",
+    "zh": "馄饨",
+    "measure": "碗",
+    "alsoOk": [
+      "份"
+    ],
+    "pinyin": "húntun",
+    "en": "wonton soup",
+    "description": "一碗热馄饨，汤里有紫菜和葱花。",
+    "descriptionEn": "A bowl of hot wontons in broth with seaweed and chopped scallion. In Hong Kong the same dish is called 云吞 (wonton).",
+    "category": "food",
+    "visual": "wonton",
+    "color": "#e7d9b8",
+    "price": 8,
+    "minPrice": 8,
+    "negotiable": false,
+    "shop": "wonton",
+    "vocabulary": [],
+    "audio": "shop-wonton",
+    "nutrition": 40
+  },
+  {
+    "id": "xiaolongbao",
+    "zh": "小笼包",
+    "measure": "笼",
+    "alsoOk": [
+      "份"
+    ],
+    "pinyin": "xiǎolóngbāo",
+    "en": "soup dumplings",
+    "description": "一笼八个，小心，里面的汤很烫。",
+    "descriptionEn": "Eight to a steamer basket. Careful: the soup inside is very hot.",
+    "category": "food",
+    "visual": "dumpling",
+    "color": "#e8dcc0",
+    "price": 10,
+    "minPrice": 10,
+    "negotiable": false,
+    "shop": "wonton",
+    "vocabulary": [],
+    "audio": "shop-xiaolongbao",
+    "nutrition": 42
+  },
+  {
+    "id": "yangchun-noodles",
+    "zh": "阳春面",
+    "measure": "碗",
+    "alsoOk": [
+      "份"
+    ],
+    "pinyin": "yángchūnmiàn",
+    "en": "plain noodle soup",
+    "description": "清汤面条，放一点葱花，简单又好吃。",
+    "descriptionEn": "Noodles in clear broth with a little scallion: simple and good.",
+    "category": "food",
+    "visual": "yangchun-noodles",
+    "color": "#e6dcc0",
+    "price": 6,
+    "minPrice": 6,
+    "negotiable": false,
+    "shop": "noodlestall",
+    "vocabulary": [],
+    "audio": "shop-yangchun-noodles",
+    "nutrition": 22
+  },
+  {
+    "id": "zhajiang-noodles",
+    "zh": "炸酱面",
+    "measure": "碗",
+    "alsoOk": [
+      "份"
+    ],
+    "pinyin": "zhájiàngmiàn",
+    "en": "noodles with bean sauce",
+    "description": "北京的老味道，面上有肉酱和黄瓜丝。",
+    "descriptionEn": "An old Beijing favourite: noodles topped with meat sauce and shredded cucumber.",
+    "category": "food",
+    "visual": "zhajiang-noodles",
+    "color": "#c9a45e",
+    "price": 9,
+    "minPrice": 9,
+    "negotiable": false,
+    "shop": "noodlestall",
+    "vocabulary": [],
+    "audio": "shop-zhajiang-noodles",
+    "nutrition": 36
+  },
+  {
+    "id": "baozi",
+    "zh": "包子",
+    "measure": "个",
+    "alsoOk": [
+      "笼"
+    ],
+    "pinyin": "bāozi",
+    "en": "steamed bun",
+    "description": "热乎乎的肉包子，刚蒸好的。",
+    "descriptionEn": "A hot pork bun, fresh from the steamer.",
+    "category": "food",
+    "visual": "baozi",
+    "color": "#f2e6c9",
+    "price": 3,
+    "minPrice": 3,
+    "negotiable": false,
+    "shop": "breakfast",
+    "vocabulary": [],
+    "audio": "shop-baozi",
+    "nutrition": 12
+  },
+  {
+    "id": "soy-milk",
+    "zh": "豆浆",
+    "measure": "杯",
+    "alsoOk": [
+      "碗"
+    ],
+    "pinyin": "dòujiāng",
+    "en": "soy milk",
+    "description": "一杯热豆浆，可以加糖，也可以不加。",
+    "descriptionEn": "A cup of hot soy milk, with or without sugar.",
+    "category": "food",
+    "visual": "soy-milk",
+    "color": "#f2ead6",
+    "price": 2,
+    "minPrice": 2,
+    "negotiable": false,
+    "shop": "breakfast",
+    "vocabulary": [],
+    "audio": "shop-soy-milk",
+    "nutrition": 8
+  },
+  {
+    "id": "youtiao",
+    "zh": "油条",
+    "measure": "根",
+    "alsoOk": [
+      "个"
+    ],
+    "pinyin": "yóutiáo",
+    "en": "fried dough stick",
+    "description": "又长又脆，最好配着豆浆吃。",
+    "descriptionEn": "Long and crisp, best with soy milk.",
+    "category": "food",
+    "visual": "youtiao",
+    "color": "#dba653",
+    "price": 2,
+    "minPrice": 2,
+    "negotiable": false,
+    "shop": "breakfast",
+    "vocabulary": [],
+    "audio": "shop-youtiao",
+    "nutrition": 10
+  },
+  {
+    "id": "jianbing",
+    "zh": "煎饼",
+    "measure": "个",
+    "alsoOk": [
+      "张"
+    ],
+    "pinyin": "jiānbing",
+    "en": "jianbing crêpe",
+    "description": "薄薄的饼，加鸡蛋和薄脆，现做现吃。",
+    "descriptionEn": "A thin crêpe with egg and a crispy cracker, made while you wait.",
+    "category": "food",
+    "visual": "jianbing",
+    "color": "#e0b563",
+    "price": 6,
+    "minPrice": 6,
+    "negotiable": false,
+    "shop": "breakfast",
+    "vocabulary": [],
+    "audio": "shop-jianbing",
+    "nutrition": 26
+  },
+  {
+    "id": "hsk-cert-1",
+    "zh": "HSK一级证书",
+    "pinyin": "HSK yī jí zhèngshū",
+    "en": "HSK 1 certificate",
+    "category": "keepsake",
+    "visual": "certificate",
+    "color": "#b8463a",
+    "price": 1,
+    "minPrice": 1,
+    "negotiable": false,
+    "shop": [],
+    "vocabulary": [],
+    "description": "在词语馆通过了HSK一级模拟考试。",
+    "descriptionEn": "Passed the HSK 1 mock exam at the word hall.",
+    "sellable": false,
+    "audio": "shop-hsk-cert-1",
+    "kind": "certificate",
+    "footprint": [
+      0.72,
+      0.06
+    ]
+  },
+  {
+    "id": "hsk-cert-2",
+    "zh": "HSK二级证书",
+    "pinyin": "HSK èr jí zhèngshū",
+    "en": "HSK 2 certificate",
+    "category": "keepsake",
+    "visual": "certificate",
+    "color": "#b8463a",
+    "price": 1,
+    "minPrice": 1,
+    "negotiable": false,
+    "shop": [],
+    "vocabulary": [],
+    "description": "在词语馆通过了HSK二级模拟考试。",
+    "descriptionEn": "Passed the HSK 2 mock exam at the word hall.",
+    "sellable": false,
+    "audio": "shop-hsk-cert-2",
+    "kind": "certificate",
+    "footprint": [
+      0.72,
+      0.06
+    ]
+  },
+  {
+    "id": "hsk-cert-3",
+    "zh": "HSK三级证书",
+    "pinyin": "HSK sān jí zhèngshū",
+    "en": "HSK 3 certificate",
+    "category": "keepsake",
+    "visual": "certificate",
+    "color": "#b8463a",
+    "price": 1,
+    "minPrice": 1,
+    "negotiable": false,
+    "shop": [],
+    "vocabulary": [],
+    "description": "在词语馆通过了HSK三级模拟考试。",
+    "descriptionEn": "Passed the HSK 3 mock exam at the word hall.",
+    "sellable": false,
+    "audio": "shop-hsk-cert-3",
+    "kind": "certificate",
+    "footprint": [
+      0.72,
+      0.06
+    ]
+  },
+  {
+    "id": "hsk-cert-4",
+    "zh": "HSK四级证书",
+    "pinyin": "HSK sì jí zhèngshū",
+    "en": "HSK 4 certificate",
+    "category": "keepsake",
+    "visual": "certificate",
+    "color": "#b8463a",
+    "price": 1,
+    "minPrice": 1,
+    "negotiable": false,
+    "shop": [],
+    "vocabulary": [],
+    "description": "在词语馆通过了HSK四级模拟考试。",
+    "descriptionEn": "Passed the HSK 4 mock exam at the word hall.",
+    "sellable": false,
+    "audio": "shop-hsk-cert-4",
+    "kind": "certificate",
+    "footprint": [
+      0.72,
+      0.06
+    ]
+  },
+  {
+    "id": "hsk-cert-5",
+    "zh": "HSK五级证书",
+    "pinyin": "HSK wǔ jí zhèngshū",
+    "en": "HSK 5 certificate",
+    "category": "keepsake",
+    "visual": "certificate",
+    "color": "#b8463a",
+    "price": 1,
+    "minPrice": 1,
+    "negotiable": false,
+    "shop": [],
+    "vocabulary": [],
+    "description": "在词语馆通过了HSK五级模拟考试。",
+    "descriptionEn": "Passed the HSK 5 mock exam at the word hall.",
+    "sellable": false,
+    "audio": "shop-hsk-cert-5",
+    "kind": "certificate",
+    "footprint": [
+      0.72,
+      0.06
+    ]
+  },
+  {
+    "id": "hsk-cert-6",
+    "zh": "HSK六级证书",
+    "pinyin": "HSK liù jí zhèngshū",
+    "en": "HSK 6 certificate",
+    "category": "keepsake",
+    "visual": "certificate",
+    "color": "#b8463a",
+    "price": 1,
+    "minPrice": 1,
+    "negotiable": false,
+    "shop": [],
+    "vocabulary": [],
+    "description": "在词语馆通过了HSK六级模拟考试。",
+    "descriptionEn": "Passed the HSK 6 mock exam at the word hall.",
+    "sellable": false,
+    "audio": "shop-hsk-cert-6",
+    "kind": "certificate",
+    "footprint": [
+      0.72,
+      0.06
+    ]
   }
 ]

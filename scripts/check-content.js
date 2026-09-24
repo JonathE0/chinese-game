@@ -68,6 +68,13 @@ for(const [id,entry] of Object.entries(objects.objects)){
   for(const key of ['zh','pinyin','en'])require(typeof entry[key]==='string'&&entry[key].trim(),`objects:${id} missing ${key}`);
   require(entry.hsk===null||entry.hsk===undefined||(Number.isInteger(entry.hsk)&&entry.hsk>=1&&entry.hsk<=6),`objects:${id} bad hsk level`);
 }
+// Signs are keyed by their exact drawn text; each has an ASCII id for its clip (sign-<id>).
+const signs=await read('signs.json'),signIds=new Set();
+for(const [text,entry] of Object.entries(signs.signs)){
+  require(typeof entry.id==='string'&&/^[a-z0-9-]+$/.test(entry.id),`signs:${text} invalid id`);
+  require(!signIds.has(entry.id),'signs: duplicate id '+entry.id);signIds.add(entry.id);
+  for(const key of ['pinyin','en'])require(typeof entry[key]==='string'&&entry[key].trim(),`signs:${text} missing ${key}`);
+}
 // Districts, their gates, and the buildings and props placed in them.
 const districtIds=new Set(world.districts.map(d=>d.id));
 for(const d of world.districts){
@@ -75,15 +82,21 @@ for(const d of world.districts){
   require(Array.isArray(d.bounds?.x)&&Array.isArray(d.bounds?.z),'district missing bounds '+d.id);
   if(d.gate){
     require(['x','z'].includes(d.gate.axis),'district gate needs an axis '+d.id);
-    require(Number.isInteger(d.gate.requires?.level)&&Number.isInteger(d.gate.requires?.words),'district gate needs a requirement '+d.id);
-    require(d.gate.requires.level>=1&&d.gate.requires.level<=hsk.levels.length,'district gate level out of range '+d.id);
+    require(['paifang','moon'].includes(d.gate.style??'paifang'),'district gate has an unknown style '+d.id);
+    // A gate with no requirement is always open (the park); one with a requirement must be valid.
+    if(d.gate.requires!==undefined){
+      require(Number.isInteger(d.gate.requires?.level)&&Number.isInteger(d.gate.requires?.words),'district gate needs a valid requirement '+d.id);
+      require(d.gate.requires?.level>=1&&d.gate.requires?.level<=hsk.levels.length,'district gate level out of range '+d.id);
+    }
   }
+  require(['paving','grass'].includes(d.surface??'paving'),'district has an unknown surface '+d.id);
 }
 for(const b of world.buildings){
   require(districtIds.has(b.district),`building ${b.id} is in unknown district ${b.district}`);
   require(!b.object||objectIds.includes(b.object),`building ${b.id} names unknown object ${b.object}`);
   require([0,180].includes(b.rotation??0),`building ${b.id} may only face 0 or 180`);
   require(['tiled','shophouse','modern'].includes(b.style??'tiled'),`building ${b.id} has an unknown style`);
+  require(b.label===undefined||(typeof b.label==='string'&&b.label.trim().length>0),`building ${b.id} has an empty map label`);
 }
 for(const prop of world.props??[])require(districtIds.has(prop.district),'prop in unknown district '+prop.kind);
 for(const one of world.people??[])require(districtIds.has(one.district),'person in unknown district');
@@ -94,6 +107,12 @@ const shopIds=new Set(catalog.flatMap(shopsOf));
 // and the half-extents it reports are what decides whether two fittings end up inside each other.
 const modelSource=await readFile(new URL('../src/world/models.js',import.meta.url),'utf8');
 const modelKinds=new Set([...modelSource.matchAll(/kind==='([a-z]+)'/g)].map(m=>m[1]));
+// A building's signature details are the builders in models.js's DETAILS table.
+const detailNames=new Set([...modelSource.matchAll(/^\s+'([a-z-]+)'\(root,/gm)].map(m=>m[1]));
+for(const b of world.buildings){
+  require(Array.isArray(b.details??[]),`building ${b.id} details must be a list`);
+  for(const name of b.details??[])require(detailNames.has(name),`building ${b.id} asks for unknown detail ${name}`);
+}
 const modelHalves={};
 for(const m of modelSource.matchAll(/if\(kind==='([a-z]+)'\)[\s\S]*?return \{entity:e,half:\[([-\d.]+),([-\d.]+)\]/g))
   modelHalves[m[1]]=[Number(m[2]),Number(m[3])];
@@ -132,7 +151,9 @@ for(const [id,room] of Object.entries(rooms)){
   for(const fitting of room.fittings??[]){
     require(modelKinds.has(fitting.kind),`room ${id} uses unknown fitting ${fitting.kind}`);
     if(fitting.action)require(!!fitting.label,`room ${id} fitting ${fitting.kind} needs a label for its action`);
-    placed.push({name:`${fitting.kind} at ${fitting.x},${fitting.z}`,...footprintOf(fitting)});
+    // A fitting may stand on the upper floor (`y`), and nowhere else off the ground.
+    require(fitting.y===undefined||fitting.y===room.upper?.y,`room ${id} fitting ${fitting.kind} floats at y ${fitting.y}`);
+    placed.push({name:`${fitting.kind} at ${fitting.x},${fitting.z}`,floor:fitting.y??0,...footprintOf(fitting)});
   }
   if(room.lectern){
     placed.push({name:'the counter',x:room.lectern.x,z:room.lectern.z,hw:1.15,hd:.5});
@@ -144,15 +165,30 @@ for(const [id,room] of Object.entries(rooms)){
     if(!item)continue;
     const turned=((slot.rot??0)/90)%2!==0;
     if(item.kind!=='rug'&&item.kind!=='ceilinglamp')
-      placed.push({name:`the ${slotId} slot`,x:slot.x,z:slot.z,
+      placed.push({name:`the ${slotId} slot`,x:slot.x,z:slot.z,floor:slot.y??0,
         hw:(turned?item.footprint[1]:item.footprint[0])/2*.86,hd:(turned?item.footprint[0]:item.footprint[1])/2*.86});
+  }
+  // Two floors share one plan: the stairwell is taken on both, and only pieces on one floor can meet.
+  if(room.upper){
+    const [x0,z0,x1,z1]=room.upper.well;
+    for(const floor of [0,room.upper.y])placed.push({name:'the stairwell',floor,x:(x0+x1)/2,z:(z0+z1)/2,hw:(x1-x0)/2,hd:(z1-z0)/2});
+  }
+  // A back room can have its way back on a side or back wall instead of the front doorway, which
+  // is then walled up. The way back sits on its wall line, clear of the corners, and nothing stands in it.
+  if(room.returnWall!==undefined){
+    require(['east','west','back'].includes(room.returnWall)&&!!room.returnPlace,`room ${id} has a bad returnWall ${room.returnWall}`);
+    const back=room.returnWall==='back',[ex,ez]=room.exit,along=back?ex:ez,across=back?ez:ex;
+    const line=room.returnWall==='west'?-w/2:room.returnWall==='east'?w/2:-d/2;
+    require(Math.abs(along)<=(back?w:d)/2-.7,`room ${id} puts its way back too close to a corner`);
+    require(Math.abs(across-line)<=.7,`room ${id}'s way back should sit near the ${room.returnWall} wall`);
+    placed.push({name:'the way back',x:back?ex:line-Math.sign(line)*.55,z:back?line+.55:ez,hw:.55,hd:.55});
   }
   for(const part of placed){
     require(Math.abs(part.x)+part.hw<=w/2+.05&&Math.abs(part.z)+part.hd<=d/2+.05,`room ${id}: ${part.name} sticks through a wall`);
-    require(!(Math.abs(part.x)<.85+part.hw&&part.z+part.hd>d/2-.6),`room ${id}: ${part.name} stands in the doorway`);
+    if(!room.returnWall)require(!(Math.abs(part.x)<.85+part.hw&&part.z+part.hd>d/2-.6),`room ${id}: ${part.name} stands in the doorway`);
   }
   for(let i=0;i<placed.length;i++)for(let j=i+1;j<placed.length;j++)
-    require(!collide(placed[i],placed[j]),`room ${id}: ${placed[i].name} overlaps ${placed[j].name}`);
+    require((placed[i].floor??0)!==(placed[j].floor??0)||!collide(placed[i],placed[j]),`room ${id}: ${placed[i].name} overlaps ${placed[j].name}`);
   const spawn={x:room.spawn[0],z:room.spawn[1],hw:.34,hd:.34};
   for(const part of placed)require(!collide(part,spawn),`room ${id}: you would spawn inside ${part.name}`);
   // A shop that opens on a milestone needs the milestone, and a sign to explain it.
@@ -202,19 +238,46 @@ for(const recipe of recipes){
 for(const [id,room] of Object.entries(rooms)){
   if(room.returnPlace){
     require(!!rooms[room.returnPlace]||room.returnPlace==='city',`room ${id} returns to unknown room ${room.returnPlace}`);
-    require(room.returnPlace==='city'||rooms[room.returnPlace]?.annex?.room===id,`room ${id} returns to ${room.returnPlace}, which has no way back in`);
+    require(room.returnPlace==='city'||rooms[room.returnPlace]?.annexes?.some(a=>a.room===id),`room ${id} returns to ${room.returnPlace}, which has no way back in`);
     require(Array.isArray(room.returnSpawn)&&room.returnSpawn.length===3,`room ${id} needs a returnSpawn of [x,z,yaw]`);
   }
-  if(room.annex){
-    require(!!rooms[room.annex.room],`room ${id} opens onto unknown room ${room.annex.room}`);
-    require(rooms[room.annex.room]?.returnPlace===id,`room ${id} opens onto ${room.annex.room}, which does not lead back`);
-    require(Math.abs(room.annex.x)<=room.size[0]/2+.6,`room ${id} puts its annex door outside the wall`);
+  const [w,d]=room.size,onWall={};
+  for(const annex of room.annexes??[]){
+    require(!!rooms[annex.room],`room ${id} opens onto unknown room ${annex.room}`);
+    require(rooms[annex.room]?.returnPlace===id,`room ${id} opens onto ${annex.room}, which does not lead back`);
+    require(['east','west','back'].includes(annex.wall),`room ${id} annex ${annex.room} has a bad wall ${annex.wall}`);
+    const back=annex.wall==='back',along=back?annex.x:annex.z,across=back?annex.z:annex.x;
+    const span=(back?w:d)/2,line=annex.wall==='west'?-w/2:annex.wall==='east'?w/2:-d/2;
+    require(Math.abs(along)<=span-.7,`room ${id} puts its annex door too close to a corner`);
+    require(Math.abs(across-line)<=.6,`room ${id} annex ${annex.room}'s coordinate off the wall should sit near the wall line`);
+    if(back)for(const wx of room.window??[])
+      require(Math.abs(annex.x-wx)>=1.4,`room ${id}'s back annex ${annex.room} sits too close to a window`);
+    for(const other of onWall[annex.wall]??[])
+      require(Math.abs(along-other)>=1.3,`room ${id} has two annex doors on the ${annex.wall} wall too close together`);
+    (onWall[annex.wall]??=[]).push(along);
   }
 }
 
+// The market, the 易混词 deck and the level checks keep their clip ids in their own files.
+const [market,confusables,levels,metro]=await Promise.all(['market.json','confusables.json','levels.json','metro.json'].map(f=>read(f)));
+const featureClips=[...new Set([...Object.keys(market.lines).map(k=>'market-'+k),...Object.keys(metro.lines).map(k=>'metro-'+k),...Object.keys(market.totals).map(n=>'market-total-'+n),
+  ...Object.values(confusables.prompts).map(p=>p.audio),...confusables.groups.flatMap(g=>g.members).map(m=>m.audio),
+  ...Object.values(levels.lines).map(l=>l.audio)].filter(Boolean))];
+// Festival lines: greetings and replies once per townsperson, the rest by the teacher (src/core/festivals.js).
+const festivalsData=await read('festivals.json');
+for(const key of Object.keys(festivalsData.lines))
+  featureClips.push(...(/^(hi-|reply)/.test(key)?festivalsData.people.map(p=>`fest-${key}-${p}`):['fest-'+key]));
+featureClips.push(...festivalsData.riddles.map(r=>'fest-riddle-'+r.n));
+for(const f of festivalsData.festivals)require(catalog.some(i=>i.id===f.food&&[].concat(i.shop).includes('fest-'+f.id)),`festival ${f.id}: its stall does not sell ${f.food}`);
+// Friendship lines are friend-<npc>-<key>, the shared gift replies once per person; gifts and presents are real items.
+const friendsData=await read('friends.json');
+for(const [npc,person] of Object.entries(friendsData.people)){
+  featureClips.push(...Object.keys({...friendsData.lines[npc],...friendsData.shared}).map(k=>`friend-${npc}-${k}`));
+  for(const id of [...person.liked,person.present.item].filter(Boolean))require(catalog.some(i=>i.id===id),`friends ${npc}: unknown item ${id}`);
+}
 const lessonAudioSources=lessons.flatMap(l=>[...l.nodes,...Object.values(l.extraLines??{})]);
 const needed=[...words,...ambient,...lessonAudioSources,...catalog].map(x=>x.audio).filter(Boolean)
-  .concat(objectIds.map(id=>'obj-'+id));
+  .concat(objectIds.map(id=>'obj-'+id),[...signIds].map(id=>'sign-'+id),featureClips);
 const missing=[],unreviewed=[];
 for(const id of needed){
   const clip=manifest.clips[id];

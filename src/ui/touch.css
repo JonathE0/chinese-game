@@ -1,0 +1,12 @@
+/* Touch controls: only shown once the game knows it is on a touch screen. */
+#world{touch-action:none}
+.touch-pad{display:none}
+body.touch.playing .touch-pad{display:block}
+body.riding .touch-pad{display:none}
+.touch-stick{position:fixed;left:96px;top:calc(100% - 220px);width:116px;height:116px;margin:-58px 0 0 -58px;border-radius:50%;border:2px solid #fff8e7b0;background:#faf5e533;pointer-events:none;z-index:9;opacity:.55}
+.touch-stick.active{opacity:.95}
+.touch-stick i{position:absolute;left:50%;top:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;background:#395e4bcc;border:1px solid #7e9b78}
+.touch-buttons{position:fixed;right:18px;bottom:250px;z-index:9;display:flex;flex-direction:column;gap:14px;align-items:center}
+.touch-buttons button{width:64px;height:64px;border-radius:50%;background:#395e4bef;color:#fff4db;border:1px solid #7e9b78;box-shadow:0 6px 20px #314b3340;font-size:19px;touch-action:none;user-select:none}
+.touch-buttons button[hidden]{display:none}
+body.touch #interact kbd,body.touch .controls{display:none}

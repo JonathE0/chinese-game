@@ -1,4 +1,5 @@
 import {escapeHtml as esc} from '../core/language.js';
+import {pinyinHtml} from './shell.js';
 import {TranslationService,MAX_TRANSLATION_LENGTH} from '../services/translation.js';
 import {icon} from './art.js';
 import {addWord,hasWord} from '../core/bank.js';
@@ -36,7 +37,7 @@ export function installLookup(ctx,translations=new TranslationService()){
     const saved=new Set(ctx.profile.saved.map(word=>word.zh));
     return words.map((word,index)=>`<div class="lookup-word">
       <div class="lookup-zh">${esc(word.zh)}</div>
-      <div class="lookup-body"><div class="lookup-pinyin">${esc(word.pinyin||'—')}</div><div class="lookup-en">${esc(word.en||'不在词典中 / not in dictionary')}</div></div>
+      <div class="lookup-body"><div class="lookup-pinyin">${word.pinyin?pinyinHtml(word.pinyin,word.zh,{always:true}):'—'}</div><div class="lookup-en">${esc(word.en||'不在词典中 / not in dictionary')}</div></div>
       ${word.unknown?'':`<button class="lookup-save" data-save="${index}" aria-label="收藏${esc(word.zh)}">${saved.has(word.zh)?'已收藏':'收藏'}</button>`}
     </div>`).join('');
   };
@@ -81,7 +82,7 @@ export function installLookup(ctx,translations=new TranslationService()){
       return loadWords(text,token,popup.querySelector('.lookup-words'),rect);
     }
     const meaning=translated.status==='translated'
-      ?`<section class="lookup-translation"><div class="lookup-meaning">${esc(translated.meaning)}</div>${translated.pinyin?`<div class="lookup-sentence-pinyin">${esc(translated.pinyin)}</div>`:''}</section>`
+      ?`<section class="lookup-translation"><div class="lookup-meaning">${esc(translated.meaning)}</div>${translated.pinyin?`<div class="lookup-sentence-pinyin">${pinyinHtml(translated.pinyin,'',{always:true})}</div>`:''}</section>`
       :`<p class="lookup-status">暂无整句翻译。 / Translation unavailable for this selection.</p>`;
     popup.innerHTML=header(text)+meaning+`<details class="lookup-details"><summary>词语详情 / Vocabulary details</summary><div class="lookup-words"><p class="lookup-loading">正在载入词典… / Loading dictionary…</p></div></details>`;
     wireClose();place(rect);

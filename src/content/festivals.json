@@ -1,0 +1,41 @@
+{
+  "_note": "Festivals (src/core/festivals.js): the last day of every game week, cycling through this list by week. Clip ids: fest-<key>-<person> for greetings and replies (once per townsperson voice), fest-<key> for the teacher's noticeboard lines, fest-riddle-<n> for riddles. Riddle parts need no clip.",
+  "people": ["lin", "mei", "chen"],
+  "hongbao": 8,
+  "riddleCoins": 1,
+  "festivals": [
+    {"id": "chunjie", "zh": "春节", "pinyin": "Chūnjié", "en": "Spring Festival", "food": "dumplings"},
+    {"id": "yuanxiao", "zh": "元宵节", "pinyin": "Yuánxiāojié", "en": "Lantern Festival", "food": "tangyuan"},
+    {"id": "duanwu", "zh": "端午节", "pinyin": "Duānwǔjié", "en": "Dragon Boat Festival", "food": "zongzi"},
+    {"id": "zhongqiu", "zh": "中秋节", "pinyin": "Zhōngqiūjié", "en": "Mid-Autumn Festival", "food": "mooncake"}
+  ],
+  "lines": {
+    "hi-chunjie": {"zh": "新年快乐！", "pinyin": "Xīnnián kuàilè!", "en": "Happy New Year!"},
+    "hi-yuanxiao": {"zh": "元宵节快乐！", "pinyin": "Yuánxiāojié kuàilè!", "en": "Happy Lantern Festival!"},
+    "hi-duanwu": {"zh": "端午节快乐！", "pinyin": "Duānwǔjié kuàilè!", "en": "Happy Dragon Boat Festival!"},
+    "hi-zhongqiu": {"zh": "中秋节快乐！", "pinyin": "Zhōngqiūjié kuàilè!", "en": "Happy Mid-Autumn Festival!"},
+    "reply-chunjie": {"zh": "恭喜发财！这是给你的红包。", "pinyin": "Gōngxǐ fācái! Zhè shì gěi nǐ de hóngbāo.", "en": "Wishing you prosperity! Here's a red envelope for you."},
+    "reply": {"zh": "谢谢！你也是！", "pinyin": "Xièxie! Nǐ yě shì!", "en": "Thanks! You too!"},
+    "about-chunjie": {"zh": "今天是春节，大家一起吃饺子、贴春联。", "pinyin": "Jīntiān shì Chūnjié, dàjiā yìqǐ chī jiǎozi, tiē chūnlián.", "en": "Today is Spring Festival: everyone eats dumplings and puts up spring couplets."},
+    "about-yuanxiao": {"zh": "今天是元宵节，晚上可以看花灯、猜灯谜。", "pinyin": "Jīntiān shì Yuánxiāojié, wǎnshang kěyǐ kàn huādēng, cāi dēngmí.", "en": "Today is the Lantern Festival: in the evening you can see the lanterns and guess lantern riddles."},
+    "about-duanwu": {"zh": "今天是端午节，大家吃粽子、看龙舟。", "pinyin": "Jīntiān shì Duānwǔjié, dàjiā chī zòngzi, kàn lóngzhōu.", "en": "Today is the Dragon Boat Festival: everyone eats zongzi and watches the dragon boats."},
+    "about-zhongqiu": {"zh": "今天是中秋节，晚上一起吃月饼、看月亮。", "pinyin": "Jīntiān shì Zhōngqiūjié, wǎnshang yìqǐ chī yuèbǐng, kàn yuèliang.", "en": "Today is the Mid-Autumn Festival: in the evening we eat mooncakes and look at the moon."}
+  },
+  "riddles": [
+    {"n": 1, "zh": "两棵树", "pinyin": "Liǎng kē shù", "en": "Two trees", "answer": "林", "parts": "木 + 木 = 林"},
+    {"n": 2, "zh": "三棵树", "pinyin": "Sān kē shù", "en": "Three trees", "answer": "森", "parts": "木 + 木 + 木 = 森"},
+    {"n": 3, "zh": "两个人", "pinyin": "Liǎng ge rén", "en": "Two people", "answer": "从", "parts": "人 + 人 = 从"},
+    {"n": 4, "zh": "三个人", "pinyin": "Sān ge rén", "en": "Three people", "answer": "众", "parts": "人 + 人 + 人 = 众"},
+    {"n": 5, "zh": "太阳和月亮", "pinyin": "Tàiyáng hé yuèliang", "en": "The sun and the moon", "answer": "明", "parts": "日 + 月 = 明"},
+    {"n": 6, "zh": "两个月亮", "pinyin": "Liǎng ge yuèliang", "en": "Two moons", "answer": "朋", "parts": "月 + 月 = 朋"},
+    {"n": 7, "zh": "女儿和儿子", "pinyin": "Nǚ'ér hé érzi", "en": "A daughter and a son", "answer": "好", "parts": "女 + 子 = 好"},
+    {"n": 8, "zh": "一个人靠着一棵树", "pinyin": "Yí ge rén kàozhe yì kē shù", "en": "A person leaning on a tree", "answer": "休", "parts": "亻 + 木 = 休"},
+    {"n": 9, "zh": "一口咬掉牛尾巴", "pinyin": "Yì kǒu yǎo diào niú wěiba", "en": "One bite takes off the cow's tail", "answer": "告", "parts": "牛（去掉尾巴）+ 口 = 告"},
+    {"n": 10, "zh": "一人在内", "pinyin": "Yì rén zài nèi", "en": "A person inside 内", "answer": "肉", "parts": "内 + 人 = 肉"}
+  ],
+  "ui": {
+    "festival": {"zh": "过节", "en": "festival"},
+    "riddle": {"zh": "猜灯谜", "en": "guess the riddle"},
+    "guess": {"zh": "打一字", "pinyin": "dǎ yí zì", "en": "guess the character"}
+  }
+}

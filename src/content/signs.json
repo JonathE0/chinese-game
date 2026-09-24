@@ -1,0 +1,545 @@
+{
+  "note": "Exact text of every sign drawn in 3D, keyed by the text itself, with its reading. Looking at a sign shows this text; F saves it to the word bank. Voice clips are sign-<id>.",
+  "signs": {
+    "我的家": {
+      "id": "room-home",
+      "pinyin": "wǒ de jiā",
+      "en": "My home"
+    },
+    "词语馆": {
+      "id": "room-hall",
+      "pinyin": "cíyǔ guǎn",
+      "en": "The word hall"
+    },
+    "生活馆": {
+      "id": "room-lifestyle",
+      "pinyin": "shēnghuó guǎn",
+      "en": "Lifestyle store"
+    },
+    "慢慢咖啡": {
+      "id": "room-cafe",
+      "pinyin": "mànman kāfēi",
+      "en": "Slow coffee"
+    },
+    "青禾超市": {
+      "id": "room-supermarket",
+      "pinyin": "Qīnghé chāoshì",
+      "en": "Qinghe supermarket"
+    },
+    "青禾灯具": {
+      "id": "room-lights",
+      "pinyin": "Qīnghé dēngjù",
+      "en": "Qinghe lighting"
+    },
+    "家常餐厅": {
+      "id": "room-restaurant",
+      "pinyin": "Jiācháng cāntīng",
+      "en": "Home-style restaurant"
+    },
+    "家居小铺": {
+      "id": "room-homeware",
+      "pinyin": "jiājū xiǎo pù",
+      "en": "Home goods"
+    },
+    "旧物铺": {
+      "id": "room-resale",
+      "pinyin": "jiùwù pù",
+      "en": "Second-hand shop"
+    },
+    "青禾银行": {
+      "id": "room-bank",
+      "pinyin": "Qīnghé yínháng",
+      "en": "Qinghe bank"
+    },
+    "麦香面包": {
+      "id": "room-bakery",
+      "pinyin": "Màixiāng miànbāo",
+      "en": "Wheat-scent bakery"
+    },
+    "青禾书馆": {
+      "id": "room-library",
+      "pinyin": "Qīnghé shūguǎn",
+      "en": "Qinghe library"
+    },
+    "青禾茶楼": {
+      "id": "room-teahouse",
+      "pinyin": "Qīnghé chálóu",
+      "en": "Qinghe tea house"
+    },
+    "书房": {
+      "id": "room-study",
+      "pinyin": "shūfáng",
+      "en": "Study"
+    },
+    "卧室": {
+      "id": "room-bedroom",
+      "pinyin": "wòshì",
+      "en": "Bedroom"
+    },
+    "我家的厨房": {
+      "id": "room-kitchen",
+      "pinyin": "wǒ jiā de chúfáng",
+      "en": "Home kitchen"
+    },
+    "星光五金百货": {
+      "id": "room-hardware",
+      "pinyin": "Xīngguāng wǔjīn bǎihuò",
+      "en": "Starlight hardware & home"
+    },
+    "阅览室": {
+      "id": "room-reading",
+      "pinyin": "yuèlǎnshì",
+      "en": "Reading room"
+    },
+    "自习室": {
+      "id": "room-studyroom",
+      "pinyin": "zìxíshì",
+      "en": "Study room"
+    },
+    "听力室": {
+      "id": "room-listening",
+      "pinyin": "tīnglìshì",
+      "en": "Listening room"
+    },
+    "庭院": {
+      "id": "room-courtyard",
+      "pinyin": "tíngyuàn",
+      "en": "Courtyard"
+    },
+    "青禾茶铺": {
+      "id": "board-tea-house",
+      "pinyin": "Qīnghé chápù",
+      "en": "Qinghe Tea Stall"
+    },
+    "学海无涯": {
+      "id": "paifang-sea-of-learning",
+      "pinyin": "xué hǎi wú yá",
+      "en": "The sea of learning has no shore"
+    },
+    "小小商店": {
+      "id": "board-little-shop",
+      "pinyin": "Xiǎoxiǎo shāngdiàn",
+      "en": "The Little Shop"
+    },
+    "客栈": {
+      "id": "board-inn",
+      "pinyin": "kèzhàn",
+      "en": "Inn"
+    },
+    "厨房": {
+      "id": "kitchen",
+      "pinyin": "chúfáng",
+      "en": "Kitchen"
+    },
+    "服装店": {
+      "id": "board-clothes",
+      "pinyin": "fúzhuāngdiàn",
+      "en": "Clothes shop"
+    },
+    "青禾邮局": {
+      "id": "board-post-office",
+      "pinyin": "Qīnghé yóujú",
+      "en": "Qinghe Post Office"
+    },
+    "青禾药店": {
+      "id": "board-pharmacy",
+      "pinyin": "Qīnghé yàodiàn",
+      "en": "Qinghe Pharmacy"
+    },
+    "商业街": {
+      "id": "district-market",
+      "pinyin": "Shāngyè jiē",
+      "en": "Shopping Street"
+    },
+    "河边文化街": {
+      "id": "district-riverside",
+      "pinyin": "Hébiān wénhuà jiē",
+      "en": "Riverside Quarter"
+    },
+    "莲池公园": {
+      "id": "park",
+      "pinyin": "Liánchí Gōngyuán",
+      "en": "Lotus Pond Park"
+    },
+    "学而时习之": {
+      "id": "motto-analects",
+      "pinyin": "xué ér shí xí zhī",
+      "en": "Learn, and practise it often (the Analects of Confucius)"
+    },
+    "建材部": {
+      "id": "dept-materials",
+      "pinyin": "jiàncái bù",
+      "en": "Building materials"
+    },
+    "五金部": {
+      "id": "dept-hardware",
+      "pinyin": "wǔjīn bù",
+      "en": "Hardware department"
+    },
+    "灯具部": {
+      "id": "dept-lighting",
+      "pinyin": "dēngjù bù",
+      "en": "Lighting department"
+    },
+    "家居部": {
+      "id": "dept-home",
+      "pinyin": "jiājū bù",
+      "en": "Home furnishings department"
+    },
+    "全店目录": {
+      "id": "dept-directory",
+      "pinyin": "quán diàn mùlù",
+      "en": "Store directory"
+    },
+    "生活用品部": {
+      "id": "dept-household",
+      "pinyin": "shēnghuó yòngpǐn bù",
+      "en": "Household goods department"
+    },
+    "收银台": {
+      "id": "checkout",
+      "pinyin": "shōuyíntái",
+      "en": "Checkout"
+    },
+    "寄信": {
+      "id": "send-letters",
+      "pinyin": "jì xìn",
+      "en": "Send letters"
+    },
+    "包裹": {
+      "id": "parcels",
+      "pinyin": "bāoguǒ",
+      "en": "Parcels"
+    },
+    "邮票": {
+      "id": "stamps",
+      "pinyin": "yóupiào",
+      "en": "Stamps"
+    },
+    "中药": {
+      "id": "chinese-medicine",
+      "pinyin": "zhōngyào",
+      "en": "Chinese medicine"
+    },
+    "西药": {
+      "id": "western-medicine",
+      "pinyin": "xīyào",
+      "en": "Western medicine"
+    },
+    "取药": {
+      "id": "collect-medicine",
+      "pinyin": "qǔ yào",
+      "en": "Collect medicine"
+    },
+    "前台": {
+      "id": "reception",
+      "pinyin": "qiántái",
+      "en": "Reception"
+    },
+    "客房": {
+      "id": "guest-rooms",
+      "pinyin": "kèfáng",
+      "en": "Guest rooms"
+    },
+    "男装": {
+      "id": "menswear",
+      "pinyin": "nánzhuāng",
+      "en": "Menswear"
+    },
+    "女装": {
+      "id": "womenswear",
+      "pinyin": "nǚzhuāng",
+      "en": "Womenswear"
+    },
+    "试衣间": {
+      "id": "fitting-room",
+      "pinyin": "shìyījiān",
+      "en": "Fitting room"
+    },
+    "鞋": {
+      "id": "shoes",
+      "pinyin": "xié",
+      "en": "Shoes"
+    },
+    "帽子": {
+      "id": "hats",
+      "pinyin": "màozi",
+      "en": "Hats"
+    },
+    "莲心亭": {
+      "id": "pavilion",
+      "pinyin": "Liánxīn Tíng",
+      "en": "Lotus Heart Pavilion"
+    },
+    "荷风水榭": {
+      "id": "waterside",
+      "pinyin": "hé fēng shuǐxiè",
+      "en": "Lotus Breeze Pavilion"
+    },
+    "云海银行": {
+      "id": "tower-bank",
+      "pinyin": "Yúnhǎi yínháng",
+      "en": "Yunhai Bank"
+    },
+    "星光百货": {
+      "id": "tower-department",
+      "pinyin": "Xīngguāng bǎihuò",
+      "en": "Starlight Department Store"
+    },
+    "一号书店": {
+      "id": "tower-bookstore",
+      "pinyin": "Yī hào shūdiàn",
+      "en": "Bookstore No. 1"
+    },
+    "中山医院": {
+      "id": "tower-hospital",
+      "pinyin": "Zhōngshān yīyuàn",
+      "en": "Zhongshan Hospital"
+    },
+    "海风面馆": {
+      "id": "tower-noodles",
+      "pinyin": "Hǎifēng miànguǎn",
+      "en": "Sea Breeze Noodle House"
+    },
+    "光明电影院": {
+      "id": "tower-cinema",
+      "pinyin": "Guāngmíng diànyǐngyuàn",
+      "en": "Guangming Cinema"
+    },
+    "欢迎来到青禾": {
+      "id": "welcome-qinghe",
+      "pinyin": "huānyíng láidào Qīnghé",
+      "en": "Welcome to Qinghe"
+    },
+    "工地": {
+      "id": "building-site",
+      "pinyin": "gōngdì",
+      "en": "Building site"
+    },
+    "暂停营业": {
+      "id": "closed",
+      "pinyin": "zàntíng yíngyè",
+      "en": "Temporarily closed"
+    },
+    "生词本": {
+      "id": "word-bank",
+      "pinyin": "shēngcíběn",
+      "en": "Word bank"
+    },
+    "地铁 1 号线": {
+      "id": "metro-line-1",
+      "pinyin": "dìtiě yī hào xiàn",
+      "en": "Metro Line 1"
+    },
+    "公交站": {
+      "id": "bus-stop",
+      "pinyin": "gōngjiāo zhàn",
+      "en": "Bus stop"
+    },
+    "便利店": {
+      "id": "convenience-store",
+      "pinyin": "biànlìdiàn",
+      "en": "Convenience store"
+    },
+    "欢迎来到云海": {
+      "id": "welcome-yunhai",
+      "pinyin": "huānyíng láidào Yúnhǎi",
+      "en": "Welcome to Yunhai"
+    },
+    "五金 · 家居 · 灯具": {
+      "id": "hardware-banner",
+      "pinyin": "wǔjīn · jiājū · dēngjù",
+      "en": "Hardware · Home · Lighting"
+    },
+    "营业中  OPEN": {
+      "id": "open",
+      "pinyin": "yíngyè zhōng",
+      "en": "Open"
+    },
+    "地铁": {
+      "id": "metro",
+      "pinyin": "dìtiě",
+      "en": "Metro"
+    },
+    "糖葫芦摊": {
+      "id": "stall-hawthorn",
+      "pinyin": "tánghúlu tān",
+      "en": "Candied hawthorn stall"
+    },
+    "烤串摊": {
+      "id": "stall-skewers",
+      "pinyin": "kǎochuàn tān",
+      "en": "Skewer stall"
+    },
+    "馄饨摊": {
+      "id": "stall-wonton",
+      "pinyin": "húntun tān",
+      "en": "Wonton stall"
+    },
+    "面摊": {
+      "id": "stall-noodles",
+      "pinyin": "miàn tān",
+      "en": "Noodle stall"
+    },
+    "早点摊": {
+      "id": "stall-breakfast",
+      "pinyin": "zǎodiǎn tān",
+      "en": "Breakfast stall"
+    },
+    "地铁站台": {
+      "id": "metro-platform",
+      "pinyin": "dìtiě zhàntái",
+      "en": "Metro platform"
+    },
+    "新年快乐": {
+      "id": "festival-new-year",
+      "pinyin": "xīnnián kuàilè",
+      "en": "Happy New Year"
+    },
+    "欢迎光临": {
+      "id": "welcome",
+      "pinyin": "huānyíng guānglín",
+      "en": "Welcome"
+    },
+    "请排队": {
+      "id": "please-queue",
+      "pinyin": "qǐng páiduì",
+      "en": "Please queue"
+    },
+    "营业时间": {
+      "id": "opening-hours",
+      "pinyin": "yíngyè shíjiān",
+      "en": "Opening hours"
+    },
+    "小心地滑": {
+      "id": "wet-floor",
+      "pinyin": "xiǎoxīn dì huá",
+      "en": "Caution: wet floor"
+    },
+    "今日特价": {
+      "id": "special-offer",
+      "pinyin": "jīnrì tèjià",
+      "en": "Today's special offer"
+    },
+    "今日推荐": {
+      "id": "recommended",
+      "pinyin": "jīnrì tuījiàn",
+      "en": "Today's recommendation"
+    },
+    "新鲜": {
+      "id": "fresh",
+      "pinyin": "xīnxiān",
+      "en": "Fresh"
+    },
+    "水果区": {
+      "id": "dept-fruit",
+      "pinyin": "shuǐguǒ qū",
+      "en": "Fruit"
+    },
+    "饮料": {
+      "id": "dept-drinks",
+      "pinyin": "yǐnliào",
+      "en": "Drinks"
+    },
+    "零食": {
+      "id": "dept-snacks",
+      "pinyin": "língshí",
+      "en": "Snacks"
+    },
+    "日用品": {
+      "id": "dept-daily-goods",
+      "pinyin": "rìyòngpǐn",
+      "en": "Household goods"
+    },
+    "菜单": {
+      "id": "menu",
+      "pinyin": "càidān",
+      "en": "Menu"
+    },
+    "茶叶": {
+      "id": "dept-tea-leaves",
+      "pinyin": "cháyè",
+      "en": "Tea leaves"
+    },
+    "点心": {
+      "id": "dept-pastries",
+      "pinyin": "diǎnxin",
+      "en": "Pastries"
+    },
+    "借书": {
+      "id": "borrow-books",
+      "pinyin": "jiè shū",
+      "en": "Borrow books"
+    },
+    "还书": {
+      "id": "return-books",
+      "pinyin": "huán shū",
+      "en": "Return books"
+    },
+    "新书": {
+      "id": "new-books",
+      "pinyin": "xīn shū",
+      "en": "New books"
+    },
+    "儿童读物": {
+      "id": "childrens-books",
+      "pinyin": "értóng dúwù",
+      "en": "Children's books"
+    },
+    "请保持安静": {
+      "id": "keep-quiet",
+      "pinyin": "qǐng bǎochí ānjìng",
+      "en": "Please keep quiet"
+    },
+    "存款": {
+      "id": "deposits",
+      "pinyin": "cúnkuǎn",
+      "en": "Deposits"
+    },
+    "取款": {
+      "id": "withdrawals",
+      "pinyin": "qǔkuǎn",
+      "en": "Withdrawals"
+    },
+    "咨询": {
+      "id": "enquiries",
+      "pinyin": "zīxún",
+      "en": "Enquiries"
+    },
+    "家具": {
+      "id": "dept-furniture",
+      "pinyin": "jiājù",
+      "en": "Furniture"
+    },
+    "床上用品": {
+      "id": "dept-bedding",
+      "pinyin": "chuángshàng yòngpǐn",
+      "en": "Bedding"
+    },
+    "厨具": {
+      "id": "dept-kitchenware",
+      "pinyin": "chújù",
+      "en": "Kitchenware"
+    },
+    "灯具": {
+      "id": "dept-lamps",
+      "pinyin": "dēngjù",
+      "en": "Lighting"
+    },
+    "工具": {
+      "id": "dept-tools",
+      "pinyin": "gōngjù",
+      "en": "Tools"
+    },
+    "五金": {
+      "id": "dept-hardware-goods",
+      "pinyin": "wǔjīn",
+      "en": "Hardware"
+    },
+    "旧物回收": {
+      "id": "buy-second-hand",
+      "pinyin": "jiùwù huíshōu",
+      "en": "We buy second-hand goods"
+    }
+  }
+}

@@ -3,11 +3,10 @@
   "station": {
     "x": -7.5,
     "z": 14.6,
-    "rotation": 180,
+    "rotation": 0,
     "zh": "青禾地铁站",
     "pinyin": "Qīnghé dìtiězhàn",
-    "en": "Qinghe metro station",
-    "label": "进地铁站 · 去市里"
+    "en": "Qinghe metro station"
   },
   "fare": {
     "single": 6,
@@ -35,7 +34,9 @@
     "ground": "#8d8f93",
     "pave": "#a3a49f",
     "sky": "#6d7d8c",
-    "returnLabel": "坐地铁回青禾 · BACK TO TOWN"
+    "returnLabel": "坐地铁回青禾 · BACK TO TOWN",
+    "returnPlace": "metro-platform",
+    "returnSpawn": [1.7, 2.3, 125]
   },
   "towers": [
     {

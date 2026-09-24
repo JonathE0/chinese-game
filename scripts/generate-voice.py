@@ -21,6 +21,23 @@ def read_json(path):
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# A lone character read with its less common reading gives the voice no context, so it falls back
+# to the usual reading (重 comes out zhòng, not chóng). Those clips speak a character with the same
+# syllable and tone instead. 卡 qiǎ has no such character and still needs a human recording.
+STAND_INS = {
+    "hsk-3be88885": "虫",  # 重 chóng
+    "hsk-4b8bc6a1": "赣",  # 干 gàn
+    "hsk-82ca4a6b": "控",  # 空 kòng
+    "hsk-939e2804": "掉",  # 调 diào
+    "hsk-ad9a4b24": "赚",  # 转 zhuàn
+    "hsk-da1f520c": "鼠",  # 数 shǔ
+}
+
+
+def spoken(line):
+    return STAND_INS.get(line["id"], line["text"])
+
+
 def collect_lines():
     """Return [{id, text, speaker, kind}] for every audio id in content."""
     lines, seen = [], set()
@@ -52,10 +69,53 @@ def collect_lines():
             text = f"{item['zh']}。{item['description']}"
         add(item.get("audio"), text, "chen", "shop")
 
+    # Ordering food at the snack stalls: market-<key> lines and market-total-<n> totals.
+    market = read_json(CONTENT / "market.json")
+    for key, line in market["lines"].items():
+        add("market-" + key, line["zh"], market["speaker"], "dialogue")
+    for n, text in market["totals"].items():
+        add("market-total-" + n, text, market["speaker"], "dialogue")
+
+    # Station announcements and the listening question on the metro ride: metro-<key>.
+    metro = read_json(CONTENT / "metro.json")
+    for key, line in metro["lines"].items():
+        add("metro-" + key, line["zh"], metro["speaker"], "dialogue")
+
+    # Festivals: greetings and replies once in each townsperson's voice (fest-<key>-<person>),
+    # the noticeboard lines (fest-<key>) and the lantern riddles (fest-riddle-<n>) by the teacher.
+    festivals = read_json(CONTENT / "festivals.json")
+    for key, line in festivals["lines"].items():
+        if key.startswith(("hi-", "reply")):
+            for person in festivals["people"]:
+                add(f"fest-{key}-{person}", line["zh"], person, "dialogue")
+        else:
+            add("fest-" + key, line["zh"], "teacher", "dialogue")
+    for riddle in festivals["riddles"]:
+        add(f"fest-riddle-{riddle['n']}", riddle["zh"], "teacher", "dialogue")
+
     # HSK words live in public/ because the study hall loads them lazily; only the
     # levels flagged by scripts/build-hsk.py carry an audio id.
     for key, entry in read_json(CONTENT / "objects.json")["objects"].items():
         add("obj-" + key, entry["zh"], "teacher", "object")
+    for text, entry in read_json(CONTENT / "signs.json")["signs"].items():
+        add("sign-" + entry["id"], text, "teacher", "sign")
+    for line in read_json(CONTENT / "levels.json")["lines"].values():
+        add(line["audio"], line["zh"], "teacher", "dialogue")
+
+    # Friendship lines, in each townsperson's own voice: friend-<npc>-<key>. The shared gift
+    # replies are voiced once per person.
+    friends = read_json(CONTENT / "friends.json")
+    for npc in friends["people"]:
+        for key, line in {**friends["lines"][npc], **friends["shared"]}.items():
+            add(f"friend-{npc}-{key}", line["zh"], npc, "dialogue")
+
+    # The 易混词 deck: its two prompts, and members without an HSK clip (homophones share one).
+    confusables = read_json(CONTENT / "confusables.json")
+    for prompt in confusables["prompts"].values():
+        add(prompt["audio"], prompt["zh"], "teacher", "prompt")
+    for member in (m for g in confusables["groups"] for m in g["members"]):
+        if member.get("audio") and member["audio"] not in seen:
+            add(member["audio"], member["zh"], "teacher", "word")
 
     hsk = ROOT / "public" / "hsk" / "words.json"
     if hsk.exists():
@@ -68,7 +128,7 @@ def collect_lines():
 def fingerprint(line, cast):
     voice = cast[line["speaker"]]
     payload = json.dumps(
-        [line["text"], voice["voice"], voice.get("rate", "+0%"), voice.get("pitch", "+0Hz")],
+        [spoken(line), voice["voice"], voice.get("rate", "+0%"), voice.get("pitch", "+0Hz")],
         ensure_ascii=False,
     )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
@@ -77,7 +137,7 @@ def fingerprint(line, cast):
 async def synthesize(edge_tts, line, cast, path):
     voice = cast[line["speaker"]]
     comm = edge_tts.Communicate(
-        line["text"],
+        spoken(line),
         voice["voice"],
         rate=voice.get("rate", "+0%"),
         pitch=voice.get("pitch", "+0Hz"),

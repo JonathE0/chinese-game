@@ -14,6 +14,8 @@ recipes) is indexed in `docs/CONTENT_MAP.md`, which is generated; never edit it 
   output. Run this after changes.
 - `npm run dev` — Vite dev server. The Browser pane config `town` runs it on port 5174, which
   Playwright also uses.
+- `http://127.0.0.1:5174/?dev` — dev mode for previewing (dev server only): every district gate
+  open, wallet topped up to 1000, the save folder never touched.
 - `npm test` — unit tests (`node --test tests/*.test.js`)
 - `npm run check:content` — content validator (also reports voice-clip coverage), then regenerates
   the content map. `npm run map` regenerates the map alone.
@@ -24,7 +26,7 @@ recipes) is indexed in `docs/CONTENT_MAP.md`, which is generated; never edit it 
 
 ## Layout
 - `src/content/` — game data: `quests.json`, `npcs.json`, `rooms.json` (interiors), `world.json`
-  (districts, buildings), `city.json` (Yunhai), `catalog.json`, `recipes.json`, `sites.json`,
+  (districts, buildings), `city.json` (Yunhai), `catalog.json`, `recipes.json`, `sites.json`, `garden.json` (莲池公园),
   `vocabulary.json`, `lessons/`
 - `src/core/` — game rules (economy, review, progress, metro, cooking, construction); unit-tested
 - `src/world/` — PlayCanvas scene (`town.js`, `city.js`, `interior.js`)
@@ -55,6 +57,11 @@ Delegate to the project agents in `.claude/agents/`:
 - `reviewer` (Opus, read-only) — reviews finished agent work for bugs, plan compliance and
   invented Chinese before it counts as done
 
+Agents keep resumable checkpoints in `.claude/checkpoints/<task id>.md` (gitignored), and the main
+session keeps `.claude/checkpoints/_session.md`: the waves, each task id with its agent id, and its
+status. After a usage limit or outage, read `_session.md` first, then resume each unfinished agent
+with SendMessage (same agent id) or relaunch it on the same task id so it picks up its checkpoint.
+
 Add a new agent (and list it here) when a job keeps recurring and produces bulky output the main
 conversation doesn't need word for word. Give it a narrow job, the cheapest model that does it
 well, and the fewest tools.
@@ -64,3 +71,7 @@ and anything that depends on what was just discussed. Run agents in parallel whe
 touch the same files: wire shared files first, and start the dev server first so parallel
 Playwright runs reuse it. Agent worktrees start from the last commit, so they don't see uncommitted
 work. Don't send several agents after the same question.
+
+## Output and code style
+- Chat replies and agent reports use caveman style (the `caveman` skill, level full): terse, no filler, with code, paths, numbers and errors exact. Files, docs, JSON and commits stay in normal prose.
+- Code follows the ponytail rules: YAGNI, reuse what the codebase, standard library or installed dependencies already provide, and write the minimum working diff, without skimping on understanding, validation, data safety, security or accessibility.

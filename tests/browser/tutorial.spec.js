@@ -14,7 +14,7 @@ test('a fresh game starts the tutorial, a turn of the view finishes step 1, and 
   await expect(card).toBeHidden();                           // not before 开始旅行
   await page.getByRole('button',{name:'开始旅行'}).click();
   await expect(card).toBeVisible();
-  await expect(card).toContainText('1 / 15');
+  await expect(card).toContainText('1 / 16');
   await expect(card).toContainText('点一下画面，再移动鼠标，看看四周。');
   await expect(card).toContainText('新手教程 · TUTORIAL');
   expect(await page.evaluate(()=>window.__qinghe.profile.tutorial)).toEqual({step:0,progress:0});
@@ -24,18 +24,19 @@ test('a fresh game starts the tutorial, a turn of the view finishes step 1, and 
   await expect(card.locator('.help-content')).toContainText('Diǎn yíxià huàmiàn');
 
   // Crossing the ±360 wrap is a small turn, not a whole circle: -350 to -10 is 20°.
-  await page.evaluate(()=>{window.__qinghe.town.yaw=-350;});
+  // You arrive facing your home, so the turns are measured from wherever the view starts.
+  await page.evaluate(()=>{const t=window.__qinghe.town;t.startYaw=t.yaw;t.yaw=t.startYaw+10-360;});
   await page.waitForTimeout(100);
-  await page.evaluate(()=>{window.__qinghe.town.yaw=-10;});
+  await page.evaluate(()=>{const t=window.__qinghe.town;t.yaw=t.startYaw-10;});
   await page.waitForTimeout(100);
-  await expect(card).toContainText('1 / 15');
+  await expect(card).toContainText('1 / 16');
   expect(await page.evaluate(()=>window.__qinghe.profile.tutorial.progress)).toBeLessThan(90);
   // Turn the view by script, the way the mouse would.
   await page.evaluate(()=>{window.__qinghe.town.yaw=-30;});
   await page.waitForTimeout(100);
   await page.evaluate(()=>{window.__qinghe.town.yaw=-130;});
   await expect(card).toContainText('做到了！');
-  await expect(card).toContainText('2 / 15',{timeout:4000});
+  await expect(card).toContainText('2 / 16',{timeout:4000});
   await expect(card).toContainText('按 W A S D 走几步。');
   const saved=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).tutorial,SAVE_KEY);
   expect(saved.step).toBe(1);
@@ -57,7 +58,7 @@ test('a fresh game starts the tutorial, a turn of the view finishes step 1, and 
   await page.keyboard.press('Digit5');
   await page.getByRole('button',{name:/重新开始新手教程/}).click();
   await expect(page.locator('#panel')).toBeHidden();
-  await expect(card).toContainText('1 / 15');
+  await expect(card).toContainText('1 / 16');
   expect(errors).toEqual([]);
 });
 
@@ -126,7 +127,7 @@ for(const layout of [
     await expect(card).toBeVisible();
     // Check the longest step as well as the first, with its pinyin open.
     const longest=await page.evaluate(()=>{
-      const c=window.__qinghe,steps=[...Array(15).keys()];
+      const c=window.__qinghe,steps=[...Array(16).keys()];
       let best=0,bestLength=0;
       for(const i of steps){c.profile.tutorial={step:i,progress:0};c.tutorial.shown=null;c.tutorial.sync();
         const h=document.querySelector('#tutorial-card').scrollHeight;if(h>bestLength){bestLength=h;best=i;}}

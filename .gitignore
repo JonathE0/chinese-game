@@ -3,9 +3,13 @@ dist/
 test-results/
 playwright-report/
 .env*
+!.env.example
 .worktrees/
 *.log
 .venv/
 screenshots/
 __pycache__/
 .cache/
+
+# Agent progress checkpoints for resuming after a limit or outage
+.claude/checkpoints/

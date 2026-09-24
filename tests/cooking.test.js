@@ -24,6 +24,9 @@ test('missing groceries change nothing and cooking beats prepared food value wit
     assert.ok(c.recipeCost(recipe)<c.preparedMealCost());
     assert.ok(c.recipeCost(recipe)>0);
   }
+  // The day stalls' 包子 (3 coins, 12 hunger) are the cheapest per-hunger food in the game, so
+  // they set the floor here — a stall food missing from the comparison would understate it.
+  assert.equal(c.preparedMealCost(),14);
 });
 
 test('the stove is not a mint: no day, rapport or outfit makes a cooked meal resell for a profit',async()=>{

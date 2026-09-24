@@ -40,6 +40,7 @@ test('looking at something names it in Chinese, and F remembers it',async({page}
   await seed(page,{});
   await start(page);
   await warp(page,0,7,0);                    // facing the fountain
+  await page.evaluate(()=>{window.__qinghe.town.pitch=-4;});   // you arrive looking up at your home
   await expect.poll(()=>plate(page),{timeout:6000}).toContain('喷泉');
   // Chinese first: the reading and gloss stay hidden until you ask for them.
   expect(await plate(page)).not.toContain('pēn quán');
@@ -57,7 +58,7 @@ test('looking at something names it in Chinese, and F remembers it',async({page}
   // board hangs high enough to walk under.
   await warp(page,0,7,180);
   await page.evaluate(()=>{window.__qinghe.town.pitch=9;});
-  await expect.poll(()=>plate(page),{timeout:6000}).toContain('招牌');
+  await expect.poll(()=>plate(page),{timeout:6000}).toContain('欢迎来到青禾');
   expect(errors).toEqual([]);
 });
 
@@ -72,11 +73,21 @@ test('objects have hitboxes, and you can jump',async({page})=>{
   expect(stopped).toBeGreaterThan(4);        // fountain edge sits near z = 4.5
   expect(stopped).toBeLessThan(6);
 
-  // A bench is low enough to stand on once you jump.
+  // A bench is too tall to walk onto but low enough to stand on once you jump: walk into the
+  // square's east bench, then hold W and jump.
+  await warp(page,4.5,4,0);
+  await hold(page,'w',1200);
+  const before=await at(page,'cy');
   expect(await height(page)).toBe(0);
+  expect(before).toBeGreaterThan(2.35);       // stopped by the bench, not walked through it
+  await page.keyboard.down('w');
   await page.keyboard.press('Space');
-  await expect.poll(()=>height(page),{timeout:2000}).toBeGreaterThan(.3);
-  await expect.poll(()=>height(page),{timeout:4000}).toBe(0);
+  await expect.poll(()=>height(page),{timeout:2000,intervals:[20]}).toBeGreaterThan(.3);
+  await page.waitForTimeout(450);              // about when the jump comes down onto the seat
+  await page.keyboard.up('w');
+  await page.waitForTimeout(600);
+  expect(await height(page)).toBeGreaterThan(.3);   // landed, and standing on the seat
+  expect(await at(page,'cy')).toBeLessThan(before);
 });
 
 test('a district stays shut until enough words are learned, and says what is missing',async({page})=>{
@@ -126,11 +137,13 @@ test('a bed you own can be placed at home, and a bad spot says so instead of can
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await seed(page,{inventory:{'wooden-bed':1,bookshelf:1},completed:['home:tutorial','home:starter']});
   await start(page);
-  await warp(page,18,19,0);
+  await warp(page,11,7.8,180);            // on the square, facing the front door
   await hold(page,'w',900);
   await page.keyboard.press('e');
   await expect(page.locator('.location b')).toHaveText('我的家');
-  await hold(page,'w',900);
+  // Stand to one side of the stairs, facing along the room, so the bed goes down on open floor.
+  await page.evaluate(()=>{const t=window.__qinghe.town;t.warp(t.rooms.get('home').offsetX-1,-1.5,-90);});
+  await page.waitForTimeout(300);
   await page.keyboard.press('e');
 
   await page.locator('[data-place="wooden-bed"]').click();
@@ -159,8 +172,8 @@ test('the review drill plays the word so you hear it before answering',async({pa
   const clips=[];page.on('request',r=>{if(r.url().includes('/audio/clips/'))clips.push(r.url());});
   await seed(page,{});
   await start(page);
-  await warp(page,0,-6.2,0);
-  await hold(page,'w',900);
+  await warp(page,0,-12.5,0);           // the word hall's forecourt, below its stairs
+  await hold(page,'w',1300);
   await page.keyboard.press('e');            // into the word hall
   await hold(page,'w',1100);
   await page.keyboard.press('e');            // the lectern

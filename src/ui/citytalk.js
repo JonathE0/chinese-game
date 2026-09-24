@@ -1,6 +1,6 @@
 import {escapeHtml as esc} from '../core/language.js';
 import {icon} from './art.js';
-import {languageLine} from './shell.js';
+import {languageLine,pinyinWith} from './shell.js';
 import {CITY} from '../world/city.js';
 import {addWord} from '../core/bank.js';
 import {metroOf} from '../core/metro.js';
@@ -30,7 +30,7 @@ export function openCityTalk(ctx,personId){
     ?`<button class="secondary wide" id="ask-directions">${icon('map',15)} 问路 · Ask the way</button>`:'';
   body.innerHTML=`<div class="dialogue-top">
       <div class="portrait">${person.zh.slice(0,1)}</div>
-      <div><b>${esc(person.zh)}</b><small>${esc(person.pinyin)} · ${esc(person.en)}</small></div>
+      <div><b>${esc(person.zh)}</b><small>${pinyinWith(person.pinyin,person.zh,person.en)}</small></div>
     </div>
     ${languageLine(line,p.settings,{className:'dialogue-line'})}
     <p class="microcopy">城里的人来来去去，每次说的不一样。<br>

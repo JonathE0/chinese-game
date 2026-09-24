@@ -11,8 +11,15 @@
     "test:browser": "playwright test",
     "check:content": "node scripts/check-content.js && node scripts/content-map.js",
     "map": "node scripts/content-map.js",
+    "audit:voice": "node scripts/audit-voice.js",
     "verify": "node --test --test-reporter=dot tests/*.test.js && node scripts/check-content.js && node scripts/content-map.js && vite build --logLevel warn"
   },
-  "dependencies": { "playcanvas": "2.22.1" },
-  "devDependencies": { "vite": "^7.0.0", "@playwright/test": "^1.55.0" }
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.1",
+    "playcanvas": "2.22.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "vite": "^7.0.0"
+  }
 }

@@ -38,8 +38,8 @@ function windows(models,root,w,d,h,glassColor){
     box(root,[-w/2-.04,y,0],[.1,1.7,d-1.6],glassColor);
     // A mullion every few metres stops the glass reading as one flat sheet.
     for(let x=-w/2+2.2;x<w/2-1;x+=2.6){
-      box(root,[x,y,d/2+.07],[.16,1.8,.06],'#5d6670');
-      box(root,[x,y,-d/2-.07],[.16,1.8,.06],'#5d6670');
+      box(root,[x,y,d/2+.07],[.16,1.8,.06],'#5d6670').lookName='window';
+      box(root,[x,y,-d/2-.07],[.16,1.8,.06],'#5d6670').lookName='window';
     }
   }
 }
@@ -55,12 +55,12 @@ function tower(models,parent,def,lamps){
   windows(models,root,w,d,h,def.glass);
   // The ground floor is set back behind a colonnade, which is what makes a street feel walkable.
   box(root,[0,2.4,d/2-.55],[w-1.2,4.8,.3],'#59616b');
-  for(let x=-w/2+1.2;x<w/2-.8;x+=3.1)box(root,[x,2.5,d/2-.05],[.5,5,.5],'#8e949a');
+  for(let x=-w/2+1.2;x<w/2-.8;x+=3.1)box(root,[x,2.5,d/2-.05],[.5,5,.5],'#8e949a').lookName='pillar';
   box(root,[0,5.3,d/2+.05],[w,.7,.6],'#6c737b');
   if(def.sign){
     const lit=glow(def.signColor);
     const board=label(root,def.sign,[0,6.9,d/2+.3],Math.min(w-1,7.4),1.5,def.signColor,def.signInk);
-    box(root,[0,6.9,d/2+.12],[Math.min(w-1,7.4)+.5,1.9,.2],'#4f565f');
+    box(root,[0,6.9,d/2+.12],[Math.min(w-1,7.4)+.5,1.9,.2],'#4f565f').signText=def.sign;
     board.setLocalPosition(0,6.9,d/2+.34);backlight(board);
     const halo=box(root,[0,5.85,d/2+.3],[Math.min(w-1,7.4),.16,.16],def.signColor);
     halo.render.meshInstances[0].material=lit;
@@ -80,7 +80,7 @@ function tower(models,parent,def,lamps){
  */
 function station(models,parent,lamps){
   const {box,cylinder,label,glow}=models;
-  const root=new pc.Entity('metro-hall');root.setLocalPosition(0,0,30.5);parent.addChild(root);
+  const root=new pc.Entity('metro-hall');root.lookName='metro-station';root.setLocalPosition(0,0,30.5);parent.addChild(root);
   box(root,[0,.15,0],[13,.3,7.4],'#b0b2ae');
   for(const side of [-1,1]){
     box(root,[side*6,2.4,0],[.7,4.8,7.2],'#9299a1');                 // side piers
@@ -91,7 +91,7 @@ function station(models,parent,lamps){
   for(let i=0;i<5;i++)cylinder(root,[0,4.9,-3+i*1.6],[.22,12.4,.22],'#8e959c',[0,0,90]);
   box(root,[0,5.15,0],[12.9,.4,7.4],'#c3d2d8');
   // The stair down to the platform: you never go down it, but it has to look like you could.
-  for(let i=0;i<6;i++)box(root,[0,.14-i*.24,1.1+i*.5],[5.4,.26,.55],'#9fa4a6');
+  for(let i=0;i<6;i++)box(root,[0,.14-i*.24,1.1+i*.5],[5.4,.26,.55],'#9fa4a6').lookName='stairs';
   for(const side of [-1,1])box(root,[side*2.9,.75,2.1],[.14,1.2,3],'#c2c8cb');
   const sign=label(root,'地铁 1 号线',[0,3.5,-3.62],6.4,1.3,'#20303f','#dfe9f2');
   sign.setLocalPosition(0,3.5,-3.66);backlight(sign);
@@ -119,8 +119,9 @@ function cityProp(models,parent,def,lamps){
     cylinder(e,[0,.1,0],[.5,.2,.5],'#6d7278');
     cylinder(e,[0,2.9,0],[.18,5.6,.18],'#8d939a');
     for(const side of [-1,1]){
-      box(e,[side*.9,5.5,0],[1.8,.14,.14],'#8d939a');
+      box(e,[side*.9,5.5,0],[1.8,.14,.14],'#8d939a').lookName='streetlight';
       const head=box(e,[side*1.7,5.35,0],[.9,.22,.5],'#e9f0f6');
+      head.lookName='streetlight';
       const lit=glow('#e8f1ff');head.render.meshInstances[0].material=lit;lamps.push(lit);
     }
     return {hw:.3,hd:.3,y1:5.7};
@@ -129,8 +130,8 @@ function cityProp(models,parent,def,lamps){
     box(e,[0,.34,0],[2.6,.68,1.5],'#9c9a94');
     box(e,[0,.7,0],[2.3,.12,1.2],'#5d6b52');
     for(const x of [-.7,0,.7]){
-      cylinder(e,[x,1.35,0],[.14,1.4,.14],'#6b6250');
-      ball(e,[x,2.15,0],[1.3,1.1,1.1],'#6d8a5c');
+      cylinder(e,[x,1.35,0],[.14,1.4,.14],'#6b6250').lookName='tree';
+      ball(e,[x,2.15,0],[1.3,1.1,1.1],'#6d8a5c').lookName='tree';
     }
     return {hw:1.35,hd:.8,y1:1.1};
   }
@@ -148,6 +149,7 @@ function cityProp(models,parent,def,lamps){
   }
   if(k==='citycrossing'){
     for(let i=-3;i<=3;i++)box(e,[i*1.3,.02,0],[.75,.04,4.4],'#e2e4e2');
+    e.lookName='crossing';
     return null;                                    // paint, not an obstacle
   }
   if(k==='trafficlight'){
@@ -156,7 +158,7 @@ function cityProp(models,parent,def,lamps){
     box(e,[0,3.5,.2],[.42,1.15,.42],'#3a4046');
     const colors=['#d4574f','#e0b652','#6fb072'];
     for(let i=0;i<3;i++){
-      const bulb=ball(e,[0,3.9-i*.36,.42],[.24,.24,.12],colors[i]);
+      const bulb=ball(e,[0,3.9-i*.36,.42],[.24,.24,.12],colors[i]);bulb.lookName='traffic-light';
       if(i===2){const lit=glow(colors[i]);bulb.render.meshInstances[0].material=lit;lamps.push(lit);}
     }
     return {hw:.3,hd:.3,y1:4.2};
@@ -248,9 +250,9 @@ export function buildCity(models,parent){
   if(city.department){
     const door=new pc.Entity('department-door');root.addChild(door);
     door.setLocalPosition(city.department.x-.28,0,city.department.z);door.setLocalEulerAngles(0,90,0);
-    box(door,[0,1.6,0],[3.3,3.2,.18],'#526e69');
-    box(door,[0,1.55,.11],[2.8,2.9,.08],'#bdd4cf');
-    for(const x of [-.22,.22])box(door,[x,1.2,.2],[.05,.55,.06],'#eee6c9');
+    box(door,[0,1.6,0],[3.3,3.2,.18],'#526e69').lookName='door';
+    box(door,[0,1.55,.11],[2.8,2.9,.08],'#bdd4cf').lookName='door';
+    for(const x of [-.22,.22])box(door,[x,1.2,.2],[.05,.55,.06],'#eee6c9').lookName='door';
     backlight(models.label(door,'五金 · 家居 · 灯具',[0,3.75,.15],5.5,.8,'#23493e','#f1e6c8'));
     models.label(door,'营业中  OPEN',[0,2.55,.2],2.2,.45,'#dce9d6','#385e4e');
   }
@@ -270,20 +272,27 @@ export function buildCity(models,parent){
 }
 
 /**
- * The way in, back in 青禾广场: a stair going down under a steel-and-glass canopy.
+ * The way in, back in 青禾广场: a stair going down under a steel-and-glass canopy, its mouth
+ * facing the square.
  *
  * Built with the town, not with the city, because it has to be standing on the square from the
- * first minute — it is how you find out the city exists at all.
+ * first minute — it is how you find out the city exists at all. The town's ground is one solid
+ * slab, so the stairwell below the top step is drawn as a dark opening rather than cut into it;
+ * pressing E on the top step takes you down to the platform (rooms.json `metro-platform`).
  */
 export function buildStationEntrance(models,parent,lamps){
   const {box,cylinder,label,glow}=models;
   const def=city.station;
-  const root=new pc.Entity('metro-entrance');
+  const root=new pc.Entity('metro-entrance');root.lookName='metro-station';
   root.setLocalPosition(def.x,0,def.z);root.setLocalEulerAngles(0,def.rotation??0,0);
   parent.addChild(root);
-  box(root,[0,.08,0],[5.6,.16,4.4],'#a8a9a4');
-  // The stair itself, dropping away under the street.
-  for(let i=0;i<7;i++)box(root,[0,-.12-i*.26,-1.5+i*.42],[3.4,.28,.44],'#9ba09f');
+  // The deck round the stairwell, open where the stair drops away (x ±1.7, z -1.72 to 1.45).
+  for(const side of [-1,1])box(root,[side*2.25,.08,0],[1.1,.16,4.4],'#a8a9a4');
+  box(root,[0,.08,-1.96],[3.4,.16,.48],'#a8a9a4');
+  box(root,[0,.08,1.83],[3.4,.16,.74],'#a8a9a4');
+  // The top step, then the dark of the stairwell going down.
+  box(root,[0,-.06,-1.5],[3.4,.28,.44],'#9ba09f').lookName='stairs';
+  box(root,[0,.03,.09],[3.4,.02,2.72],'#1d2226').lookName='stairs';
   box(root,[0,-.6,1.6],[3.8,2,.3],'#3c4247');
   for(const side of [-1,1]){
     box(root,[side*1.9,.5,0],[.14,1,4.2],'#8f979d');
@@ -308,10 +317,13 @@ export function buildStationEntrance(models,parent,lamps){
     x:def.x+lx*cos+lz*sin, z:def.z-lx*sin+lz*cos,
     hw:Math.abs(cos)>.5?hw:hd, hd:Math.abs(cos)>.5?hd:hw,
   });
-  // The canopy and the balustrades are solid; the stair mouth is not, so you can stand on it.
-  return [
-    {...at(0,-1.9,2.3,1.5),y0:.9,y1:3.2,name:'metro-station'},
-    {...at(-1.9,0,.3,2.2),y0:0,y1:1.1,name:'metro-station'},
-    {...at(1.9,0,.3,2.2),y0:0,y1:1.1,name:'metro-station'},
-  ];
+  // The canopy roof and the balustrades are solid, and so is the stairwell past the top step:
+  // you go down by pressing E, not by walking off the edge. None of them is named, so a look
+  // lands on the step or the stairwell (楼梯) or, anywhere else, on the entrance (地铁站).
+  return {root,marks:[
+    {...at(0,-1.9,2.3,1.5),y0:2.8,y1:3.2,name:null},
+    {...at(-1.9,0,.3,2.2),y0:0,y1:1.1,name:null},
+    {...at(1.9,0,.3,2.2),y0:0,y1:1.1,name:null},
+    {...at(0,.24,1.6,1.52),y0:0,y1:1.1,name:null},
+  ]};
 }

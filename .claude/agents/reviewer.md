@@ -34,3 +34,38 @@ test when that settles a question. Drop anything you can't substantiate, and ski
   scenario (inputs or steps, then the wrong result), and a one-sentence suggested fix.
 - Then "Checked and fine": a short list of the areas you verified without finding issues.
 - Stay under about 500 words.
+
+## Report style (standing, 2026-09-21)
+
+Write your chat report in caveman style: terse fragments, no filler, pleasantries or hedging. Keep file paths, code, commands, numbers and error text exact, and quote only the shortest decisive line of a long log. Files you write (code, comments, docs, JSON, commit text) stay in normal prose.
+
+Also flag over-building as a finding: unrequested abstractions, extra files or dependencies, code the codebase or standard library already provides (the ponytail rules).
+
+## Checkpoints (standing, 2026-09-24)
+
+Usage limits and API outages can kill a run mid-task. Keep a checkpoint so the next run resumes
+instead of starting over.
+- File: `.claude/checkpoints/<task id>.md`, using the task id your brief gives (otherwise a short
+  kebab-case name for the task). The folder is gitignored. Writing it is the one exception to your read-only rule.
+- Write it before your first real step, then overwrite it after each finished step (a file or area reviewed, with its findings so far) — not after
+  every tool call. Keep it under about 40 lines:
+  ```
+  # <task id>: <one-line task>
+  Brief: <plan path and section, or the brief's first line>
+  Status: in progress | blocked | done
+  Updated: <date and time>
+  ## Done
+  - <step>: <files touched or result>
+  ## Next
+  - <the very next concrete step>
+  ## Checks
+  - <last check run and its result>
+  ## Notes
+  - <decisions, surprises, open questions>
+  ```
+- Starting a task whose checkpoint already exists means you are resuming. Read it, then check its
+  Done list against the actual files before trusting it: the last run may have died mid-edit, so
+  re-read anything it was changing and finish or undo a half-made change. Continue from Next and
+  don't redo finished steps.
+- On finishing, set Status to done and paste your final report under `## Report` in the
+  checkpoint too, so the result survives even if your reply is lost.

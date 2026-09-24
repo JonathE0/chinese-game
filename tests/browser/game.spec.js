@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {pastGreeting} from './greeting.js';
 test('town loads, stays player initiated, and Chinese help is opt-in',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
@@ -15,7 +16,7 @@ test('town loads, stays player initiated, and Chinese help is opt-in',async({pag
 test('denied microphone keeps the response editable and does not alter rewards',async({page})=>{
   await page.addInitScript(()=>{window.SpeechRecognition=class{start(){queueMicrotask(()=>this.onerror?.({error:'not-allowed'}));}abort(){}};});
   await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
-  await walk(page,'a','cx',-9);await walk(page,'w','cy',-1.1);await page.keyboard.press('e');
+  await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));await walk(page,'a','cx',-9);await walk(page,'w','cy',-1.1);await page.keyboard.press('e');await pastGreeting(page);
   await page.getByRole('button',{name:'麦克风回答'}).click();await expect(page.locator('#speech-status')).toContainText('denied');
   await expect(page.getByRole('textbox',{name:'你的回答'})).toBeEditable();await expect(page.locator('#wallet-count')).toHaveText('0');
   await page.getByRole('textbox',{name:'你的回答'}).fill('您好');await page.getByRole('button',{name:'提交回答'}).click();await expect(page.getByRole('button',{name:'继续',exact:true})).toBeVisible();
@@ -23,7 +24,7 @@ test('denied microphone keeps the response editable and does not alter rewards',
 test('practice gives saved rewards and repeat completion cannot farm coins',async({page})=>{
   await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
   // The picture drill is 小美's corner of the square, not a sidebar tab.
-  await page.evaluate(()=>window.__qinghe.town.onInteract('mei'));
+  await page.evaluate(()=>window.__qinghe.town.onInteract('mei'));await pastGreeting(page);
   await page.getByRole('button',{name:'开始练习'}).click();
   for(let i=0;i<4;i++){
     const word=await page.locator('#practice-word').getAttribute('data-word');
@@ -34,15 +35,17 @@ test('practice gives saved rewards and repeat completion cannot farm coins',asyn
   const wallet=Number(await page.locator('#wallet-count').textContent());expect(wallet).toBeGreaterThan(0);
   await page.reload();await page.getByRole('button',{name:'开始旅行'}).click();
   await expect(page.locator('#wallet-count')).toHaveText(String(wallet));
-  await page.evaluate(()=>window.__qinghe.town.onInteract('mei'));await page.getByRole('button',{name:'开始练习'}).click();
+  await page.evaluate(()=>window.__qinghe.town.onInteract('mei'));await pastGreeting(page);await page.getByRole('button',{name:'开始练习'}).click();
   for(let i=0;i<4;i++){const word=await page.locator('#practice-word').getAttribute('data-word');await page.locator(`[data-item="${word}"]`).click();await page.getByRole('button',{name:i===3?'完成练习':'下一个'}).click();}
   await expect(page.locator('#wallet-count')).toHaveText(String(wallet));
 });
 
+// Walking slides about 0.7 m after the key comes up, so let go that much early and let it settle.
 async function walk(page,key,axis,target){
-  const start=Number(await page.locator('#map-player').getAttribute(axis));
+  const start=Number(await page.locator('#map-player').getAttribute(axis)),early=target>start?target-.7:target+.7;
   await page.keyboard.down(key);
-  try{await expect.poll(async()=>Number(await page.locator('#map-player').getAttribute(axis)),{timeout:12000,intervals:[80]} )[target>start?'toBeGreaterThan':'toBeLessThan'](target);}finally{await page.keyboard.up(key);}
+  try{await expect.poll(async()=>Number(await page.locator('#map-player').getAttribute(axis)),{timeout:12000,intervals:[80]} )[target>start?'toBeGreaterThan':'toBeLessThan'](early);}finally{await page.keyboard.up(key);}
+  await page.waitForTimeout(600);
 }
 test('walk to NPC, introduce yourself, bargain and confirm a wearable purchase',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -54,9 +57,9 @@ test('walk to NPC, introduce yourself, bargain and confirm a wearable purchase',
   const clips=[];page.on('request',r=>{if(r.url().includes('/audio/clips/'))clips.push(r.url());});
   await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
   await page.screenshot({path:'test-results/town.png'});
-  await walk(page,'a','cx',-9);await walk(page,'w','cy',-1.1);
+  await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));await walk(page,'a','cx',-9);await walk(page,'w','cy',-1.1);
   await expect(page.locator('#interact')).toBeVisible();await expect(page.locator('#panel')).toBeHidden();
-  await page.keyboard.press('e');await expect(page.getByRole('heading',{name:'初次见面'})).toBeVisible();
+  await page.keyboard.press('e');await pastGreeting(page);await expect(page.getByRole('heading',{name:'初次见面'})).toBeVisible();
   // The clip manifest is fetched in the background, so the label starts as "loading".
   await expect(page.locator('.audio-source')).toHaveText('普通话 · AI 配音',{timeout:15000});
   await page.getByRole('button',{name:'重听',exact:true}).click();
@@ -66,7 +69,7 @@ test('walk to NPC, introduce yourself, bargain and confirm a wearable purchase',
     await page.getByRole('textbox',{name:'你的回答'}).fill(answer);await page.getByRole('button',{name:'提交回答'}).click();await page.getByRole('button',{name:i===3?'完成对话':'继续',exact:true}).click();
   }
   await expect(page.locator('#wallet-count')).toHaveText('60');await page.getByRole('button',{name:'回到小镇',exact:true}).click();
-  await walk(page,'d','cx',9);await page.keyboard.press('e');await expect(page.getByRole('heading',{name:'带一点青禾回家'})).toBeVisible();
+  await walk(page,'d','cx',9);await page.keyboard.press('e');await pastGreeting(page);await expect(page.getByRole('heading',{name:'带一点青禾回家'})).toBeVisible();
   await page.locator('[data-shop-item="travel-hat"]').click();
   // How low the vendor will go depends on their mood today, so read it off the counter.
   const floorText=await page.locator('.negotiation h3 small').textContent();
@@ -87,8 +90,9 @@ test('walk to NPC, introduce yourself, bargain and confirm a wearable purchase',
 });
 test('settings export, layout preview, ambient collection and mobile layout',async({page})=>{
   await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));   // the neighbours chat in view of the old arrival spot
   await page.getByRole('button',{name:'听听闲聊'}).click();await page.locator('[data-save-phrase]').first().click();await expect(page.locator('[data-save-phrase]').first()).toHaveText('已收藏');await page.keyboard.press('Escape');
-  await page.getByRole('button',{name:'设置',exact:true}).click();await page.locator('#setting-pinyin').uncheck();
+  await page.getByRole('button',{name:'设置',exact:true}).click();await page.locator('#setting-pinyin').selectOption('never');
   const download=page.waitForEvent('download');await page.getByRole('button',{name:'导出存档'}).click();expect((await download).suggestedFilename()).toBe('qinghe-save.json');
   await page.getByRole('button',{name:'编辑小镇布局'}).click();await page.locator('#layout-x').fill('-8');
   const layoutDownload=page.waitForEvent('download');await page.getByRole('button',{name:'导出 world.json'}).click();expect((await layoutDownload).suggestedFilename()).toBe('world.json');
@@ -102,7 +106,9 @@ test('mouse look turns the view and walking follows where you face',async({page}
   const at=async axis=>Number(await page.locator('#map-player').getAttribute(axis));
   const heading=async()=>Number((await page.locator('#map-facing').getAttribute('transform')).match(/rotate\(([-\d.]+)\)/)[1]);
   await expect(page.locator('#crosshair')).toBeVisible();
-  expect(await heading()).toBe(0);
+  // You arrive facing your home; start this from the middle of the square, facing north.
+  await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));
+  await expect.poll(heading).toBe(0);   // the map redraws on the next frame
   // Clicking the town grabs the mouse, then moving it turns the tourist.
   await page.mouse.click(700,500);
   expect(await page.evaluate(()=>document.pointerLockElement?.id)).toBe('world');
@@ -127,7 +133,7 @@ test('mouse look turns the view and walking follows where you face',async({page}
 });
 test('typing in a dialogue field never drives the town or repeats the interaction',async({page})=>{
   await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
-  await walk(page,'a','cx',-9);await walk(page,'w','cy',-1.1);await page.keyboard.press('e');
+  await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));await walk(page,'a','cx',-9);await walk(page,'w','cy',-1.1);await page.keyboard.press('e');await pastGreeting(page);
   await expect(page.getByRole('heading',{name:'初次见面'})).toBeVisible();
   const box=page.getByRole('textbox',{name:'你的回答'});await box.click();
   const before={cx:Number(await page.locator('#map-player').getAttribute('cx')),cy:Number(await page.locator('#map-player').getAttribute('cy'))};
@@ -190,6 +196,7 @@ test('highlighting Chinese gives pinyin and a gloss, and saves it for later',asy
   await expect(page.locator('#lookup .lookup-save').first()).toHaveText('已收藏');
   // A multi-word phrase is segmented rather than looked up whole.
   await page.keyboard.press('Escape');
+  await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));
   await page.getByRole('button',{name:'听听闲聊'}).click();
   await select('.ambient-line .zh');
   // A sentence leads with its meaning; the word-by-word breakdown is loaded when you open it.

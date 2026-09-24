@@ -6,13 +6,34 @@ import questData from '../content/quests.json' with {type:'json'};
 import {dailyReady} from '../core/daily.js';
 import {closeHook} from '../core/conversation.js';
 import {TUTORIAL_UI,shouldAutoStart} from '../core/tutorial.js';
+import {gardenMapParts} from './garden-map.js';
+import {knowsLook} from '../core/bank.js';
+import {showPinyin,pinyinMarkup} from '../core/pinyin.js';
+
+// The live game, bound when the shell starts, so pinyin can tell which words the player knows.
+let bound=null,hskList=null,hskIds=null;
+const hskId=zh=>{
+  const list=bound?.hskWords;
+  if(list!==hskList){hskList=list;hskIds=list?new Map(list.map(w=>[w.zh,w.id])):null;}
+  return hskIds?.get(zh)??null;
+};
+const pinyinShown=(text,zh,settings,always)=>showPinyin(text,{zh,settings,profile:bound?.profile,idOf:hskId,always});
+/** Pinyin markup for `zh` under the player's settings, or '' when it should not show.
+ *  `always` is for study tools, where the pinyin is the answer rather than help. */
+export function pinyinHtml(text,zh,{always=false,settings=bound?.profile?.settings}={}){
+  return pinyinShown(text,zh,settings,always)?pinyinMarkup(text,settings):'';
+}
+/** The same rule as plain text, for notices, tooltips and other text-only places. */
+export const pinyinText=(text,zh)=>pinyinShown(text,zh,bound?.profile?.settings,false)?text:'';
+/** Pinyin followed by other escaped parts (usually the English), joined with ' · '. */
+export const pinyinWith=(text,zh,...rest)=>[pinyinHtml(text,zh),...rest.filter(Boolean).map(esc)].filter(Boolean).join(' · ');
 
 export function languageLine(line,settings,{className='',help=true}={}) {
-  const pinyin=settings.pinyin?`<div class="pinyin">${esc(line.pinyin)}</div>`:'';
+  const shown=pinyinHtml(line.pinyin,line.zh,{settings}),pinyin=shown?`<div class="pinyin">${shown}</div>`:'';
   const english=settings.english?`<div class="translation">${esc(line.en)}</div>`:'';
   // A usage note and an answering hint are different help, so one never hides the other.
   const note=settings.english?[line.note,line.hint].filter(Boolean).map(t=>`<div class="usage">${esc(t)}</div>`).join(''):'';
-  const empty=!settings.english&&!settings.pinyin?'<div class="translation">请在设置里选择帮助语言。</div>':'';
+  const empty=!settings.english&&!pinyin?'<div class="translation">请在设置里选择帮助语言。</div>':'';
   const helpMarkup=help?`<button class="help-toggle" data-help aria-label="显示帮助">?</button><div class="help-content" hidden>${pinyin}${english}${note}${empty}</div>`:'';
   return `<div class="language-line ${className}"><div class="zh">${esc(line.zh)}</div>${helpMarkup}</div>`;
 }
@@ -33,7 +54,7 @@ const hudOf=profile=>(profile.settings.hud??={quests:true,names:true,controls:'e
 
 export class Shell {
  constructor(ctx){
-  this.ctx=ctx;this.panelId=null;this.route=null;this.closeHook=closeHook();
+  this.ctx=ctx;bound=ctx;this.panelId=null;this.route=null;this.closeHook=closeHook();
   const hud=hudOf(ctx.profile);
   document.querySelector('#app').innerHTML=`
   <header class="topbar"><div class="brand"><span class="brand-mark">禾</span><div><h1>青禾小镇</h1><span>A LITTLE MANDARIN GETAWAY</span></div></div><div class="top-actions"><div class="wallet" title="学习币">${icon('coin')}<b id="wallet-count">0</b><span>学习币</span></div><button class="icon-button" id="journal-button" aria-label="旅行手册" aria-keyshortcuts="1" title="旅行手册 · Journal (1)">${icon('book')}<kbd>1</kbd></button><button class="icon-button" id="inventory-button" aria-label="背包" aria-keyshortcuts="2" title="背包 · Inventory (2)">${icon('bag')}<kbd>2</kbd></button><button class="icon-button" id="review-button" aria-label="生词本" aria-keyshortcuts="3" title="生词本 · Encountered words (3)">${icon('leaf')}<kbd>3</kbd></button></div></header>
@@ -85,7 +106,7 @@ export class Shell {
  toggleQuests(){const hud=hudOf(this.ctx.profile);hud.quests=!hud.quests;this.cardBox=null;this.ctx.save();this.applyHud();}
  toggleNames(){
   const hud=hudOf(this.ctx.profile);hud.names=!hud.names;this.ctx.save();this.applyHud();
-  if(hud.names)this.nameplate(this.ctx.town?.looking,{known:!!this.ctx.town?.looking&&this.ctx.profile.discovered.includes(this.ctx.town.looking.id)});
+  if(hud.names)this.nameplate(this.ctx.town?.looking,{known:!!this.ctx.town?.looking&&knowsLook(this.ctx.profile,this.ctx.town.looking)});
   this.notice(hud.names?'名字标签：开 / Labels on':'名字标签：关。按 H 打开。 / Labels off — press H to bring them back.');
  }
  /** English, Chinese, or both. English first is the default; the Chinese is never thrown away. */
@@ -150,7 +171,7 @@ export class Shell {
      <div class="quest-text">
        <div class="quest-line"><b>${esc(quest.zh)}</b>
          <button class="help-toggle quest-help" data-help aria-label="显示拼音">?</button>
-         <div class="help-content" hidden><div class="pinyin">${esc(quest.pinyin)}</div></div></div>
+         <div class="help-content" hidden><div class="pinyin">${pinyinHtml(quest.pinyin,quest.zh,{always:true})}</div></div></div>
        <small>${esc(quest.en)}</small>
        ${progress?`<span class="quest-progress">${progress}</span>`:''}
        ${quest.where&&!done?`<span class="quest-go">${routed?'带路中 · guiding':'点一下带路 · show me'}</span>`:''}
@@ -232,8 +253,8 @@ export class Shell {
   el.hidden=!name;
   if(!name)return;
   const s=this.ctx.profile.settings,show=known||reveal;
-  const pinyin=show&&s.pinyin?`<span class="np-pinyin">${esc(name.pinyin)}</span>`:'';
-  const english=show&&s.english?`<span class="np-en">${esc(name.en)}</span>`:'';
+  const shown=show&&pinyinHtml(name.pinyin,name.zh),pinyin=shown?`<span class="np-pinyin">${shown}</span>`:'';
+  const english=show&&s.english&&name.en?`<span class="np-en">${esc(name.en)}</span>`:'';
   const level=name.hsk?`<span class="np-hsk">HSK ${name.hsk}</span>`:'';
   el.className=known?'known':'';
   el.innerHTML=`<b>${esc(name.zh)}</b>${pinyin}${english}${level}<small>${known?'已记住':'<kbd>F</kbd> 记住'}</small>`;
@@ -244,8 +265,16 @@ export class Shell {
   const pad=3,cx=(x0+x1)/2,cz=(z0+z1)/2,size=Math.max(x1-x0,z1-z0)+pad*2;
   document.querySelector('#map-svg').setAttribute('viewBox',`${cx-size/2} ${cz-size/2} ${size} ${size}`);
   const parts=[`<rect x="${x0}" y="${z0}" width="${x1-x0}" height="${z1-z0}" rx="2" fill="#f6eedb"/>`];
-  for(const b of world.buildings.filter(b=>b.district===district.id))
+  if(district.id==='garden')parts.push(...gardenMapParts());
+  const labels=[];          // drawn last, so nothing on the map covers a landmark's name
+  for(const b of world.buildings.filter(b=>b.district===district.id)){
+   if(b.label)labels.push(`<text x="${b.x}" y="${b.z}" font-size="4.5" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#3d2a1e" stroke="#fcf6e8" stroke-width=".8" paint-order="stroke">${esc(b.label)}</text>`);
    parts.push(`<rect x="${b.x-b.width/2}" y="${b.z-b.depth/2}" width="${b.width}" height="${b.depth}" rx="1" fill="${b.roof}" opacity=".85"/>`);
+   // Wings turn with their building (only 0 and 180 degrees are used).
+   const s=(b.rotation??0)===180?-1:1;
+   for(const wg of b.wings??[])
+    parts.push(`<rect x="${b.x+s*wg.x-wg.width/2}" y="${b.z+s*wg.z-wg.depth/2}" width="${wg.width}" height="${wg.depth}" rx="1" fill="${wg.roof??b.roof}" opacity=".85"/>`);
+  }
   for(const t of world.trees.filter(([x,z])=>x>=x0&&x<=x1&&z>=z0&&z<=z1))
    parts.push(`<circle cx="${t[0]}" cy="${t[1]}" r="1.1" fill="#9db98a"/>`);
   if(district.id==='square')parts.push('<circle cx="0" cy="1.8" r="2.4" fill="#90b5a9"/>');
@@ -259,7 +288,7 @@ export class Shell {
    const g=d.gate,horizontal=g.axis==='z';
    parts.push(`<rect x="${horizontal?g.x-g.span:g.x-.5}" y="${horizontal?g.z-.5:g.z-g.span}" width="${horizontal?g.span*2:1}" height="${horizontal?1:g.span*2}" fill="#b08a60"/>`);
   }
-  document.querySelector('#map-content').innerHTML=parts.join('');
+  document.querySelector('#map-content').innerHTML=parts.concat(labels).join('');
  }
  /** The card in the corner names wherever you are: a district outdoors, a room indoors. */
  setPlace(place,where){

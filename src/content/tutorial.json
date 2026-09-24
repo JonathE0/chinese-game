@@ -75,10 +75,10 @@
     },
     {
       "id": "home",
-      "zh": "你的家在广场的东南角，门朝南。跟着虚线走到门口，按 E 进去。",
-      "pinyin": "Nǐ de jiā zài guǎngchǎng de dōngnánjiǎo, mén cháo nán. Gēnzhe xūxiàn zǒu dào ménkǒu, àn E jìnqù.",
-      "en": "Your home is in the southeast corner of the square, and its door faces south. Follow the dashed line to the door and press E to go in.",
-      "where": {"district": "square", "x": 16.1, "z": 17.2, "zh": "我的家"},
+      "zh": "你的家在广场南边，门朝着喷泉。跟着虚线走到门口，按 E 进去。",
+      "pinyin": "Nǐ de jiā zài guǎngchǎng nánbian, mén cháozhe pēnquán. Gēnzhe xūxiàn zǒu dào ménkǒu, àn E jìnqù.",
+      "en": "Your home is on the south side of the square, with its door facing the fountain. Follow the dashed line to the door and press E to go in.",
+      "where": {"district": "square", "x": 11, "z": 9.6, "zh": "我的家"},
       "done": {"event": "enter", "id": "home"}
     },
     {
@@ -98,6 +98,12 @@
       "zh": "买东西的时候，走到柜台前按 E。陈叔叔的小摊可以讲价。做饭或者工地缺材料，就点「哪儿有卖」，地图会告诉你去哪儿买。",
       "pinyin": "Mǎi dōngxi de shíhou, zǒu dào guìtái qián àn E. Chén shūshu de xiǎotān kěyǐ jiǎngjià. Zuò fàn huòzhě gōngdì quē cáiliào, jiù diǎn “Nǎr yǒu mài”, dìtú huì gàosu nǐ qù nǎr mǎi.",
       "en": "To buy something, walk up to the counter and press E. Uncle Chen's stall lets you haggle. When a recipe or a build site is short of something, tap 哪儿有卖 and the map shows where to buy it."
+    },
+    {
+      "id": "park",
+      "zh": "广场南边有莲池公园，穿过月亮门就到了。广场西边还有小吃摊，卖馄饨、面条和包子。",
+      "pinyin": "Guǎngchǎng nánbian yǒu Liánchí Gōngyuán, chuānguò yuèliangmén jiù dào le. Guǎngchǎng xībian hái yǒu xiǎochītān, mài húntun, miàntiáo hé bāozi.",
+      "en": "Lotus Pond Park is just south of the square: walk through the moon gate. On the west side of the square, snack stalls sell wontons, noodles and steamed buns."
     },
     {
       "id": "gates",

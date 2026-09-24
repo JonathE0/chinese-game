@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {pastGreeting} from './greeting.js';
 
 const SAVE_KEY='little-mandarin-town.v1';
 const BANK=[
@@ -66,7 +67,7 @@ test('a room goes dark at night until you put a lamp in it',async({page})=>{
   await page.evaluate(()=>{window.__qinghe.town.daylight.paused=true;});
   await enter(page,'home',3.0);
 
-  const ceiling=()=>page.evaluate(()=>window.__qinghe.town.rooms.get('home').ceiling.light.intensity);
+  const ceiling=()=>page.evaluate(()=>window.__qinghe.town.rooms.get('home').ceilings[0].light.intensity);
   await page.evaluate(()=>window.__qinghe.town.daylight.setHour(13));
   await page.waitForTimeout(150);
   const day=await ceiling();
@@ -154,7 +155,7 @@ test('a waiter walks the floor and can take the order too',async({page})=>{
   });
   await warp(page,spot[0],spot[1],0);
   await expect(page.locator('#interact span')).toContainText('服务员');
-  await page.keyboard.press('e');
+  await page.keyboard.press('e');await pastGreeting(page);
   await expect(page.locator('#panel-title')).toHaveText('菜单');
 });
 
@@ -163,7 +164,7 @@ test('a vendor mood shifts by day and rapport, and pushing a sour one can raise 
   await seed(page,{dayIndex:3});
   await start(page);
   await warp(page,9,0.6,0);
-  await page.keyboard.press('e');
+  await page.keyboard.press('e');await pastGreeting(page);
   const plain=await page.locator('.vendor-mood b').textContent();
   await page.evaluate(k=>{
     const p=JSON.parse(localStorage.getItem(k));p.vendors={chen:{rapport:36}};localStorage.setItem(k,JSON.stringify(p));
@@ -172,7 +173,7 @@ test('a vendor mood shifts by day and rapport, and pushing a sour one can raise 
   await page.getByRole('button',{name:'开始旅行'}).click();
   await page.waitForTimeout(400);await page.mouse.click(700,500);
   await warp(page,9,0.6,0);
-  await page.keyboard.press('e');
+  await page.keyboard.press('e');await pastGreeting(page);
   const friendly=await page.locator('.vendor-mood b').textContent();
   const order=['心情不好','不太热情','心情不错','今天很开心'];
   expect(order.indexOf(friendly)).toBeGreaterThanOrEqual(order.indexOf(plain));
@@ -191,8 +192,8 @@ test('the games use your own words and pay out once a day',async({page})=>{
   await seed(page,{saved:BANK});
   await start(page);
   await warp(page,(await offsetOf(page,'home')),0,0);   // not needed, but keeps focus in the world
-  await enter(page,'home',3.0);
-  await warp(page,(await offsetOf(page,'home'))-2.4,-1.2,-90);
+  await enter(page,'study',0);                                   // the desk is in the study now
+  await warp(page,(await offsetOf(page,'study'))-.7,-1.4,-90);
   await page.keyboard.press('e');
   await expect(page.locator('#panel-title')).toHaveText('生词本');
   await page.getByRole('button',{name:/小游戏/}).click();
