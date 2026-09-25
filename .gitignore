@@ -18,3 +18,6 @@ __pycache__/
 # Netlify agent skills written by the Netlify MCP tool; local tooling, not part of the game
 .claude/skills/netlify-*/
 skills-lock.json
+
+# Vite dependency cache, one per checkout
+.vite/
