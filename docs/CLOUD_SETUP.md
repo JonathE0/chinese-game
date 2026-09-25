@@ -81,7 +81,7 @@ designed. What protects the saves is the Row Level Security set up in step 2.
      - `http://localhost:5174/`
 
    After signing in, players are sent back to the game's page, and Supabase only allows addresses
-   on this list. Dev mode (`/?dev`) never uses the cloud, so it needs no entry.
+   on this list. Admin mode (`/?admin`) never uses the cloud, so it needs no entry.
 
 6. **Give the game the three public values.** In Supabase open **Project Settings** → **API**
    (newer dashboards: **Project Settings** → **Data API** for the URL and **API Keys** for the
@@ -149,7 +149,7 @@ expected. Playwright starts its own dev server with the three values blanked, so
   folder does. Reload the page to get the update.
 - Nothing on your device is ever lost because of the cloud. A failure shows 同步失败 in settings
   and is retried later.
-- Dev mode (`?dev`) never reads or writes the cloud.
+- Admin mode (`?admin`) never reads or writes the cloud.
 - **删除云端存档** deletes your row and signs this device out (other devices stay signed in, and
   their next upload creates the row again). Your Google account and the progress on this device are
   not touched. Signing in again uploads this device's save again.

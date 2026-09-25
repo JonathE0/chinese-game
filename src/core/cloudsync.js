@@ -72,6 +72,6 @@ export async function newNonce(){
   return {raw,hashed:await sha256Hex(raw)};
 }
 
-/** What the arrival screen adds: nothing without the cloud (`cloudOn` false: not configured, ?dev,
+/** What the arrival screen adds: nothing without the cloud (`cloudOn` false: not configured, ?admin,
  *  read-only), the signed-in address, or the choice between signing in and playing as a guest. */
 export const arrivalChoice=(cloudOn,who)=>!cloudOn?'plain':who?'signed-in':'choose';

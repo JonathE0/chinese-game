@@ -64,13 +64,13 @@ const loaded=loadProfile(localStorage);
 // readOnly: the save comes from a newer build, so nothing may be written over it this session.
 // holdSave: a damaged save's original did not fit beside it, so it goes to IndexedDB before any save.
 const ctx={profile:loaded.profile,hinted:false,town:null,holdSync:true,readOnly:!!loaded.readOnly,holdSave:!!loaded.unkept};
-// Dev mode, for previewing (`?dev`, and only on the Vite dev server): every district gate stands open
+// Admin mode, for play-testing (`?admin`, and only on the Vite dev server): every district gate stands open
 // and the wallet is topped up to 1000. The save folder is never read or written in this mode, so none
 // of it can leak into a real save.
-const DEV=import.meta.env.DEV&&new URLSearchParams(location.search).has('dev');
+const ADMIN=import.meta.env.DEV&&new URLSearchParams(location.search).has('admin');
 // The cloud save exists only when configured, and never in dev mode (like the folder).
-if(cloudConfigured&&!DEV)ctx.cloud={};
-if(DEV){ctx.profile.wallet=Math.max(ctx.profile.wallet??0,1000);document.body.classList.add('dev');}
+if(cloudConfigured&&!ADMIN)ctx.cloud={};
+if(ADMIN){ctx.profile.wallet=Math.max(ctx.profile.wallet??0,1000);document.body.classList.add('admin');}
 if(loaded.unkept)keepUnreadable(loaded.unkept).then(()=>{loaded.warning=loaded.keptWarning;},()=>{}).finally(()=>{ctx.holdSave=false;});
 ctx.voice=new VoicePlayer(ctx.profile.settings,t=>ctx.ui.notice(t));ctx.music=new Ambience(ctx.profile.settings);ctx.speech=new SpeechInput();ctx.dictionary=new Dictionary();ctx.ui=new Shell(ctx);ctx.lookup=installLookup(ctx);ctx.tutorial=new Tutorial(ctx);
 // Backups, the progress log and the folder copy follow a save within 5 s, at most one write per 5 s
@@ -170,7 +170,7 @@ function collect(name){
 let hskWords=null;
 function refreshGates(){
  if(!ctx.town?.gates)return;
- const states=districtStates(ctx.profile,ctx.town.data.districts,hskWords).map(s=>DEV?{...s,unlocked:true}:s);
+ const states=districtStates(ctx.profile,ctx.town.data.districts,hskWords).map(s=>ADMIN?{...s,unlocked:true}:s);
  ctx.gateStates=states;
  for(const state of states)ctx.town.setUnlocked(state.id,state.unlocked);
 }
@@ -395,7 +395,7 @@ document.querySelector('#start-button').onclick=()=>{started=true;document.query
  if(shouldAutoStart(ctx.profile))ctx.tutorial.start();else ctx.tutorial.sync();
  // A connected folder with more progress than this browser's save is offered before anything overwrites it.
  // The cloud is checked after that, against whichever save the player kept.
- if(!DEV)offerFolderRestore(ctx).then(offered=>{if(!offered){ctx.holdSync=false;cloudSync(ctx);}},()=>{ctx.holdSync=false;cloudSync(ctx);});
+ if(!ADMIN)offerFolderRestore(ctx).then(offered=>{if(!offered){ctx.holdSync=false;cloudSync(ctx);}},()=>{ctx.holdSync=false;cloudSync(ctx);});
 };
 // With the cloud on, the arrival screen offers signing in or playing as a guest.
 if(ctx.cloud&&!ctx.readOnly)mountArrivalCloud(ctx);

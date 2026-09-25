@@ -134,7 +134,7 @@ async function renderFolder(ctx,el){
  el.querySelector('#stop-sync')?.addEventListener('click',async()=>{await stopSync();renderFolder(ctx,el);});
 }
 /**
- * The cloud save, only when services/cloud.js is configured and never in ?dev (main.js leaves
+ * The cloud save, only when services/cloud.js is configured and never in ?admin (main.js leaves
  * ctx.cloud null then). ctx.cloud holds the core/cloudsync.js state plus: hold (a cloud restore
  * offer is waiting for an answer), busy, failed, and at (the last successful upload).
  */

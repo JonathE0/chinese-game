@@ -764,5 +764,5 @@ body.riding .controls,body.riding #crosshair,body.riding #interact,body.riding #
 #metro-ride{--tone-1:#de6a6a;--tone-2:#d9831f;--tone-3:#2f9e5b;--tone-4:#628ce0;--tone-0:#8a8a8a}
 .tone-1{color:var(--tone-1)}.tone-2{color:var(--tone-2)}.tone-3{color:var(--tone-3)}.tone-4{color:var(--tone-4)}.tone-0{color:var(--tone-0)}
 .setting-row select{padding:7px 9px;background:#f2efdf;border:1px solid #ccd2b9;border-radius:7px;color:#58694f;font-size:12px}
-/* Dev mode badge (?dev on the dev server). */
-body.dev::after{content:'DEV';position:fixed;left:8px;bottom:8px;z-index:50;padding:2px 7px;border-radius:6px;background:#b8463a;color:#fff;font:600 11px/1.4 system-ui,sans-serif;letter-spacing:1px;pointer-events:none}
+/* Admin mode badge (?admin on the dev server). */
+body.admin::after{content:'ADMIN';position:fixed;left:8px;bottom:8px;z-index:50;padding:2px 7px;border-radius:6px;background:#b8463a;color:#fff;font:600 11px/1.4 system-ui,sans-serif;letter-spacing:1px;pointer-events:none}
