@@ -170,7 +170,7 @@ test('the poster by the door explains furnishing, and the bed sets the time of d
   await page.locator('.close-button').click();
 
   // The starter bed is upstairs.
-  await page.evaluate(x=>window.__qinghe.town.warp(x,-2.6,0,2.9),home+3.6);
+  await page.evaluate(x=>window.__qinghe.town.warp(x,.5,-90,2.9),home+3.0);
   await page.waitForTimeout(200);
   await expect(page.locator('#interact span')).toHaveText('睡觉 · 选时间');
   await page.keyboard.press('e');

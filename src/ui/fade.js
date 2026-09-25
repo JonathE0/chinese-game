@@ -8,19 +8,23 @@
  */
 const FADE_MS=400;   // each way
 
-export function fadeThrough(between,{duration=FADE_MS,onDone}={}){
+/** `hold` keeps the veil clear for that many milliseconds before it starts to darken: it still
+ *  covers input, so something can play out on screen first (the hop into bed). */
+export function fadeThrough(between,{duration=FADE_MS,hold=0,onDone}={}){
   const host=document.querySelector('#app');
   const veil=document.createElement('div');
   veil.className='fade-veil';
   veil.style.transitionDuration=duration+'ms';
   host.appendChild(veil);
-  // Force layout before the class that starts the transition, or the browser can fold both
-  // style changes into one frame and skip the fade-in entirely.
-  veil.getBoundingClientRect();
-  veil.classList.add('opaque');
   setTimeout(()=>{
-    between?.();
-    veil.classList.remove('opaque');
-    setTimeout(()=>{veil.remove();onDone?.();},duration);
-  },duration);
+    // Force layout before the class that starts the transition, or the browser can fold both
+    // style changes into one frame and skip the fade-in entirely.
+    veil.getBoundingClientRect();
+    veil.classList.add('opaque');
+    setTimeout(()=>{
+      between?.();
+      veil.classList.remove('opaque');
+      setTimeout(()=>{veil.remove();onDone?.();},duration);
+    },duration);
+  },hold);
 }
