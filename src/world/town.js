@@ -24,6 +24,7 @@ import {stepVelocity,inputWish,GRAVITY,JUMP} from '../core/movement.js';
 
 const NAMES=objectNames.objects;
 const SEAT_DROP=.66;    // how far the body sinks so the hips land on the seat
+const SLEEP_HOP=.6;     // seconds from standing by the bed to lying on it
 const SIGNS=signTexts.signs;
 
 /** What a tagged entity is called: an object key from objects.json, or a sign's exact text. */
@@ -765,6 +766,57 @@ export class Town {
     this.clearNearest();this.placeCamera(this.player.entity.getPosition());
     return true;
   }
+  // --- sleeping ---------------------------------------------------------
+  /** The bed nearest the tourist, on the floor they stand on, if this room has one. */
+  bedHere() {
+    const room=this.rooms.get(this.place),floor=this.floorY(),p=this.player.entity.getPosition();
+    let best=null,far=Infinity;
+    for(const prop of room?.props.values()??[]){
+      const d=Math.hypot(room.offsetX+prop.x-p.x,prop.z-p.z);
+      if(prop.kind==='bed'&&(prop.y??0)===floor&&d<far){best=prop;far=d;}
+    }
+    return best;
+  }
+  /** A point in a bed's own frame (x towards its foot, z out of its front, y up from its floor), in the world. */
+  onBed(bed,x,y,z) {
+    const r=(bed.rot??0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r);
+    return new pc.Vec3(this.rooms.get(this.place).offsetX+bed.x+x*c+z*s,(bed.y??0)+y,bed.z-x*s+z*c);
+  }
+  /**
+   * Hop onto the bed and lie back looking up at the canopy: a short arc from where the tourist
+   * stands onto the mattress, head on the pillows. The caller pauses the town first, so nothing else
+   * moves them; getUp() ends it. Returns the milliseconds until they are settled.
+   */
+  lieDown(bed) {
+    const body=this.player.entity,from=body.getPosition().clone(),eye=new pc.Vec3(from.x,from.y+this.eyeHeight,from.z);
+    // Lying on your back: the body's up runs to the head end (-x), its face to the sky.
+    const flat=new pc.Quat().setFromEulerAngles(0,(bed.rot??0)+90,0).mul(new pc.Quat().setFromEulerAngles(-90,0,0));
+    this.sleeping={t:0,view:this.view,from,to:this.onBed(bed,.85,.81,0),turn:body.getRotation().clone(),flat,
+      eyeFrom:eye,eyeTo:this.onBed(bed,-.79,1.04,0),eye:eye.clone(),
+      yaw:this.yaw,pitch:this.pitch,yawTo:(bed.rot??0)-90};
+    this.view='first';this.applyView();   // lying down is seen from your own eyes
+    restIdle(this.player);this.clearNearest();
+    return (SLEEP_HOP+.3)*1000;
+  }
+  stepSleep(dt) {
+    const z=this.sleeping;z.t=Math.min(1,z.t+dt/SLEEP_HOP);
+    const k=z.t*z.t*(3-2*z.t),lift=4*z.t*(1-z.t)*.5,body=this.player.entity;   // eased, over a half-metre arc
+    const at=(a,b)=>new pc.Vec3().lerp(a,b,k).add(new pc.Vec3(0,lift,0));
+    body.setPosition(at(z.from,z.to));
+    body.setRotation(new pc.Quat().slerp(z.turn,z.flat,k));
+    z.eye.copy(at(z.eyeFrom,z.eyeTo));
+    this.yaw=z.yaw+((((z.yawTo-z.yaw)%360)+540)%360-180)*k;   // the short way round
+    this.pitch=z.pitch+(70-z.pitch)*k;
+  }
+  /** Stand up at the front of the bed, facing into the room. */
+  getUp(bed) {
+    const was=this.sleeping;this.sleeping=null;
+    if(was){this.view=was.view;this.applyView();}
+    const floor=bed.y??0,spot=this.onBed(bed,0,0,1.25);
+    this.playerY=floor;
+    const free=this.canMove(spot.x,spot.z,floor)?spot:(this.nearestFreeSpot(spot.x,spot.z)??spot);
+    this.warp(free.x,free.z,(bed.rot??0)+180,floor);
+  }
   // --- furnishing -------------------------------------------------------
   /** Rebuild a room's furniture from saved records. Returns the records it could place. */
   furnish(id,records) {
@@ -1094,6 +1146,7 @@ export class Town {
   facing() {const r=this.yaw*Math.PI/180;return {fx:-Math.sin(r),fz:-Math.cos(r),rx:Math.cos(r),rz:-Math.sin(r)};}
   placeCamera(pos) {
     this.camera.setEulerAngles(this.pitch,this.yaw,0);
+    if(this.sleeping){this.camera.setPosition(this.sleeping.eye);return;}
     if(this.view==='first'){this.camera.setPosition(pos.x,pos.y+this.eyeHeight,pos.z);return;}
     const yr=this.yaw*Math.PI/180,pr=this.pitch*Math.PI/180,cos=Math.cos(pr);
     const dx=-Math.sin(yr)*cos,dy=Math.sin(pr),dz=-Math.cos(yr)*cos;
@@ -1109,8 +1162,9 @@ export class Town {
     // Opening a panel while in mouse-look should give the mouse back when the panel closes —
     // otherwise you are left looking at a world that will not turn until you click it again.
     // If the cursor was already free, it stays free, so the buttons stay clickable.
-    if(value){this.relock=this.locked();this.releaseLook();}
-    else if(this.relock){this.relock=false;this.relockTimer=setTimeout(()=>this.requestLook(),200);}
+    // A pause straight after another ends (a panel closing into the hop into bed) keeps that promise.
+    if(value){this.relock||=this.locked();this.releaseLook();}
+    else if(this.relock)this.relockTimer=setTimeout(()=>{this.relock=false;this.requestLook();},200);
   }
   /** Closest spot within a few metres that is not inside anything. */
   nearestFreeSpot(x,z) {
@@ -1182,6 +1236,7 @@ export class Town {
     dt=Math.min(dt,.05);this.clock+=dt;this.drainLook(dt);
     const pos=this.player.entity.getPosition();
     const {fx,fz,rx,rz}=this.facing();let moving=false;
+    if(this.sleeping)this.stepSleep(dt);
     if(!this.paused&&!this.seated) {
       // Walking is relative to where the tourist is looking, not to the world axes.
       const advance=(this.keys.has('KeyW')||this.keys.has('ArrowUp')?1:0)-(this.keys.has('KeyS')||this.keys.has('ArrowDown')?1:0)-this.stick.dz;
@@ -1214,12 +1269,12 @@ export class Town {
       if(vertical.grounded||vertical.ceiling)this.velocityY=0;
       this.player.entity.setPosition(x,this.playerY,z);
     }
-    this.player.entity.setEulerAngles(0,(this.seated?this.seated.bodyYaw:this.yaw)+180,0);
+    if(!this.sleeping)this.player.entity.setEulerAngles(0,(this.seated?this.seated.bodyYaw:this.yaw)+180,0);
     if(moving){
       restIdle(this.player);
       this.player.legs.forEach((leg,i)=>leg.setLocalEulerAngles(Math.sin(this.clock*12+i*Math.PI)*23,0,0));
       this.player.arms.forEach((arm,i)=>arm.setLocalEulerAngles(Math.sin(this.clock*12+i*Math.PI)*-18,0,0));
-    } else if(!this.seated) animateIdle(this.player,dt);
+    } else if(!this.seated&&!this.sleeping) animateIdle(this.player,dt);
     this.daylight.advance(dt);
     this.lightRoom();
     this.updatePlacement();

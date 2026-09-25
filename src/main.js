@@ -413,7 +413,8 @@ addEventListener('keydown',e=>{
 const shortcuts={Digit1:['journal',openJournal],Digit2:['inventory',openInventory],Digit3:['wordbank',openWordBank],Digit4:['status',openStatus],Digit5:['settings',openSettings]};
 addEventListener('keydown',e=>{
  const choice=shortcuts[e.code.replace('Numpad','Digit')];
- if(!choice||!shortcutAllowed(e,{started,panelId:ctx.ui.panelId,placing:!!ctx.town.ghost,
+ // Nothing opens behind a fade (a taxi ride, a night's sleep): the veil holds all input until it lifts.
+ if(!choice||document.querySelector('.fade-veil')||!shortcutAllowed(e,{started,panelId:ctx.ui.panelId,placing:!!ctx.town.ghost,
    reviewing:!!document.querySelector('#panel .drill-prompt')})||isTyping(document.activeElement))return;
  e.preventDefault();
  if(ctx.ui.panelId===choice[0])ctx.ui.close();else choice[1](ctx);

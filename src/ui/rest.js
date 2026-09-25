@@ -4,6 +4,7 @@ import {icon} from './art.js';
 import {languageLine,pinyinWith} from './shell.js';
 import {readStats,sleep,energyNote} from '../core/stats.js';
 import {clockText} from '../world/daylight.js';
+import {fadeThrough} from './fade.js';
 
 /**
  * Your own bed. Sleeping is the one place you get to set the clock yourself — the day/night
@@ -37,16 +38,26 @@ export function openSleep(ctx){
 
   body.querySelectorAll('[data-sleep]').forEach(button=>button.onclick=()=>{
     const time=TIMES.find(t=>t.id===button.dataset.sleep);
-    let hours=time.hour-ctx.town.daylight.hour;
-    if(hours<=0)hours+=24;                            // sleeping round to the same time tomorrow
-    if(hours>=(24-ctx.town.daylight.hour)&&ctx.town.daylight.hour+hours>=24)ctx.profile.dayIndex=(ctx.profile.dayIndex??0)+1;
-    ctx.town.daylight.setHour(time.hour);
-    ctx.profile.clock=time.hour;
-    sleep(ctx.profile,hours);
-    ctx.profile.stats.hour=time.hour;                 // do not charge hunger twice for the same hours
-    ctx.save();
+    const town=ctx.town,bed=town.bedHere();
     ctx.ui.close();
-    ctx.ui.notice(`睡到${time.zh}了。 / You slept until ${time.en.toLowerCase()}.`);
+    // Into bed with a hop (or, with reduced motion, simply a fade), the screen goes dark, the clock
+    // jumps, and the tourist is up again beside the bed. Nothing takes input until it is over.
+    town.setPaused(true);
+    const settle=bed&&!matchMedia('(prefers-reduced-motion: reduce)').matches?town.lieDown(bed):0;
+    fadeThrough(()=>{
+      let hours=time.hour-town.daylight.hour;
+      if(hours<=0)hours+=24;                            // sleeping round to the same time tomorrow
+      if(hours>=(24-town.daylight.hour)&&town.daylight.hour+hours>=24)ctx.profile.dayIndex=(ctx.profile.dayIndex??0)+1;
+      town.daylight.setHour(time.hour);
+      ctx.profile.clock=time.hour;
+      sleep(ctx.profile,hours);
+      ctx.profile.stats.hour=time.hour;                 // do not charge hunger twice for the same hours
+      ctx.save();
+      if(bed)town.getUp(bed);
+    },{duration:1000,hold:settle,onDone:()=>{
+      town.setPaused(false);
+      ctx.ui.notice(`睡到${time.zh}了。 / You slept until ${time.en.toLowerCase()}.`);
+    }});
   });
 }
 
