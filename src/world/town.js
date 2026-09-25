@@ -564,6 +564,9 @@ export class Town {
       const sill=data.upper?.entrance?data.upper.y:0;
       if(sill)this.mark(room.id,offsetX,d/2+.15,.85,.2,0,sill,'wall');
       this.mark(room.id,offsetX,d/2+.15,.85,.2,sill,sill+.6,'door',false);
+      // The doorway itself is shut to walking: the room floats far from the town, so stepping through
+      // it led into nothing. You leave with E; the door mark above only names it.
+      if(!data.returnWall)this.mark(room.id,offsetX,d/2+.15,.85,.2,sill,top,null);
       // A room whose way back is on another wall has its front doorway walled up, and that way marked.
       if(data.returnWall){
         this.mark(room.id,offsetX,d/2+.15,.85,.2,0,top,'wall');

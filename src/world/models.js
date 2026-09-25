@@ -524,20 +524,37 @@ export function createModels(app) {
       for(const x of [-.62,.62])for(const z of [-.38,.38])box(e,[x,.2,z],[.11,.42,.11],'#8f6a48');
       box(e,[0,.24,0],[1.2,.06,.7],'#a97d55');
     } else if(kind==='bed') {
-      // A low wooden frame, a mattress that sits inside it, a folded quilt and two pillows.
-      box(e,[0,.15,0],[2.16,.3,1.46],'#8f6a48');
-      for(const x of [-1.0,1.0])for(const z of [-.62,.62])box(e,[x,.07,z],[.14,.14,.14],'#6f5236');
-      box(e,[0,.34,0],[1.98,.24,1.32],'#f4ecd8');                 // mattress
-      box(e,[0,.46,0],[1.96,.05,1.3],'#fdf7e6');
+      // A traditional canopy bed (架子床). As in a Chinese bedroom its long side stands against the
+      // wall (-z) and you climb in from the open front (+z); the sleeper's head is at the -x end,
+      // where the pillows lie. Four posts carry a canopy with a lattice valance, and low lattice rails
+      // close the back and both ends, leaving short rails either side of the way in.
+      const wood='#6e3322',trim='#8a4a2c',dark='#4e2418',top=2.12;
+      const frame=group(e,'bed');
+      box(frame,[0,.36,0],[2.16,.12,1.46],wood);                                     // bed board
+      box(frame,[0,.26,.71],[2.0,.1,.04],trim);                                      // front apron
+      for(const x of [-1.02,1.02])for(const z of [-.66,.66])box(frame,[x,.15,z],[.1,.3,.1],dark);   // feet
+      for(const x of [-1.04,1.04])for(const z of [-.69,.69])box(frame,[x,(top+.42)/2,z],[.07,top-.42,.07],wood);
+      for(const z of [-.69,.69])box(frame,[0,top,z],[2.16,.08,.08],wood);             // canopy frame
+      for(const x of [-1.04,1.04])box(frame,[x,top,0],[.08,.08,1.46],wood);
+      box(frame,[0,top+.05,0],[2.16,.03,1.46],trim);
+      box(frame,[0,top-.22,.69],[2.02,.04,.04],trim);                                // front valance
+      for(let i=0;i<11;i++)box(frame,[-.95+i*.19,top-.11,.69],[.03,.2,.03],trim);
+      // A lattice rail: a top bar over upright bars, from a to b along x (at z) or along z (at x).
+      const rail=(alongX,a,b,at)=>{
+        const mid=(a+b)/2,len=b-a,n=Math.max(2,Math.round(len/.19));
+        box(frame,alongX?[mid,.8,at]:[at,.8,mid],alongX?[len,.04,.05]:[.05,.04,len],trim);
+        for(let i=0;i<=n;i++){const u=a+len*i/n;box(frame,alongX?[u,.62,at]:[at,.62,u],[.025,.34,.025],trim);}
+      };
+      rail(true,-1.0,1.0,-.69);                                                       // back
+      for(const x of [-1.04,1.04])rail(false,-.65,.65,x);                              // ends
+      for(const [a,b] of [[-1.0,-.62],[.62,1.0]])rail(true,a,b,.69);                   // either side of the way in
+      for(const x of [-.97,.97])box(frame,[x,1.45,.64],[.12,1.3,.1],'#efe6d2');        // bed curtains, tied back
+      box(frame,[0,.48,0],[2.0,.12,1.36],'#efe4c8');                                  // mattress
+      box(frame,[0,.55,0],[1.96,.02,1.32],'#d8c490');                                 // woven summer mat
       const quilt=group(e,'quilt');
-      box(quilt,[0,.5,.2],[1.9,.14,.86],color??'#a8bfa5');            // turned-down quilt
-      box(quilt,[0,.56,.5],[1.9,.1,.3],'#c3d3bd');
-      for(const x of [-.48,.48])tag(box(e,[x,.53,-.44],[.78,.16,.4],'#fdf6e2',[0,x<0?4:-4,0]),'pillow');   // pillows
-      box(e,[-1.13,.66,0],[.1,1.02,1.46],'#8f6a48');              // headboard
-      box(e,[-1.13,1.14,0],[.16,.12,1.5],'#a2764f');
-      for(let i=0;i<4;i++)box(e,[-1.09,.62+i*.14,0],[.03,.06,1.3],'#7d5c3d');
-      box(e,[1.13,.42,0],[.1,.54,1.46],'#8f6a48');                // footboard
-      box(e,[1.13,.68,0],[.16,.1,1.5],'#a2764f');
+      box(quilt,[.28,.6,0],[1.45,.08,1.3],color??'#b0392c');                          // quilt, turned down
+      box(quilt,[-.46,.62,0],[.22,.1,1.3],'#d6a84e');
+      for(const z of [-.3,.3])tag(box(e,[-.8,.62,z],[.34,.14,.52],'#f6efdc'),'pillow');  // pillows at the head
     } else if(kind==='shelf') {
       box(e,[0,.85,0],[1.4,1.7,.55],color);
       box(e,[0,.85,.06],[1.24,1.54,.5],'#eadcbb');

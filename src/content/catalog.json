@@ -73,7 +73,7 @@
     "descriptionEn": "Sleep well; the town will still be here tomorrow.",
     "category": "furniture",
     "visual": "bed",
-    "color": "#c2a883",
+    "color": "#b0392c",
     "price": 40,
     "minPrice": 40,
     "negotiable": false,
