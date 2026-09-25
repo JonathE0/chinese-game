@@ -32245,6 +32245,19 @@
    "bytes": 11664,
    "hash": "f1eb10d702ee215f"
   },
+  "obj-blanket": {
+   "src": "/audio/clips/obj-blanket.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "毯子",
+   "bytes": 11232,
+   "hash": "838064574602e222"
+  },
   "obj-book": {
    "src": "/audio/clips/obj-book.mp3",
    "approved": true,

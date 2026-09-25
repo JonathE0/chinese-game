@@ -516,6 +516,48 @@ export function createModels(app) {
     cylinder(g,[x,y-.31,z],[.045,.25,.045],'#e0b86a');
     return {entity:globe,material:lit};
   }
+  /**
+   * A carved fretwork panel, w by h metres: a lattice drawn on a canvas inside a solid frame, cut
+   * out with alpha test so a whole panel is one flat box. `hole` [x,y,r] (metres from the centre)
+   * clears a round opening with a rim. Panels of the same size share one material.
+   */
+  const frets=new Map();
+  function fretwork(w,h,hole,color,rim) {
+    const key=[w,h,hole,color,rim].join();
+    if(frets.has(key))return frets.get(key);
+    const ppm=200,cw=Math.round(w*ppm),ch=Math.round(h*ppm);
+    const canvas=document.createElement('canvas');canvas.width=cw;canvas.height=ch;
+    const c=canvas.getContext('2d');
+    // A square grid with a diamond in every cell touching the middle of each side (菱花 lattice).
+    const nx=Math.max(1,Math.round(w/.15)),ny=Math.max(1,Math.round(h/.15)),sx=cw/nx,sy=ch/ny;
+    c.strokeStyle=color;c.lineWidth=.02*ppm;c.beginPath();
+    for(let i=0;i<=nx;i++){c.moveTo(i*sx,0);c.lineTo(i*sx,ch);}
+    for(let j=0;j<=ny;j++){c.moveTo(0,j*sy);c.lineTo(cw,j*sy);}
+    for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){
+      const x=i*sx,y=j*sy;
+      c.moveTo(x+sx/2,y);c.lineTo(x+sx,y+sy/2);c.lineTo(x+sx/2,y+sy);c.lineTo(x,y+sy/2);c.closePath();
+    }
+    c.stroke();
+    c.strokeStyle=rim;c.lineWidth=.09*ppm;c.strokeRect(0,0,cw,ch);   // half of it lands on the canvas
+    if(hole){
+      const [x,y,r]=hole.map(v=>v*ppm);
+      c.globalCompositeOperation='destination-out';c.beginPath();c.arc(cw/2+x,ch/2-y,r,0,Math.PI*2);c.fill();
+      c.globalCompositeOperation='source-over';c.lineWidth=.03*ppm;c.beginPath();c.arc(cw/2+x,ch/2-y,r+.015*ppm,0,Math.PI*2);c.stroke();
+    }
+    const tex=new pc.Texture(app.graphicsDevice,{width:cw,height:ch,mipmaps:true,anisotropy:4,
+      minFilter:pc.FILTER_LINEAR_MIPMAP_LINEAR,magFilter:pc.FILTER_LINEAR});
+    tex.setSource(canvas);
+    const m=new pc.StandardMaterial();
+    m.diffuseMap=tex;m.opacityMap=tex;m.opacityMapChannel='a';m.alphaTest=.5;
+    m.useMetalness=true;m.metalness=0;m.gloss=.1;m.update();
+    frets.set(key,m);return m;
+  }
+  /** A round rim of n short bars of radius r, standing in the xy plane of a node at xyz turned by yaw. */
+  function hoop(parent,xyz,yaw,r,n,color) {
+    const e=new pc.Entity('hoop');e.setLocalPosition(...xyz);e.setLocalEulerAngles(0,yaw,0);parent.addChild(e);
+    const len=2*r*Math.tan(Math.PI/n)+.012;
+    for(let i=0;i<n;i++){const a=(i+.5)/n*Math.PI*2;box(e,[r*Math.cos(a),r*Math.sin(a),0],[len,.05,.06],color,[0,0,a*180/Math.PI+90]);}
+  }
   // Home furnishings, built from the same blocky vocabulary as the town itself.
   function furniture(parent,kind,color='#b98d62') {
     const e=new pc.Entity('furniture-'+kind);parent.addChild(e);
@@ -524,37 +566,50 @@ export function createModels(app) {
       for(const x of [-.62,.62])for(const z of [-.38,.38])box(e,[x,.2,z],[.11,.42,.11],'#8f6a48');
       box(e,[0,.24,0],[1.2,.06,.7],'#a97d55');
     } else if(kind==='bed') {
-      // A traditional canopy bed (架子床). As in a Chinese bedroom its long side stands against the
-      // wall (-z) and you climb in from the open front (+z); the sleeper's head is at the -x end,
-      // where the pillows lie. Four posts carry a canopy with a lattice valance, and low lattice rails
-      // close the back and both ends, leaving short rails either side of the way in.
-      const wood='#6e3322',trim='#8a4a2c',dark='#4e2418',top=2.12;
+      // A moon-gate canopy bed (月洞门架子床) in reddish rosewood. Its long side stands against the
+      // wall (-z) and you climb in at the front (+z), through a round opening nearly the height of
+      // the canopy; the sleeper's head is at the -x end. Each end has a round window in its fretwork,
+      // the back is lattice, a low lattice rail runs round the back and ends, and a lattice frieze
+      // runs round the canopy. The platform stands on an apron and short horse-hoof legs. Every
+      // fretwork panel is one flat box with a cut-out texture (see fretwork()).
+      const wood='#8a3f26',fret='#6a2c1b',dark='#5a2616';
+      const base=.44,rail=.78,frieze=2.0,top=2.22,span=1.95,deep=1.25;   // heights; panel widths
       const frame=group(e,'bed');
-      box(frame,[0,.36,0],[2.16,.12,1.46],wood);                                     // bed board
-      box(frame,[0,.26,.71],[2.0,.1,.04],trim);                                      // front apron
-      for(const x of [-1.02,1.02])for(const z of [-.66,.66])box(frame,[x,.15,z],[.1,.3,.1],dark);   // feet
-      for(const x of [-1.04,1.04])for(const z of [-.69,.69])box(frame,[x,(top+.42)/2,z],[.07,top-.42,.07],wood);
-      for(const z of [-.69,.69])box(frame,[0,top,z],[2.16,.08,.08],wood);             // canopy frame
-      for(const x of [-1.04,1.04])box(frame,[x,top,0],[.08,.08,1.46],wood);
-      box(frame,[0,top+.05,0],[2.16,.03,1.46],trim);
-      box(frame,[0,top-.22,.69],[2.02,.04,.04],trim);                                // front valance
-      for(let i=0;i<11;i++)box(frame,[-.95+i*.19,top-.11,.69],[.03,.2,.03],trim);
-      // A lattice rail: a top bar over upright bars, from a to b along x (at z) or along z (at x).
-      const rail=(alongX,a,b,at)=>{
-        const mid=(a+b)/2,len=b-a,n=Math.max(2,Math.round(len/.19));
-        box(frame,alongX?[mid,.8,at]:[at,.8,mid],alongX?[len,.04,.05]:[.05,.04,len],trim);
-        for(let i=0;i<=n;i++){const u=a+len*i/n;box(frame,alongX?[u,.62,at]:[at,.62,u],[.025,.34,.025],trim);}
+      const panel=(xyz,size,hole)=>{
+        const w=size[0]>size[2]?size[0]:size[2],b=box(frame,xyz,size,fret);
+        b.render.meshInstances[0].material=fretwork(w,size[1],hole,fret,wood);
       };
-      rail(true,-1.0,1.0,-.69);                                                       // back
-      for(const x of [-1.04,1.04])rail(false,-.65,.65,x);                              // ends
-      for(const [a,b] of [[-1.0,-.62],[.62,1.0]])rail(true,a,b,.69);                   // either side of the way in
-      for(const x of [-.97,.97])box(frame,[x,1.45,.64],[.12,1.3,.1],'#efe6d2');        // bed curtains, tied back
-      box(frame,[0,.48,0],[2.0,.12,1.36],'#efe4c8');                                  // mattress
-      box(frame,[0,.55,0],[1.96,.02,1.32],'#d8c490');                                 // woven summer mat
+      for(const x of [-.98,.98])for(const z of [-.62,.62]){
+        box(frame,[x,.15,z],[.09,.22,.09],dark,[z>0?-8:8,0,x>0?8:-8]);                  // a leg curving out
+        box(frame,[x*1.03,.025,z*1.04],[.13,.05,.13],dark);                             // to a hoof foot
+      }
+      box(frame,[0,.29,0],[2.02,.12,1.32],wood);                                       // apron
+      box(frame,[0,.235,.665],[1.7,.03,.02],dark);                                     // its carved bead
+      box(frame,[0,.4,0],[2.1,.08,1.4],wood);                                          // platform
+      for(const x of [-1.01,1.01])for(const z of [-.66,.66])box(frame,[x,(base+top)/2,z],[.07,top-base,.07],wood);   // posts
+      box(frame,[0,top+.02,0],[2.12,.05,1.42],wood);                                   // canopy
+      for(const z of [-.66,.66])panel([0,(frieze+top)/2,z],[span,top-frieze,.025]);    // frieze
+      for(const x of [-1.01,1.01])panel([x,(frieze+top)/2,0],[.025,top-frieze,deep]);
+      const gate=(frieze-base)/2-.06,gy=(base+frieze)/2;                               // the moon gate
+      panel([0,gy,.66],[span,frieze-base,.025],[0,0,gate]);
+      hoop(frame,[0,gy,.66],0,gate+.02,16,wood);
+      panel([0,(base+rail)/2,-.66],[span,rail-base,.025]);                             // back rail
+      panel([0,(rail+frieze)/2,-.66],[span,frieze-rail,.025]);                         // back
+      const round=Math.min(deep,frieze-rail)/2-.08,ry=(rail+frieze)/2;                 // round windows
+      for(const x of [-1.01,1.01]){
+        panel([x,(base+rail)/2,0],[.025,rail-base,deep]);
+        panel([x,ry,0],[.025,frieze-rail,deep],[0,0,round]);
+        hoop(frame,[x,ry,0],90,round+.02,12,wood);
+      }
+      box(frame,[0,.5,0],[1.96,.12,1.26],'#efe4c8');                                   // mattress
       const quilt=group(e,'quilt');
-      box(quilt,[.28,.6,0],[1.45,.08,1.3],color??'#b0392c');                          // quilt, turned down
-      box(quilt,[-.46,.62,0],[.22,.1,1.3],'#d6a84e');
-      for(const z of [-.3,.3])tag(box(e,[-.8,.62,z],[.34,.14,.52],'#f6efdc'),'pillow');  // pillows at the head
+      box(quilt,[.25,.595,0],[1.4,.07,1.22],color);                                    // spread to the foot
+      box(quilt,[-.5,.61,0],[.14,.09,1.22],'#ead6a8');                                 // folded back at the head
+      for(const z of [-.27,.27])tag(box(e,[-.72,.62,z],[.28,.13,.46],'#f6efdc'),'pillow');   // pillows at the head
+      tag(cylinder(e,[-.915,.63,0],[.14,1.1,.14],'#e9dcc0',[90,0,0]),'pillow');         // and a bolster
+      const blanket=group(e,'blanket');                                                  // folded at the foot
+      box(blanket,[.78,.68,0],[.3,.1,.95],'#d9b36a');
+      box(blanket,[.78,.68,0],[.312,.104,.18],'#a8453a');
     } else if(kind==='shelf') {
       box(e,[0,.85,0],[1.4,1.7,.55],color);
       box(e,[0,.85,.06],[1.24,1.54,.5],'#eadcbb');
