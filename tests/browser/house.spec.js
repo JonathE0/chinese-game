@@ -92,9 +92,9 @@ test('the stairs are walked up with W alone, the starter bed is upstairs, and W 
   expect(await page.evaluate(()=>window.__qinghe.town.warps)).toBe(warps);
   expect((await where(page)).place).toBe('home');
   // Upstairs, the bed is somewhere to sleep; standing on the same spot downstairs offers nothing of the kind.
-  await stand(page,'home',3.6,-2.6,0,2.9);
+  await stand(page,'home',3.0,.5,-90,2.9);
   await expect(page.locator('#interact span')).toHaveText('睡觉 · 选时间');
-  await stand(page,'home',3.6,-2.6,0);
+  await stand(page,'home',3.0,.5,-90);
   expect(await page.evaluate(()=>window.__qinghe.town.nearest?.id??null)).not.toBe('sleep');
   // From the landing, W walks back down to the ground floor.
   await stand(page,'home',-4.45,-.9,180,2.9);
@@ -132,7 +132,7 @@ test('upstairs furniture, in a slot or placed by hand, is still upstairs after a
   await page.getByRole('button',{name:'开始旅行'}).click();
   await page.waitForTimeout(500);
   const props=await propsIn(page,'home');
-  expect(props).toEqual(expect.arrayContaining([expect.objectContaining({kind:'bed',x:2.8,z:-3.6,y:2.9}),expect.objectContaining({kind:'plant',y:2.9})]));
+  expect(props).toEqual(expect.arrayContaining([expect.objectContaining({kind:'bed',x:4.25,z:.5,y:2.9}),expect.objectContaining({kind:'plant',y:2.9})]));
   expect(await page.evaluate(()=>[...window.__qinghe.town.rooms.get('home').props.values()].every(p=>Math.abs(p.entity.getLocalPosition().y-2.9)<.01))).toBe(true);
   expect(errors).toEqual([]);
 });

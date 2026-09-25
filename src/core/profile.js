@@ -11,7 +11,7 @@ export const SAVE_KEY='little-mandarin-town.v1';
  * to the save format adds one step here; loading runs whatever steps a save still needs, and saving
  * always writes SAVE_VERSION.
  */
-const UPGRADES=[upstairs];
+const UPGRADES=[upstairs,bedSpot];
 export const SAVE_VERSION=UPGRADES.length+1;
 /** `notes` collects what an upgrade had to tell the player (loadProfile turns it into `notice`). */
 export function upgradeSave(p,steps=UPGRADES,notes=[]) {
@@ -33,9 +33,8 @@ function upstairs(p,notes) {
   const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
   // Where a piece standing on its own goes, or null for back into storage.
   const place=r=>{
-    const size=half(r);
     if (r.room==='bedroom') {
-      const slot=r.slot&&home.slots['up-'+r.slot];
+      const slot=r.slot&&home.slots['up-'+r.slot],size=half(r,slot?slot.rot??0:r.rot);   // turned the way its slot is
       let x=slot?slot.x:clamp(r.x+1,-w/2+size[0]+.3,w/2-size[0]-.3);
       const z=slot?slot.z:clamp(r.z-2,-d/2+size[1]+.3,d/2-size[1]-.5);
       if (inWell(x,z,size)) x=wx1+size[0]+.3;
@@ -45,7 +44,7 @@ function upstairs(p,notes) {
       if (slot) moved.slot='up-'+r.slot;
       return moved;
     }
-    if ((r.room??'home')!=='home'||r.y||!inWell(r.x,r.z,size)) return r;
+    if ((r.room??'home')!=='home'||r.y||!inWell(r.x,r.z,half(r))) return r;
     const slot=r.slot&&home.slots[r.slot];
     return slot&&!inWell(slot.x,slot.z,half(r,slot.rot))?{...r,x:slot.x,z:slot.z,rot:slot.rot??0}:null;
   };
@@ -78,6 +77,25 @@ function upstairs(p,notes) {
     if (note&&!notes.includes(note)) notes.push(note);
   }
   return {...p,home:kept};
+}
+/**
+ * Version 3: the upstairs bed slot moved from the back wall (2.8, -3.6, facing the room) to the
+ * middle of the east wall, facing the landing. A bed still standing exactly in the old spot goes
+ * to the new one, unless something else already stands there; a bed moved by hand stays put.
+ */
+function bedSpot(p) {
+  if (!Array.isArray(p.home)) return p;
+  const slot=rooms.home.slots['up-bed'],up=rooms.home.upper.y;
+  const half=r=>{const [fw,fd]=Array.isArray(r.footprint)?r.footprint:[0,0];return ((r.rot??0)/90)%2?[fd/2,fw/2]:[fw/2,fd/2];};
+  const upstairs=r=>plain(r)&&(r.room??'home')==='home'&&r.y===up;
+  const old=r=>upstairs(r)&&r.kind==='bed'&&r.x===2.8&&r.z===-3.6&&(r.rot??0)===0;
+  return {...p,home:p.home.map(r=>{
+    if (!old(r)) return r;
+    const to={...r,x:slot.x,z:slot.z,rot:slot.rot};
+    const clash=other=>other!==r&&upstairs(other)&&other.kind!=='rug'&&!other.on
+      &&Math.abs(other.x-to.x)<half(other)[0]+half(to)[0]&&Math.abs(other.z-to.z)<half(other)[1]+half(to)[1];
+    return p.home.some(clash)?r:to;
+  })};
 }
 export function freshProfile() {
   return {version:SAVE_VERSION,wallet:0,inventory:{},equipped:{},claims:{},words:{},completed:[],phrases:[],saved:[],home:[],discovered:[],read:[],clock:15,dayIndex:0,vendors:{},settings:{pinyin:'known',toneColors:false,english:true,dialogueVolume:0.9,ambientVolume:0.35,musicVolume:0.5,sensitivity:0.12,hud:{quests:true,names:true,controls:'en'}},playerName:'旅人'};

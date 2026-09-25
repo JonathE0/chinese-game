@@ -211,7 +211,7 @@ test("a version 1 save: the bedroom's furniture moves upstairs and nothing owned
   for (const uid of ['bed', 'ns', 'plant', 'tea']) {
     const r = byUid[uid];
     assert.equal(r.room, 'home', uid); assert.equal(r.y, rooms.home.upper.y, uid);
-    const [hw, hd] = [r.footprint[0] / 2, r.footprint[1] / 2];
+    const turned = (r.rot / 90) % 2 !== 0, [hw, hd] = [r.footprint[turned ? 1 : 0] / 2, r.footprint[turned ? 0 : 1] / 2];
     assert.ok(Math.abs(r.x) + hw <= 5 && Math.abs(r.z) + hd <= 4.5, uid + ' inside the floor');
     assert.ok(r.x - hw >= wx1 || r.x + hw <= wx0 || r.z - hd >= wz1 || r.z + hd <= wz0, uid + ' off the stairwell');
   }
@@ -260,4 +260,33 @@ test('a version 1 save: a moved piece that would land on another goes back to th
   assert.equal(byUid.wardrobe.rot, rooms.home.slots['up-wardrobe'].rot);
   assert.deepEqual(notes, ['moved', 'returned']);
   assert.deepEqual(up.inventory, old.inventory);
+});
+
+test('a version 2 save: a bed in the old upstairs spot moves to the new one; a bed moved by hand stays put', () => {
+  const piece = (uid, item, kind, footprint, x, z, extra = {}) => ({ uid, item, kind, color: '#aa8866', footprint, x, z, rot: 0, room: 'home', y: 2.9, ...extra });
+  const slot = rooms.home.slots['up-bed'], old = { x: 2.8, z: -3.6 };
+  assert.notDeepEqual([slot.x, slot.z], [old.x, old.z], 'the slot has moved');
+  const v2 = home => ({ ...freshProfile(), version: 2, inventory: { 'wooden-bed': 2, nightstand: 1, 'potted-plant': 1 }, home });
+  const bed = (extra = {}) => piece('bed', 'wooden-bed', 'bed', [2.1, 1.4], old.x, old.z, { slot: 'up-bed', ...extra });
+  const notes = [];
+  const up = upgradeSave(v2([
+    bed(),
+    piece('ns', 'nightstand', 'nightstand', [0.65, 0.5], 1.3, -4.05, { slot: 'up-nightstand' }),
+    // Downstairs, the same coordinates are a different spot altogether.
+    piece('down', 'wooden-bed', 'bed', [2.1, 1.4], old.x, old.z, { y: undefined }),
+  ]), undefined, notes);
+  assert.equal(up.version, 3);
+  assert.deepEqual(up.home.map(r => [r.uid, r.x, r.z, r.rot, r.slot]), [
+    ['bed', slot.x, slot.z, slot.rot, 'up-bed'], ['ns', 1.3, -4.05, 0, 'up-nightstand'], ['down', old.x, old.z, 0, undefined]]);
+  assert.deepEqual(notes, []);
+  // Moved by hand, or with the new spot already taken by something else, the bed stays where it is.
+  const moved = bed({ x: 1.5 });
+  assert.deepEqual(upgradeSave(v2([moved])).home, [moved]);
+  const blocked = [bed(), piece('plant', 'potted-plant', 'plant', [0.7, 0.7], slot.x, slot.z)];
+  assert.deepEqual(upgradeSave(v2(structuredClone(blocked))).home, blocked);
+  // A rug lies under everything, so it does not keep the bed out.
+  assert.equal(upgradeSave(v2([bed(), piece('rug', 'floor-rug', 'rug', [2.2, 1.6], slot.x, slot.z)])).home[0].x, slot.x);
+  // Loading runs it too.
+  const loaded = loadProfile(memory({ [SAVE_KEY]: JSON.stringify(v2([bed()])) }));
+  assert.deepEqual([loaded.profile.home[0].x, loaded.profile.home[0].z, loaded.profile.version], [slot.x, slot.z, SAVE_VERSION]);
 });
