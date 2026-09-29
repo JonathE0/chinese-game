@@ -153,10 +153,10 @@ export function buildHarbour(town,root){
   /** Parts built under a scratch entity, baked into one mesh, then thrown away. */
   const baked=(build,tris)=>{const scratch=new pc.Entity('scratch');build(scratch);const mesh=bake(device,scratch,tris);scratch.destroy();return mesh;};
   /** Someone who stands still (the ticket seller, the crew at the gangway, the wheel's attendant): one mesh, batched. */
-  const figure=(x,y,z,turn,color,hat)=>{
+  const figure=(x,y,z,turn,color,hat,solid=true)=>{
     const mesh=baked(s=>{const made=m.person(s,color,[0,0,0],hat);if(!hat)made.hat.destroy();});
     const e=drawn('person',g,[mesh],paint);e.noBatch=false;e.setLocalPosition(x,y,z);e.setLocalEulerAngles(0,turn,0);
-    e.lookName='person';mark(x,z,.3,.3,y,y+1.95,null);
+    e.lookName='person';if(solid)mark(x,z,.3,.3,y,y+1.95,null);
     return e;
   };
 
@@ -189,7 +189,7 @@ export function buildHarbour(town,root){
     box(b,[(x0+x1)/2,top+2.78,zc],[w+.5,.16,d+.5],'#c9453b');
     const sign=new pc.Entity('sign');sign.setLocalPosition(x1+.06,0,zc);sign.setLocalEulerAngles(0,90,0);b.addChild(sign);
     label(sign,'售票处',[0,top+2.4,0],1.8,.5,'#fff4d6','#a4564a');
-    figure(x1-.75,top,zc,90,'#2f4a6b',false);
+    figure(x1-.75,top,zc,90,'#2f4a6b',false,false);   // inside the booth, whose own mark keeps you out
     mark((x0+x1)/2,zc,w/2,d/2,top,top+2.86,null);
   };
   /** A roof on four posts over the pier head, two lamps under it. */
@@ -287,12 +287,12 @@ export function buildHarbour(town,root){
     const [x0,x1,z0,z1]=W.platform,deckTop=W.floor;
     const platform=new pc.Entity('platform');platform.lookName='ferris-wheel';g.addChild(platform);
     box(platform,[(x0+x1)/2,(top+deckTop)/2,(z0+z1)/2],[x1-x0,deckTop-top,z1-z0],'#c9c2b2');
-    mark((x0+x1)/2,(z0+z1)/2,(x1-x0)/2,(z1-z0)/2,-1,deckTop,null);
+    mark((x0+x1)/2,(z0+z1)/2,(x1-x0)/2,(z1-z0)/2,top,deckTop,null);   // it stands on the landing
     const [gx]=W.gate,railed=(ax,az,bx,bz)=>{
       railing(ax,az,bx,bz,deckTop);
       mark((ax+bx)/2,(az+bz)/2,Math.max(.06,Math.abs(bx-ax)/2),Math.max(.06,Math.abs(bz-az)/2),deckTop,deckTop+1.05,'railing');
     };
-    railed(x0+.05,z0,x0+.05,z1);railed(x1-.05,z0,x1-.05,z1);railed(x0,z0+.05,x1,z0+.05);
+    railed(x0+.05,z0+.1,x0+.05,z1-.1);railed(x1-.05,z0+.1,x1-.05,z1-.1);   // the sides end against the front and back railsrailed(x0,z0+.05,x1,z0+.05);
     railed(x0,z1-.05,gx-1.6,z1-.05);railed(gx+1.6,z1-.05,x1,z1-.05);
     for(const x of [gx-1.4,gx+1.4]){box(platform,[x,deckTop+1.7,z1-.05],[.25,3.4,.25],'#c9453b');mark(x,z1-.05,.15,.15,deckTop,deckTop+3.4,null);}
     box(platform,[gx,deckTop+3.5,z1-.05],[3.2,.3,.3],'#c9453b');

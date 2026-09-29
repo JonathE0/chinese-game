@@ -40,9 +40,11 @@ test('the front door of 我的家 is a short, open walk from where you arrive',a
       const x=x0+i*step,z=z0+j*step;
       if(Math.hypot(x-door.x,z-door.z)<=door.radius-.2)best=Math.min(best,dist[at(i,j)]);
     }
+    // In front of 陈叔叔's counter, where you stand to talk to him.
+    const chen=t.data.npcs.find(n=>n.id==='chen');
     const walk=(x,z)=>{const [i,j]=cell(x,z);return dist[at(i,j)];};
     return {spawnFree:t.canMove(spawnX,spawnZ,0),toDoor:best,straight:Math.hypot(door.x-spawnX,door.z-spawnZ),
-      chen:walk(9,0),underSign:t.canMove(0,17,0),post:t.canMove(2.2,17,0)};
+      chen:walk(chen.x,chen.z+2.6),underSign:t.canMove(0,17,0),post:t.canMove(2.2,17,0)};
   });
   expect(result.spawnFree).toBe(true);
   expect(result.toDoor).toBeLessThan(result.straight*1.1);   // nothing in the way

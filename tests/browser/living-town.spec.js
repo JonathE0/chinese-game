@@ -152,7 +152,7 @@ test('night stalls stay away by day and are pushed into place after dark',async(
 test('a tea set goes on the table, never on the bed, and the two become one piece',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   // A new player's starter bed is upstairs now, so this living room keeps a bed from an older save.
-  const bed={uid:'bed-old',item:'wooden-bed',kind:'bed',color:'#b98b5f',footprint:[2.1,1.4],x:2.9,z:-2.6,rot:0,slot:'bed'};
+  const bed={uid:'bed-old',item:'wooden-bed',kind:'bed',color:'#b98b5f',footprint:[2.1,1.4],x:2.9,z:-3.75,rot:0,slot:'bed'}   // at its slot by the wall;
   await seed(page,{inventory:{'low-table':1,'tea-set':1,'wooden-bed':1},home:[bed],completed:['home:tutorial','home:starter']});
   await start(page);
   await enter(page,'home',3.0);
@@ -177,7 +177,7 @@ test('a tea set goes on the table, never on the bed, and the two become one piec
 
   // Over the bed the tea set is refused, and it says why.
   await place(teaset);
-  await warp(page,home+2.9,-0.6,0);
+  await warp(page,home+2.9,-1.75,0);   // two metres short of the bed, facing it
   const onBed=await page.evaluate(()=>{
     const g=window.__qinghe.town.ghost;return {valid:g.valid,problem:g.problem?.zh??null,on:g.on};
   });

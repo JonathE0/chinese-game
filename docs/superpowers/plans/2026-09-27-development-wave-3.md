@@ -331,3 +331,4 @@ China's tourists 打卡 (check in) by photographing famous spots; the mouse butt
   square 594 → 92 draw calls, west quarter 1,441 → 271); ≥ 38 fps everywhere at 4× CPU throttle.
 - Left for the player to decide: doors for 海风大厦 and the promenade tower; moving the bank to a new
   plot.
+- W3-fix (after the full suite): planters moved clear of the restaurant and a tree, a 云海 street tree clear of the café awning, harbour hedge/booth/wheel marks untangled; three tests updated for changes the game had made on purpose (码头 joins the 石 hunt, 陈叔叔's new spot, the bed moved to the wall).
