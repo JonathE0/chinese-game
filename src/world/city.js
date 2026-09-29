@@ -163,22 +163,24 @@ function cityProp(models,parent,def,lamps){
     }
     return {hw:.3,hd:.3,y1:4.2};
   }
+  // The shelter and the kiosk are roofed well above head height, so standing under them (or
+  // swinging the camera past them) never feels like ducking under a low shed.
   if(k==='cityshelter'){
-    for(const x of [-2.4,2.4])cylinder(e,[x,1.3,0],[.16,2.6,.16],'#868d94');
-    box(e,[0,2.7,0],[5.4,.16,2.2],'#b8c8d0');
-    box(e,[0,1.4,-1.0],[5.2,2.6,.1],'#c3d3da');
+    for(const x of [-2.4,2.4])cylinder(e,[x,1.6,0],[.16,3.2,.16],'#868d94');
+    box(e,[0,3.25,0],[5.4,.16,2.2],'#b8c8d0');
+    box(e,[0,1.6,-1.0],[5.2,3.0,.1],'#c3d3da');
     for(let i=0;i<4;i++)box(e,[-1.6+i*1.05,.6,-.7],[.9,.1,.5],'#98a0a7');
-    backlight(label(e,'公交站',[1.9,1.9,.98],1.7,.6,'#26333f','#e2ecf3'),.7);
-    return {hw:2.8,hd:1.2,y1:2.9};
+    backlight(label(e,'公交站',[1.9,2.3,.98],1.7,.6,'#26333f','#e2ecf3'),.7);
+    return {hw:2.8,hd:1.2,y1:3.45};
   }
   if(k==='citykiosk'){
-    box(e,[0,1.35,0],[3.4,2.7,2.4],'#8b9299');
-    box(e,[0,2.85,0],[3.8,.3,2.8],'#6e757c');
-    const glass=box(e,[0,1.5,1.24],[2.6,1.5,.08],'#cfe0e6');
+    box(e,[0,1.6,0],[3.4,3.2,2.4],'#8b9299');
+    box(e,[0,3.35,0],[3.8,.3,2.8],'#6e757c');
+    const glass=box(e,[0,1.6,1.24],[2.6,1.7,.08],'#cfe0e6');
     const lit=glow('#f3ead0');glass.render.meshInstances[0].material=lit;lamps.push(lit);
     box(e,[0,.62,1.3],[2.8,.18,.5],'#a9b0b6');
-    backlight(label(e,'便利店',[0,2.5,1.45],2.4,.66,'#2f4436','#ecf3e4'),.8);
-    return {hw:1.9,hd:1.5,y1:3};
+    backlight(label(e,'便利店',[0,2.9,1.45],2.4,.66,'#2f4436','#ecf3e4'),.8);
+    return {hw:1.9,hd:1.5,y1:3.5};
   }
   if(k==='bigscreen'){
     for(const x of [-6.5,6.5])box(e,[x,3.2,0],[.7,6.4,.7],'#767c83');
@@ -272,8 +274,10 @@ export function buildCity(models,parent){
 }
 
 /**
- * The way in, back in 青禾广场: a stair going down under a steel-and-glass canopy, its mouth
- * facing the square.
+ * The way in, back in 青禾广场: a modern metro entrance, a glass pavilion under a rounded steel
+ * canopy over a stair going down, its open front facing the square. A sign band across the front
+ * carries the metro roundel, the station's name 青禾站 and the exit letter A出入口, and a pair of
+ * granite steps lead up to it.
  *
  * Built with the town, not with the city, because it has to be standing on the square from the
  * first minute — it is how you find out the city exists at all. The town's ground is one solid
@@ -286,28 +290,51 @@ export function buildStationEntrance(models,parent,lamps){
   const root=new pc.Entity('metro-entrance');root.lookName='metro-station';
   root.setLocalPosition(def.x,0,def.z);root.setLocalEulerAngles(0,def.rotation??0,0);
   parent.addChild(root);
-  // The deck round the stairwell, open where the stair drops away (x ±1.7, z -1.72 to 1.45).
-  for(const side of [-1,1])box(root,[side*2.25,.08,0],[1.1,.16,4.4],'#a8a9a4');
-  box(root,[0,.08,-1.96],[3.4,.16,.48],'#a8a9a4');
-  box(root,[0,.08,1.83],[3.4,.16,.74],'#a8a9a4');
+  const granite='#a9aaa5',steel='#8f989f',dark='#65707a';
+  // The granite deck round the stairwell, open where the stair drops away (x ±1.7, z -1.72 to
+  // 1.45), and two granite steps up to it along the front.
+  for(const side of [-1,1])box(root,[side*2.075,.1,.35],[.75,.2,5.06],granite);
+  box(root,[0,.1,-1.95],[3.4,.2,.46],granite);
+  box(root,[0,.1,2.165],[3.4,.2,1.43],granite);
+  box(root,[0,.075,-2.33],[4.9,.15,.3],'#b3b4ae');
+  box(root,[0,.04,-2.63],[4.9,.08,.3],'#b3b4ae');
   // The top step, then the dark of the stairwell going down.
   box(root,[0,-.06,-1.5],[3.4,.28,.44],'#9ba09f').lookName='stairs';
   box(root,[0,.03,.09],[3.4,.02,2.72],'#1d2226').lookName='stairs';
   box(root,[0,-.6,1.6],[3.8,2,.3],'#3c4247');
+  // Clear glass on three sides, in a slim steel frame. The glass casts no shadow.
+  const glass=new pc.StandardMaterial();
+  glass.diffuse=new pc.Color().fromString('#cfe3ea');glass.opacity=.3;glass.blendType=pc.BLEND_NORMAL;
+  glass.depthWrite=false;glass.gloss=.9;glass.useMetalness=true;glass.metalness=.2;glass.update();
+  const pane=(pos,size)=>{const e=box(root,pos,size,'#cfe3ea');e.render.meshInstances[0].material=glass;e.render.castShadows=false;};
   for(const side of [-1,1]){
-    box(root,[side*1.9,.5,0],[.14,1,4.2],'#8f979d');
-    for(let i=0;i<5;i++)cylinder(root,[side*1.9,.5,-1.6+i*.9],[.1,1,.1],'#8f979d');
-    cylinder(root,[side*1.9,1.02,0],[.11,4.2,.11],'#c2c8cb',[90,0,0]);
-    cylinder(root,[side*1.55,2.4,-1.9],[.16,4.8,.16],'#8f979d');
+    pane([side*2.3,1.48,.35],[.05,2.56,4.9]);
+    for(const z of [-2.1,-.55,1.05,2.8])box(root,[side*2.3,1.48,z],[.12,2.56,.12],steel);
+    box(root,[side*2.3,.28,.35],[.14,.12,5.02],steel);
+    box(root,[side*2.3,2.8,.35],[.18,.16,5.1],steel);
   }
-  box(root,[0,2.9,-1.9],[4.2,.18,2.6],'#b9cbd2');
-  box(root,[0,3.05,-1.9],[4.4,.12,2.8],'#7f8a91');
-  const sign=label(root,'地铁',[0,2.2,-3.1],1.9,.8,'#20303f','#e6f0f8');
-  sign.setLocalPosition(0,2.2,-3.12);
-  cylinder(root,[0,1.2,-3.1],[.12,2,.12],'#8f979d');
-  const lit=glow('#5b93c8');
-  const halo=box(root,[0,1.68,-3.1],[1.9,.12,.1],'#5b93c8');
-  halo.render.meshInstances[0].material=lit;
+  pane([0,1.48,2.8],[4.5,2.56,.05]);
+  box(root,[0,2.8,2.8],[4.7,.16,.18],steel);
+  box(root,[0,2.8,-2.1],[4.7,.16,.18],steel);
+  // The rounded canopy: a shallow barrel vault of steel panels, rising 0.7 m over the 5.2 m span
+  // and reaching out over the steps, with darker ribs at its ends and in the middle.
+  const half=2.6,rise=.7,spring=2.9,R=(half*half+rise*rise)/(2*rise),top=Math.asin(half/R),n=8;
+  for(let i=0;i<n;i++){
+    const a=-top+(i+.5)*2*top/n,x=R*Math.sin(a),y=spring+rise-R+R*Math.cos(a),wide=2*R*Math.sin(top/n)+.03;
+    box(root,[x,y,.2],[wide,.08,5.9],'#aab3b9',[0,0,-a*180/Math.PI]);
+    for(const z of [-2.72,.2,3.12])box(root,[x,y-.07,z],[wide,.1,.12],dark,[0,0,-a*180/Math.PI]);
+  }
+  // The sign band along the front, read from the square (local -x is on your right): roundel,
+  // name and exit letter, lit from within after dark.
+  box(root,[0,2.45,-2.2],[4.62,.62,.12],'#1f3552');
+  cylinder(root,[1.95,2.45,-2.27],[.48,.03,.48],'#f2f5f7',[90,0,0]);
+  cylinder(root,[1.95,2.45,-2.29],[.36,.03,.36],'#2c68b0',[90,0,0]);
+  box(root,[1.95,2.45,-2.31],[.07,.26,.02],'#f2f5f7');
+  backlight(label(root,'青禾站',[.45,2.45,-2.28],2.4,.5,'#1f3552','#f4f7fa'),.8);
+  backlight(label(root,'A出入口',[-1.5,2.45,-2.28],1.44,.3,'#f0c43a','#1f3552'),.8);
+  const lit=glow('#e6eef5');
+  const strip=box(root,[0,2.11,-2.2],[4.4,.05,.1],'#e6eef5');
+  strip.render.meshInstances[0].material=lit;
   lamps?.push(lit);
   // The registry is axis aligned and knows nothing about the entity's rotation, so the hitboxes
   // are turned by hand here. Getting this wrong leaves a solid canopy floating on the wrong side
@@ -317,13 +344,15 @@ export function buildStationEntrance(models,parent,lamps){
     x:def.x+lx*cos+lz*sin, z:def.z-lx*sin+lz*cos,
     hw:Math.abs(cos)>.5?hw:hd, hd:Math.abs(cos)>.5?hd:hw,
   });
-  // The canopy roof and the balustrades are solid, and so is the stairwell past the top step:
-  // you go down by pressing E, not by walking off the edge. None of them is named, so a look
-  // lands on the step or the stairwell (楼梯) or, anywhere else, on the entrance (地铁站).
+  // The canopy and the glass walls are solid, and so is the stairwell past the top step: you go
+  // down by pressing E, not by walking off the edge. None of them is named, so a look lands on
+  // the step or the stairwell (楼梯), a sign, or anywhere else on the entrance (地铁站). The boxes
+  // meet without overlapping: walls up to 2.1 m, the roof above, the back wall between the sides.
   return {root,marks:[
-    {...at(0,-1.9,2.3,1.5),y0:2.8,y1:3.2,name:null},
-    {...at(-1.9,0,.3,2.2),y0:0,y1:1.1,name:null},
-    {...at(1.9,0,.3,2.2),y0:0,y1:1.1,name:null},
+    {...at(0,.2,2.65,3),y0:2.1,y1:3.7,name:null},
+    {...at(-2.3,.35,.14,2.55),y0:0,y1:2.1,name:null},
+    {...at(2.3,.35,.14,2.55),y0:0,y1:2.1,name:null},
+    {...at(0,2.8,2.12,.14),y0:0,y1:2.1,name:null},
     {...at(0,.24,1.6,1.52),y0:0,y1:1.1,name:null},
   ]};
 }

@@ -109,6 +109,15 @@ def collect_lines():
         for key, line in {**friends["lines"][npc], **friends["shared"]}.items():
             add(f"friend-{npc}-{key}", line["zh"], npc, "dialogue")
 
+    # Shop assistants: assistant-<key>, all in one voice.
+    assistants = read_json(CONTENT / "assistants.json")
+    for key, line in assistants["lines"].items():
+        add("assistant-" + key, line["zh"], assistants["speaker"], "dialogue")
+
+    # People in the word hall (hall-<key>), each line in its own speaker's voice.
+    for line in read_json(CONTENT / "hall-visitors.json")["lines"].values():
+        add(line["audio"], line["zh"], line["speaker"], "dialogue")
+
     # The 易混词 deck: its two prompts, and members without an HSK clip (homophones share one).
     confusables = read_json(CONTENT / "confusables.json")
     for prompt in confusables["prompts"].values():

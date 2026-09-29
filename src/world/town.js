@@ -6,21 +6,25 @@ import rooms from '../content/rooms.json' with {type:'json'};
 import {buildRoom,ROOM_OFFSET,annexDoor,annexApproach,upperParts} from './interior.js';
 import {Registry,raySpan} from './registry.js';
 import {walkClear,rotatedHalf} from './navigation.js';
+import {Visitors} from './visitors.js';
 import {pavingMaterial} from './paving.js';
 import {Daylight} from './daylight.js';
+import {Views} from './views.js';
 import {initIdle,animateIdle,restIdle} from './idle.js';
 import objectNames from '../content/objects.json' with {type:'json'};
 import signTexts from '../content/signs.json' with {type:'json'};
 import {isTyping,queueLook,drainLook} from '../core/input.js';
 import {Toybox,Container} from './physics.js';
 import {NightMarket,NIGHT_PITCHES,DAY_PITCHES} from './stalls.js';
-import {surfaceHeight,offersSurface,canStack,fitsOn,decorOn,placementProblem} from '../core/surfaces.js';
+import {surfaceHeight,offersSurface,canStack,fitsOn,decorOn,placementProblem,hangsOnWall} from '../core/surfaces.js';
 import sites from '../content/sites.json' with {type:'json'};
 import {buildCity,buildStationEntrance,CITY,CITY_OFFSET} from './city.js';
 import {buildGarden} from './garden.js';
+import {buildFountain,FOUNTAIN,FOUNTAIN_MARK,FOUNTAIN_LOOKS} from './fountain.js';
 import {buildWordHall} from './wordhall.js';
 import friends from '../content/friends.json' with {type:'json'};
 import {stepVelocity,inputWish,GRAVITY,JUMP} from '../core/movement.js';
+import {KEY_ACTIONS,isKey,codeOf,normalCode} from '../core/keys.js';
 
 const NAMES=objectNames.objects;
 const SEAT_DROP=.66;    // how far the body sinks so the hips land on the seat
@@ -96,6 +100,9 @@ export class Town {
     this.lookPending={x:0,y:0};this.speedScale=1;this.seated=null;this.roomOpen=new Map();
     initIdle(this.player,.37);
     this.place='town';this.rooms=new Map();this.buildRooms();this.registerRooms();
+    // People in the word hall (src/world/visitors.js), walking whether or not you are there.
+    this.visitors=new Visitors({registry:this.registry,rooms:this.rooms,models:this.m,seatDrop:SEAT_DROP,
+      player:()=>{const p=this.player.entity.getPosition();return {place:this.place,x:p.x,z:p.z,seat:this.seated?.index};}});
     // Loose objects hang off their own node at the origin, so a body's coordinates are the same
     // numbers the collision registry uses whichever place it is rolling around in.
     this.toyRoot=new pc.Entity('loose');this.app.root.addChild(this.toyRoot);
@@ -116,6 +123,7 @@ export class Town {
     // main.js calls it once that is set, so a save from the night does not open the day stalls
     // and then walk them straight back out again in view.
     this.daylight.apply();
+    this.views=new Views(this);   // the street, seen from inside a shop through its door and windows
     this.applyView();this.placeCamera(this.player.entity.getPosition());
     this.bind(canvas);this.app.on('update',dt=>this.update(dt));
     // PlayCanvas fires postUpdate on app.systems, not on the app, so an app-level listener for it
@@ -167,7 +175,7 @@ export class Town {
       ?this.m.veranda(p,def,this.data.buildings.find(b=>b.id===def.building)):this.m[def.kind](p,def,this.lampMaterials)).marks);
     this.hoardings=new Map();
     for(const site of sites.sites)this.hoardings.set(site.id,this.buildHoarding(site));
-    for(const [x,z]of this.data.trees)tree(p,x,z,1.15);
+    for(const [x,z,kind]of this.data.trees)tree(p,x,z,1.15,kind);
     this.props=this.data.props.map(def=>{
       const made=streetProp(p,def.kind,def.tint);
       if(made.material)this.lampMaterials.push(made.material);
@@ -176,14 +184,17 @@ export class Town {
       return {...def,...made};
     });
     // A fountain and a lantern line keep the original square as the heart of the city.
-    cylinder(p,[0,.2,1.8],[4.2,.45,4.2],'#b6b499');cylinder(p,[0,.45,1.8],[3.75,.2,3.75],'#719f99');
-    cylinder(p,[0,.8,1.8],[.5,1,.5],'#c4bda2');cylinder(p,[0,1.25,1.8],[1.8,.18,1.8],'#d4c9ac');cylinder(p,[0,1.36,1.8],[1.55,.05,1.55],'#8cb5ad');ball(p,[0,1.56,1.8],[.28,.4,.28],'#c3cec1');
+    buildFountain(this.m,this.app,p,()=>this.place==='town');
     for(const x of [-12,12]) {box(p,[x,2.25,0],[.18,4.5,.18],'#866b52');box(p,[x,4.4,0],[1.3,.13,.13],'#866b52');lamp(p,x-.47,4.05,0);lamp(p,x+.47,4.05,0);}
     for(let x=-11;x<=11;x+=2.2)lamp(p,x,5.9-Math.sin((x+11)/22*Math.PI)*.8,-5);
     box(p,[0,6.12,-5],[24,.025,.025],'#8b7b62').lookName='lantern-string';
-    for(const x of [-10,10]){box(p,[x,.7,-4.1],[3.2,1.4,1.15],'#b88b63');box(p,[x,1.44,-4.1],[3.5,.13,1.3],'#e6cf9e');}
-    for(let i=0;i<3;i++)cylinder(p,[-10.8+i*.7,1.65,-4.1],[.3,.28,.3],'#ede4ce').lookName='goods';
-    for(let i=0;i<3;i++)box(p,[9.2+i*.65,1.68,-4.1],[.42,.38,.38],['#d9ae68','#91a494','#c98568'][i]).lookName='goods';
+    // 林阿姨's tea stall and 陈叔叔's souvenir counter stand beside their shops, clear of the doors,
+    // each keeper behind the counter.
+    const at=id=>{const n=this.data.npcs.find(n=>n.id===id);return [n.x,n.z+1.3];},tea=at('lin'),gifts=at('chen');
+    this.stalls=[tea,gifts];
+    for(const [x,z] of this.stalls){box(p,[x,.7,z],[3.2,1.4,1.15],'#b88b63');box(p,[x,1.44,z],[3.5,.13,1.3],'#e6cf9e');}
+    for(let i=0;i<3;i++)cylinder(p,[tea[0]-.8+i*.7,1.65,tea[1]],[.3,.28,.3],'#ede4ce').lookName='goods';
+    for(let i=0;i<3;i++)box(p,[gifts[0]-.8+i*.65,1.68,gifts[1]],[.42,.38,.38],['#d9ae68','#91a494','#c98568'][i]).lookName='goods';
     for(const def of this.data.npcs) {const info=npcs.find(n=>n.id===def.id);this.actors.set(def.id,person(p,info.color,[def.x,0,def.z]));}
     // Townsfolk who are just going about their day. They are scenery, and a word to learn.
     this.people=(this.data.people??[]).map(def=>{
@@ -432,6 +443,7 @@ export class Town {
     }
     for(const member of this.rooms.get(place)?.staff??[])
       this.addLookBox(place,member.entity,lookNameOf(member.entity)??{id:'waiter',...NAMES.waiter},'moving');
+    for(const one of this.visitors.here(place))this.addLookBox(place,one.entity,lookNameOf(one.entity),'moving');
   }
   /** Plaques that hang on the door of a shop that has not opened yet. */
   buildClosedSigns() {
@@ -498,10 +510,12 @@ export class Town {
     }
     // A shop that has not been built yet is not there to bump into: `revealSite` registers it.
     for(const b of d.buildings)if(!b.bespoke&&!b.site)this.registerBuilding(b);
-    for(const [x,z] of d.trees){
-      this.markDisc('town',x,z,.98,0,.35,'tree');
-      this.markDisc('town',x,z,.22,.35,2.4,'tree');
-      this.markDisc('town',x,z,1.5,1.55,4.3,'tree');
+    for(const [x,z,kind='tree'] of d.trees){
+      const pit=kind==='willow'?0:.35;   // a willow stands straight in the bank, with no stone pit to step on
+      if(pit)this.markDisc('town',x,z,.98,0,pit,kind);
+      this.markDisc('town',x,z,.22,pit,2.4,kind);
+      // A willow's curtain is soft: you walk through the strands, and only its crown is in the way.
+      this.markDisc('town',x,z,1.5,kind==='willow'?2.8:1.55,4.3,kind);
     }
     // Street furniture is named from the same table the world data uses.
     const propName={bench:'bench',bin:'bin',streetlight:'streetlight',bicycle:'bicycle',planter:'planter',
@@ -519,12 +533,12 @@ export class Town {
     this.siteWalls=new Map(sites.sites.map(site=>[site.id,this.mark('town',site.x,site.z,3.8,2.9,0,2.4,'wall')]));
     for(const mark of this.station?.marks??[])
       this.mark('town',mark.x,mark.z,mark.hw,mark.hd,mark.y0,mark.y1,mark.name);
-    this.markDisc('town',0,1.8,2.12,0,.46,'fountain');
-    this.markDisc('town',0,1.8,.95,.46,1.75,'fountain',false);
+    this.markDisc('town',FOUNTAIN.x,FOUNTAIN.z,FOUNTAIN_MARK.radius,FOUNTAIN_MARK.y0,FOUNTAIN_MARK.y1,null);
+    for(const part of FOUNTAIN_LOOKS)this.markDisc('town',FOUNTAIN.x,FOUNTAIN.z,part.radius,part.y0,part.y1,'fountain',false);
     // Only the posts are in the way; the board is high enough to walk under.
     for(const x of [-2.2,2.2])this.mark('town',x,17,.14,.14,0,3.8,'sign');
     this.mark('town',0,17,2,.12,2.95,3.8,'sign');
-    for(const x of [-10,10])this.mark('town',x,-4.1,1.75,.7,0,1.5,'counter');
+    for(const [x,z] of this.stalls)this.mark('town',x,z,1.75,.7,0,1.5,'counter');
     for(const x of [-12,12]){
       this.markDisc('town',x,0,.3,0,4.6,'streetlight');
       for(const off of [-.47,.47])this.mark('town',x+off,0,.25,.25,3.7,4.4,'lantern',false);
@@ -600,7 +614,7 @@ export class Town {
   }
   buildRooms() {
     Object.entries(rooms).forEach(([id,data],index)=>{
-      const built=buildRoom(this.m,this.app.root,data,index);
+      const built=buildRoom(this.m,this.app.root,data,index,id);
       built.root.enabled=false;
       for(const fitting of built.fittings)if(fitting.material)this.lampMaterials.push(fitting.material);
       this.lampMaterials.push(...built.lamps);
@@ -609,7 +623,7 @@ export class Town {
         if(def.look)made.entity.lookName=def.look;   // a clerk or pharmacist, not a waiter
         return initIdle({...def,...made,leg:0,target:1,wait:Math.random()*2,x:def.path[0][0],z:def.path[0][1]});
       });
-      this.rooms.set(id,{id,data,root:built.root,ceilings:built.ceilings,sun:built.sun,fittings:built.fittings,staff,index,offsetX:ROOM_OFFSET*(index+1),props:new Map()});
+      this.rooms.set(id,{id,data,root:built.root,ceilings:built.ceilings,sun:built.sun,fittings:built.fittings,openings:built.openings,staff,index,offsetX:ROOM_OFFSET*(index+1),props:new Map()});
     });
   }
   /** Everything the tourist can press E on, in whichever place they are standing. */
@@ -677,9 +691,12 @@ export class Town {
       if(fitting.action)list.push({id:fitting.action,x:room.offsetX+fitting.x,z:fitting.z,y:fitting.y,radius:1.9,label:fitting.label??'看看',wide:true});
       if(fitting.seat!==undefined)list.push({id:'sit:'+index,x:room.offsetX+fitting.x,z:fitting.z,radius:1.7,label:'坐下',wide:true});
     }
-    // Only waiters take orders; other staff (`talk: false`) are there to be seen and named.
+    // Staff who talk (`talk: false` are only there to be seen). Someone you are looking at (the
+    // same look box the word hall's visitors use) wins over the counter they stand behind.
     for(const member of room.staff??[])if(member.talk!==false)
-      list.push({id:'staff:'+member.id,x:room.offsetX+member.x,z:member.z,radius:2.6,label:'和'+member.zh+'说话',wide:false});
+      list.push({id:'staff:'+member.id,x:room.offsetX+member.x,z:member.z,radius:2.6,label:'和'+member.zh+'说话',wide:false,
+        aimed:this.lookingBox?.entity===member.entity});
+    list.push(...this.visitors.targets(this.place,this.lookingBox?.entity));
     if(room.data.desk)list.push({id:'studydesk',x:room.offsetX+room.data.desk.x+1.1,z:room.data.desk.z,radius:2.2,label:room.data.desk.label,wide:true});
     // A bed you own is somewhere to sleep, and sleeping is how you choose the time of day.
     for(const prop of room.props.values())if(prop.kind==='bed')
@@ -847,9 +864,9 @@ export class Town {
     entity.setLocalEulerAngles(0,record.rot??0,0);
     const [fw,fd]=record.footprint,turned=((record.rot??0)/90)%2!==0;
     const hw=(turned?fd:fw)/2,hd=(turned?fw:fd)/2;
-    const height={rug:.03,table:.47,bed:.62,shelf:1.7,lamp:1.3,plant:1.1}[record.kind]??.8;
+    const height={rug:.03,table:.47,bed:.62,shelf:1.7,lamp:1.3,plant:1.1,'tea-table':.5,'folding-screen':1.7,birdcage:1.5}[record.kind]??.8;
     // A certificate hangs on the wall, so like a vase on a table it has no footing to bump into.
-    const box=base||record.kind==='certificate'?null
+    const box=base||hangsOnWall(record.kind)?null
       :this.mark(id,room.offsetX+record.x,record.z,hw*.86,hd*.86,floor,floor+height,record.kind,record.kind!=='rug');
     // Named by its own meshes too, so a vase on a table reads 花瓶 and not 桌子.
     entity.lookName??=record.kind;
@@ -1012,8 +1029,7 @@ export class Town {
     const face=(building?.rotation??0)===180?-1:1;
     // Back at the height you went in at: the word hall's door is up on its terrace.
     const y=this.exitPoint?.y??0;
-    // One step further out than where you went in, unless that step is into something: the
-    // guesthouse door opens onto a narrow walk along the garden wall.
+    // One step further out than where you went in, unless that step is into something.
     if(this.exitPoint){const {x,z}=this.exitPoint,out=z+face*.6;this.player.entity.setPosition(x,y,this.canMove(x,out,y)?out:z);}
     this.playerY=y;this.velocityY=0;this.grounded=true;
     this.yaw=this.exitYaw!==undefined?this.exitYaw+180:180;this.pitch=-4;this.clearNearest();
@@ -1024,22 +1040,24 @@ export class Town {
     this.canvas=canvas;
     addEventListener('keydown',e=>{
       if(this.paused||isTyping(e.target)||e.isComposing)return;
-      if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
-      this.keys.add(e.code);
-      // Sitting down takes over the space bar, so you can always get up again.
-      if(e.code==='Space'&&this.seated){this.stand();return;}
-      if(e.code==='KeyG'&&this.toys.held){this.toys.drop();return;}
-      if(e.code==='KeyE'&&this.nearest)this.onInteract(this.nearest.id);
-      if(e.code==='KeyV')this.setView(this.view==='first'?'third':'first');
-      if(e.code==='KeyF'&&this.looking)this.onCollect?.(this.looking);
+      // Keys go through the player's bindings (core/keys.js); the arrows always walk too.
+      // Any bound key, so a rebound Space or Enter never also clicks a focused HUD button.
+      if(e.code.startsWith('Arrow')||KEY_ACTIONS.some(a=>isKey(e,a.id)))e.preventDefault();
+      this.keys.add(normalCode(e.code));
+      // Sitting down takes over the jump key, so you can always get up again.
+      if(isKey(e,'jump')&&this.seated){this.stand();return;}
+      if(isKey(e,'drop')&&this.toys.held){this.toys.drop();return;}
+      if(isKey(e,'interact')&&this.nearest)this.onInteract(this.nearest.id);
+      if(isKey(e,'view'))this.setView(this.view==='first'?'third':'first');
+      if(isKey(e,'collect')&&this.looking)this.onCollect?.(this.looking);
       // Edge-triggered so a quick tap between frames still counts.
-      if(e.code==='Space'&&this.grounded&&!this.ghost&&!this.seated){this.velocityY=JUMP;this.grounded=false;}
+      if(isKey(e,'jump')&&this.grounded&&!this.ghost&&!this.seated){this.velocityY=JUMP;this.grounded=false;}
       if(this.ghost){
-        if(e.code==='KeyR')this.rotatePlacement();
-        if(e.code==='KeyX'){const item=this.ghost.item;this.cancelPlacement();this.onPlace?.({status:'cancelled',item});}
+        if(isKey(e,'rotate'))this.rotatePlacement();
+        if(isKey(e,'cancel')){const item=this.ghost.item;this.cancelPlacement();this.onPlace?.({status:'cancelled',item});}
       }
     });
-    addEventListener('keyup',e=>this.keys.delete(e.code));
+    addEventListener('keyup',e=>this.keys.delete(normalCode(e.code)));
     addEventListener('blur',()=>{this.resetInput();this.freshLock=true;});
     document.addEventListener('visibilitychange',()=>{if(document.hidden){this.resetInput();this.freshLock=true;}});
     document.addEventListener('focusin',e=>{if(isTyping(e.target))this.resetInput();});
@@ -1194,6 +1212,7 @@ export class Town {
     if(!this.withinPlace(this.place,x,z))return false;
     const room=this.rooms.get(this.place);
     if(feetY<1.9&&(room?.staff??[]).some(s=>Math.hypot(x-room.offsetX-s.x,z-s.z)<.86))return false;
+    if(feetY<1.9&&this.visitors.blocks(this.place,x,z,this.player.entity.getPosition()))return false;
     return !this.registry.blocks(this.place,x,z,feetY);
   }
   // --- things you can pick up -------------------------------------------
@@ -1239,8 +1258,9 @@ export class Town {
     if(this.sleeping)this.stepSleep(dt);
     if(!this.paused&&!this.seated) {
       // Walking is relative to where the tourist is looking, not to the world axes.
-      const advance=(this.keys.has('KeyW')||this.keys.has('ArrowUp')?1:0)-(this.keys.has('KeyS')||this.keys.has('ArrowDown')?1:0)-this.stick.dz;
-      const strafe=(this.keys.has('KeyD')||this.keys.has('ArrowRight')?1:0)-(this.keys.has('KeyA')||this.keys.has('ArrowLeft')?1:0)+this.stick.dx;
+      const held=(action,arrow)=>this.keys.has(codeOf(action))||this.keys.has(arrow)?1:0;
+      const advance=held('forward','ArrowUp')-held('back','ArrowDown')-this.stick.dz;
+      const strafe=held('right','ArrowRight')-held('left','ArrowLeft')+this.stick.dx;
       const {forward,side}=inputWish(advance,strafe);
       let dx=fx*forward+rx*side,dz=fz*forward+rz*side;
       const len=Math.hypot(dx,dz);
@@ -1287,6 +1307,7 @@ export class Town {
       }
     }
     this.walkStaff(dt);
+    if(!this.paused)this.visitors.update(dt);   // hold still while a panel is open: you may be talking to one
     for(const container of this.containers)if(container.place===this.place)container.tick(this.clock);
     this.market.update(dt,{hour:this.daylight.hour,place:this.place,offCamera:(x,z)=>this.offCamera(x,z)});
     // The one pushing the cart is its stall keeper, not just anybody.
@@ -1305,10 +1326,10 @@ export class Town {
     const here=this.player.entity.getPosition();let nearest=null,best=Infinity;
     for(const t of this.targets()) {
       const d=Math.hypot(here.x-t.x,here.z-t.z);
-      if(d>t.radius||d>=best)continue;
+      if(d>t.radius||(d>=best&&!t.aimed))continue;
       const aim=d<1e-3?1:((t.x-here.x)/d)*fx+((t.z-here.z)/d)*fz;
       if(d>1.3&&aim<(t.wide?.1:.35))continue;
-      nearest=t;best=d;
+      nearest=t;best=t.aimed?-1:d;   // a person looked at in range beats anything merely nearer
     }
     if(nearest?.id!==this.nearest?.id){this.nearest=nearest;this.onNear(nearest);}
   }
@@ -1322,6 +1343,7 @@ export class Town {
     const name=seen?.box.name??null;
     // Two cups on two tables share a name but not a box: a new box is a new thing to point at.
     if(seen?.box!==this.lookingBox){this.lookingBox=seen?.box;this.looking=name;this.onLook?.(name);}
+    this.views.update();
     this.onFrame?.(this);
   }
   /** Waiters pace a fixed loop, so the room feels staffed without needing pathfinding. */

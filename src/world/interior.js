@@ -44,7 +44,7 @@ export function upperParts(data){
   return parts;
 }
 
-export function buildRoom(models,parent,data,index){
+export function buildRoom(models,parent,data,index,id){
   const {box,cylinder,label}=models;
   const root=new pc.Entity('room-'+index);
   root.setLocalPosition(ROOM_OFFSET*(index+1),0,0);
@@ -52,9 +52,12 @@ export function buildRoom(models,parent,data,index){
   const [w,d]=data.size,h=data.height,t=.22;
   const back=-d/2,front=d/2;
 
-  // Floor, with seams a shade darker than the boards rather than drawn in ink.
-  box(root,[0,-.1,0],[w,.2,d],data.floor).lookName='floor';
-  for(let x=-w/2+.75;x<w/2-.5;x+=1.5)box(root,[x,.004,0],[.05,.015,d-.1],data.trim);
+  // Floor: the room's own pattern from floors.json, or plain boards with seams a shade darker.
+  const style=floors.styles[floors.rooms[id]];
+  // `x0,z1` is the part's west and front edge, so every part of a floor continues one pattern.
+  const paint=(e,pw,pd,x0=-w/2,z1=d/2)=>{if(style)e.render.meshInstances[0].material=floorMaterial(pc.AppBase.getApplication(),style,pw,pd,x0+w/2,d/2-z1);return e;};
+  paint(box(root,[0,-.1,0],[w,.2,d],data.floor),w,d).lookName='floor';
+  if(!style)for(let x=-w/2+.75;x<w/2-.5;x+=1.5)box(root,[x,.004,0],[.05,.015,d-.1],data.trim);
 
   // Walls. The front wall carries a doorway gap the tourist walks through.
   box(root,[-w/2-t/2,h/2,0],[t,h,d],data.wall);
@@ -62,6 +65,9 @@ export function buildRoom(models,parent,data,index){
   box(root,[0,h/2,back-t/2],[w+t*2,h,t],data.wall);
   // A room entered upstairs (`upper.entrance`, the metro platform) has its doorway up there too.
   const gap=1.7,top=data.doorHeight??h-1.1,sill=data.upper?.entrance?data.upper.y:0;
+  // What the street view (views.js) shows through: the doorway gap, unless it is walled up, and
+  // the front window panes. `face` is the outer face of the front wall, room-local.
+  const openings={sill,face:front+t,panes:[],door:data.returnWall?null:{y:(sill+top)/2,z:front+t/2,hw:gap/2,hh:(top-sill)/2,hd:t/2}};
   for(const side of [-1,1])box(root,[side*(gap/2+(w-gap)/4),h/2,front+t/2],[(w-gap)/2,h,t],data.wall);
   box(root,[0,(top+h)/2,front+t/2],[gap,h-top,t],data.wall);
   if(sill)box(root,[0,sill/2,front+t/2],[gap,sill,t],data.wall);
@@ -76,7 +82,7 @@ export function buildRoom(models,parent,data,index){
   // A second floor: its slab (boards on top, ceiling underneath), the stairs up to it, and railings.
   for(const {kind,x,z,hw,hd,y0,y1} of upperParts(data)){
     if(kind==='slab'){
-      box(root,[x,y1-.01,z],[hw*2,.02,hd*2],data.floor).lookName='floor';
+      paint(box(root,[x,y1-.01,z],[hw*2,.02,hd*2],data.floor),hw*2,hd*2,x-hw,z+hd).lookName='floor';
       box(root,[x,(y0+y1-.02)/2,z],[hw*2,y1-y0-.02,hd*2],data.wall).lookName='ceiling';
     } else if(kind==='step')box(root,[x,y1/2,z],[hw*2,y1,hd*2],data.trim).lookName='stairs';
   }
@@ -116,7 +122,7 @@ export function buildRoom(models,parent,data,index){
   // Windows (and glass doors, `door: true`) on the inner face of the front wall, beside the doorway.
   for(const pane of data.frontWindows??[]){
     const face=front-.04,[sill,pw,ph]=pane.door?[1.1,1.2,2.1]:[1.75,1.1,1.2],y=sill+(pane.y??0);
-    box(root,[pane.x,y,face-.02],[pw,ph,.06],'#cfe0dd');
+    openings.panes.push(box(root,[pane.x,y,face-.02],[pw,ph,.06],'#cfe0dd'));
     box(root,[pane.x,y,face-.06],[.07,ph-.05,.05],data.trim);
     for(const off of [-1,1])box(root,[pane.x+off*pw/2,y,face-.06],[.08,ph+.08,.06],data.trim);
     box(root,[pane.x,y+ph/2,face-.06],[pw+.08,.08,.06],data.trim);
@@ -188,6 +194,20 @@ export function buildRoom(models,parent,data,index){
     fittings.push({...def,...made,hw,hd});
   }
 
+  // Wall decor from walls.json: wainscoting round the walls, and pieces that go up only where
+  // nothing else already is (a counter added later simply wins its stretch of wall).
+  const decor=walls.rooms[id];
+  if(decor){
+    const blocked=wallBlockers(data,fittings);
+    if(decor.wainscot)for(const wall of ['front','back','west','east'])for(const [a0,a1] of wainscotRuns(data,blocked,wall)){
+      // Flush with the wall, and thick enough to take in the back wall's low trim strip.
+      const face=onWall(root,wall,(a0+a1)/2,w,d,0);
+      box(face,[0,WAINSCOT/2,.035],[a1-a0,WAINSCOT,.07],decor.wainscot).lookName='wall';
+      box(face,[0,WAINSCOT,.045],[a1-a0,.06,.09],data.trim).lookName='wall';
+    }
+    for(const piece of decor.pieces??[])if(wallFits(piece,blocked,data))lamps.push(...wallPiece(models,onWall(root,piece.wall,piece.at,w,d),piece));
+  }
+
   // The study desk is part of the house, so the review spot always exists.
   if(data.desk){
     const d0=data.desk,desk=new pc.Entity('study-desk');
@@ -213,7 +233,121 @@ export function buildRoom(models,parent,data,index){
       for(let i=0;i<4;i++)box(root,[x+dx,.42+i*.56,z-.35],[.36,.06,1.55],'#c7ab83');
     }
   }
-  return {root,ceilings,fittings,sun,lamps};
+  return {root,ceilings,fittings,sun,lamps,openings};
 }
 import {rotatedHalf} from './navigation.js';
+import {floorMaterial} from './paving.js';
+import floors from '../content/floors.json' with {type:'json'};
+import walls from '../content/walls.json' with {type:'json'};
 
+/** Wall pieces from walls.json: how wide each is along its wall, and the band of wall it covers. */
+const WALL_PIECES={scroll:{w:.7,y0:1.0,y1:2.5},painting:{w:1.2,y0:1.3,y1:2.2},shelf:{w:1.4,y0:1.3,y1:2.0},lattice:{w:1.4,y0:1.05,y1:2.35},lamp:{w:.4,y0:1.85,y1:2.45}};
+const WAINSCOT=.9;
+const wallLength=(data,wall)=>wall==='front'||wall==='back'?data.size[0]:data.size[1];
+
+/**
+ * What already takes up a room's walls, as spans a wall piece must keep clear of: `a0..a1` along
+ * the wall (x on the front and back walls, z on the east and west ones) and `y0..y1` up it. Doors
+ * break the wainscoting too; anything that `stands` in front of a wall (fittings, the counter, the
+ * desk, the stairs) only keeps pieces off it.
+ */
+export function wallBlockers(data,fittings=[]){
+  const [w,d]=data.size,h=data.height,out=[];
+  const add=(wall,a,half,y0,y1,stands=false)=>out.push({wall,a0:a-half,a1:a+half,y0,y1,stands});
+  const top=data.doorHeight??h-1.1,sill=data.upper?.entrance?data.upper.y:0;
+  if(!data.returnWall)add('front',0,1.2,sill,top+.1);                    // the doorway and its sill board
+  for(const pane of data.frontWindows??[]){
+    const lift=pane.y??0;
+    if(pane.door)add('front',pane.x,.75,lift,lift+2.25);else add('front',pane.x,.7,lift+1.05,lift+2.45);
+  }
+  for(const x of data.window??[])add('back',x,.9,.95,2.7);
+  add('back',0,Math.min(3.2,w-2.4)/2+.1,h-.95,h);                        // the room's name board
+  if(data.motto)add('back',0,2.3,h*.6-.75,h*.6+.75);
+  const way=data.returnWall?[{wall:data.returnWall,x:data.exit[0],z:data.exit[1]}]:[];
+  for(const annex of [...(data.annexes??[]),...way])add(annex.wall,annex.wall==='back'?annex.x:annex.z,.75,0,2.35);
+  // Anything standing within half a metre of a wall takes that stretch of it, floor to ceiling.
+  const rects=fittings.map(({x,z,hw,hd})=>({x,z,hw,hd}));
+  if(data.lectern){const {x,z}=data.lectern;rects.push({x,z,hw:1.15,hd:.5});for(const dx of [-2.1,2.1])rects.push({x:x+dx,z:z-.35,hw:.2,hd:.78});}
+  if(data.desk)rects.push({x:data.desk.x,z:data.desk.z,hw:.95,hd:.95});   // whichever way it is turned
+  if(data.upper){const s=data.upper.stairs,run=s.steps*s.tread/2;rects.push({x:s.x,z:s.z-run,hw:s.width/2,hd:run});}
+  for(const r of rects){
+    if(r.x-r.hw<-w/2+.5)add('west',r.z,r.hd,0,h,true);
+    if(r.x+r.hw>w/2-.5)add('east',r.z,r.hd,0,h,true);
+    if(r.z-r.hd<-d/2+.5)add('back',r.x,r.hw,0,h,true);
+    if(r.z+r.hd>d/2-.5)add('front',r.x,r.hw,0,h,true);
+  }
+  return out;
+}
+/** Does a wall piece fit where walls.json puts it: clear of the corners, the ceiling (or the upper
+ *  floor's slab) and everything in `blockers`, with a hand's width to spare. */
+export function wallFits(piece,blockers,data){
+  const size=WALL_PIECES[piece.kind];if(!size)return false;
+  const half=size.w/2,mid=piece.y??(size.y0+size.y1)/2,y0=mid-(size.y1-size.y0)/2,y1=mid+(size.y1-size.y0)/2;
+  if(Math.abs(piece.at)+half>wallLength(data,piece.wall)/2-.5||y1>(data.upper?.y??data.height)-.25)return false;
+  return !blockers.some(b=>b.wall===piece.wall&&piece.at+half>b.a0-.1&&piece.at-half<b.a1+.1&&y1>b.y0&&y0<b.y1);
+}
+/** The stretches of a wall the wainscoting runs along: corner to corner, broken only at doors. */
+export function wainscotRuns(data,blockers,wall){
+  const end=wallLength(data,wall)/2-.45,runs=[];let from=-end;
+  for(const b of blockers.filter(b=>b.wall===wall&&!b.stands&&b.y0<WAINSCOT).sort((a,b)=>a.a0-b.a0)){
+    if(b.a0>from)runs.push([from,Math.min(b.a0,end)]);
+    from=Math.max(from,b.a1);
+  }
+  if(end>from)runs.push([from,end]);
+  return runs.filter(([a0,a1])=>a1-a0>.3);
+}
+/** A frame on a wall's inner face, `at` along it, turned so its +z faces into the room. Pieces on
+ *  the back wall stand a little further off it, clear of the trim strips running along it. */
+function onWall(root,wall,at,w,d,off=.07){
+  const [x,z,rot]={back:[at,-d/2+off,0],front:[at,d/2,180],west:[-w/2,at,90],east:[w/2,at,-90]}[wall];
+  const e=new pc.Entity('wall-'+wall);e.setLocalPosition(x,0,z);e.setLocalEulerAngles(0,rot,0);root.addChild(e);
+  return e;
+}
+/** Draws one wall piece into its frame; returns any glowing material for the town to dim by day. */
+function wallPiece({box,cylinder,shape,glow,latticeWindow},e,piece){
+  const {kind,tint}=piece,size=WALL_PIECES[kind],y=piece.y??(size.y0+size.y1)/2;
+  const named=key=>{const g=new pc.Entity(key);g.lookName=key;e.addChild(g);return g;};
+  if(kind==='scroll'){
+    // A hanging scroll: silk mounting, a paper painting of ink hills with a line of writing and a
+    // red seal, and a roller top and bottom.
+    const g=named('scroll-painting');
+    box(g,[0,y,.012],[.6,1.36,.02],tint??'#b9a37a');
+    box(g,[0,y-.04,.026],[.46,1.0,.01],'#f3ead3');
+    shape(g,'cone',[-.07,y-.12,.034],[.3,.4,.004],'#6f7a74');
+    shape(g,'cone',[.1,y-.2,.036],[.24,.26,.004],'#a3aba4');
+    box(g,[.15,y+.28,.034],[.03,.36,.004],'#3b3a36');
+    box(g,[-.15,y-.44,.034],[.05,.05,.004],'#b8463a');
+    cylinder(g,[0,y+.7,.03],[.035,.66,.035],'#6b4a33',[0,0,90]);
+    cylinder(g,[0,y-.7,.03],[.045,.7,.045],'#6b4a33',[0,0,90]);
+  } else if(kind==='painting'){
+    // A framed landscape: sky, two hills, a meadow and a low sun.
+    const g=named('painting');
+    box(g,[0,y,.02],[1.2,.9,.04],tint??'#6f5236');
+    box(g,[0,y,.042],[1.06,.76,.01],'#dfe7e0');
+    shape(g,'cone',[-.2,y-.1,.047],[.62,.44,.004],'#8aa391');
+    shape(g,'cone',[.22,y-.14,.049],[.52,.34,.004],'#5f7d6c');
+    box(g,[0,y-.29,.05],[1.06,.18,.004],'#a9bd8f');
+    cylinder(g,[.34,y+.2,.047],[.1,.004,.1],'#e3a869',[90,0,0]);
+  } else if(kind==='shelf'){
+    // A wall shelf on two brackets with books, a vase and a cup on it.
+    const shelf=named('shelf');
+    box(shelf,[0,y-.2,.13],[1.4,.05,.26],tint??'#a97d55');
+    for(const x of [-.55,.55])box(shelf,[x,y-.3,.05],[.05,.2,.1],'#7d6349');
+    const books=named('book');
+    ['#8fa98d','#c47f6b','#d9b072','#7f9ab0'].forEach((c,i)=>box(books,[-.52+i*.09,y-.03,.13],[.07,.3,.2],c));
+    const vase=named('vase');
+    shape(vase,'sphere',[.24,y-.08,.13],[.17,.2,.17],'#5a7fae');
+    cylinder(vase,[.24,y+.05,.13],[.07,.1,.07],'#5a7fae');
+    cylinder(named('cup'),[.5,y-.12,.13],[.12,.11,.12],'#efe7d2');
+  } else if(kind==='lattice'){
+    latticeWindow(e,0,y,.07,1.2,1.2,tint??'#637b70');
+  } else if(kind==='lamp'){
+    // A wall lamp: a plate, a short arm and a glowing shade, lit after dark with the lanterns.
+    const g=named('lamp'),lit=glow('#f7e7bb');
+    box(g,[0,y-.15,.02],[.14,.22,.04],'#7d6349');
+    box(g,[0,y-.1,.11],[.04,.04,.18],'#7d6349');
+    cylinder(g,[0,y+.02,.22],[.22,.26,.22],'#f7e7bb').render.meshInstances[0].material=lit;
+    return [lit];
+  }
+  return [];
+}

@@ -219,7 +219,8 @@ test('the second-hand shop makes an offer and the bank lends against tomorrow',a
   await page.locator('.close-button').click();
 
   await enter(page,'bank',2.6);
-  await warp(page,await offsetOf(page,'bank'),0.5,0);
+  await warp(page,await offsetOf(page,'bank')-2.8,0,90);         // at the teller windows on the west wall
+  await page.evaluate(()=>{window.__qinghe.town.pitch=-30;});   // looking at the counter, not the assistant behind it
   await expect(page.locator('#interact span')).toHaveText('柜台 · 存钱与借钱');
   await page.keyboard.press('e');
   // The counter opens on savings now; borrowing is its own tab.

@@ -163,7 +163,7 @@ test('a vendor mood shifts by day and rapport, and pushing a sour one can raise 
   // Rapport lifts the same day's mood.
   await seed(page,{dayIndex:3});
   await start(page);
-  await warp(page,9,0.6,0);
+  await warp(page,4.8,-6.8,0);
   await page.keyboard.press('e');await pastGreeting(page);
   const plain=await page.locator('.vendor-mood b').textContent();
   await page.evaluate(k=>{
@@ -172,7 +172,7 @@ test('a vendor mood shifts by day and rapport, and pushing a sour one can raise 
   await page.reload();
   await page.getByRole('button',{name:'开始旅行'}).click();
   await page.waitForTimeout(400);await page.mouse.click(700,500);
-  await warp(page,9,0.6,0);
+  await warp(page,4.8,-6.8,0);
   await page.keyboard.press('e');await pastGreeting(page);
   const friendly=await page.locator('.vendor-mood b').textContent();
   const order=['心情不好','不太热情','心情不错','今天很开心'];

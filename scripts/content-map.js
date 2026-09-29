@@ -39,7 +39,8 @@ function shopLine(shop){
 }
 function roomNotes(r){
   return [r.interiorOnly&&'inside only',r.annexes?.length&&`annexes → ${r.annexes.map(a=>a.room).join(', ')}`,r.decoratable&&'decoratable',
-    r.lectern?.panel&&`${r.lectern.panel} panel`,r.staff?.length&&`${r.staff.length} staff`].filter(Boolean).join(', ');
+    // A panel opens from the old lectern or from a counter's action (`panel:<id>`).
+    ...[r.lectern?.panel,...(r.fittings??[]).map(f=>f.action?.match(/^panel:(.+)/)?.[1])].filter(Boolean).map(p=>`${p} panel`),r.staff?.length&&`${r.staff.length} staff`].filter(Boolean).join(', ');
 }
 
 const out=[

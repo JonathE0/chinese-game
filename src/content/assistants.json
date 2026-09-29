@@ -1,0 +1,29 @@
+{
+  "note": "What shop assistants say when you talk to them: the greeting, the shop's own line (shop-<room id>), then buttons to browse (the shop panel, as the assistant says pay), write a postcard (rooms in postcard) or say goodbye. The second line is find when the buy guide led you here, else browse. Clips are assistant-<key>, all in the speaker's voice.",
+  "speaker": "student",
+  "postcard": ["post-office"],
+  "ui": {
+    "browse": {"zh": "看看商品", "en": "browse the goods"},
+    "bye": {"zh": "再见", "en": "goodbye"}
+  },
+  "lines": {
+    "greet": {"zh": "欢迎光临！需要帮忙吗？", "pinyin": "Huānyíng guānglín! Xūyào bāngmáng ma?", "en": "Welcome! Can I help you?"},
+    "browse": {"zh": "随便看看，有问题就叫我。", "pinyin": "Suíbiàn kànkan, yǒu wèntí jiù jiào wǒ.", "en": "Have a look around. Call me if you need anything."},
+    "find": {"zh": "你要找什么？我带你去。", "pinyin": "Nǐ yào zhǎo shénme? Wǒ dài nǐ qù.", "en": "What are you looking for? I'll show you."},
+    "pay": {"zh": "在这边付钱就可以了。", "pinyin": "Zài zhèbiān fù qián jiù kěyǐ le.", "en": "You can pay over here."},
+    "bye": {"zh": "谢谢光临，欢迎再来！", "pinyin": "Xièxie guānglín, huānyíng zài lái!", "en": "Thanks for coming, come again!"},
+    "shop-supermarket": {"zh": "今天的水果很新鲜。", "pinyin": "Jīntiān de shuǐguǒ hěn xīnxiān.", "en": "The fruit is very fresh today."},
+    "shop-cafe": {"zh": "我们的咖啡是现磨的。", "pinyin": "Wǒmen de kāfēi shì xiàn mó de.", "en": "Our coffee is freshly ground."},
+    "shop-bakery": {"zh": "面包刚出炉，还是热的。", "pinyin": "Miànbāo gāng chūlú, hái shì rè de.", "en": "The bread is fresh out of the oven, still warm."},
+    "shop-lifestyle": {"zh": "买家具可以先看看尺寸。", "pinyin": "Mǎi jiājù kěyǐ xiān kànkan chǐcùn.", "en": "When you buy furniture, check the size first."},
+    "shop-library": {"zh": "新书在门口这边。", "pinyin": "Xīn shū zài ménkǒu zhèbiān.", "en": "The new books are over here by the door."},
+    "shop-lights": {"zh": "这盏灯晚上特别好看。", "pinyin": "Zhè zhǎn dēng wǎnshang tèbié hǎokàn.", "en": "This lamp looks especially nice at night."},
+    "shop-homeware": {"zh": "布置房间，从一块地毯开始吧。", "pinyin": "Bùzhì fángjiān, cóng yí kuài dìtǎn kāishǐ ba.", "en": "To decorate a room, start with a rug."},
+    "shop-bank": {"zh": "请先拿号，稍等一下。", "pinyin": "Qǐng xiān ná hào, shāo děng yíxià.", "en": "Please take a number first and wait a moment."},
+    "shop-post-office": {"zh": "寄信请在这里买邮票。", "pinyin": "Jì xìn qǐng zài zhèlǐ mǎi yóupiào.", "en": "To send a letter, buy stamps here."},
+    "shop-pharmacy": {"zh": "哪里不舒服？我帮你看看。", "pinyin": "Nǎlǐ bù shūfu? Wǒ bāng nǐ kànkan.", "en": "Where do you feel unwell? Let me help."},
+    "shop-hardware": {"zh": "你要修什么？我帮你找工具。", "pinyin": "Nǐ yào xiū shénme? Wǒ bāng nǐ zhǎo gōngjù.", "en": "What do you need to fix? I'll help you find the tools."},
+    "shop-clothes-shop": {"zh": "这件衣服你可以试试。", "pinyin": "Zhè jiàn yīfu nǐ kěyǐ shìshi.", "en": "You could try this one on."},
+    "shop-teahouse": {"zh": "来一壶茶吧，慢慢喝。", "pinyin": "Lái yì hú chá ba, mànmàn hē.", "en": "Have a pot of tea, and take your time."}
+  }
+}

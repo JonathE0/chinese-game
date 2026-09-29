@@ -11,14 +11,18 @@
  */
 
 /** Furniture that offers a flat top, and the height of that top. */
-const TOPS={table:.47,desk:.81,nightstand:.65,dresser:1.17,shelf:1.74,chair:.5};
+const TOPS={table:.47,desk:.81,nightstand:.65,dresser:1.17,shelf:1.74,chair:.5,'tea-table':.5};
 /** Deliberately absent: bed, rug, wardrobe. A bed is not a shelf. */
 export const surfaceHeight=kind=>TOPS[kind]??null;
 export const offersSurface=kind=>surfaceHeight(kind)!==null;
 
 /** Small decor that may stand on a surface as well as on the floor. */
-const CAN_STACK=new Set(['desklamp','teaset','plant','lamp']);
+const CAN_STACK=new Set(['desklamp','teaset','plant','lamp','vase','bonsai']);
 export const canStack=kind=>CAN_STACK.has(kind);
+
+/** Pieces that hang on a wall: they go in a wall slot, never on the floor, and have no footing. */
+const WALL=new Set(['certificate','scroll-painting','landscape-painting']);
+export const hangsOnWall=kind=>WALL.has(kind);
 
 /** How much clear room a small piece needs on the top it is sitting on. */
 const CLEARANCE=.1;

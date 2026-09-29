@@ -174,10 +174,10 @@
       },
       "up-nightstand": {
         "zh": "床头柜",
-        "x": 1.3,
-        "z": -4.05,
+        "x": 4.65,
+        "z": -0.95,
         "y": 2.9,
-        "rot": 0,
+        "rot": -90,
         "accepts": [
           "nightstand"
         ]
@@ -223,31 +223,37 @@
         ]
       },
       "wall-1": {
-        "zh": "证书",
+        "zh": "墙面",
         "x": -1.2,
         "z": -4.44,
         "rot": 0,
         "accepts": [
-          "certificate"
+          "certificate",
+          "scroll-painting",
+          "landscape-painting"
         ]
       },
       "wall-2": {
-        "zh": "证书",
+        "zh": "墙面",
         "x": 1.2,
         "z": -4.44,
         "rot": 0,
         "accepts": [
-          "certificate"
+          "certificate",
+          "scroll-painting",
+          "landscape-painting"
         ]
       },
       "wall-up": {
-        "zh": "证书",
+        "zh": "墙面",
         "x": 4.94,
         "z": -1.2,
         "y": 2.9,
         "rot": -90,
         "accepts": [
-          "certificate"
+          "certificate",
+          "scroll-painting",
+          "landscape-painting"
         ]
       }
     },
@@ -544,12 +550,6 @@
       -4,
       4
     ],
-    "lectern": {
-      "x": 0,
-      "z": -2.4,
-      "label": "看看货架 · 家具与文具",
-      "shop": "lifestyle"
-    },
     "stock": "lifestyle",
     "fittings": [
       {
@@ -639,6 +639,35 @@
         "x": -5.5,
         "z": 0.6,
         "rot": 90
+      },
+      {
+        "kind": "checkout",
+        "x": 0,
+        "z": -2.2,
+        "rot": 0,
+        "action": "shop:lifestyle",
+        "label": "看看货架 · 家具与文具"
+      }
+    ],
+    "staff": [
+      {
+        "id": "lifestyle-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#7f9ab0",
+        "path": [
+          [
+            -0.9,
+            -3.2
+          ],
+          [
+            0.9,
+            -3.2
+          ]
+        ],
+        "speed": 0.5
       }
     ]
   },
@@ -674,19 +703,15 @@
       -3.2,
       3.2
     ],
-    "lectern": {
-      "x": 0,
-      "z": -1.9,
-      "label": "看看菜单",
-      "shop": "cafe"
-    },
     "stock": "cafe",
     "fittings": [
       {
-        "kind": "coffeebar",
+        "kind": "espressobar",
         "x": 0,
-        "z": -2.9,
-        "rot": 0
+        "z": -1.9,
+        "rot": 0,
+        "action": "shop:cafe",
+        "label": "看看菜单"
       },
       {
         "kind": "cakecase",
@@ -781,6 +806,27 @@
         "z": -1.2,
         "rot": 90
       }
+    ],
+    "staff": [
+      {
+        "id": "cafe-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#8d6b4d",
+        "path": [
+          [
+            -1,
+            -2.9
+          ],
+          [
+            1,
+            -2.9
+          ]
+        ],
+        "speed": 0.5
+      }
     ]
   },
   "supermarket": {
@@ -815,12 +861,6 @@
       -4.5,
       4.5
     ],
-    "lectern": {
-      "x": 0,
-      "z": -2.4,
-      "label": "看看今天有什么",
-      "shop": "supermarket"
-    },
     "stock": "supermarket",
     "fittings": [
       {
@@ -862,11 +902,13 @@
         "rot": 0
       },
       {
-        "kind": "checkout",
+        "kind": "checkoutlane",
         "x": 2,
         "z": 2.3,
         "rot": 0,
-        "sign": "收银台"
+        "sign": "收银台",
+        "action": "shop:supermarket",
+        "label": "看看今天有什么"
       },
       {
         "kind": "basketstack",
@@ -936,6 +978,27 @@
         "rot": 0,
         "sign": "今日特价"
       }
+    ],
+    "staff": [
+      {
+        "id": "supermarket-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#c9584f",
+        "path": [
+          [
+            1.4,
+            1.45
+          ],
+          [
+            2.6,
+            1.45
+          ]
+        ],
+        "speed": 0.5
+      }
     ]
   },
   "lights": {
@@ -970,12 +1033,6 @@
       -3.2,
       3.2
     ],
-    "lectern": {
-      "x": 0,
-      "z": -1.9,
-      "label": "看看灯具",
-      "shop": "lights"
-    },
     "stock": "lights",
     "fittings": [
       {
@@ -1039,6 +1096,14 @@
         "x": -4.5,
         "z": -0.2,
         "rot": 90
+      },
+      {
+        "kind": "lightcounter",
+        "x": 0,
+        "z": -1.9,
+        "rot": 0,
+        "action": "shop:lights",
+        "label": "看看灯具"
       }
     ],
     "lanterns": [
@@ -1050,6 +1115,27 @@
         3.5,
         1.3
       ]
+    ],
+    "staff": [
+      {
+        "id": "lights-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#c9a45f",
+        "path": [
+          [
+            -0.9,
+            -2.85
+          ],
+          [
+            0.9,
+            -2.85
+          ]
+        ],
+        "speed": 0.5
+      }
     ]
   },
   "restaurant": {
@@ -1316,12 +1402,6 @@
       -3.6,
       3.6
     ],
-    "lectern": {
-      "x": 0,
-      "z": -2.4,
-      "label": "看看家具 · 布置你的家",
-      "shop": "homeware"
-    },
     "stock": "homeware",
     "fittings": [
       {
@@ -1405,6 +1485,35 @@
         "x": -5,
         "z": -2.4,
         "rot": 90
+      },
+      {
+        "kind": "wrapdesk",
+        "x": 0,
+        "z": -2.2,
+        "rot": 0,
+        "action": "shop:homeware",
+        "label": "看看家具 · 布置你的家"
+      }
+    ],
+    "staff": [
+      {
+        "id": "homeware-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#b45b52",
+        "path": [
+          [
+            -0.9,
+            -3.2
+          ],
+          [
+            0.9,
+            -3.2
+          ]
+        ],
+        "speed": 0.5
       }
     ]
   },
@@ -1548,12 +1657,6 @@
       -3.4,
       3.4
     ],
-    "lectern": {
-      "x": 0,
-      "z": -2.8,
-      "label": "柜台 · 存钱与借钱",
-      "panel": "bank"
-    },
     "opens": {
       "flag": "practice:first",
       "zh": "先跟小美学几个词",
@@ -1562,14 +1665,16 @@
     "fittings": [
       {
         "kind": "bankcounter",
-        "x": -4.2,
+        "x": -3.8,
         "z": 0,
         "rot": 90,
         "sign": [
           "存款",
           "取款",
           "咨询"
-        ]
+        ],
+        "action": "panel:bank",
+        "label": "柜台 · 存钱与借钱"
       },
       {
         "kind": "atm",
@@ -1639,6 +1744,27 @@
         "z": 0.8,
         "rot": -90
       }
+    ],
+    "staff": [
+      {
+        "id": "bank-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#36594f",
+        "path": [
+          [
+            -4.55,
+            -1
+          ],
+          [
+            -4.55,
+            1
+          ]
+        ],
+        "speed": 0.5
+      }
     ]
   },
   "bakery": {
@@ -1673,12 +1799,6 @@
       -3.4,
       3.4
     ],
-    "lectern": {
-      "x": 0,
-      "z": -2.4,
-      "label": "看看今天的面包",
-      "shop": "bakery"
-    },
     "stock": "bakery",
     "fittings": [
       {
@@ -1749,6 +1869,35 @@
         "x": -5,
         "z": -2.2,
         "rot": 90
+      },
+      {
+        "kind": "bakerycounter",
+        "x": 0,
+        "z": -2,
+        "rot": 0,
+        "action": "shop:bakery",
+        "label": "看看今天的面包"
+      }
+    ],
+    "staff": [
+      {
+        "id": "bakery-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#c98d76",
+        "path": [
+          [
+            -0.9,
+            -2.95
+          ],
+          [
+            0.9,
+            -2.95
+          ]
+        ],
+        "speed": 0.5
       }
     ]
   },
@@ -1784,12 +1933,6 @@
       -4.2,
       4.2
     ],
-    "lectern": {
-      "x": 0,
-      "z": -3,
-      "label": "借书 · 所有书架",
-      "panel": "library"
-    },
     "fittings": [
       {
         "kind": "bookcase",
@@ -1915,6 +2058,35 @@
         "x": 3.2,
         "z": 4.5,
         "rot": 180
+      },
+      {
+        "kind": "lendingdesk",
+        "x": 0,
+        "z": -2.6,
+        "rot": 0,
+        "action": "panel:library",
+        "label": "借书 · 所有书架"
+      }
+    ],
+    "staff": [
+      {
+        "id": "library-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#5f7a5e",
+        "path": [
+          [
+            -0.9,
+            -3.65
+          ],
+          [
+            0.9,
+            -3.65
+          ]
+        ],
+        "speed": 0.5
       }
     ]
   },
@@ -1950,12 +2122,6 @@
       -3.6,
       3.6
     ],
-    "lectern": {
-      "x": 0,
-      "z": -2.4,
-      "label": "点一壶茶",
-      "shop": "teahouse"
-    },
     "stock": "teahouse",
     "opens": {
       "flag": "built:teahouse",
@@ -2080,6 +2246,14 @@
         "x": -5,
         "z": -1.8,
         "rot": 90
+      },
+      {
+        "kind": "teabar",
+        "x": 0,
+        "z": -2.2,
+        "rot": 0,
+        "action": "shop:teahouse",
+        "label": "点一壶茶"
       }
     ],
     "lanterns": [
@@ -2091,6 +2265,27 @@
         2.2,
         1.4
       ]
+    ],
+    "staff": [
+      {
+        "id": "teahouse-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#6e533b",
+        "path": [
+          [
+            -0.9,
+            -3.2
+          ],
+          [
+            0.9,
+            -3.2
+          ]
+        ],
+        "speed": 0.5
+      }
     ]
   },
   "post-office": {
@@ -2212,7 +2407,6 @@
         "pinyin": "yíngyèyuán",
         "en": "shop assistant",
         "look": "clerk",
-        "talk": false,
         "color": "#4f7a5e",
         "path": [
           [
@@ -2323,7 +2517,6 @@
         "pinyin": "yàojìshī",
         "en": "pharmacist",
         "look": "pharmacist",
-        "talk": false,
         "color": "#eef0ea",
         "path": [
           [
@@ -2345,8 +2538,8 @@
     "en": "Guesthouse",
     "building": "guesthouse",
     "door": {
-      "x": -18,
-      "z": 16.6
+      "x": -17.5,
+      "z": 9.4
     },
     "enterLabel": "进客栈",
     "size": [
@@ -2589,7 +2782,6 @@
         "pinyin": "yíngyèyuán",
         "en": "shop assistant",
         "look": "clerk",
-        "talk": false,
         "color": "#c9707f",
         "path": [
           [
@@ -2832,7 +3024,7 @@
         "sign": "生活用品部"
       },
       {
-        "kind": "checkout",
+        "kind": "tradecounter",
         "x": 5.5,
         "z": 5,
         "action": "shop:hardware",
@@ -2921,6 +3113,27 @@
         "z": 8,
         "rot": 180,
         "sign": "营业时间"
+      }
+    ],
+    "staff": [
+      {
+        "id": "hardware-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#54776e",
+        "path": [
+          [
+            4.8,
+            4
+          ],
+          [
+            6.2,
+            4
+          ]
+        ],
+        "speed": 0.5
       }
     ]
   },

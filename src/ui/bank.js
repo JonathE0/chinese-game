@@ -1,4 +1,5 @@
 import {escapeHtml as esc} from '../core/language.js';
+import {keyLabel} from '../core/keys.js';
 import {languageLine,pinyinHtml} from './shell.js';
 import {icon} from './art.js';
 import {familiarity,reviewWord,cardCoins,pickReviewWords} from '../core/review.js';
@@ -39,7 +40,7 @@ function list(ctx,body,venue=null){
       <div><b>${words.filter(w=>familiarity(ctx.profile.words[w.id]?.recognition)==='familiar').length}</b><span>熟悉</span></div>
     </div>
     ${words.length<4
-      ? `<p class="panel-intro">再收集几个词就可以复习了。走在城里看着东西按 <kbd>F</kbd>，或者在任何中文上划选。<br>Collect a few more words first — press F while looking at things, or highlight any Chinese.</p>`
+      ? `<p class="panel-intro">再收集几个词就可以复习了。走在城里看着东西按 <kbd>${keyLabel('collect')}</kbd>，或者在任何中文上划选。<br>Collect a few more words first — press ${keyLabel('collect')} while looking at things, or highlight any Chinese.</p>`
       : `<button class="primary wide" id="bank-review">复习 ${Math.min(SESSION,due.length+fresh.length)} 个词 ${icon('arrow',15)}</button>
          <p class="microcopy">优先复习到期的词，再加上还没练过的。</p>`}
     <p class="microcopy bank-rate">${rateNote(venue)}</p>

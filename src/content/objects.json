@@ -763,6 +763,24 @@
       "en": "pine tree",
       "hsk": 4
     },
+    "willow": {
+      "zh": "柳树",
+      "pinyin": "liǔshù",
+      "en": "weeping willow",
+      "hsk": null
+    },
+    "ginkgo": {
+      "zh": "银杏树",
+      "pinyin": "yínxìngshù",
+      "en": "ginkgo tree",
+      "hsk": null
+    },
+    "osmanthus": {
+      "zh": "桂花树",
+      "pinyin": "guìhuāshù",
+      "en": "osmanthus tree",
+      "hsk": null
+    },
     "moongate": {
       "zh": "月亮门",
       "pinyin": "yuèliangmén",
@@ -1086,6 +1104,72 @@
       "pinyin": "huòjià",
       "en": "shelf (in a shop)",
       "hsk": null
+    },
+    "student": {
+      "zh": "学生",
+      "pinyin": "xuésheng",
+      "en": "student",
+      "hsk": 1
+    },
+    "librarian": {
+      "zh": "图书管理员",
+      "pinyin": "túshū guǎnlǐyuán",
+      "en": "librarian",
+      "hsk": null
+    },
+    "scroll-painting": {
+      "zh": "字画",
+      "pinyin": "zìhuà",
+      "en": "calligraphy scroll",
+      "hsk": null
+    },
+    "landscape-painting": {
+      "zh": "山水画",
+      "pinyin": "shānshuǐhuà",
+      "en": "landscape painting",
+      "hsk": null
+    },
+    "vase": {
+      "zh": "花瓶",
+      "pinyin": "huāpíng",
+      "en": "vase",
+      "hsk": 6
+    },
+    "folding-screen": {
+      "zh": "屏风",
+      "pinyin": "píngfēng",
+      "en": "folding screen",
+      "hsk": null
+    },
+    "bonsai": {
+      "zh": "盆景",
+      "pinyin": "pénjǐng",
+      "en": "bonsai",
+      "hsk": null
+    },
+    "tea-table": {
+      "zh": "茶几",
+      "pinyin": "chájī",
+      "en": "tea table",
+      "hsk": null
+    },
+    "birdcage": {
+      "zh": "鸟笼",
+      "pinyin": "niǎolóng",
+      "en": "birdcage",
+      "hsk": null
+    },
+    "painting": {
+      "zh": "画",
+      "pinyin": "huà",
+      "en": "painting",
+      "hsk": 2
+    },
+    "tourist": {
+      "zh": "游客",
+      "pinyin": "yóukè",
+      "en": "tourist",
+      "hsk": 2
     }
   }
 }

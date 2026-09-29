@@ -3,6 +3,7 @@ import {Town} from './world/town.js';
 import {Shell,pinyinText,pinyinWith} from './ui/shell.js';
 import {VoicePlayer} from './services/audio.js';
 import {Ambience} from './services/music.js';
+import {FOUNTAIN,fountainLevel,fountainSound} from './world/fountain.js';
 import {Dictionary} from './services/dictionary.js';
 import {installLookup} from './ui/lookup.js';
 import {SpeechInput} from './services/speech.js';
@@ -22,6 +23,7 @@ import {cloudConfigured} from './services/cloud.js';
 import {syncSave,keepUnreadable} from './services/filesync.js';
 import {openHsk} from './ui/hsk.js';
 import {openDecorate,installPlacement,applyStarterHome} from './ui/decorate.js';
+import {openHallVisitor} from './ui/hall-visitors.js';
 import ambient from './content/ambient.json' with {type:'json'};
 import objectNames from './content/objects.json' with {type:'json'};
 import rooms from './content/rooms.json' with {type:'json'};
@@ -29,6 +31,7 @@ import npcs from './content/npcs.json' with {type:'json'};
 import {loadWords} from './services/hsk-data.js';
 import {districtStates,gateMessage} from './core/progress.js';
 import {openStatus} from './ui/status.js';
+import {readKeysFrom,isKey,keyLabel} from './core/keys.js';
 import {openBank,openResale} from './ui/money.js';
 import {openGuide} from './ui/guide.js';
 import {openSleep,openClosed} from './ui/rest.js';
@@ -53,7 +56,7 @@ import {shouldAutoStart} from './core/tutorial.js';
 import {Tutorial} from './ui/tutorial.js';
 import {installTouch} from './ui/touch.js';
 import {AmbientConversations} from './core/social.js';
-import {openNpcGreeting} from './ui/social.js';
+import {openNpcGreeting,openAssistant} from './ui/social.js';
 import {festivalFrame} from './world/festivals.js';
 import {openFestival} from './ui/festivals.js';
 import {openPostcard} from './ui/postcard.js';
@@ -64,6 +67,8 @@ const loaded=loadProfile(localStorage);
 // readOnly: the save comes from a newer build, so nothing may be written over it this session.
 // holdSave: a damaged save's original did not fit beside it, so it goes to IndexedDB before any save.
 const ctx={profile:loaded.profile,hinted:false,town:null,holdSync:true,readOnly:!!loaded.readOnly,holdSave:!!loaded.unkept};
+// Key bindings always come from whichever save is current (an import or restore swaps ctx.profile).
+readKeysFrom(()=>ctx.profile.settings.keys);
 // Admin mode, for play-testing (`?admin`, and only on the Vite dev server): every district gate stands open
 // and the wallet is topped up to 1000. The save folder is never read or written in this mode, so none
 // of it can leak into a real save.
@@ -107,7 +112,7 @@ function interact(id){
  }
  if(id==='grab')return void ctx.town.grabLoose();
  if(id.startsWith('sit:')){
-  if(ctx.town.sit(Number(id.slice(4)))){bump(ctx.profile,'sits');ctx.save();ctx.ui.notice('坐下了。按 空格 站起来。 / Seated — press Space to stand.');}
+  if(ctx.town.sit(Number(id.slice(4)))){bump(ctx.profile,'sits');ctx.save();ctx.ui.notice(`坐下了。按 ${keyLabel('jump')} 站起来。 / Seated — press ${keyLabel('jump')} to stand.`);}
   return;
  }
  if(id==='stand')return void ctx.town.stand();
@@ -145,7 +150,18 @@ function interact(id){
  if(id==='decorate')return openDecorate(ctx);
  if(id==='studydesk')return openWordBank(ctx,{venue:'desk'});
  if(id==='menu')return openMenu(ctx,'tablet');
- if(id.startsWith('staff:')){bump(ctx.profile,'talks');return openNpcGreeting(ctx,'staff',()=>openMenu(ctx,'waiter'));}
+ if(id.startsWith('hall:')){bump(ctx.profile,'talks');return openHallVisitor(ctx,ctx.town.visitors.people[Number(id.slice(5))]);}
+ if(id.startsWith('staff:')){
+  bump(ctx.profile,'talks');
+  // Shop assistants (staff with a look of their own) help you shop; waiters take your order.
+  const room=ctx.town.rooms.get(ctx.town.place),member=room?.staff.find(s=>'staff:'+s.id===id);
+  if(member?.look){
+   const counter=room.fittings.find(f=>/^(shop|panel):/.test(f.action??'')),led=ctx.ledTo===room.id;
+   if(led)ctx.ledTo=null;   // asked once per trip
+   return openAssistant(ctx,member,room.id,{browse:counter&&(()=>interact(counter.action)),sells:counter?.action.startsWith('shop:'),led});
+  }
+  return openNpcGreeting(ctx,'staff',()=>openMenu(ctx,'waiter'));
+ }
 }
 // Looking at something and pressing F is the main way to pick up everyday words.
 function collect(name){
@@ -191,8 +207,8 @@ function showGate(id){
  body.innerHTML=`<p class="panel-intro">${pinyinWith(d.pinyin,d.zh,d.en)}</p>
   <div class="gate-note"><b>${esc(gateMessage(state))}</b>
   <div class="gate-bar"><i style="width:${percent}%"></i></div>
-  <p class="microcopy">在词语馆复习 HSK ${state.level} 的词，或在城里用 <kbd>F</kbd> 记住看到的东西。两种都算。<br>
-  Review HSK ${state.level} words in the word hall, or look at things around town and press F. Both count.</p></div>`;
+  <p class="microcopy">在词语馆复习 HSK ${state.level} 的词，或在城里用 <kbd>${esc(keyLabel('collect'))}</kbd> 记住看到的东西。两种都算。<br>
+  Review HSK ${state.level} words in the word hall, or look at things around town and press ${esc(keyLabel('collect'))}. Both count.</p></div>`;
  ctx.ui.update();
 }
 function enterPlace(id){
@@ -201,8 +217,12 @@ function enterPlace(id){
   if(!ctx.town.enterRoom(id))return;
   // The word hall is one of the places a postcard can say you went to.
   if(noteVisit(ctx.profile,id))ctx.save();
-  // Being led to this door? Then you have arrived.
-  if(ctx.ui.route?.key===id)ctx.ui.clearRoute();
+  // Being led to this door? Then you have arrived. A buy-guide route names the shop it is for (the
+  // city's store is reached through the metro platform), and that shop's assistant asks what you
+  // need; other routes (去找找, missions) name none. Walking into any other room ends the errand.
+  const route=ctx.ui.route;
+  if(route?.key===id){ctx.ledTo=route.shop??null;ctx.ui.clearRoute();}
+  else if(id!==ctx.ledTo)ctx.ledTo=null;
   // One count per shop per day, so walking in and out is not a way to farm the errand.
   const daily=syncDay(ctx.profile,ctx.profile.dayIndex??0);
   if(!daily.counts['seen-'+id]){daily.counts['seen-'+id]=1;bump(ctx.profile,'visits');ctx.save();}
@@ -269,6 +289,7 @@ try{
   onCollect:name=>collect(name),onFrame:town=>{
   const pos=town.player.entity.getPosition(),outside=town.place==='town';
   ctx.music.setPlace(town.place);
+  fountainSound(ctx.music,outside?fountainLevel(Math.hypot(pos.x-FOUNTAIN.x,pos.z-FOUNTAIN.z)):0);
   const dot=document.querySelector('#map-player');
   dot.dataset.y=pos.y.toFixed(3);   // height is read indoors too: up the stairs at home
   if(outside){
@@ -405,14 +426,14 @@ document.querySelector('#journal-button').onclick=()=>{if(started)openJournal(ct
 document.querySelector('#interact-button').onclick=()=>interact(ctx.town.nearest?.id);document.querySelector('#ambient-bubble').onclick=()=>openAmbient(ctx);
 // Debug handle: lets the layout tools and the browser tests drive the game directly.
 window.__qinghe=ctx;
-// H hides the name that follows the crosshair, for anyone who would rather just look at the town.
+// H (or its rebinding) hides the name that follows the crosshair, for anyone who would rather just look at the town.
 addEventListener('keydown',e=>{
- if(e.code!=='KeyH'||!started||ctx.ui.panelId||isTyping(e.target)||e.repeat||e.isComposing)return;
+ if(!isKey(e,'labels')||!started||ctx.ui.panelId||isTyping(e.target)||e.repeat||e.isComposing)return;
  ctx.ui.toggleNames();
 });
-const shortcuts={Digit1:['journal',openJournal],Digit2:['inventory',openInventory],Digit3:['wordbank',openWordBank],Digit4:['status',openStatus],Digit5:['settings',openSettings]};
+const shortcuts=[['journal',openJournal],['inventory',openInventory],['wordbank',openWordBank],['status',openStatus],['settings',openSettings]];
 addEventListener('keydown',e=>{
- const choice=shortcuts[e.code.replace('Numpad','Digit')];
+ const choice=shortcuts.find(([action])=>isKey(e,action));
  // Nothing opens behind a fade (a taxi ride, a night's sleep): the veil holds all input until it lifts.
  if(!choice||document.querySelector('.fade-veil')||!shortcutAllowed(e,{started,panelId:ctx.ui.panelId,placing:!!ctx.town.ghost,
    reviewing:!!document.querySelector('#panel .drill-prompt')})||isTyping(document.activeElement))return;

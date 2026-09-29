@@ -21,7 +21,7 @@ the city uses its own coordinates.
 | 地铁 | metro-station | square | -7.5,14.6 | metro-platform |  |
 | 词语馆 | practice-house | square | 0,-22 | hall, reading, studyroom, listening, courtyard |  |
 | 小小商店 | souvenir-house | square | 11,-8 |  |  |
-| 客栈 | guesthouse | square | -18,12 | guesthouse |  |
+| 客栈 | guesthouse | square | -17.5,13 | guesthouse |  |
 | 我的家 | home | square | 11,14 | home, study, kitchen |  |
 | 青禾超市 | supermarket | market | 28,-9 | supermarket |  |
 | 慢慢咖啡 | cafe | market | 28,9 | cafe |  |
@@ -44,24 +44,24 @@ the city uses its own coordinates.
 | --- | --- | --- | --- | --- | --- | --- |
 | home | 我的家 | My home | home |  |  | annexes → kitchen, study, decoratable |
 | hall | 词语馆 | The word hall | practice-house |  |  | annexes → reading, studyroom, listening, courtyard |
-| lifestyle | 生活馆 | Lifestyle store | lifestyle | lifestyle |  |  |
-| cafe | 慢慢咖啡 | Slow coffee | cafe | cafe |  |  |
-| supermarket | 青禾超市 | Qinghe supermarket | supermarket | supermarket |  |  |
-| lights | 青禾灯具 | Qinghe lighting | lights | lights |  |  |
+| lifestyle | 生活馆 | Lifestyle store | lifestyle | lifestyle |  | 1 staff |
+| cafe | 慢慢咖啡 | Slow coffee | cafe | cafe |  | 1 staff |
+| supermarket | 青禾超市 | Qinghe supermarket | supermarket | supermarket |  | 1 staff |
+| lights | 青禾灯具 | Qinghe lighting | lights | lights |  | 1 staff |
 | restaurant | 家常餐厅 | Home-style restaurant | restaurant | restaurant |  | 2 staff |
-| homeware | 家居小铺 | Home goods | homeware | homeware |  |  |
+| homeware | 家居小铺 | Home goods | homeware | homeware |  | 1 staff |
 | resale | 旧物铺 | Second-hand shop | resale |  | purchase:first: Opens once you have bought something in town. | resale panel |
-| bank | 青禾银行 | Qinghe bank | bank-branch |  | practice:first: Opens after your first practice session with Xiaomei. | bank panel |
-| bakery | 麦香面包 | Wheat-scent bakery | bakery | bakery |  |  |
-| library | 青禾书馆 | Qinghe library | bookshop |  |  | library panel |
-| teahouse | 青禾茶楼 | Qinghe tea house | teahouse | teahouse | built:teahouse: Opens once the build site is finished. |  |
+| bank | 青禾银行 | Qinghe bank | bank-branch |  | practice:first: Opens after your first practice session with Xiaomei. | bank panel, 1 staff |
+| bakery | 麦香面包 | Wheat-scent bakery | bakery | bakery |  | 1 staff |
+| library | 青禾书馆 | Qinghe library | bookshop |  |  | library panel, 1 staff |
+| teahouse | 青禾茶楼 | Qinghe tea house | teahouse | teahouse | built:teahouse: Opens once the build site is finished. | 1 staff |
 | post-office | 青禾邮局 | Qinghe Post Office | bank |  |  | 1 staff |
 | pharmacy | 青禾药店 | Qinghe Pharmacy | pharmacy |  |  | 1 staff |
 | guesthouse | 客栈 | Guesthouse | guesthouse |  |  |  |
 | clothes-shop | 服装店 | Clothes shop | clothes-shop |  |  | 1 staff |
 | study | 书房 | Study | home |  |  | inside only |
 | kitchen | 我家的厨房 | Home kitchen | home |  |  | inside only |
-| hardware | 星光五金百货 | Starlight hardware & home | city:department |  |  | inside only |
+| hardware | 星光五金百货 | Starlight hardware & home | city:department |  |  | inside only, 1 staff |
 | reading | 阅览室 | Reading room | practice-house |  |  | inside only |
 | studyroom | 自习室 | Study room | practice-house |  |  | inside only |
 | listening | 听力室 | Listening room | practice-house |  |  | inside only |
@@ -73,8 +73,8 @@ the city uses its own coordinates.
 Prices in 学习币; `~` marks a negotiable price. An item sold in several shops is listed under each.
 
 - **chen** (陈叔叔, 小商店): 旅行帽 travel-hat 24~, 明信片 postcard 8~, 草鞋 straw-sandals 9~
-- **lifestyle** (生活馆, room lifestyle): 矮桌 low-table 22, 木床 wooden-bed 40, 书架 bookshelf 30, 盆栽 potted-plant 12, 地毯 floor-rug 18, 本子 notebook 6, 笔 pen 4, 亚麻衬衫 linen-shirt 26, 棉裤子 cotton-trousers 22, 草帽 straw-hat 18, 五斗柜 dresser 28, 床头柜 nightstand 12, 书桌 study-desk 26, 椅子 wooden-chair 8, 衣柜 wardrobe 34, 布鞋 cloth-shoes 16, 运动鞋 sport-shoes 34, 茶具 tea-set 14
-- **homeware** (家居小铺, room homeware): 矮桌 low-table 22, 木床 wooden-bed 40, 书架 bookshelf 30, 盆栽 potted-plant 12, 地毯 floor-rug 18, 五斗柜 dresser 28, 床头柜 nightstand 12, 椅子 wooden-chair 8, 竹席 bamboo-mat 10, 圆凳 round-stool 6, 布鞋 cloth-shoes 16, 茶具 tea-set 14, 木料 timber 7, 砖 brick 6, 布匹 cloth-bolt 9
+- **lifestyle** (生活馆, room lifestyle): 矮桌 low-table 22, 木床 wooden-bed 40, 书架 bookshelf 30, 盆栽 potted-plant 12, 地毯 floor-rug 18, 本子 notebook 6, 笔 pen 4, 亚麻衬衫 linen-shirt 26, 棉裤子 cotton-trousers 22, 草帽 straw-hat 18, 五斗柜 dresser 28, 床头柜 nightstand 12, 书桌 study-desk 26, 椅子 wooden-chair 8, 衣柜 wardrobe 34, 布鞋 cloth-shoes 16, 运动鞋 sport-shoes 34, 茶具 tea-set 14, 屏风 folding-screen 90, 茶几 tea-table 70
+- **homeware** (家居小铺, room homeware): 矮桌 low-table 22, 木床 wooden-bed 40, 书架 bookshelf 30, 盆栽 potted-plant 12, 地毯 floor-rug 18, 五斗柜 dresser 28, 床头柜 nightstand 12, 椅子 wooden-chair 8, 竹席 bamboo-mat 10, 圆凳 round-stool 6, 布鞋 cloth-shoes 16, 茶具 tea-set 14, 木料 timber 7, 砖 brick 6, 布匹 cloth-bolt 9, 字画 scroll-painting 45, 山水画 landscape-painting 60, 花瓶 vase 30, 屏风 folding-screen 90, 盆景 bonsai 40, 茶几 tea-table 70, 鸟笼 birdcage 35
 - **hardware** (星光五金百货, room hardware): 矮桌 low-table 22, 木床 wooden-bed 40, 书架 bookshelf 30, 纸灯 paper-lamp 14, 盆栽 potted-plant 12, 地毯 floor-rug 18, 五斗柜 dresser 28, 床头柜 nightstand 12, 书桌 study-desk 26, 椅子 wooden-chair 8, 衣柜 wardrobe 34, 吊灯 ceiling-lamp 30, 台灯 desk-lamp 16, 竹席 bamboo-mat 10, 圆凳 round-stool 6, 布鞋 cloth-shoes 16, 茶具 tea-set 14, 木料 timber 7, 砖 brick 6, 布匹 cloth-bolt 9
 - **lights** (青禾灯具, room lights): 纸灯 paper-lamp 14, 吊灯 ceiling-lamp 30, 台灯 desk-lamp 16
 - **cafe** (慢慢咖啡, room cafe): 咖啡 coffee 9, 蛋糕 cake 11, 面包 bread 7
@@ -98,18 +98,18 @@ Prices in 学习币; `~` marks a negotiable price. An item sold in several shops
 
 | id | zh | en | role | lesson | x,z | voice |
 | --- | --- | --- | --- | --- | --- | --- |
-| lin | 林阿姨 | Auntie Lin | 茶铺 | introductions | -9,-2 | lin |
+| lin | 林阿姨 | Auntie Lin | 茶铺 | introductions | -4.8,-9.4 | lin |
 | mei | 小美 | Xiaomei | 练习角 |  | -2.9,-6.4 | mei |
-| chen | 陈叔叔 | Uncle Chen | 小商店 |  | 9,-2 | chen |
+| chen | 陈叔叔 | Uncle Chen | 小商店 |  | 4.8,-9.4 | chen |
 
 ## Missions (`quests.json`, in order)
 
 | id | zh | done when | where |
 | --- | --- | --- | --- |
-| greet | 初次见面 | flag introductions | square -9,-2 茶铺 · 林阿姨 |
+| greet | 初次见面 | flag introductions | square -4.8,-9.4 茶铺 · 林阿姨 |
 | four-words | 认识四个新词 | flag practice:first | square -2.9,-6.4 练习角 · 小美 |
 | name-things | 认出十样东西 | discovered ≥ 10 | square 0,5 广场中心 |
-| souvenir | 带一份纪念品回家 | flag purchase:first | square 9,-2 小小商店 · 陈叔叔 |
+| souvenir | 带一份纪念品回家 | flag purchase:first | square 4.8,-9.4 小小商店 · 陈叔叔 |
 | furnish | 布置你的房间 | home ≥ 4 | square 11,9.6 我的家 |
 | market | 走进商业街 | district (market) | square 19.4,0 商业街的门 |
 | order | 用中文点一道菜 | ordered | riverside -51,4.1 家常餐厅 |
@@ -173,7 +173,7 @@ Prices in 学习币; `~` marks a negotiable price. An item sold in several shops
 ## Words, lessons and reading
 
 - Town words (vocabulary.json): 水 water, 茶 tea, 苹果 apple, 书 book
-- Nameable objects (objects.json): 181 (HSK 1 ×17, HSK 3 ×27, HSK 2 ×25, HSK 4 ×24, HSK 5 ×12, HSK 6 ×13, no level ×63)
+- Nameable objects (objects.json): 195 (HSK 1 ×18, HSK 3 ×27, HSK 2 ×27, HSK 4 ×24, HSK 5 ×12, HSK 6 ×14, no level ×73)
 - Lessons: city-directions 问路 (3 nodes), city-noodles 来一碗面 (5 nodes), city-taxi 打车 (2 nodes), introductions 初次见面 (4 nodes), npc-smalltalk 聊一会儿 (0 nodes)
 - Ambient lines: ambient-weather, ambient-walk, ambient-tea, ambient-yes, ambient-bread, ambient-breakfast, ambient-reading, ambient-story, ambient-lunch, ambient-noodles, ambient-river, ambient-later, ambient-park-view, ambient-park-lotus, ambient-park-fish, ambient-park-feed, ambient-snack-wonton, ambient-snack-try, ambient-snack-breakfast, ambient-snack-youtiao, ambient-study-words, ambient-study-count, ambient-study-quiet, ambient-study-like
 - Library stories: 早上 morning (level 1, 6 lines), 我的家 my-home (level 1, 6 lines), 买东西 shopping (level 2, 6 lines), 一把伞 umbrella (level 2, 6 lines), 老照片 photographs (level 3, 6 lines), 夜市 night-market (level 4, 6 lines)

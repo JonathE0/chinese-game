@@ -86,7 +86,7 @@ export function openBuyGuide(ctx,body,needs,{back}={}){
     const seller=group.seller;
     const key=seller.city?'metro-platform':seller.shop;
     const label=seller.city?`青禾地铁站 → ${seller.zh}`:seller.zh;
-    ctx.ui.showWay({key,district:seller.district,x:seller.x,z:seller.z,label});
+    ctx.ui.showWay({key,district:seller.district,x:seller.x,z:seller.z,label,shop:seller.shop});
     ctx.ui.close();
   });
   body.querySelector('[data-buyguide-back]')?.addEventListener('click',()=>back?.());

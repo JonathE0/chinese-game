@@ -149,85 +149,85 @@
   "props": [
     {
       "kind": "citylamp",
-      "x": -8.4,
+      "x": -7.7,
       "z": 20,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": 7.8,
+      "x": 7.7,
       "z": 20,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": -8.4,
+      "x": -7.7,
       "z": 12,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": 8.4,
+      "x": 7.7,
       "z": 12,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": -8.4,
+      "x": -7.7,
       "z": 4,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": 8.4,
+      "x": 7.7,
       "z": 4,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": -8.4,
+      "x": -7.7,
       "z": -4,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": 8.4,
+      "x": 7.7,
       "z": -4,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": -8.4,
+      "x": -7.7,
       "z": -12,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": 8.4,
+      "x": 7.7,
       "z": -12,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": -8.4,
+      "x": -7.7,
       "z": -20,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": 8.4,
+      "x": 7.7,
       "z": -20,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": -8.4,
+      "x": -7.7,
       "z": -25.6,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
-      "x": 8.4,
+      "x": 7.7,
       "z": -25.6,
       "name": "streetlight"
     },

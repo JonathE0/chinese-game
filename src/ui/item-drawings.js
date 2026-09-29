@@ -51,5 +51,13 @@ export const itemDrawings={
  youtiao:shadow+ellipse(80,122,52,9,'#e8dcc0')+stick(64,78,-9)+stick(97,80,9),
  // A framed certificate: wooden frame, paper, lines of text and a red seal.
  certificate:shadow+rect(30,22,100,112,'#8d6b4d',4)+rect(38,30,84,96,'#f6efdc',2)+path('M52 48h56','none','#c9a24e')+path('M52 66h56M52 80h56M52 94h36','none','#b9ae95')+ellipse(104,108,11,11,'#c0463c')+path('M99 104l10 8M109 104l-10 8','none','#f3c9b8'),
- jianbing:shadow+ellipse(80,92,54,28,'#e8c26c')+path('M28 92q52 22 104 0','none','#c9a24e')+ellipse(58,76,19,10,'#f3d879')+path('M40 96l15-8M104 93l16-7','none','#d9b06a')+path('M55 101l9 13M103 99l-8 14','none','#7f9c50')
+ jianbing:shadow+ellipse(80,92,54,28,'#e8c26c')+path('M28 92q52 22 104 0','none','#c9a24e')+ellipse(58,76,19,10,'#f3d879')+path('M40 96l15-8M104 93l16-7','none','#d9b06a')+path('M55 101l9 13M103 99l-8 14','none','#7f9c50'),
+ // Home decor from the homeware shop.
+ 'scroll-painting':path('M64 12l16-8 16 8','none','#6b4a33')+rect(52,18,56,112,'#b9a37a',2)+rect(60,26,40,90,'#f3ead3',1)+path('M62 100l14-28 10 14 6-8 8 22z','#6f7a74')+path('M92 34v26','none','#3b3a36')+rect(63,104,7,7,'#b8463a',1)+rect(48,12,64,8,'#6b4a33',4)+rect(46,128,68,9,'#6b4a33',4),
+ 'landscape-painting':rect(18,36,124,88,'#6f5236',4)+rect(26,44,108,72,'#e9e6d6',2)+path('M26 104l30-44 22 30 14-18 28 32z','#8aa391')+path('M70 104l26-30 26 30z','#5f7d6c')+rect(26,102,108,14,'#9fbccb',0)+ellipse(112,60,8,8,'#e3a869'),
+ vase:shadow+path('M78 50l-10-30M82 50l14-26','none','#5a3d2c')+ellipse(68,22,6,6,'#eaa6ae')+ellipse(96,24,6,6,'#eaa6ae')+ellipse(73,33,5,5,'#eaa6ae')+path('M66 50h28v10q22 16 16 44-6 22-30 26-24-4-30-26-6-28 16-44z','#5a7fae')+path('M53 96h54','none','#f1ece0')+ellipse(80,50,16,5,'#f1ece0'),
+ 'folding-screen':shadow+[0,1,2,3].map(i=>{const x=20+i*30,dy=i%2?-8:8;return path(`M${x} ${i%2?38:30}l30 ${dy}v88l-30 ${-dy}z`,'#8a3f26')+path(`M${x+4} ${(i%2?38:30)+6+dy*4/30}l22 ${dy*22/30}v66l-22 ${-dy*22/30}z`,'#efe4c8');}).join('')+path('M38 104q24-40 62-58','none','#5a3d2c')+ellipse(62,78,5,5,'#d9737b')+ellipse(92,56,5,5,'#d9737b'),
+ bonsai:shadow+path('M78 104q-12-20 4-36t-8-28','none','#6b4a33')+ellipse(58,72,22,10,'#5f7f4f')+ellipse(100,58,24,11,'#5f7f4f')+ellipse(76,42,18,9,'#5f7f4f')+rect(32,102,96,8,'#4f6f7d',3)+path('M36 110h88l-8 18H44z','#5c7f8f'),
+ 'tea-table':shadow+rect(36,88,7,40,'#7a5a3c',2)+rect(117,88,7,40,'#7a5a3c',2)+rect(52,86,6,32,'#6a4c32',2)+rect(102,86,6,32,'#6a4c32',2)+rect(40,112,80,5,'#a97d55',1)+rect(32,82,96,8,'#6f4a30',1)+path('M22 68h116l-10 14H32z','#8a5a3a'),
+ birdcage:shadow+rect(77,96,6,36,'#7d6349',2)+ellipse(80,132,22,4,'#7d6349')+path('M80 18v18','none','#7d6349')+path('M48 60q32-44 64 0z','#c9a36a')+path('M50 94V58M60 95V52M70 96V50M80 96V50M90 96V50M100 95V52M110 94V58','none','#c9a36a')+path('M62 86h36','none','#6b4a33')+ellipse(80,78,10,8,'#e3c14f')+ellipse(88,71,5,5,'#e3c14f')+ellipse(80,96,34,7,'#8a6c49'),
 };

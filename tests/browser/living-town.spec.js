@@ -75,7 +75,8 @@ test('the bakery sells a basket of things in one transaction',async({page})=>{
   await start(page);
   await page.evaluate(()=>window.__qinghe.town.setUnlocked('market',true));
   await enter(page,'bakery',2.6);
-  await warp(page,await offsetOf(page,'bakery'),1.0,0);
+  await warp(page,await offsetOf(page,'bakery'),-1.1,0);        // in front of the glass counter
+  await page.evaluate(()=>{window.__qinghe.town.pitch=-30;});   // looking at the counter, not the assistant behind it
   await expect(page.locator('#interact span')).toHaveText('看看今天的面包');
   await page.keyboard.press('e');
   await expect(page.locator('#panel-title')).toHaveText('麦香面包');
@@ -216,7 +217,8 @@ test('the library shelves books by what you can read, and hands over what you ar
   await start(page);
   await page.evaluate(()=>window.__qinghe.town.setUnlocked('market',true));
   await enter(page,'library',3.4);
-  await warp(page,await offsetOf(page,'library'),1.0,0);
+  await warp(page,await offsetOf(page,'library'),-1.7,0);       // in front of the lending desk
+  await page.evaluate(()=>{window.__qinghe.town.pitch=-30;});   // looking at the counter, not the assistant behind it
   await expect(page.locator('#interact span')).toHaveText('借书 · 所有书架');
   await page.keyboard.press('e');
   await expect(page.locator('#panel-title')).toHaveText('青禾书馆');
@@ -248,7 +250,8 @@ test('the bank takes deposits, pays capped interest and sells a permit on instal
   await seed(page,{wallet:400,completed:['home:tutorial','home:starter','practice:first']});
   await start(page);
   await enter(page,'bank',2.6);
-  await warp(page,await offsetOf(page,'bank'),0.5,0);
+  await warp(page,await offsetOf(page,'bank')-2.8,0,90);         // at the teller windows on the west wall
+  await page.evaluate(()=>{window.__qinghe.town.pitch=-30;});   // looking at the counter, not the assistant behind it
   await page.keyboard.press('e');
   await expect(page.locator('#panel-title')).toHaveText('青禾银行');
 

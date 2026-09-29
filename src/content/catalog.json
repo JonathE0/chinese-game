@@ -1788,5 +1788,175 @@
       0.72,
       0.06
     ]
+  },
+  {
+    "id": "scroll-painting",
+    "zh": "字画",
+    "pinyin": "zìhuà",
+    "en": "calligraphy scroll",
+    "description": "挂一幅字，房间多了一点书香。",
+    "descriptionEn": "Hang up some calligraphy, and the room feels a little more scholarly.",
+    "category": "furniture",
+    "visual": "scroll-painting",
+    "color": "#b9a37a",
+    "price": 45,
+    "minPrice": 45,
+    "negotiable": false,
+    "shop": [
+      "homeware"
+    ],
+    "vocabulary": [],
+    "audio": "shop-scroll-painting",
+    "kind": "scroll-painting",
+    "footprint": [
+      0.56,
+      0.06
+    ]
+  },
+  {
+    "id": "landscape-painting",
+    "zh": "山水画",
+    "pinyin": "shānshuǐhuà",
+    "en": "landscape painting",
+    "description": "不出门，也能看山看水。",
+    "descriptionEn": "Mountains and rivers, without leaving home.",
+    "category": "furniture",
+    "visual": "landscape-painting",
+    "color": "#6f5236",
+    "price": 60,
+    "minPrice": 60,
+    "negotiable": false,
+    "shop": [
+      "homeware"
+    ],
+    "vocabulary": [],
+    "audio": "shop-landscape-painting",
+    "kind": "landscape-painting",
+    "footprint": [
+      1,
+      0.06
+    ]
+  },
+  {
+    "id": "vase",
+    "zh": "花瓶",
+    "pinyin": "huāpíng",
+    "en": "vase",
+    "description": "插几枝花，放在桌上。",
+    "descriptionEn": "Put a few flowers in it and stand it on a table.",
+    "category": "furniture",
+    "visual": "vase",
+    "color": "#5a7fae",
+    "price": 30,
+    "minPrice": 30,
+    "negotiable": false,
+    "shop": [
+      "homeware"
+    ],
+    "vocabulary": [],
+    "audio": "shop-vase",
+    "kind": "vase",
+    "footprint": [
+      0.3,
+      0.3
+    ]
+  },
+  {
+    "id": "folding-screen",
+    "zh": "屏风",
+    "pinyin": "píngfēng",
+    "en": "folding screen",
+    "description": "把房间隔开，多一个安静的角落。",
+    "descriptionEn": "Divides the room to make a quiet corner.",
+    "category": "furniture",
+    "visual": "folding-screen",
+    "color": "#8a3f26",
+    "price": 90,
+    "minPrice": 90,
+    "negotiable": false,
+    "shop": [
+      "homeware",
+      "lifestyle"
+    ],
+    "vocabulary": [],
+    "audio": "shop-folding-screen",
+    "kind": "folding-screen",
+    "footprint": [
+      1.8,
+      0.4
+    ]
+  },
+  {
+    "id": "bonsai",
+    "zh": "盆景",
+    "pinyin": "pénjǐng",
+    "en": "bonsai",
+    "description": "小小一盆，却像一棵老树。",
+    "descriptionEn": "Only a little pot, yet it looks like an old tree.",
+    "category": "furniture",
+    "visual": "bonsai",
+    "color": "#5c7f8f",
+    "price": 40,
+    "minPrice": 40,
+    "negotiable": false,
+    "shop": [
+      "homeware"
+    ],
+    "vocabulary": [],
+    "audio": "shop-bonsai",
+    "kind": "bonsai",
+    "footprint": [
+      0.5,
+      0.35
+    ]
+  },
+  {
+    "id": "tea-table",
+    "zh": "茶几",
+    "pinyin": "chájī",
+    "en": "tea table",
+    "description": "放上茶具，客人来了就能喝茶。",
+    "descriptionEn": "Put a tea set on it, and guests can have tea when they come.",
+    "category": "furniture",
+    "visual": "tea-table",
+    "color": "#8a5a3a",
+    "price": 70,
+    "minPrice": 70,
+    "negotiable": false,
+    "shop": [
+      "homeware",
+      "lifestyle"
+    ],
+    "vocabulary": [],
+    "audio": "shop-tea-table",
+    "kind": "tea-table",
+    "footprint": [
+      1,
+      0.6
+    ]
+  },
+  {
+    "id": "birdcage",
+    "zh": "鸟笼",
+    "pinyin": "niǎolóng",
+    "en": "birdcage",
+    "description": "有了鸟笼，好像能听见鸟叫。",
+    "descriptionEn": "With a birdcage in the room, you can almost hear the birds.",
+    "category": "furniture",
+    "visual": "birdcage",
+    "color": "#c9a36a",
+    "price": 35,
+    "minPrice": 35,
+    "negotiable": false,
+    "shop": [
+      "homeware"
+    ],
+    "vocabulary": [],
+    "audio": "shop-birdcage",
+    "kind": "birdcage",
+    "footprint": [
+      0.5,
+      0.5
+    ]
   }
 ]

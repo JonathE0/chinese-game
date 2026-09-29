@@ -1,0 +1,30 @@
+{
+  "note": "Rebindable keyboard actions, in the order the settings panel lists them. `key` is the default KeyboardEvent.code. Content text can name a key with {actionId} (for example {interact}); it is filled with the player's binding at display time. UI labels only, no voice clips.",
+  "actions": [
+    {"id": "forward", "key": "KeyW", "zh": "向前走", "pinyin": "xiàng qián zǒu", "en": "Move forward"},
+    {"id": "back", "key": "KeyS", "zh": "向后走", "pinyin": "xiàng hòu zǒu", "en": "Move back"},
+    {"id": "left", "key": "KeyA", "zh": "向左走", "pinyin": "xiàng zuǒ zǒu", "en": "Move left"},
+    {"id": "right", "key": "KeyD", "zh": "向右走", "pinyin": "xiàng yòu zǒu", "en": "Move right"},
+    {"id": "jump", "key": "Space", "zh": "跳 · 站起来", "pinyin": "tiào · zhàn qǐlái", "en": "Jump / stand up"},
+    {"id": "interact", "key": "KeyE", "zh": "交谈 · 进门", "pinyin": "jiāotán · jìn mén", "en": "Talk / enter"},
+    {"id": "collect", "key": "KeyF", "zh": "记住这个词", "pinyin": "jìzhù zhège cí", "en": "Learn this word"},
+    {"id": "view", "key": "KeyV", "zh": "视角", "pinyin": "shìjiǎo", "en": "Switch view"},
+    {"id": "labels", "key": "KeyH", "zh": "隐藏名字", "pinyin": "yǐncáng míngzi", "en": "Hide labels"},
+    {"id": "drop", "key": "KeyG", "zh": "放下", "pinyin": "fàngxià", "en": "Put down"},
+    {"id": "rotate", "key": "KeyR", "zh": "转向", "pinyin": "zhuǎnxiàng", "en": "Rotate"},
+    {"id": "cancel", "key": "KeyX", "zh": "取消放置", "pinyin": "qǔxiāo fàngzhì", "en": "Cancel placing"},
+    {"id": "journal", "key": "Digit1", "zh": "旅行手册", "pinyin": "lǚxíng shǒucè", "en": "Journal"},
+    {"id": "inventory", "key": "Digit2", "zh": "背包", "pinyin": "bēibāo", "en": "Inventory"},
+    {"id": "wordbank", "key": "Digit3", "zh": "生词本", "pinyin": "shēngcíběn", "en": "Word bank"},
+    {"id": "status", "key": "Digit4", "zh": "状态", "pinyin": "zhuàngtài", "en": "Condition"},
+    {"id": "settings", "key": "Digit5", "zh": "设置", "pinyin": "shèzhì", "en": "Settings"}
+  ],
+  "ui": {
+    "title": {"zh": "按键设置", "en": "KEY BINDINGS"},
+    "help": {"zh": "点一下按键，再按你想用的新键。按 Esc 取消。", "en": "Click a key, then press the new key you want. Esc cancels."},
+    "waiting": {"zh": "请按新键…", "en": "Press a new key…"},
+    "swapped": {"zh": "和「{zh}」互换了。", "en": "Swapped with {en}."},
+    "reserved": {"zh": "这个键不能用。", "en": "That key can't be used."},
+    "reset": {"zh": "恢复默认", "en": "Reset to defaults"}
+  }
+}

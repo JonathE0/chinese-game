@@ -1,0 +1,34 @@
+{
+  "note": "People in the word hall (src/world/visitors.js). They stroll, sit and walk between the hall and its side rooms, keeping each room within its limits [fewest, most]. roles are what the player calls them (the look name is the role key in objects.json); each person says one line, voiced as its audio id by scripts/generate-voice.py.",
+  "limits": {
+    "hall": [3, 5],
+    "reading": [1, 2],
+    "studyroom": [1, 2],
+    "listening": [1, 2],
+    "courtyard": [1, 2]
+  },
+  "roles": {
+    "student": {"zh": "学生", "pinyin": "xuésheng", "en": "student"},
+    "librarian": {"zh": "图书管理员", "pinyin": "túshū guǎnlǐyuán", "en": "librarian"},
+    "tourist": {"zh": "游客", "pinyin": "yóukè", "en": "tourist"}
+  },
+  "lines": {
+    "student-1": {"speaker": "student", "audio": "hall-student-1", "zh": "我在准备HSK考试，每天都来这儿复习。", "pinyin": "Wǒ zài zhǔnbèi HSK kǎoshì, měitiān dōu lái zhèr fùxí.", "en": "I'm preparing for the HSK exam; I come here to review every day."},
+    "student-2": {"speaker": "student", "audio": "hall-student-2", "zh": "听力室的耳机很好用。", "pinyin": "Tīnglìshì de ěrjī hěn hǎo yòng.", "en": "The headphones in the listening room are great."},
+    "student-3": {"speaker": "student", "audio": "hall-student-3", "zh": "你也是来学中文的吗？", "pinyin": "Nǐ yě shì lái xué Zhōngwén de ma?", "en": "Are you here to learn Chinese too?"},
+    "librarian-1": {"speaker": "narrator", "audio": "hall-librarian-1", "zh": "阅览室里请保持安静。", "pinyin": "Yuèlǎnshì lǐ qǐng bǎochí ānjìng.", "en": "Please keep quiet in the reading room."},
+    "librarian-2": {"speaker": "narrator", "audio": "hall-librarian-2", "zh": "这本书很适合初学者。", "pinyin": "Zhè běn shū hěn shìhé chūxuézhě.", "en": "This book is great for beginners."},
+    "visitor-1": {"speaker": "friend-a", "audio": "hall-visitor-1", "zh": "词语馆真大啊！", "pinyin": "Cíyǔguǎn zhēn dà a!", "en": "The word hall is really big!"}
+  },
+  "people": [
+    {"role": "student", "line": "student-1", "color": "#6f8fb0", "room": "hall"},
+    {"role": "student", "line": "student-3", "color": "#c9855f", "room": "hall"},
+    {"role": "librarian", "line": "librarian-2", "color": "#4f6b63", "room": "hall"},
+    {"role": "tourist", "line": "visitor-1", "color": "#d6b36a", "room": "hall"},
+    {"role": "librarian", "line": "librarian-1", "color": "#5a6780", "room": "reading"},
+    {"role": "student", "line": "student-3", "color": "#9a7fb0", "room": "reading"},
+    {"role": "student", "line": "student-1", "color": "#7fa58a", "room": "studyroom"},
+    {"role": "student", "line": "student-2", "color": "#b86f6f", "room": "listening"},
+    {"role": "tourist", "line": "visitor-1", "color": "#a39174", "room": "courtyard"}
+  ]
+}

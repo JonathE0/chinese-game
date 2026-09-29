@@ -1,4 +1,5 @@
 import social from '../content/lessons/npc-smalltalk.json' with {type:'json'};
+import assistants from '../content/assistants.json' with {type:'json'};
 import npcs from '../content/npcs.json' with {type:'json'};
 import {chooseSmalltalk} from '../core/social.js';
 import {evaluateNode,choicesFor} from '../core/conversation.js';
@@ -9,6 +10,7 @@ import catalog from '../content/catalog.json' with {type:'json'};
 import {friends,isFriend,levelOf,friendOf,friendLine,visit,heard,chatted,giveGift,giftables,pinned} from '../core/friends.js';
 import {CITY} from '../world/city.js';
 import {festivalGreeting} from './festivals.js';
+import {openPostcard} from './postcard.js';
 
 const people={...Object.fromEntries(npcs.map(n=>[n.id,n])),...Object.fromEntries(CITY.people.map(n=>[n.id,n])),...social.people};
 
@@ -97,4 +99,66 @@ export function openNpcGreeting(ctx,personId,onContinue=()=>{}){
   bindAudio(line);body.querySelector('#social-done').onclick=proceed;
  }
  showGreeting();
+}
+
+/** A shop assistant says hello, offers help, and says a line about the shop; then you browse the
+ * goods, write a postcard (where the shop sends them) or say goodbye. `browse` opens the shop's own
+ * panel, so a shop with nothing on sale gets no browse button; `sells`: it is a till, so the assistant
+ * says where to pay (a bank or library panel is not). `led`: the buy guide brought you here for
+ * something this shop sells, so the assistant asks what you are looking for. */
+export function openAssistant(ctx,member,roomId,{browse,sells,led}={}){
+ const {lines,ui}=assistants,settings=ctx.profile.settings;
+ const body=ctx.ui.open('dialogue',member.zh,[pinyinText(member.pinyin,member.zh),member.en].filter(Boolean).join(' · '));
+ const header=`<div class="dialogue-top"><div class="portrait" style="background:${esc(member.color??'#90a982')};color:#fff5da">${esc(member.zh.slice(0,1))}</div><div><b>${esc(member.zh)}</b></div></div>`;
+ const button=(id,label,cls)=>`<button class="${cls}" id="${id}">${esc(label.zh)} <small>${esc(label.en)}</small></button>`;
+ // Closing a panel stops the voice, so a parting line is spoken (and shown) once the panel is gone.
+ const leave=(key,then)=>{
+  ctx.ui.armClose(()=>{
+   then?.();
+   if(!key)return;
+   const line=lines[key];
+   ctx.ui.notice(settings.english===false?line.zh:`${line.zh} / ${line.en}`);
+   if(ctx.voice.available('assistant-'+key))ctx.voice.play('assistant-'+key);
+  });
+  ctx.ui.close();
+ };
+ // A page shows one or more lines and plays them one after the other.
+ function say(keys,buttons){
+  const clips=keys.map(key=>'assistant-'+key);
+  body.innerHTML=`${header}${keys.map(key=>languageLine(lines[key],settings,{className:'dialogue-line'})).join('')}<div class="audio-row"><button class="subtle" id="assistant-replay">${icon('sound',16)} 重听</button><button class="subtle" id="assistant-slow">慢速</button><small class="audio-source">${ctx.voice.sourceLabel(clips[0])}</small></div><div class="button-row">${buttons}</div>`;
+  body.querySelector('#assistant-replay').onclick=()=>playInTurn(ctx,clips);
+  body.querySelector('#assistant-slow').onclick=()=>playInTurn(ctx,clips,{slow:true});
+  playInTurn(ctx,clips);
+  body.querySelector('.button-row button')?.focus();   // keyboard players keep their place
+ }
+ // Hello and an offer of help first, then the shop's own line with the buttons.
+ const pages=[['greet',led?'find':'browse'],...(lines['shop-'+roomId]?[['shop-'+roomId]]:[])];
+ const writes=(assistants.postcard??[]).includes(roomId);
+ function step(i){
+  if(i<pages.length-1){
+   say(pages[i],`<button class="primary" id="assistant-next">${esc(social.ui.continue)} ${icon('arrow',16)}</button>`);
+   body.querySelector('#assistant-next').onclick=()=>step(i+1);
+   return;
+  }
+  say(pages[i],(browse?button('assistant-browse',ui.browse,'primary'):'')+(writes?button('assistant-postcard',friends.ui.write,'primary'):'')+button('assistant-bye',ui.bye,'secondary'));
+  body.querySelector('#assistant-browse')?.addEventListener('click',()=>leave(sells?'pay':null,browse));
+  body.querySelector('#assistant-postcard')?.addEventListener('click',()=>leave(null,()=>openPostcard(ctx)));
+  body.querySelector('#assistant-bye').onclick=()=>leave('bye');
+ }
+ step(0);
+}
+
+/** Play clips one after another. Another clip starting, the panel closing, or a clip that fails to
+ * load or play ends the run. */
+async function playInTurn(ctx,clips,options){
+ for(const clip of clips){
+  if(!ctx.voice.available(clip))continue;
+  // Take this clip's audio before awaiting, or a newer page's clip could be mistaken for it.
+  const started=ctx.voice.play(clip,options),audio=ctx.voice.foreground;
+  await started;
+  if(!audio)return;
+  // Still playing: wait for its end ('pause' fires then too), a stop, or a load or decode error.
+  if(!audio.paused)await new Promise(done=>{for(const event of ['pause','error'])audio.addEventListener(event,done,{once:true});});
+  if(ctx.voice.foreground!==audio)return;
+ }
 }

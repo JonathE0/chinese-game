@@ -23,7 +23,7 @@ test('林阿姨 loves a pot of tea, and a postcard from the 邮筒 is answered t
   await page.waitForTimeout(400);
 
   // A gift: 送礼物 lists what you carry; tea is one of her favourites.
-  await warp(page,-9,-0.6,0);
+  await warp(page,-4.8,-6.8,0);
   await expect(page.locator('#interact span')).toContainText('林阿姨');
   await page.keyboard.press('e');
   await expect(page.locator('#panel .friend-level')).toHaveText('认识');
@@ -53,7 +53,7 @@ test('林阿姨 loves a pot of tea, and a postcard from the 邮筒 is answered t
 
   // A day later 陈叔叔 answers it and pins it up on his shop.
   await page.evaluate(()=>{window.__qinghe.profile.dayIndex=1;});
-  await warp(page,9,-0.6,0);
+  await warp(page,4.8,-6.8,0);
   await expect(page.locator('#interact span')).toContainText('陈叔叔');
   await page.keyboard.press('e');
   // Walking off at the hello keeps his answer for next time, and the card is not up yet.

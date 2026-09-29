@@ -1,0 +1,219 @@
+{
+  "note": "Wall decor for each room, drawn by src/world/interior.js. `wainscot` is the colour of low panelling run round the walls (broken at doors). Each piece has a `kind` (scroll, painting, shelf, lattice, lamp), a `wall` (back, front, west, east) and `at`, its centre along that wall in room-local metres (x on the back and front walls, z on the west and east); `y` (centre height) and `tint` are optional. A piece that would overlap a door, window, sign, counter or fitting is left out when the room is built, so a fitting added later always wins its stretch of wall.",
+  "rooms": {
+    "home": {"wainscot": "#a98460"},
+    "study": {"wainscot": "#a98460", "pieces": [
+      {"kind": "lamp", "wall": "east", "at": -1.55},
+      {"kind": "scroll", "wall": "east", "at": 1.25}
+    ]},
+    "kitchen": {"pieces": [
+      {"kind": "shelf", "wall": "back", "at": 0},
+      {"kind": "lamp", "wall": "west", "at": -1.5},
+      {"kind": "shelf", "wall": "west", "at": 1.0},
+      {"kind": "painting", "wall": "east", "at": 0},
+      {"kind": "lamp", "wall": "east", "at": 2.0},
+      {"kind": "lamp", "wall": "front", "at": -2.4}
+    ]},
+    "hall": {"wainscot": "#7d5f44", "pieces": [
+      {"kind": "lamp", "wall": "back", "at": -2.75},
+      {"kind": "lamp", "wall": "back", "at": 2.75},
+      {"kind": "painting", "wall": "front", "at": -2.5},
+      {"kind": "painting", "wall": "front", "at": 2.7},
+      {"kind": "lamp", "wall": "front", "at": -6.0},
+      {"kind": "lamp", "wall": "front", "at": 5.7}
+    ]},
+    "reading": {"wainscot": "#7d5f44", "pieces": [
+      {"kind": "lamp", "wall": "back", "at": 1.5},
+      {"kind": "scroll", "wall": "west", "at": -0.1},
+      {"kind": "scroll", "wall": "east", "at": -0.1},
+      {"kind": "lamp", "wall": "west", "at": 3.1},
+      {"kind": "lamp", "wall": "east", "at": 3.1},
+      {"kind": "lamp", "wall": "front", "at": -2.0},
+      {"kind": "painting", "wall": "front", "at": 3.0}
+    ]},
+    "studyroom": {"pieces": [
+      {"kind": "painting", "wall": "back", "at": -1.2},
+      {"kind": "painting", "wall": "back", "at": 1.2},
+      {"kind": "lamp", "wall": "back", "at": -4.5},
+      {"kind": "lamp", "wall": "back", "at": 4.5},
+      {"kind": "lamp", "wall": "west", "at": -1.3},
+      {"kind": "lamp", "wall": "west", "at": 1.3},
+      {"kind": "lamp", "wall": "east", "at": -1.3},
+      {"kind": "lamp", "wall": "east", "at": 1.3},
+      {"kind": "painting", "wall": "front", "at": 4.4}
+    ]},
+    "listening": {"pieces": [
+      {"kind": "lamp", "wall": "back", "at": 0},
+      {"kind": "lamp", "wall": "west", "at": -2.75},
+      {"kind": "lamp", "wall": "east", "at": -2.95},
+      {"kind": "lamp", "wall": "east", "at": 0},
+      {"kind": "painting", "wall": "front", "at": -2.6},
+      {"kind": "painting", "wall": "front", "at": 2.6}
+    ]},
+    "courtyard": {"pieces": [
+      {"kind": "lattice", "wall": "west", "at": -2.0},
+      {"kind": "lattice", "wall": "west", "at": 2.0},
+      {"kind": "lattice", "wall": "east", "at": -2.0},
+      {"kind": "lattice", "wall": "east", "at": 2.0},
+      {"kind": "lattice", "wall": "back", "at": -3.6},
+      {"kind": "lattice", "wall": "back", "at": 3.6}
+    ]},
+    "lifestyle": {"pieces": [
+      {"kind": "painting", "wall": "back", "at": -1.8},
+      {"kind": "painting", "wall": "back", "at": 1.8},
+      {"kind": "shelf", "wall": "west", "at": -1.6},
+      {"kind": "painting", "wall": "east", "at": 1.5},
+      {"kind": "lamp", "wall": "front", "at": -2.2},
+      {"kind": "lamp", "wall": "front", "at": 2.2}
+    ]},
+    "cafe": {"wainscot": "#7a5a42", "pieces": [
+      {"kind": "painting", "wall": "back", "at": -1.2},
+      {"kind": "painting", "wall": "back", "at": 1.2},
+      {"kind": "shelf", "wall": "west", "at": 1.0},
+      {"kind": "lamp", "wall": "east", "at": 0.9},
+      {"kind": "painting", "wall": "east", "at": 2.0},
+      {"kind": "lamp", "wall": "front", "at": -2.3}
+    ]},
+    "supermarket": {"pieces": [
+      {"kind": "lamp", "wall": "west", "at": -2.5},
+      {"kind": "lamp", "wall": "west", "at": 0.5},
+      {"kind": "lamp", "wall": "east", "at": -1.5},
+      {"kind": "lamp", "wall": "east", "at": 1.5},
+      {"kind": "lamp", "wall": "front", "at": -4.7},
+      {"kind": "lamp", "wall": "front", "at": 5.0}
+    ]},
+    "lights": {"pieces": [
+      {"kind": "lamp", "wall": "back", "at": -1.8},
+      {"kind": "lamp", "wall": "back", "at": -0.6},
+      {"kind": "lamp", "wall": "back", "at": 0.6},
+      {"kind": "lamp", "wall": "back", "at": 1.8},
+      {"kind": "lamp", "wall": "west", "at": 0.8},
+      {"kind": "lamp", "wall": "west", "at": 2.2},
+      {"kind": "lamp", "wall": "east", "at": -0.4},
+      {"kind": "lamp", "wall": "east", "at": 1.0},
+      {"kind": "lamp", "wall": "east", "at": 2.2}
+    ]},
+    "restaurant": {"wainscot": "#7d4f3a", "pieces": [
+      {"kind": "scroll", "wall": "back", "at": -1.1},
+      {"kind": "scroll", "wall": "back", "at": 1.1},
+      {"kind": "painting", "wall": "west", "at": -0.1},
+      {"kind": "lamp", "wall": "west", "at": 3.0},
+      {"kind": "painting", "wall": "east", "at": 1.2},
+      {"kind": "lamp", "wall": "east", "at": 3.2},
+      {"kind": "scroll", "wall": "front", "at": -3.4},
+      {"kind": "scroll", "wall": "front", "at": 3.4}
+    ]},
+    "homeware": {"wainscot": "#c9b08a", "pieces": [
+      {"kind": "painting", "wall": "back", "at": -1.5},
+      {"kind": "painting", "wall": "back", "at": 1.5},
+      {"kind": "shelf", "wall": "west", "at": -0.5},
+      {"kind": "lamp", "wall": "east", "at": 2.3},
+      {"kind": "lamp", "wall": "front", "at": -3.5},
+      {"kind": "scroll", "wall": "front", "at": 2.0},
+      {"kind": "painting", "wall": "front", "at": 3.6}
+    ]},
+    "resale": {"pieces": [
+      {"kind": "painting", "wall": "back", "at": -1.0},
+      {"kind": "painting", "wall": "back", "at": 1.0},
+      {"kind": "painting", "wall": "west", "at": -1.5},
+      {"kind": "scroll", "wall": "west", "at": 1.4},
+      {"kind": "shelf", "wall": "east", "at": -1.55},
+      {"kind": "lamp", "wall": "east", "at": 2.0}
+    ]},
+    "bank": {"wainscot": "#9a968a", "pieces": [
+      {"kind": "painting", "wall": "back", "at": -1.3},
+      {"kind": "painting", "wall": "back", "at": 1.3},
+      {"kind": "lamp", "wall": "west", "at": -1.5},
+      {"kind": "painting", "wall": "west", "at": 0.5},
+      {"kind": "lamp", "wall": "west", "at": 2.5},
+      {"kind": "lamp", "wall": "east", "at": 2.5},
+      {"kind": "lamp", "wall": "front", "at": -2.5},
+      {"kind": "lamp", "wall": "front", "at": 4.0}
+    ]},
+    "bakery": {"wainscot": "#d9b98f", "pieces": [
+      {"kind": "shelf", "wall": "back", "at": -1.7},
+      {"kind": "shelf", "wall": "back", "at": 1.7},
+      {"kind": "painting", "wall": "west", "at": -0.5},
+      {"kind": "painting", "wall": "east", "at": -2.0},
+      {"kind": "lamp", "wall": "east", "at": 2.6},
+      {"kind": "painting", "wall": "front", "at": 2.9}
+    ]},
+    "library": {"wainscot": "#6f4a36", "pieces": [
+      {"kind": "scroll", "wall": "back", "at": -1.0},
+      {"kind": "scroll", "wall": "back", "at": 1.0},
+      {"kind": "painting", "wall": "west", "at": -1.5},
+      {"kind": "lamp", "wall": "west", "at": 0.5},
+      {"kind": "painting", "wall": "west", "at": 2.5},
+      {"kind": "painting", "wall": "east", "at": 0.5},
+      {"kind": "lamp", "wall": "east", "at": 2.0},
+      {"kind": "scroll", "wall": "east", "at": 3.2},
+      {"kind": "scroll", "wall": "front", "at": -2.3},
+      {"kind": "lamp", "wall": "front", "at": 1.9}
+    ]},
+    "teahouse": {"wainscot": "#5f4a3a", "pieces": [
+      {"kind": "scroll", "wall": "back", "at": -1.95},
+      {"kind": "scroll", "wall": "back", "at": 0},
+      {"kind": "scroll", "wall": "back", "at": 2.05},
+      {"kind": "lattice", "wall": "west", "at": -0.6},
+      {"kind": "lattice", "wall": "east", "at": 1.4},
+      {"kind": "painting", "wall": "front", "at": -2.9},
+      {"kind": "scroll", "wall": "front", "at": 3.25}
+    ]},
+    "post-office": {"wainscot": "#6f8a78", "pieces": [
+      {"kind": "painting", "wall": "back", "at": 0},
+      {"kind": "lamp", "wall": "back", "at": -1.4},
+      {"kind": "lamp", "wall": "back", "at": 1.4},
+      {"kind": "painting", "wall": "west", "at": -0.05},
+      {"kind": "painting", "wall": "east", "at": -2.45},
+      {"kind": "lamp", "wall": "front", "at": -2.5},
+      {"kind": "lamp", "wall": "front", "at": 2.5}
+    ]},
+    "pharmacy": {"pieces": [
+      {"kind": "painting", "wall": "back", "at": 0.1},
+      {"kind": "lamp", "wall": "west", "at": -2.75},
+      {"kind": "painting", "wall": "east", "at": -2.6},
+      {"kind": "lamp", "wall": "front", "at": -2.3},
+      {"kind": "lamp", "wall": "front", "at": 2.3}
+    ]},
+    "guesthouse": {"wainscot": "#6f5238", "pieces": [
+      {"kind": "scroll", "wall": "back", "at": -0.8},
+      {"kind": "scroll", "wall": "back", "at": 0.9},
+      {"kind": "lamp", "wall": "back", "at": -3.8},
+      {"kind": "lamp", "wall": "back", "at": 3.5},
+      {"kind": "painting", "wall": "west", "at": -2.4},
+      {"kind": "lattice", "wall": "west", "at": 1.6},
+      {"kind": "lattice", "wall": "east", "at": 2.0},
+      {"kind": "scroll", "wall": "front", "at": 2.6}
+    ]},
+    "clothes-shop": {"pieces": [
+      {"kind": "painting", "wall": "back", "at": 0},
+      {"kind": "painting", "wall": "back", "at": 2.5},
+      {"kind": "lamp", "wall": "back", "at": 4.0},
+      {"kind": "lamp", "wall": "west", "at": -2.2},
+      {"kind": "lamp", "wall": "west", "at": 2.0},
+      {"kind": "lamp", "wall": "east", "at": -1.35},
+      {"kind": "painting", "wall": "east", "at": 2.6},
+      {"kind": "lamp", "wall": "front", "at": 2.9}
+    ]},
+    "hardware": {"pieces": [
+      {"kind": "lamp", "wall": "back", "at": 1.0},
+      {"kind": "lamp", "wall": "back", "at": 3.5},
+      {"kind": "lamp", "wall": "west", "at": 0},
+      {"kind": "lamp", "wall": "west", "at": 3.0},
+      {"kind": "lamp", "wall": "west", "at": 6.0},
+      {"kind": "lamp", "wall": "east", "at": 0},
+      {"kind": "lamp", "wall": "east", "at": 5.5},
+      {"kind": "lamp", "wall": "front", "at": -7.0},
+      {"kind": "lamp", "wall": "front", "at": -5.0},
+      {"kind": "lamp", "wall": "front", "at": 4.0},
+      {"kind": "lamp", "wall": "front", "at": 7.0}
+    ]},
+    "metro-platform": {"pieces": [
+      {"kind": "lamp", "wall": "back", "at": -3.6},
+      {"kind": "lamp", "wall": "west", "at": -2.5},
+      {"kind": "lamp", "wall": "east", "at": 1.6},
+      {"kind": "lamp", "wall": "front", "at": -3.0},
+      {"kind": "lamp", "wall": "front", "at": 3.0}
+    ]}
+  }
+}

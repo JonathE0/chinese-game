@@ -317,6 +317,240 @@
    "bytes": 13824,
    "hash": "4453f363a16d9c88"
   },
+  "assistant-browse": {
+   "src": "/audio/clips/assistant-browse.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "随便看看，有问题就叫我。",
+   "bytes": 16416,
+   "hash": "96219a51a0c519f2"
+  },
+  "assistant-bye": {
+   "src": "/audio/clips/assistant-bye.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "谢谢光临，欢迎再来！",
+   "bytes": 14256,
+   "hash": "981180faaf1efbfc"
+  },
+  "assistant-find": {
+   "src": "/audio/clips/assistant-find.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "你要找什么？我带你去。",
+   "bytes": 16848,
+   "hash": "8b5ff695619a3fe6"
+  },
+  "assistant-greet": {
+   "src": "/audio/clips/assistant-greet.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "欢迎光临！需要帮忙吗？",
+   "bytes": 17856,
+   "hash": "9424887f32e5abbe"
+  },
+  "assistant-pay": {
+   "src": "/audio/clips/assistant-pay.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "在这边付钱就可以了。",
+   "bytes": 12816,
+   "hash": "79bab1fb5ce2743b"
+  },
+  "assistant-shop-bakery": {
+   "src": "/audio/clips/assistant-shop-bakery.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "面包刚出炉，还是热的。",
+   "bytes": 14976,
+   "hash": "9694bec8380bb634"
+  },
+  "assistant-shop-bank": {
+   "src": "/audio/clips/assistant-shop-bank.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "请先拿号，稍等一下。",
+   "bytes": 14400,
+   "hash": "e3d7ae573fc0c71d"
+  },
+  "assistant-shop-cafe": {
+   "src": "/audio/clips/assistant-shop-cafe.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "我们的咖啡是现磨的。",
+   "bytes": 12960,
+   "hash": "e89cb475c46e2a40"
+  },
+  "assistant-shop-clothes-shop": {
+   "src": "/audio/clips/assistant-shop-clothes-shop.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "这件衣服你可以试试。",
+   "bytes": 13968,
+   "hash": "f33d068eb4b270fb"
+  },
+  "assistant-shop-hardware": {
+   "src": "/audio/clips/assistant-shop-hardware.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "你要修什么？我帮你找工具。",
+   "bytes": 18288,
+   "hash": "129693a5b579f2ee"
+  },
+  "assistant-shop-homeware": {
+   "src": "/audio/clips/assistant-shop-homeware.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "布置房间，从一块地毯开始吧。",
+   "bytes": 17424,
+   "hash": "ad0136f1dc5770c6"
+  },
+  "assistant-shop-library": {
+   "src": "/audio/clips/assistant-shop-library.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "新书在门口这边。",
+   "bytes": 12384,
+   "hash": "dfb92192794a2780"
+  },
+  "assistant-shop-lifestyle": {
+   "src": "/audio/clips/assistant-shop-lifestyle.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "买家具可以先看看尺寸。",
+   "bytes": 15696,
+   "hash": "0af99ab36ce31f30"
+  },
+  "assistant-shop-lights": {
+   "src": "/audio/clips/assistant-shop-lights.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "这盏灯晚上特别好看。",
+   "bytes": 14544,
+   "hash": "908a3285adf142ea"
+  },
+  "assistant-shop-pharmacy": {
+   "src": "/audio/clips/assistant-shop-pharmacy.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "哪里不舒服？我帮你看看。",
+   "bytes": 18432,
+   "hash": "6b4d955fbbc27411"
+  },
+  "assistant-shop-post-office": {
+   "src": "/audio/clips/assistant-shop-post-office.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "寄信请在这里买邮票。",
+   "bytes": 13824,
+   "hash": "493b85a763052525"
+  },
+  "assistant-shop-supermarket": {
+   "src": "/audio/clips/assistant-shop-supermarket.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "今天的水果很新鲜。",
+   "bytes": 12672,
+   "hash": "63541bbb49cf1336"
+  },
+  "assistant-shop-teahouse": {
+   "src": "/audio/clips/assistant-shop-teahouse.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "来一壶茶吧，慢慢喝。",
+   "bytes": 14400,
+   "hash": "4ba96c01c855bae6"
+  },
   "chat-apple-question": {
    "src": "/audio/clips/chat-apple-question.mp3",
    "approved": true,
@@ -1681,6 +1915,84 @@
    "text": "我们可以互相学习！",
    "bytes": 13824,
    "hash": "8bfdf1e0a7688761"
+  },
+  "hall-librarian-1": {
+   "src": "/audio/clips/hall-librarian-1.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-YunyangNeural",
+   "speaker": "narrator",
+   "kind": "dialogue",
+   "text": "阅览室里请保持安静。",
+   "bytes": 15696,
+   "hash": "37d0b9e21ba803fc"
+  },
+  "hall-librarian-2": {
+   "src": "/audio/clips/hall-librarian-2.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-YunyangNeural",
+   "speaker": "narrator",
+   "kind": "dialogue",
+   "text": "这本书很适合初学者。",
+   "bytes": 15264,
+   "hash": "1da377b6ac40a149"
+  },
+  "hall-student-1": {
+   "src": "/audio/clips/hall-student-1.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "我在准备HSK考试，每天都来这儿复习。",
+   "bytes": 24336,
+   "hash": "da348d33ca1f9cc3"
+  },
+  "hall-student-2": {
+   "src": "/audio/clips/hall-student-2.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "听力室的耳机很好用。",
+   "bytes": 13392,
+   "hash": "cbdc2533ce167b1f"
+  },
+  "hall-student-3": {
+   "src": "/audio/clips/hall-student-3.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoxiaoNeural",
+   "speaker": "student",
+   "kind": "dialogue",
+   "text": "你也是来学中文的吗？",
+   "bytes": 11952,
+   "hash": "396c13548e226c84"
+  },
+  "hall-visitor-1": {
+   "src": "/audio/clips/hall-visitor-1.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-YunxiNeural",
+   "speaker": "friend-a",
+   "kind": "dialogue",
+   "text": "词语馆真大啊！",
+   "bytes": 13536,
+   "hash": "38e8f3016fbe0987"
   },
   "hello-chen": {
    "src": "/audio/clips/hello-chen.mp3",
@@ -32245,6 +32557,19 @@
    "bytes": 11664,
    "hash": "f1eb10d702ee215f"
   },
+  "obj-birdcage": {
+   "src": "/audio/clips/obj-birdcage.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "鸟笼",
+   "bytes": 11232,
+   "hash": "5dbf82e96fde0163"
+  },
   "obj-blanket": {
    "src": "/audio/clips/obj-blanket.mp3",
    "approved": true,
@@ -32257,6 +32582,19 @@
    "text": "毯子",
    "bytes": 11232,
    "hash": "838064574602e222"
+  },
+  "obj-bonsai": {
+   "src": "/audio/clips/obj-bonsai.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "盆景",
+   "bytes": 11232,
+   "hash": "ca14526ab16da4a2"
   },
   "obj-book": {
    "src": "/audio/clips/obj-book.mp3",
@@ -32817,6 +33155,19 @@
    "bytes": 10512,
    "hash": "f693eac04fe12e6c"
   },
+  "obj-folding-screen": {
+   "src": "/audio/clips/obj-folding-screen.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "屏风",
+   "bytes": 11232,
+   "hash": "e37e6b9306bac47b"
+  },
   "obj-fountain": {
    "src": "/audio/clips/obj-fountain.mp3",
    "approved": true,
@@ -32881,6 +33232,19 @@
    "text": "大蒜",
    "bytes": 11232,
    "hash": "93769ec7c6e50041"
+  },
+  "obj-ginkgo": {
+   "src": "/audio/clips/obj-ginkgo.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "银杏树",
+   "bytes": 12096,
+   "hash": "0c0741d9493f6041"
   },
   "obj-goods": {
    "src": "/audio/clips/obj-goods.mp3",
@@ -33103,6 +33467,19 @@
    "bytes": 9072,
    "hash": "4c37510603c6644e"
   },
+  "obj-landscape-painting": {
+   "src": "/audio/clips/obj-landscape-painting.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "山水画",
+   "bytes": 12816,
+   "hash": "a5aa4ab5d37a4443"
+  },
   "obj-lantern": {
    "src": "/audio/clips/obj-lantern.mp3",
    "approved": true,
@@ -33141,6 +33518,19 @@
    "text": "花窗",
    "bytes": 11232,
    "hash": "6973d0bc5a6fb4c9"
+  },
+  "obj-librarian": {
+   "src": "/audio/clips/obj-librarian.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "图书管理员",
+   "bytes": 14832,
+   "hash": "e0a3ec8a80935b18"
   },
   "obj-lifestyle": {
    "src": "/audio/clips/obj-lifestyle.mp3",
@@ -33363,6 +33753,19 @@
    "bytes": 11664,
    "hash": "5cd4599a6114ed4e"
   },
+  "obj-osmanthus": {
+   "src": "/audio/clips/obj-osmanthus.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "桂花树",
+   "bytes": 12096,
+   "hash": "365d3e6fbf45a679"
+  },
   "obj-oven": {
    "src": "/audio/clips/obj-oven.mp3",
    "approved": true,
@@ -33388,6 +33791,19 @@
    "text": "牌坊",
    "bytes": 11232,
    "hash": "e7c0b561be18f274"
+  },
+  "obj-painting": {
+   "src": "/audio/clips/obj-painting.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "画",
+   "bytes": 11232,
+   "hash": "237a7ea157259441"
   },
   "obj-paper": {
    "src": "/audio/clips/obj-paper.mp3",
@@ -33818,6 +34234,19 @@
    "bytes": 11664,
    "hash": "78955bb5ef7acb1e"
   },
+  "obj-scroll-painting": {
+   "src": "/audio/clips/obj-scroll-painting.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "字画",
+   "bytes": 11232,
+   "hash": "6b5b7a0dfea215c2"
+  },
   "obj-shelf": {
    "src": "/audio/clips/obj-shelf.mp3",
    "approved": true,
@@ -34039,6 +34468,19 @@
    "bytes": 10080,
    "hash": "d80b93f6f3f2293c"
   },
+  "obj-student": {
+   "src": "/audio/clips/obj-student.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "学生",
+   "bytes": 10944,
+   "hash": "a0ccad196b74fdfe"
+  },
   "obj-study": {
    "src": "/audio/clips/obj-study.mp3",
    "approved": true,
@@ -34104,6 +34546,19 @@
    "bytes": 12528,
    "hash": "883f73f191267cbc"
   },
+  "obj-tea-table": {
+   "src": "/audio/clips/obj-tea-table.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "茶几",
+   "bytes": 11376,
+   "hash": "efcb375037386f4b"
+  },
   "obj-teahouse": {
    "src": "/audio/clips/obj-teahouse.mp3",
    "approved": true,
@@ -34168,6 +34623,19 @@
    "text": "收银机",
    "bytes": 12384,
    "hash": "8b8af60caff1d229"
+  },
+  "obj-tourist": {
+   "src": "/audio/clips/obj-tourist.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "游客",
+   "bytes": 11376,
+   "hash": "97e8f10eaa9ff9a6"
   },
   "obj-tower": {
    "src": "/audio/clips/obj-tower.mp3",
@@ -34246,6 +34714,19 @@
    "text": "伞",
    "bytes": 10944,
    "hash": "416a4bddb3e6b6a3"
+  },
+  "obj-vase": {
+   "src": "/audio/clips/obj-vase.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "花瓶",
+   "bytes": 11808,
+   "hash": "5bf96d660b8bbe56"
   },
   "obj-vegetable": {
    "src": "/audio/clips/obj-vegetable.mp3",
@@ -34390,6 +34871,19 @@
    "bytes": 11232,
    "hash": "67e4bb09df79c485"
   },
+  "obj-willow": {
+   "src": "/audio/clips/obj-willow.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "object",
+   "text": "柳树",
+   "bytes": 11232,
+   "hash": "d935e5c26e4c5d86"
+  },
   "obj-window": {
    "src": "/audio/clips/obj-window.mp3",
    "approved": true,
@@ -34467,6 +34961,32 @@
    "text": "包子。热乎乎的肉包子，刚蒸好的。",
    "bytes": 29088,
    "hash": "2fb3990d483ade2c"
+  },
+  "shop-birdcage": {
+   "src": "/audio/clips/shop-birdcage.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-YunjianNeural",
+   "speaker": "chen",
+   "kind": "shop",
+   "text": "鸟笼。有了鸟笼，好像能听见鸟叫。",
+   "bytes": 28224,
+   "hash": "4f3161ab0bd1daf0"
+  },
+  "shop-bonsai": {
+   "src": "/audio/clips/shop-bonsai.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-YunjianNeural",
+   "speaker": "chen",
+   "kind": "shop",
+   "text": "盆景。小小一盆，却像一棵老树。",
+   "bytes": 28224,
+   "hash": "816b76f2620d54e0"
   },
   "shop-bookshelf": {
    "src": "/audio/clips/shop-bookshelf.mp3",
@@ -34728,6 +35248,19 @@
    "bytes": 21168,
    "hash": "06643c7820a48551"
   },
+  "shop-folding-screen": {
+   "src": "/audio/clips/shop-folding-screen.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-YunjianNeural",
+   "speaker": "chen",
+   "kind": "shop",
+   "text": "屏风。把房间隔开，多一个安静的角落。",
+   "bytes": 29952,
+   "hash": "e23ce071788648d8"
+  },
   "shop-fried-rice": {
    "src": "/audio/clips/shop-fried-rice.mp3",
    "approved": true,
@@ -34883,6 +35416,19 @@
    "text": "烤串。炭火烤的，孜然味很香。",
    "bytes": 28656,
    "hash": "97e0d0f4f9a9e001"
+  },
+  "shop-landscape-painting": {
+   "src": "/audio/clips/shop-landscape-painting.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-YunjianNeural",
+   "speaker": "chen",
+   "kind": "shop",
+   "text": "山水画。不出门，也能看山看水。",
+   "bytes": 28512,
+   "hash": "2ed871f432fb61b8"
   },
   "shop-linen-shirt": {
    "src": "/audio/clips/shop-linen-shirt.mp3",
@@ -35079,6 +35625,19 @@
    "bytes": 21888,
    "hash": "8ce75dc701ae3b3a"
   },
+  "shop-scroll-painting": {
+   "src": "/audio/clips/shop-scroll-painting.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-YunjianNeural",
+   "speaker": "chen",
+   "kind": "shop",
+   "text": "字画。挂一幅字，房间多了一点书香。",
+   "bytes": 28368,
+   "hash": "06d0f8d74f656460"
+  },
   "shop-soy-milk": {
    "src": "/audio/clips/shop-soy-milk.mp3",
    "approved": true,
@@ -35196,6 +35755,19 @@
    "bytes": 26784,
    "hash": "965931881d1d613a"
   },
+  "shop-tea-table": {
+   "src": "/audio/clips/shop-tea-table.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-YunjianNeural",
+   "speaker": "chen",
+   "kind": "shop",
+   "text": "茶几。放上茶具，客人来了就能喝茶。",
+   "bytes": 28512,
+   "hash": "06a3c071e1156405"
+  },
   "shop-timber": {
    "src": "/audio/clips/shop-timber.mp3",
    "approved": true,
@@ -35234,6 +35806,19 @@
    "text": "旅行帽。一顶轻便的帽子。",
    "bytes": 22608,
    "hash": "7388775ea0e820df"
+  },
+  "shop-vase": {
+   "src": "/audio/clips/shop-vase.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-YunjianNeural",
+   "speaker": "chen",
+   "kind": "shop",
+   "text": "花瓶。插几枝花，放在桌上。",
+   "bytes": 25200,
+   "hash": "fe9df5e1df0dbb07"
   },
   "shop-vegetable": {
    "src": "/audio/clips/shop-vegetable.mp3",
@@ -36002,6 +36587,19 @@
    "bytes": 11232,
    "hash": "9a1a6c565b92a65c"
   },
+  "sign-metro-entrance-a": {
+   "src": "/audio/clips/sign-metro-entrance-a.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "sign",
+   "text": "A出入口",
+   "bytes": 13824,
+   "hash": "69e886077b5b9d5d"
+  },
   "sign-metro-line-1": {
    "src": "/audio/clips/sign-metro-line-1.mp3",
    "approved": true,
@@ -36027,6 +36625,19 @@
    "text": "地铁站台",
    "bytes": 13536,
    "hash": "3a07815566e679c1"
+  },
+  "sign-metro-qinghe-station": {
+   "src": "/audio/clips/sign-metro-qinghe-station.mp3",
+   "approved": true,
+   "source": "generated",
+   "review": "unreviewed",
+   "provider": "edge-tts",
+   "voice": "zh-CN-XiaoyiNeural",
+   "speaker": "teacher",
+   "kind": "sign",
+   "text": "青禾站",
+   "bytes": 12384,
+   "hash": "3595536f07850767"
   },
   "sign-motto-analects": {
    "src": "/audio/clips/sign-motto-analects.mp3",

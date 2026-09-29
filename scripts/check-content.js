@@ -151,6 +151,10 @@ for(const [id,room] of Object.entries(rooms)){
   for(const fitting of room.fittings??[]){
     require(modelKinds.has(fitting.kind),`room ${id} uses unknown fitting ${fitting.kind}`);
     if(fitting.action)require(!!fitting.label,`room ${id} fitting ${fitting.kind} needs a label for its action`);
+    // A counter opens a shop that sells something, or one of the panels src/main.js knows.
+    const [, opens,target]=/^(shop|panel):(.+)$/.exec(fitting.action??'')??[];
+    if(opens==='shop')require(shopIds.has(target),`room ${id} fitting ${fitting.kind} sells for unknown shop ${target}`);
+    if(opens==='panel')require(['bank','resale','library'].includes(target),`room ${id} fitting ${fitting.kind} opens unknown panel ${target}`);
     // A fitting may stand on the upper floor (`y`), and nowhere else off the ground.
     require(fitting.y===undefined||fitting.y===room.upper?.y,`room ${id} fitting ${fitting.kind} floats at y ${fitting.y}`);
     placed.push({name:`${fitting.kind} at ${fitting.x},${fitting.z}`,floor:fitting.y??0,...footprintOf(fitting)});
@@ -274,6 +278,15 @@ const friendsData=await read('friends.json');
 for(const [npc,person] of Object.entries(friendsData.people)){
   featureClips.push(...Object.keys({...friendsData.lines[npc],...friendsData.shared}).map(k=>`friend-${npc}-${k}`));
   for(const id of [...person.liked,person.present.item].filter(Boolean))require(catalog.some(i=>i.id===id),`friends ${npc}: unknown item ${id}`);
+}
+// Shop assistants' lines are assistant-<key>, in one cast voice.
+const assistantsData=await read('assistants.json');
+featureClips.push(...Object.keys(assistantsData.lines).map(k=>'assistant-'+k));
+require(!!voices.cast[assistantsData.speaker],'No voice cast for shop assistant speaker '+assistantsData.speaker);
+// People in the word hall speak their own clips (hall-<key>), each in their speaker's cast voice.
+for(const [key,line] of Object.entries((await read('hall-visitors.json')).lines)){
+  featureClips.push(line.audio);
+  require(!!voices.cast[line.speaker],`word hall line ${key}: no voice cast for ${line.speaker}`);
 }
 const lessonAudioSources=lessons.flatMap(l=>[...l.nodes,...Object.values(l.extraLines??{})]);
 const needed=[...words,...ambient,...lessonAudioSources,...catalog].map(x=>x.audio).filter(Boolean)

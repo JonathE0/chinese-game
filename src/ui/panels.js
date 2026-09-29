@@ -1,4 +1,5 @@
 import catalog from '../content/catalog.json' with {type:'json'};
+import {KEY_ACTIONS,KEY_UI,keyLabel,rebind} from '../core/keys.js';
 import ambient from '../content/ambient.json' with {type:'json'};
 import curriculum from '../content/curriculum.json' with {type:'json'};
 import objectNames from '../content/objects.json' with {type:'json'};
@@ -43,7 +44,7 @@ export function openJournal(ctx){
  <div class="discovery">
   <div class="discovery-count"><b>${ctx.profile.discovered.length}</b><span>/ ${Object.keys(objectNames.objects).length}</span></div>
   <div><div class="gate-bar"><i style="width:${Math.round(ctx.profile.discovered.length/Object.keys(objectNames.objects).length*100)}%"></i></div>
-  <p class="microcopy">看着城里的东西，按 <kbd>F</kbd> 记住它的名字。<br>Look at anything in the city and press F to learn its name.</p></div>
+  <p class="microcopy">看着城里的东西，按 <kbd>${keyLabel('collect')}</kbd> 记住它的名字。<br>Look at anything in the city and press ${keyLabel('collect')} to learn its name.</p></div>
  </div>
  <div class="discovered-list">${ctx.profile.discovered.map(id=>objectNames.objects[id]).filter(Boolean).map(o=>`<span class="discovered-chip">${esc(o.zh)}${pinyinHtml(o.pinyin,o.zh)?`<small>${pinyinHtml(o.pinyin,o.zh)}</small>`:''}</span>`).join('')||'<p class="microcopy">还没有认出任何东西。</p>'}</div>
  <button class="secondary wide" id="journal-collection">图鉴 <small>COLLECTION</small></button>
@@ -83,7 +84,7 @@ import {mountPlaylist} from './music-playlist.js';
 
 export function openSettings(ctx){
  const body=ctx.ui.open('settings','按你的节奏','设置 · SETTINGS');const s=ctx.profile.settings;
- body.innerHTML=`<h3>帮助内容 <small>WHEN YOU TAP ?</small></h3><p class="microcopy">默认只显示汉字。点击 ? 时，显示你选择的帮助。<br>Chinese stays visible. Choose what the Help button reveals.</p><label class="setting-row"><span>拼音 <small>Pinyin</small></span><select id="setting-pinyin">${[['always','总是显示','Always'],['known','学会的就不显示','Hide for words I know'],['never','不显示','Never']].map(([v,zh,en])=>`<option value="${v}" ${pinyinMode(s)===v?'selected':''}>${zh} · ${en}</option>`).join('')}</select></label><label class="setting-row"><span>声调颜色 <small>Tone colours</small></span><input type="checkbox" id="setting-tones" ${s.toneColors?'checked':''}></label><label class="setting-row"><span>英文 <small>English</small></span><input type="checkbox" id="setting-english" ${s.english?'checked':''}></label><button class="secondary wide replay-tutorial" id="replay-tutorial">${esc(TUTORIAL_UI.replay.zh)} <small>${esc(TUTORIAL_UI.replay.en)}</small></button><h3 class="section-title">视角 <small>LOOKING AROUND</small></h3><p class="microcopy">鼠标转身的快慢。太快了会觉得画面在跳。<br>How far the view turns per unit of mouse movement. Too high feels like the view is jumping.</p><label class="setting-row"><span>鼠标灵敏度 <small>Mouse sensitivity</small></span><input type="range" id="look-sensitivity" min="0.04" max="0.3" step="0.01" value="${s.sensitivity??0.12}"></label><h3 class="section-title">声音 <small>AUDIO</small></h3><label class="setting-row"><span>对话音量 <small>Dialogue</small></span><input type="range" id="dialogue-volume" min="0" max="1" step="0.05" value="${s.dialogueVolume}"></label><label class="setting-row"><span>环境音量 <small>Ambience</small></span><input type="range" id="ambient-volume" min="0" max="1" step="0.05" value="${s.ambientVolume}"></label><label class="setting-row"><span>背景音乐 <small>Music</small></span><input type="range" id="music-volume" min="0" max="1" step="0.05" value="${s.musicVolume}"></label><div class="gentle-note">NPC voices are AI generated Mandarin (edge-tts), not native-speaker recordings, and have not passed a listening review. Background music is synthesised in your browser. Microphone transcription depends on your browser and may use its online speech service.</div><h3 class="section-title">旅行存档 <small>YOUR PROGRESS</small></h3><p class="microcopy">Saved in this browser. Export a backup to keep your progress.</p><div class="button-row"><button class="secondary" id="export-save">导出存档</button><button class="secondary" id="import-save">导入存档</button><input type="file" id="save-file" accept=".json,application/json" hidden></div><div id="import-preview"></div><p class="microcopy">每个网址都有自己的存档：localhost 和 127.0.0.1 不共用。<br>Each web address keeps its own save: localhost and 127.0.0.1 don't share one.</p><h3 class="section-title">电脑上的存档 <small>SAVE TO YOUR COMPUTER</small></h3><div id="folder-sync"></div>${ctx.cloud&&!ctx.readOnly?'<h3 class="section-title">云端存档 <small>CLOUD SAVE</small></h3><div id="cloud-sync"></div>':''}<h3 class="section-title">自动备份 <small>AUTOMATIC BACKUPS</small></h3><div id="backup-list"></div><h3 class="section-title">创作工具 <small>MAKE IT YOURS</small></h3><button class="secondary wide" id="edit-world">编辑小镇布局 ${icon('map')}</button><p class="microcopy">Preview NPC and building positions, then export world.json. Lesson text, accepted answers and prices are separate editable files.</p>`;
+ body.innerHTML=`<h3>帮助内容 <small>WHEN YOU TAP ?</small></h3><p class="microcopy">默认只显示汉字。点击 ? 时，显示你选择的帮助。<br>Chinese stays visible. Choose what the Help button reveals.</p><label class="setting-row"><span>拼音 <small>Pinyin</small></span><select id="setting-pinyin">${[['always','总是显示','Always'],['known','学会的就不显示','Hide for words I know'],['never','不显示','Never']].map(([v,zh,en])=>`<option value="${v}" ${pinyinMode(s)===v?'selected':''}>${zh} · ${en}</option>`).join('')}</select></label><label class="setting-row"><span>声调颜色 <small>Tone colours</small></span><input type="checkbox" id="setting-tones" ${s.toneColors?'checked':''}></label><label class="setting-row"><span>英文 <small>English</small></span><input type="checkbox" id="setting-english" ${s.english?'checked':''}></label><button class="secondary wide replay-tutorial" id="replay-tutorial">${esc(TUTORIAL_UI.replay.zh)} <small>${esc(TUTORIAL_UI.replay.en)}</small></button><h3 class="section-title">视角 <small>LOOKING AROUND</small></h3><p class="microcopy">鼠标转身的快慢。太快了会觉得画面在跳。<br>How far the view turns per unit of mouse movement. Too high feels like the view is jumping.</p><label class="setting-row"><span>鼠标灵敏度 <small>Mouse sensitivity</small></span><input type="range" id="look-sensitivity" min="0.04" max="0.3" step="0.01" value="${s.sensitivity??0.12}"></label><h3 class="section-title">${esc(KEY_UI.title.zh)} <small>${esc(KEY_UI.title.en)}</small></h3><p class="microcopy">${esc(KEY_UI.help.zh)}<br>${esc(KEY_UI.help.en)}</p><div id="key-bindings">${KEY_ACTIONS.map(a=>`<div class="setting-row"><span>${esc(a.zh)} <small>${esc(a.en)}</small></span><button class="secondary key-bind" data-bind="${a.id}"></button></div>`).join('')}<p class="microcopy key-note" aria-live="polite"></p><button class="secondary wide" id="reset-keys">${esc(KEY_UI.reset.zh)} <small>${esc(KEY_UI.reset.en)}</small></button></div><h3 class="section-title">声音 <small>AUDIO</small></h3><label class="setting-row"><span>对话音量 <small>Dialogue</small></span><input type="range" id="dialogue-volume" min="0" max="1" step="0.05" value="${s.dialogueVolume}"></label><label class="setting-row"><span>环境音量 <small>Ambience</small></span><input type="range" id="ambient-volume" min="0" max="1" step="0.05" value="${s.ambientVolume}"></label><label class="setting-row"><span>背景音乐 <small>Music</small></span><input type="range" id="music-volume" min="0" max="1" step="0.05" value="${s.musicVolume}"></label><div class="gentle-note">NPC voices are AI generated Mandarin (edge-tts), not native-speaker recordings, and have not passed a listening review. Background music is synthesised in your browser. Microphone transcription depends on your browser and may use its online speech service.</div><h3 class="section-title">旅行存档 <small>YOUR PROGRESS</small></h3><p class="microcopy">Saved in this browser. Export a backup to keep your progress.</p><div class="button-row"><button class="secondary" id="export-save">导出存档</button><button class="secondary" id="import-save">导入存档</button><input type="file" id="save-file" accept=".json,application/json" hidden></div><div id="import-preview"></div><p class="microcopy">每个网址都有自己的存档：localhost 和 127.0.0.1 不共用。<br>Each web address keeps its own save: localhost and 127.0.0.1 don't share one.</p><h3 class="section-title">电脑上的存档 <small>SAVE TO YOUR COMPUTER</small></h3><div id="folder-sync"></div>${ctx.cloud&&!ctx.readOnly?'<h3 class="section-title">云端存档 <small>CLOUD SAVE</small></h3><div id="cloud-sync"></div>':''}<h3 class="section-title">自动备份 <small>AUTOMATIC BACKUPS</small></h3><div id="backup-list"></div><h3 class="section-title">创作工具 <small>MAKE IT YOURS</small></h3><button class="secondary wide" id="edit-world">编辑小镇布局 ${icon('map')}</button><p class="microcopy">Preview NPC and building positions, then export world.json. Lesson text, accepted answers and prices are separate editable files.</p>`;
  ctx.ui.armClose(mountPlaylist(body,ctx.music));
  body.querySelector('#setting-pinyin').onchange=e=>{s.pinyin=e.target.value;ctx.save();};body.querySelector('#setting-tones').onchange=e=>{s.toneColors=e.target.checked;ctx.save();};body.querySelector('#setting-english').onchange=e=>{s.english=e.target.checked;ctx.save();};
  for(const [id,key]of [['dialogue-volume','dialogueVolume'],['ambient-volume','ambientVolume'],['music-volume','musicVolume']])body.querySelector('#'+id).oninput=e=>{s[key]=Number(e.target.value);ctx.voice.settings=s;ctx.music.settings=s;ctx.music.setVolume();ctx.save();};
@@ -99,9 +100,40 @@ export function openSettings(ctx){
  renderFolder(ctx,body.querySelector('#folder-sync'));
  if(body.querySelector('#cloud-sync'))renderCloud(ctx,body.querySelector('#cloud-sync'));
  renderBackups(ctx,body.querySelector('#backup-list'));
+ mountKeys(ctx,body.querySelector('#key-bindings'));
+}
+/** 按键设置: click a key's button, then press the new key. Esc cancels (and must not close the
+ *  panel), Tab cancels and moves on, a key another action has swaps the two. */
+function mountKeys(ctx,el){
+ const note=el.querySelector('.key-note'),buttons=[...el.querySelectorAll('[data-bind]')];
+ let waiting=null;
+ const show=(b,text)=>{const a=KEY_ACTIONS.find(x=>x.id===b.dataset.bind);b.textContent=text;b.setAttribute('aria-label',`${a.zh} · ${a.en}: ${text}`);};
+ const refresh=()=>{for(const b of buttons)show(b,keyLabel(b.dataset.bind));ctx.ui.applyKeys();};
+ const stop=()=>{removeEventListener('keydown',onKey,true);waiting=null;refresh();};
+ // Capture on window runs before every other key handler, so the press only rebinds.
+ const onKey=e=>{
+  // Closing the panel (×, Esc elsewhere, another panel) ends the wait; #panel is only hidden.
+  if(e.key==='Tab'||!el.isConnected||ctx.ui.panelId!=='settings'){stop();return;}
+  e.preventDefault();e.stopImmediatePropagation();
+  if(e.repeat)return;
+  if(e.code==='Escape'){stop();return;}
+  const s=ctx.profile.settings,result=rebind(s.keys??{},waiting,e.code);
+  if(result.reserved){note.textContent=`${KEY_UI.reserved.zh} ${KEY_UI.reserved.en}`;stop();return;}
+  if(Object.keys(result.keys).length)s.keys=result.keys;else delete s.keys;
+  const other=KEY_ACTIONS.find(a=>a.id===result.swapped);
+  note.textContent=other?`${KEY_UI.swapped.zh.replace('{zh}',other.zh)} ${KEY_UI.swapped.en.replace('{en}',other.en)}`:'';
+  ctx.save();stop();
+ };
+ for(const b of buttons)b.onclick=()=>{
+  if(waiting)stop();
+  waiting=b.dataset.bind;note.textContent='';show(b,KEY_UI.waiting.zh);
+  addEventListener('keydown',onKey,true);
+ };
+ el.querySelector('#reset-keys').onclick=()=>{if(waiting)stop();delete ctx.profile.settings.keys;note.textContent='';ctx.save();refresh();};
+ refresh();
 }
 /** Swaps in another save (an import, a backup, the folder's copy) and saves it at once. */
-function replaceProfile(ctx,p){ctx.tutorial?.leaveStep();if(ctx.tutorial)ctx.tutorial.shown=null;ctx.profile=p;ctx.voice.settings=p.settings;ctx.town.equip(outfit(p));ctx.save();ctx.ui.close();}
+function replaceProfile(ctx,p){ctx.tutorial?.leaveStep();if(ctx.tutorial)ctx.tutorial.shown=null;ctx.profile=p;ctx.ui.applyKeys();ctx.voice.settings=p.settings;ctx.town.equip(outfit(p));ctx.save();ctx.ui.close();}
 /** Offers the folder's save when it holds more progress than this browser's. True if offered. */
 export async function offerFolderRestore(ctx){
  if(ctx.readOnly)return false;

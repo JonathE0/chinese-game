@@ -6,9 +6,11 @@ import {escapeHtml as esc} from '../core/language.js';
 import {purchase} from '../core/economy.js';
 import {bump} from '../core/daily.js';
 import {openGuide} from './guide.js';
-import {decorOn,canStack} from '../core/surfaces.js';
+import {fillKeys,keyLabel} from '../core/keys.js';
+import {decorOn,canStack,hangsOnWall} from '../core/surfaces.js';
 
-const furniture=catalog.filter(item=>item.category==='furniture');
+// Wall pieces only go up in a wall slot, so they are never offered for free placement.
+const furniture=catalog.filter(item=>item.category==='furniture'&&!hangsOnWall(item.kind));
 const byId=id=>catalog.find(item=>item.id===id);
 const slotsOf=roomId=>rooms[roomId]?.slots??{};
 /** The slots on the floor the tourist is standing on: upstairs slots carry the floor's height. */
@@ -52,7 +54,7 @@ const STEPS=[
   {zh:'按位置布置。',pinyin:'Àn wèizhì bùzhì.',en:'Furnish by position.',
    body:'每件家具都有自己的位置：床位、五斗柜、衣柜、灯……点一个位置就能订购或更换。<br>Every piece has its own spot. Click a position to order something for it, or swap what is there. It is delivered straight to the room — nothing to carry.'},
   {zh:'也可以自己摆。',pinyin:'Yě kěyǐ zìjǐ bǎi.',en:'Or place it yourself.',
-   body:'想自己决定位置，就用「自由摆放」。走到想放的地方，点击放下，<kbd>R</kbd> 转向，<kbd>X</kbd> 取消。绿色表示放得下。<br>Prefer to decide yourself? Use free placement: walk where you want it and click. R turns it, X cancels.'},
+   body:'想自己决定位置，就用「自由摆放」。走到想放的地方，点击放下，<kbd>{rotate}</kbd> 转向，<kbd>{cancel}</kbd> 取消。绿色表示放得下。<br>Prefer to decide yourself? Use free placement: walk where you want it and click. {rotate} turns it, {cancel} cancels.'},
   {zh:'天黑了要开灯。',pinyin:'Tiān hēi le yào kāi dēng.',en:'Turn a light on after dark.',
    body:'白天窗户就够亮了，晚上房间会暗下来。灯具店里的灯，放进房间会真的发光。<br>Daylight comes through the windows, but the room really does go dark at night. Lamps from the lighting shop actually light it.'},
 ];
@@ -64,7 +66,7 @@ function tutorial(ctx,step=0){
     <div class="tutorial-step"><span>${step+1} / ${STEPS.length}</span>
       <div class="step-track">${STEPS.map((_,i)=>`<i class="${i<=step?'active':''}"></i>`).join('')}</div></div>
     ${languageLine(s,ctx.profile.settings,{className:'dialogue-line'})}
-    <p class="tutorial-body">${s.body}</p>
+    <p class="tutorial-body">${fillKeys(s.body)}</p>
     <div class="button-row tutorial-actions">
       ${step>0?'<button class="secondary" id="tut-back">上一步</button>':''}
       <button class="primary" id="tut-next">${step===STEPS.length-1?'开始布置':'下一步'} ${icon('arrow',15)}</button>
@@ -102,7 +104,7 @@ function render(ctx,body){
     <div class="decorate-grid">${furniture.filter(i=>spare(ctx,i.id)>0).map(item=>`
       <button class="shop-card" data-place="${esc(item.id)}">${itemArt(item.visual)}<b>${esc(item.zh)}</b><span>还有 ${spare(ctx,item.id)} 件</span></button>`).join('')
       ||'<p class="microcopy">仓库里没有多余的家具。买一件，或从某个位置上收起来。</p>'}</div>
-    <p class="microcopy">自由摆放时：<kbd>R</kbd> 转向 · <kbd>X</kbd> 取消 · 点击放下。</p>
+    <p class="microcopy">自由摆放时：<kbd>${keyLabel('rotate')}</kbd> 转向 · <kbd>${keyLabel('cancel')}</kbd> 取消 · 点击放下。</p>
     <button class="subtle wide" id="open-guide">忘了怎么弄？看看墙上的海报 · House notes</button>
     ${loose.length?`<h3 class="section-title">自己摆的 <small>PLACED BY HAND</small></h3>
       <div class="placed-list">${loose.filter(({record})=>!record.on).map(({record,index})=>{
@@ -218,7 +220,7 @@ export function installPlacement(ctx){
       const why=result.problem;
       ctx.ui.notice(why
         ?`${why.zh}。 / ${why.en}.`
-        :`这里放不下「${result.item.zh}」。往后退一点，或按 R 转个方向。 / It does not fit here — step back or press R to turn it.`);
+        :`这里放不下「${result.item.zh}」。往后退一点，或按 ${keyLabel('rotate')} 转个方向。 / It does not fit here — step back or press ${keyLabel('rotate')} to turn it.`);
     }else{
       ctx.ui.notice('已取消。 / Cancelled.');
     }

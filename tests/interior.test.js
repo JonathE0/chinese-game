@@ -40,3 +40,33 @@ test('the approach point for a hitbox or target is measured from the drawn door,
   assert.equal(backNear.x,back.x);
   assert.notEqual(backNear.z,-4+.2);   // the old bug: nudging the raw z, not the wall line
 });
+
+import {wallBlockers,wallFits,wainscotRuns} from '../src/world/interior.js';
+
+// A 10 x 8 shop: a back window at x 3, an annex door on the east wall at z 1, and a shelf
+// standing against the west wall at z -2.
+const shop={size:[10,8],height:3.5,window:[3],annexes:[{wall:'east',x:4.5,z:1}]};
+const shelf={x:-4.6,z:-2,hw:.3,hd:.7};
+
+test('a wall piece keeps clear of windows, doors, fittings, the doorway and the corners',()=>{
+  const blocked=wallBlockers(shop,[shelf]);
+  assert.equal(wallFits({kind:'painting',wall:'back',at:3},blocked,shop),false);     // over the window
+  assert.equal(wallFits({kind:'painting',wall:'back',at:-1},blocked,shop),true);
+  assert.equal(wallFits({kind:'scroll',wall:'east',at:1.2},blocked,shop),false);     // on the annex door
+  assert.equal(wallFits({kind:'scroll',wall:'east',at:-2},blocked,shop),true);
+  assert.equal(wallFits({kind:'painting',wall:'west',at:-2},blocked,shop),false);    // behind the shelf
+  assert.equal(wallFits({kind:'painting',wall:'west',at:1.5},blocked,shop),true);
+  assert.equal(wallFits({kind:'painting',wall:'front',at:0},blocked,shop),false);    // over the doorway
+  assert.equal(wallFits({kind:'lamp',wall:'front',at:2.5},blocked,shop),true);
+  assert.equal(wallFits({kind:'painting',wall:'back',at:4.6},blocked,shop),false);   // in the corner
+});
+
+test('wainscoting runs round the walls, broken only at doors',()=>{
+  const blocked=wallBlockers(shop,[shelf]);
+  const front=wainscotRuns(shop,blocked,'front');
+  assert.equal(front.length,2);                                  // either side of the doorway
+  assert.ok(front.every(([a0,a1])=>a1<=-.85||a0>=.85));
+  assert.equal(wainscotRuns(shop,blocked,'west').length,1);      // a fitting does not break it
+  assert.equal(wainscotRuns(shop,blocked,'east').length,2);      // the annex door does
+  assert.equal(wainscotRuns(shop,blocked,'back').length,1);      // a window sits above it
+});

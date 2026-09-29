@@ -9,6 +9,7 @@ import world from '../content/world.json' with {type:'json'};
 import rooms from '../content/rooms.json' with {type:'json'};
 import city from '../content/city.json' with {type:'json'};
 import {languageLine,pinyinHtml} from './shell.js';
+import {keyLabel} from '../core/keys.js';
 import {itemArt,icon} from './art.js';
 
 const shuffle=arr=>arr.map(value=>({value,sort:Math.random()})).sort((a,b)=>a.sort-b.sort).map(x=>x.value);
@@ -77,7 +78,7 @@ export async function openConfusables(ctx){
   const body=ctx.ui.open('practice',ui.title,ui.titleEn.toUpperCase());
   const hsk=new Map((await loadWords().catch(()=>[])).map(w=>[w.zh,w]));
   const deck=confusableDeck(ctx.profile,confusables.groups,zh=>hsk.get(zh)?.id).slice(0,8);
-  if(!deck.length){body.innerHTML='<p class="panel-intro">再收集几个词就可以复习了。走在城里看着东西按 <kbd>F</kbd>，或者在任何中文上划选。<br>Collect a few more words first — press F while looking at things, or highlight any Chinese.</p>';return;}
+  if(!deck.length){body.innerHTML=`<p class="panel-intro">再收集几个词就可以复习了。走在城里看着东西按 <kbd>${keyLabel('collect')}</kbd>，或者在任何中文上划选。<br>Collect a few more words first — press ${keyLabel('collect')} while looking at things, or highlight any Chinese.</p>`;return;}
   let index=0,right=0,earned=0;
   const clipOf=m=>m.audio??hsk.get(m.zh)?.audio;
   const step=()=>{

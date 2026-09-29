@@ -85,11 +85,68 @@ export function createModels(app) {
     return {entity:e,torso,collar,upper,legs,arms,hat:hatRoot,head,neck,eyes,brows,mouth,lips,
       hatBrim:hatRoot.children.filter(c=>c.render)};
   }
-  function tree(parent,x,z,size=1) {
-    const root=new pc.Entity('tree');root.setLocalPosition(x,0,z);root.setLocalScale(size,size,size);parent.addChild(root);
-    cylinder(root,[0,1,0],[.34,2,.34],'#967658');
-    for(const [p,s,c] of [[[0,2.6,0],[2.2,2.4,2.1],'#91a779'],[[-.65,2.2,.25],[1.4,1.7,1.4],'#809a6a'],[[.6,2.8,.15],[1.4,1.8,1.5],'#a5b786']])shape(root,'cone',p,s,c);
-    cylinder(root,[0,.15,0],[1.7,.3,1.7],'#c7bb9e');
+  /**
+   * A street tree (world.json `trees`: [x, z, kind]): a broadleaf `tree`, a weeping `willow`, a
+   * golden `ginkgo`, a dense `osmanthus` in flower, or a `pine` of stacked cones (a courtyard's).
+   * Each has a tapered trunk and a canopy layered in three tones, stands in a stone pit (a willow
+   * straight in the bank), and turns by where it stands so a row never repeats. It is all static
+   * and batches; only the big canopy pieces cast a shadow.
+   */
+  const TREE_LEAVES={
+    tree:['#6c8a58','#88a46c','#a3ba80'],willow:['#88a46c','#9fb86c','#b5c982'],
+    ginkgo:['#c79a39','#d6b048','#e4c65f'],osmanthus:['#5b7a4c','#6c8a58','#7e9a66'],
+    pine:['#557452','#62845c','#6f8f66'],
+  };
+  function tree(parent,x,z,size=1,kind='tree') {
+    const root=tag(new pc.Entity(kind),kind);root.setLocalPosition(x,0,z);root.setLocalScale(size,size,size);
+    root.setLocalEulerAngles(0,Math.abs(x*37+z*53)%360,0);parent.addChild(root);
+    const [dark,mid,light]=TREE_LEAVES[kind]??TREE_LEAVES.tree,bark='#76604a',limbBark='#5f4c3b';
+    if(kind!=='willow'){                                       // a stone pit and its soil
+      cylinder(root,[0,.15,0],[1.7,.3,1.7],'#c7bb9e');cylinder(root,[0,.31,0],[1.4,.03,1.4],'#8a7458');
+    }
+    const trunk=(h,w)=>{cylinder(root,[0,h/2,0],[w,h,w],bark);shape(root,'cone',[0,.55,0],[w*1.9,.6,w*1.9],bark);};
+    // A limb leaves the trunk at height y, leaning `tilt` degrees out towards `turn`.
+    const limb=(y,len,tilt,turn,thick=.13)=>{
+      const pivot=new pc.Entity('limb');pivot.setLocalPosition(0,y,0);pivot.setLocalEulerAngles(0,turn,0);root.addChild(pivot);
+      const t=tilt*Math.PI/180;cylinder(pivot,[Math.sin(t)*len/2,Math.cos(t)*len/2,0],[thick,len,thick],limbBark,[0,0,-tilt]);
+    };
+    const leaves=list=>{for(const [p,s,c] of list)ball(root,p,s,c);};
+    if(kind==='willow'){
+      trunk(1.9,.4);
+      for(const turn of [0,120,240])limb(1.7,1.25,44,turn,.16);
+      leaves([[[0,2.9,0],[2.2,.9,2.1],mid],[[.2,3.25,-.1],[1.4,.7,1.3],light]]);
+      // The hanging curtain: slim cones, point down, in three rings of mixed tone and length. It
+      // casts no shadow: eighteen casters a willow is more than the shadow budget can carry.
+      for(let i=0;i<18;i++){
+        const a=i/18*Math.PI*2+(i%2)*.17,r=[.62,.9,1.08][i%3],h=2.3-(i%4)*.25;
+        shape(root,'cone',[Math.cos(a)*r,3.05-h/2,Math.sin(a)*r],[.3,h,.3],[dark,mid,light][(i>>1)%3],[180,0,0]).render.castShadows=false;
+      }
+    } else if(kind==='pine'){
+      trunk(2.0,.3);
+      for(const [y,w,h,c] of [[1.9,2.2,1.5,dark],[2.7,1.7,1.4,mid],[3.4,1.2,1.3,dark],[4.0,.7,1.0,light]])shape(root,'cone',[0,y,0],[w,h,w],c);
+    } else if(kind==='ginkgo'){
+      trunk(3.4,.28);
+      [[1.9,0],[2.5,120],[3.0,240]].forEach(([y,turn])=>limb(y,.8,55,turn,.1));
+      leaves([[[0,2.3,0],[2.4,.8,2.2],dark],[[0,2.95,0],[2.0,.8,1.9],mid],[[0,3.55,0],[1.5,.75,1.45],light],
+        [[0,4.05,0],[.9,.6,.85],mid],[[.7,2.6,.3],[1.0,.6,.9],light],[[-.6,3.2,-.3],[1.0,.6,.9],dark]]);
+      // A few fan leaves already down on the paving.
+      for(let i=0;i<5;i++){const a=i*2.4;cylinder(root,[Math.cos(a)*(1+i%2*.3),.035,Math.sin(a)*(1+i%2*.3)],[.22,.02,.16],light,[0,i*50,0]);}
+    } else if(kind==='osmanthus'){
+      trunk(1.3,.3);
+      for(const turn of [30,150,270])limb(1.1,.9,45,turn);
+      leaves([[[0,2.25,0],[2.4,1.9,2.3],dark],[[-.6,1.95,.45],[1.4,1.2,1.3],mid],[[.6,2.55,-.35],[1.4,1.2,1.3],mid],[[0,3.05,0],[1.5,.9,1.4],light]]);
+      // Tiny gold flower clusters dotted over the crown.
+      for(let i=0;i<14;i++){
+        const a=i*2.4,e=-.25+(i%5)*.25;
+        ball(root,[Math.cos(a)*Math.cos(e)*1.22,2.25+Math.sin(e)*.97,Math.sin(a)*Math.cos(e)*1.17],[.13,.13,.13],'#eab54d');
+      }
+    } else {
+      trunk(2.2,.3);
+      for(const [y,len,tilt,turn] of [[1.7,1.1,40,0],[1.9,1.0,35,130],[2.0,.9,30,250]])limb(y,len,tilt,turn);
+      leaves([[[0,2.9,0],[2.3,1.6,2.2],mid],[[-.6,2.55,.35],[1.4,1.2,1.3],dark],[[.65,2.7,-.25],[1.4,1.2,1.4],light],
+        [[.1,3.55,.05],[1.5,1.0,1.4],light],[[.25,2.4,-.7],[1.2,.9,1.1],dark],[[-.35,3.2,-.4],[1.1,.9,1.0],mid]]);
+    }
+    return root;
   }
   /**
    * A shop front comes in three builds. They share a footprint and a doorway — the collision
@@ -697,6 +754,70 @@ export function createModels(app) {
       box(e,[0,1.7,.048],[.36,.05,.004],'#b08b60');
       for(let i=0;i<3;i++)box(e,[-.06,1.6-i*.07,.048],[.4,.025,.004],'#c2b79c');
       cylinder(e,[.2,1.42,.05],[.1,.01,.1],color,[90,0,0]);
+    } else if(kind==='scroll-painting') {
+      // Hangs on a wall like the certificate: a hanging scroll of ink hills with a line of writing
+      // and a red seal, mounted on silk (`color`) with a roller top and bottom.
+      box(e,[0,1.7,.012],[.56,1.3,.02],color);
+      box(e,[0,1.66,.026],[.44,.96,.01],'#f3ead3');
+      shape(e,'cone',[-.06,1.56,.034],[.28,.38,.004],'#6f7a74');
+      shape(e,'cone',[.1,1.48,.036],[.22,.24,.004],'#a3aba4');
+      box(e,[.14,1.95,.034],[.03,.34,.004],'#3b3a36');
+      box(e,[-.14,1.24,.034],[.05,.05,.004],'#b8463a');
+      cylinder(e,[0,2.37,.03],[.035,.62,.035],'#6b4a33',[0,0,90]);
+      cylinder(e,[0,1.03,.03],[.045,.66,.045],'#6b4a33',[0,0,90]);
+    } else if(kind==='landscape-painting') {
+      // Hangs on a wall like the certificate: mountains over water under a low sun, in a `color` frame.
+      box(e,[0,1.6,.02],[1.0,.7,.04],color);
+      box(e,[0,1.6,.042],[.88,.58,.01],'#e9e6d6');
+      shape(e,'cone',[-.18,1.53,.047],[.5,.36,.004],'#8aa391');
+      shape(e,'cone',[.2,1.5,.049],[.42,.28,.004],'#5f7d6c');
+      box(e,[0,1.37,.051],[.88,.12,.004],'#9fbccb');
+      cylinder(e,[.28,1.76,.047],[.08,.004,.08],'#e3a869',[90,0,0]);
+    } else if(kind==='vase') {
+      // A `color` glazed vase with a white band, holding a sprig of blossom.
+      cylinder(e,[0,.02,0],[.16,.04,.16],'#f1ece0');
+      ball(e,[0,.21,0],[.28,.34,.28],color);
+      cylinder(e,[0,.21,0],[.285,.05,.285],'#f1ece0');
+      cylinder(e,[0,.42,0],[.12,.16,.12],color);
+      cylinder(e,[0,.5,0],[.16,.03,.16],'#f1ece0');
+      for(const [x,a] of [[-.04,14],[.05,-18]]){
+        box(e,[x,.66,0],[.015,.32,.015],'#5a3d2c',[0,0,a]);
+        ball(e,[x*2.6,.8,0],[.08,.08,.08],'#eaa6ae');
+      }
+    } else if(kind==='folding-screen') {
+      // Four hinged panels standing in a zigzag, each a `color` frame round a painted paper panel.
+      for(let i=0;i<4;i++){
+        const panel=new pc.Entity('panel');panel.setLocalPosition((i-1.5)*.413,0,0);panel.setLocalEulerAngles(0,i%2?20:-20,0);e.addChild(panel);
+        box(panel,[0,.92,0],[.44,1.7,.04],color);
+        box(panel,[0,1.0,0],[.36,1.3,.05],'#efe4c8');
+        box(panel,[0,.2,0],[.36,.2,.05],'#c9a97a');
+        box(panel,[0,1.1,.027],[.02,.8,.004],'#5a3d2c',[0,0,i%2?28:-28]);
+        ball(panel,[i%2?-.1:.1,1.32,.03],[.07,.07,.02],'#d9737b');
+      }
+    } else if(kind==='bonsai') {
+      // A small leaning tree in a shallow `color` glazed tray.
+      box(e,[0,.06,0],[.46,.12,.32],color);
+      box(e,[0,.125,0],[.42,.02,.28],'#6b5842');
+      box(e,[-.04,.22,0],[.05,.2,.05],'#6b4a33',[0,0,-25]);
+      box(e,[.04,.34,0],[.04,.16,.04],'#6b4a33',[0,0,30]);
+      for(const [pos,scale] of [[[-.11,.34,0],[.22,.1,.18]],[[.12,.44,.02],[.24,.1,.2]],[[.02,.52,-.02],[.18,.09,.16]]])ball(e,pos,scale,'#5f7f4f');
+    } else if(kind==='tea-table') {
+      // A low tea table, its top at the height surfaces.js gives it, with a shelf underneath.
+      box(e,[0,.475,0],[1.0,.05,.6],color);
+      box(e,[0,.42,0],[.92,.06,.52],'#8f6a48');
+      for(const x of [-.44,.44])for(const z of [-.24,.24])box(e,[x,.21,z],[.06,.42,.06],'#7a5a3c');
+      box(e,[0,.12,0],[.88,.03,.48],'#a97d55');
+    } else if(kind==='birdcage') {
+      // A round `color` bamboo cage on a tall stand, with a little bird on its perch.
+      cylinder(e,[0,.03,0],[.4,.06,.4],'#7d6349');
+      cylinder(e,[0,.5,0],[.05,.95,.05],'#7d6349');
+      cylinder(e,[0,1.0,0],[.46,.04,.46],'#8a6c49');
+      for(let i=0;i<8;i++){const a=i/8*Math.PI*2;cylinder(e,[Math.cos(a)*.21,1.22,Math.sin(a)*.21],[.015,.44,.015],color);}
+      ball(e,[0,1.44,0],[.44,.2,.44],color);
+      cylinder(e,[0,1.58,0],[.02,.1,.02],'#7d6349');
+      box(e,[0,1.14,0],[.32,.015,.015],'#6b4a33');
+      ball(e,[0,1.2,0],[.09,.08,.13],'#e3c14f');
+      ball(e,[0,1.26,.05],[.06,.06,.06],'#e3c14f');
     } else {box(e,[0,.3,0],[.8,.6,.8],color);return e;}
     // Every drawn kind is also an objects.json key, so the whole piece is one look box
     // (full height, and for a ceiling lamp up where it hangs).
@@ -707,24 +828,45 @@ export function createModels(app) {
   function streetProp(parent,kind,tint) {
     const e=new pc.Entity('prop-'+kind);parent.addChild(e);
     if(kind==='bench') {
-      box(e,[0,.44,0],[2.0,.14,.62],tint??'#a8875f');
-      box(e,[0,.82,-.26],[2.0,.5,.11],tint??'#b8975f',[12,0,0]);
-      for(const x of [-.78,.78])box(e,[x,.22,0],[.16,.44,.56],'#6c7f6b');
+      // Rounded timber slats on two timber end frames with curled arms.
+      const wood=tint??'#a8875f',frame='#6b5a45';
+      for(let i=0;i<4;i++)cylinder(e,[0,.46,-.2+i*.135],[.13,2.0,.13],wood,[0,0,90]);
+      for(let i=0;i<3;i++)cylinder(e,[0,.64+i*.14,-.28-i*.03],[.12,2.0,.12],wood,[0,0,90]);
+      for(const x of [-.85,.85]){
+        box(e,[x,.2,.2],[.1,.4,.1],frame);
+        box(e,[x,.5,-.27],[.1,1.0,.1],frame,[-8,0,0]);
+        box(e,[x,.4,-.03],[.1,.08,.52],frame);
+        cylinder(e,[x,.68,0],[.09,.5,.09],frame,[90,0,0]);
+        ball(e,[x,.68,.25],[.13,.13,.13],frame);
+      }
       return {entity:e,half:[1.05,.42],top:.52};
     }
     if(kind==='bin') {
+      // Timber-banded bin with a domed lid.
       cylinder(e,[0,.42,0],[.52,.84,.52],'#7f8a72');
-      cylinder(e,[0,.87,0],[.58,.08,.58],'#5f6c58');
+      for(const y of [.12,.72])cylinder(e,[0,y,0],[.55,.07,.55],'#6b5a45');
+      ball(e,[0,.86,0],[.56,.2,.56],'#5f6c58');
+      ball(e,[0,.97,0],[.1,.08,.1],'#6b5a45');
       return {entity:e,half:[.3,.3],top:.9};
     }
     if(kind==='streetlight') {
-      cylinder(e,[0,.12,0],[.42,.24,.42],'#6f6a58');
-      cylinder(e,[0,2.3,0],[.16,4.4,.16],'#7d7563');
-      box(e,[0,4.5,.42],[.16,.16,1.0],'#7d7563');
-      const head=tag(box(e,[0,4.36,.86],[.5,.34,.5],'#f2e2b4'),'lamp');
+      // A dark timber post on a stone foot, with a square palace lantern hung from a bracket.
+      const post='#5f4c3b';
+      box(e,[0,.15,0],[.5,.3,.5],'#b3aa90');
+      cylinder(e,[0,2.1,0],[.17,3.8,.17],post);
+      ball(e,[0,4.08,0],[.24,.24,.24],post);
+      box(e,[0,3.92,.36],[.1,.1,.8],post);
+      box(e,[0,3.7,.12],[.06,.4,.06],post,[40,0,0]);
+      cylinder(e,[0,3.8,.72],[.03,.24,.03],post);
+      box(e,[0,3.65,.72],[.56,.08,.56],post);
+      shape(e,'cone',[0,3.74,.72],[.4,.16,.4],post);
+      const head=tag(box(e,[0,3.36,.72],[.44,.5,.44],'#f2e2b4'),'lamp');
+      for(const [dx,dz] of [[-.21,-.21],[.21,-.21],[-.21,.21],[.21,.21]])box(e,[dx,3.36,.72+dz],[.05,.52,.05],'#b8322a');
+      box(e,[0,3.08,.72],[.48,.06,.48],post);
+      cylinder(e,[0,2.9,.72],[.06,.3,.06],'#b8322a');
       const lit=glow('#f7e9c2');
       head.render.meshInstances[0].material=lit;
-      return {entity:e,half:[.24,.24],top:4.6,material:lit};
+      return {entity:e,half:[.26,.26],top:4.6,material:lit};
     }
     if(kind==='bicycle') {
       // Drawn in side profile: the bike runs along x, the wheels stand in the xy plane, and every
@@ -766,14 +908,23 @@ export function createModels(app) {
       return {entity:e,half:[.72,.22],top:1.05};
     }
     if(kind==='planter') {
-      box(e,[0,.3,0],[1.5,.6,1.0],tint??'#c2ad8b');
-      box(e,[0,.64,0],[1.36,.14,.88],'#87996b');
+      // A carved stone trough on a plinth, with a coping rim, leaves and flowers.
+      box(e,[0,.06,0],[1.56,.12,1.04],'#b3aa90');
+      box(e,[0,.34,0],[1.44,.48,.92],tint??'#cfc6ad');
+      for(const z of [-.47,.47])box(e,[0,.34,z],[1.1,.26,.03],'#b3aa90');
+      box(e,[0,.62,0],[1.54,.1,1.02],'#ddd5bd');
+      box(e,[0,.64,0],[1.3,.06,.8],'#8a7458');
+      for(let i=0;i<5;i++)ball(e,[-.52+i*.26,.74,(i%2-.5)*.3],[.36,.22,.34],i%2?'#7f9a66':'#6c8a58');
       const flowers=group(e,'flower');
-      for(let i=0;i<4;i++)ball(flowers,[-.45+i*.3,.86,0],[.3,.28,.32],i%2?'#e5ba77':'#d38e84');
+      for(let i=0;i<5;i++)ball(flowers,[-.5+i*.25,.84,(i%2-.5)*-.26],[.2,.18,.2],['#e5ba77','#d38e84','#eab54d'][i%3]);
       return {entity:e,half:[.78,.53],top:.9};
     }
     if(kind==='crate') {
-      box(e,[0,.28,0],[.9,.56,.7],tint??'#b8935f');
+      // A slatted timber crate: planks round a frame of corner posts.
+      const wood=tint??'#b8935f',dark='#6b5a45';
+      box(e,[0,.28,0],[.86,.52,.66],wood);
+      for(const y of [.16,.4])for(const z of [-.34,.34])box(e,[0,y,z],[.84,.12,.03],dark);
+      for(const x of [-.43,.43])for(const z of [-.33,.33])box(e,[x,.28,z],[.07,.56,.07],dark);
       box(e,[0,.58,0],[.94,.06,.74],'#9c7a4d');
       return {entity:e,half:[.47,.37],top:.62};
     }
@@ -1316,7 +1467,7 @@ export function createModels(app) {
       return {entity:e,half:[.5,1.5],top:.04,name:'path'};
     }
     if(kind==='pine') {
-      tree(e,0,0,.8);
+      tree(e,0,0,.8,'pine');
       return {entity:e,half:[.68,.68],radius:.68,top:4.2,name:'pine'};
     }
     if(kind==='rock') {
@@ -1534,8 +1685,169 @@ export function createModels(app) {
       if(text)label(e,text,[0,2.42,.8],1.0,.3,'#f4ead2','#36594f');
       return {entity:e,half:[.9,.82],top:2.6,name:'fitting-room',signed:!!text};
     }
+    // ---- A counter for each trade. The customer stands in front (+z); the shop assistant works
+    // behind it (-z), where the till and tools of the trade face them.
+    // A bakery counter: a glass case of bread and tarts in front, a wooden work top behind.
+    if(kind==='bakerycounter') {
+      box(e,[0,.45,0],[2.6,.9,.8],tint??'#b08a60');
+      box(e,[0,.93,-.25],[2.66,.08,.36],'#e0cba4');
+      box(e,[0,.92,.15],[2.56,.06,.5],'#e8dcc0');
+      const bread=group(e,'bread'),tarts=group(e,'eggtart');
+      for(let i=0;i<5;i++)box(bread,[-1+i*.5,1.02,.24],[.34,.16,.22],i%2?'#d9a468':'#e5b87f');
+      for(let i=0;i<5;i++)cylinder(tarts,[-1+i*.5,1.2,.06],[.22,.08,.22],'#e8c169');
+      box(e,[0,1.14,.07],[2.5,.03,.3],'#c9b083');                  // the upper tray
+      glassOver(box(e,[0,1.16,.15],[2.56,.46,.52],'#dceaea'));
+      const till=group(e,'till');
+      box(till,[.85,1.1,-.26],[.42,.26,.3],'#5f6a6c');
+      box(till,[.85,1.27,-.3],[.34,.1,.24],'#8fc0c4',[22,0,0]);
+      return {entity:e,half:[1.33,.42],top:1.45,name:'counter'};
+    }
+    // An espresso bar: a stone-topped bar with a two-group machine, a grinder and a stack of cups.
+    if(kind==='espressobar') {
+      box(e,[0,.52,0],[3,1.04,.8],tint??'#6f5641');
+      for(let i=0;i<9;i++)box(e,[-1.3+i*.325,.5,.41],[.2,.9,.03],'#8d6f52');   // slatted front
+      box(e,[0,1.08,0],[3.2,.1,.95],'#d9d2c3');
+      const machine=group(e,'coffee-machine'),cups=group(e,'cup');
+      box(machine,[-.8,1.4,-.2],[.95,.52,.46],'#b9c2c0');
+      box(machine,[-.8,1.68,-.2],[.98,.05,.5],'#8f9694');
+      for(const x of [-1.05,-.55]){
+        cylinder(machine,[x,1.24,.07],[.16,.1,.16],'#6f7a77');           // group head
+        box(machine,[x,1.2,.2],[.05,.04,.22],'#3c4747');                // portafilter handle
+      }
+      cylinder(machine,[-.25,1.3,.02],[.03,.3,.03],'#a1b1ae',[20,0,0]);  // steam wand
+      cylinder(machine,[.05,1.3,-.25],[.28,.36,.28],'#3c4747');         // grinder
+      shape(machine,'cone',[.05,1.62,-.25],[.3,.28,.3],'#8d6b4d',[180,0,0]);
+      for(let i=0;i<3;i++)cylinder(cups,[-1.05+i*.25,1.76,-.2],[.14,.1,.14],'#efe7d2');
+      for(let i=0;i<4;i++)cylinder(cups,[.45,1.18+i*.08,.15],[.16,.08,.16],'#efe7d2');
+      const till=group(e,'till');
+      box(till,[1.1,1.25,-.2],[.42,.24,.34],'#5f6a6c');
+      box(till,[1.1,1.42,-.24],[.34,.12,.04],'#8fc0c4',[20,0,0]);
+      return {entity:e,half:[1.6,.48],top:1.8,name:'counter'};
+    }
+    // A supermarket checkout lane: a belt runs to the till, then a bagging shelf, and the lane's
+    // number light stands on a pole where the cashier sits.
+    if(kind==='checkoutlane') {
+      box(e,[0,.45,0],[2.4,.9,.75],tint??'#d6d2c6');
+      box(e,[.4,.93,.05],[1.6,.06,.62],'#e2ded0');
+      box(e,[.4,.97,.05],[1.5,.03,.52],'#3c4747');                    // the belt
+      for(const x of [-.37,1.17])cylinder(e,[x,.97,.05],[.08,.52,.08],'#8f9694',[90,0,0]);
+      box(e,[-.85,.8,.05],[.7,.05,.62],'#e2ded0');                    // the bagging shelf
+      box(e,[.4,1,.35],[1.5,.05,.04],'#b9b3a0');
+      const till=group(e,'till');
+      box(till,[-.4,1.08,-.2],[.4,.22,.3],'#5f6a6c');
+      box(till,[-.4,1.32,-.18],[.36,.24,.04],'#8fc0c4',[-12,0,0]);
+      box(till,[-.12,1.02,.12],[.14,.08,.2],'#3c4747');               // card reader
+      const lane=group(e,'sign');
+      cylinder(lane,[-1.1,1.15,-.3],[.06,2.3,.06],'#8f9694');
+      box(lane,[-1.1,2.3,-.3],[.34,.26,.1],'#c9584f');
+      box(lane,[-1.1,2.3,-.24],[.12,.16,.02],'#f4ead2');
+      return {entity:e,half:[1.2,.38],top:1.4,name:'counter'};
+    }
+    // A library lending desk: a raised front ledge to hand books over, a return slot, the
+    // librarian's screen and lamp, and books waiting to be shelved.
+    if(kind==='lendingdesk') {
+      box(e,[0,.45,-.05],[2.8,.9,.7],tint??'#8a6a4c');
+      box(e,[0,.93,-.05],[2.9,.06,.78],'#c9a97a');
+      box(e,[0,1.02,.33],[2.9,.24,.12],tint??'#8a6a4c');              // the front ledge
+      box(e,[0,1.16,.33],[2.96,.05,.2],'#c9a97a');
+      box(e,[-1.05,.7,.31],[.5,.08,.03],'#3c4747');                   // the return slot
+      const books=group(e,'book'),screen=group(e,'monitor'),lamp=group(e,'desklamp');
+      for(let i=0;i<5;i++)box(books,[-1.1,.99+i*.07,-.15],[.38,.06,.28],jar[i%6]);
+      for(let i=0;i<3;i++)box(books,[-.55+i*.12,1.1,-.2],[.08,.28,.24],jar[(i+2)%6]);
+      box(screen,[.55,1.25,-.2],[.6,.4,.04],'#2f3a3d');
+      box(screen,[.55,1.25,-.18],[.54,.34,.02],'#8fc0c4');
+      box(screen,[.55,1,-.24],[.2,.08,.16],'#5f6a6c');
+      cylinder(lamp,[1.2,.98,-.25],[.2,.04,.2],'#5f7160');
+      cylinder(lamp,[1.2,1.2,-.25],[.03,.44,.03],'#5f7160');
+      shape(lamp,'cone',[1.2,1.42,-.15],[.26,.18,.26],'#8fa98a',[200,0,0]);
+      tag(box(e,[-.1,.99,-.1],[.14,.08,.1],'#c9584f'),'stamp');       // the date stamp
+      return {entity:e,half:[1.45,.45],top:1.35,name:'counter'};
+    }
+    // A lighting shop's display counter: small lamps lit under a glass top, table lamps on it.
+    if(kind==='lightcounter') {
+      const lit=glow('#f7e7bb');
+      box(e,[0,.45,0],[2.4,.9,.75],tint??'#e8e2d6');
+      box(e,[0,.72,.1],[2.24,.03,.5],'#c8bda6');
+      const lamps=group(e,'lamp');
+      for(let i=0;i<4;i++)ball(lamps,[-.84+i*.56,.8,.1],[.18,.14,.18],'#f7e7bb').render.meshInstances[0].material=lit;
+      box(e,[0,.8,.37],[2.3,.18,.02],'#dceaea');                      // glass front strip
+      glassOver(box(e,[0,.94,0],[2.46,.06,.8],'#dceaea'));
+      for(const x of [-.85,.85]){
+        cylinder(lamps,[x,1.0,-.15],[.2,.06,.2],'#8f7355');
+        cylinder(lamps,[x,1.2,-.15],[.04,.36,.04],'#8f7355');
+        shape(lamps,'cone',[x,1.46,-.15],[.46,.3,.46],'#f2e0b4',[180,0,0]).render.meshInstances[0].material=lit;
+      }
+      const till=group(e,'till');
+      box(till,[0,1.08,-.22],[.4,.22,.3],'#5f6a6c');
+      return {entity:e,half:[1.23,.4],top:1.65,name:'counter',material:lit};
+    }
+    // A homeware wrapping table: rolls of paper on a rod at the back, ribbon, a wrapped present.
+    if(kind==='wrapdesk') {
+      box(e,[0,.45,0],[2.6,.9,.85],tint??'#c2a077');
+      box(e,[0,.93,0],[2.7,.06,.92],'#e6d9bd');
+      const paper=group(e,'paper');
+      for(const x of [-1.2,.2])box(paper,[x,1.2,-.36],[.06,.5,.1],'#8d6b4d');
+      cylinder(paper,[-.5,1.38,-.36],[.04,1.44,.04],'#8f9694',[0,0,90]);
+      ['#c9584f','#7f9ab0','#e0c05e'].forEach((c,i)=>cylinder(paper,[-1+i*.45,1.3,-.36],[.16,.4,.16],c,[0,0,90]));
+      box(paper,[-.4,.97,.05],[.9,.01,.6],'#c9584f');                 // a sheet spread out
+      const gift=group(e,'box');
+      box(gift,[-.4,1.07,.05],[.36,.2,.3],'#7f9ab0');
+      box(gift,[-.4,1.07,.05],[.38,.22,.05],'#e0c05e');
+      box(gift,[-.4,1.07,.05],[.05,.22,.32],'#e0c05e');
+      for(let i=0;i<3;i++)cylinder(e,[.35+i*.18,1.0,.2],[.13,.08,.13],jar[i*2]);   // ribbon spools
+      const till=group(e,'till');
+      box(till,[1,1.08,-.2],[.4,.22,.3],'#5f6a6c');
+      box(till,[1,1.23,-.24],[.34,.1,.04],'#8fc0c4',[20,0,0]);
+      return {entity:e,half:[1.35,.46],top:1.6,name:'counter'};
+    }
+    // A tea bar: dark wood with slats, caddies of leaf tea along the back, a set laid for tasting
+    // and a kettle on a little stove.
+    if(kind==='teabar') {
+      box(e,[0,.47,0],[2.8,.94,.8],tint??'#6e533b');
+      for(let i=0;i<8;i++)box(e,[-1.23+i*.35,.47,.41],[.06,.8,.03],'#8a6a4c');
+      box(e,[0,.97,0],[2.96,.08,.9],'#8a6a4c');
+      const jars=group(e,'jar');
+      for(let i=0;i<5;i++){
+        cylinder(jars,[-1.2+i*.3,1.13,-.28],[.2,.26,.2],['#5f7a5e','#b45b52','#c9a45f','#7f6d55','#4f6a72'][i]);
+        cylinder(jars,[-1.2+i*.3,1.28,-.28],[.21,.04,.21],'#3c4747');
+      }
+      furniture(e,'teaset').setLocalPosition(.1,1.01,.1);
+      const kettle=group(e,'teapot');
+      box(kettle,[1.0,1.06,-.15],[.34,.1,.3],'#3c4747');
+      cylinder(kettle,[1.0,1.2,-.15],[.24,.2,.24],'#a1b1ae');
+      box(kettle,[1.0,1.33,-.15],[.16,.04,.04],'#3c4747');
+      return {entity:e,half:[1.48,.45],top:1.35,name:'counter'};
+    }
+    // A hardware trade counter: a steel top on a green cabinet, a cabinet of small-parts drawers,
+    // tins of screws and nails, and the till.
+    if(kind==='tradecounter') {
+      box(e,[0,.5,0],[3,1,.85],tint??'#54776e');
+      box(e,[0,.08,.41],[3,.16,.04],'#3c4747');                       // kick plate
+      box(e,[0,1.04,0],[3.1,.08,.95],'#a1b1ae');
+      const drawers=group(e,'box');
+      box(drawers,[-1.05,1.33,-.2],[.8,.5,.4],'#82918c');
+      for(let r=0;r<3;r++)for(let c=0;c<4;c++)box(drawers,[-1.35+c*.2,1.17+r*.15,.01],[.16,.1,.02],jar[(r+c)%6]);
+      const goods=group(e,'goods');
+      for(let i=0;i<4;i++)cylinder(goods,[-.3+i*.24,1.14,.15],[.18,.12,.18],'#8f9694');
+      box(goods,[.3,1.12,-.2],[.5,.08,.3],'#d2ad7e');                 // a plank to be cut
+      const till=group(e,'till');
+      box(till,[1.05,1.2,-.2],[.44,.24,.34],'#5f6a6c');
+      box(till,[1.05,1.38,-.24],[.36,.12,.04],'#8fc0c4',[20,0,0]);
+      return {entity:e,half:[1.55,.48],top:1.6,name:'counter'};
+    }
     box(e,[0,.5,0],[1,1,.6],tint??'#b0a98f');
     return {entity:e,half:[.5,.3],top:1};
+  }
+  /** The trade counters' glass: one see-through material for all of them. */
+  let counterGlass=null;
+  function glassOver(mesh) {
+    if(!counterGlass){
+      counterGlass=new pc.StandardMaterial();
+      counterGlass.diffuse=new pc.Color().fromString('#dceaea');counterGlass.opacity=.3;
+      counterGlass.blendType=pc.BLEND_NORMAL;counterGlass.gloss=.9;counterGlass.useMetalness=true;counterGlass.metalness=.1;counterGlass.update();
+    }
+    mesh.render.meshInstances[0].material=counterGlass;
+    return mesh;
   }
   // ---- Classical garden pieces: a covered walkway, a lattice wall, a veranda front, and a canal
   // edged with stones and rockery and crossed by arched stone bridges. Layouts and collision marks

@@ -1,5 +1,6 @@
 import tutorial from '../content/tutorial.json' with {type:'json'};
 import {cardCoins} from './review.js';
+import {fillKeys} from './keys.js';
 
 /**
  * The first-run tutorial, as rules. The save holds `profile.tutorial`:
@@ -42,7 +43,7 @@ export function nextStep(p) {if(currentStep(p))advance(p);return p.tutorial;}
 export function skipTutorial(p) {p.tutorial={done:true};return p.tutorial;}
 /** Coin rates in the text come from balance.json, so the tutorial never quotes a stale price. */
 export function fillText(text) {
-  return String(text)
+  return fillKeys(text)
     .replaceAll('{anywhere}',cardCoins(null,false))
     .replaceAll('{desk}',cardCoins('desk',false))
     .replaceAll('{hallNew}',cardCoins('hall',true));

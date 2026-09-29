@@ -331,6 +331,16 @@
       "pinyin": "dìtiě yī hào xiàn",
       "en": "Metro Line 1"
     },
+    "青禾站": {
+      "id": "metro-qinghe-station",
+      "pinyin": "Qīnghé Zhàn",
+      "en": "Qinghe Station"
+    },
+    "A出入口": {
+      "id": "metro-entrance-a",
+      "pinyin": "A chūrùkǒu",
+      "en": "Entrance A"
+    },
     "公交站": {
       "id": "bus-stop",
       "pinyin": "gōngjiāo zhàn",

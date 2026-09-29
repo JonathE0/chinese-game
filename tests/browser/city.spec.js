@@ -34,6 +34,22 @@ async function start(page){
   await page.waitForTimeout(300);
   await page.mouse.click(700,500);          // take the pointer so the world has focus
 }
+/** Click to put down the piece in hand. Once the world has the pointer, Playwright's jump to the
+ *  click point reads as a mouse turn and the piece would go wherever the view drifted, so
+ *  mouse-look is off. The first click takes the pointer back (or, if closing the panel already
+ *  has, puts the piece down); the second waits until the world has the pointer. */
+async function clickToPlace(page){
+  await page.evaluate(()=>{window.__qinghe.town.sensitivity=0;});
+  await page.mouse.click(700,520);
+  await expect.poll(()=>page.evaluate(()=>!!document.pointerLockElement)).toBe(true);
+  await page.mouse.click(700,520);
+}
+/** Walk ahead until the prompt offers `label`: a fixed hold covers less ground when frames come
+ *  slowly under load. */
+async function walkUntil(page,label){
+  await page.keyboard.down('w');
+  try{await expect(page.locator('#interact span')).toHaveText(label,{timeout:15000});}finally{await page.keyboard.up('w');}
+}
 
 test('looking at something names it in Chinese, and F remembers it',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -138,7 +154,7 @@ test('a bed you own can be placed at home, and a bad spot says so instead of can
   await seed(page,{inventory:{'wooden-bed':1,bookshelf:1},completed:['home:tutorial','home:starter']});
   await start(page);
   await warp(page,11,7.8,180);            // on the square, facing the front door
-  await hold(page,'w',900);
+  await walkUntil(page,'回家');
   await page.keyboard.press('e');
   await expect(page.locator('.location b')).toHaveText('我的家');
   // Stand to one side of the stairs, facing along the room, so the bed goes down on open floor.
@@ -150,8 +166,7 @@ test('a bed you own can be placed at home, and a bad spot says so instead of can
   await expect(page.locator('#placing')).toBeVisible();
   await expect(page.locator('#placing')).toContainText('木床');
   await expect(page.locator('#placing')).toContainText('放得下');
-  await page.mouse.click(700,520);
-  await page.mouse.click(700,520);
+  await clickToPlace(page);
   await expect(page.locator('#toast')).toContainText('放好了');
   expect((await page.evaluate(k=>JSON.parse(localStorage.getItem(k)).home,SAVE_KEY)).map(r=>r.item)).toEqual(['wooden-bed']);
 
@@ -160,8 +175,7 @@ test('a bed you own can be placed at home, and a bad spot says so instead of can
   await page.locator('[data-place="bookshelf"]').click();
   await expect(page.locator('#placing')).toContainText('书架');
   await expect(page.locator('#placing.blocked')).toBeVisible();
-  await page.mouse.click(700,520);
-  await page.mouse.click(700,520);
+  await clickToPlace(page);
   await expect(page.locator('#toast')).toContainText('放不下');
   await expect(page.locator('#placing')).toBeVisible();          // still carrying it
   expect((await page.evaluate(k=>JSON.parse(localStorage.getItem(k)).home,SAVE_KEY)).length).toBe(1);
@@ -173,9 +187,9 @@ test('the review drill plays the word so you hear it before answering',async({pa
   await seed(page,{});
   await start(page);
   await warp(page,0,-12.5,0);           // the word hall's forecourt, below its stairs
-  await hold(page,'w',1300);
+  await walkUntil(page,'进词语馆');
   await page.keyboard.press('e');            // into the word hall
-  await hold(page,'w',1100);
+  await walkUntil(page,'查词 · HSK');
   await page.keyboard.press('e');            // the lectern
   await expect(page.locator('.syllabus-note')).toBeVisible({timeout:20000});
   await page.getByRole('button',{name:/复习这一级/}).click();

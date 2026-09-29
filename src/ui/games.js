@@ -1,4 +1,5 @@
 import {escapeHtml as esc} from '../core/language.js';
+import {keyLabel} from '../core/keys.js';
 import {pinyinHtml} from './shell.js';
 import {icon} from './art.js';
 import {grant} from '../core/economy.js';
@@ -19,7 +20,7 @@ export async function openGames(ctx){
   body.innerHTML='<p class="panel-intro">正在准备…</p>';
   const pool=await wordPool(ctx);
   if(pool.length<PAIRS*2){
-    body.innerHTML=`<p class="panel-intro">再收集几个词就能玩了。走在城里按 <kbd>F</kbd> 记住东西的名字，或者在词语馆复习。<br>Collect a few more words first — press F around town, or review in the word hall.</p>`;
+    body.innerHTML=`<p class="panel-intro">再收集几个词就能玩了。走在城里按 <kbd>${keyLabel('collect')}</kbd> 记住东西的名字，或者在词语馆复习。<br>Collect a few more words first — press ${keyLabel('collect')} around town, or review in the word hall.</p>`;
     return;
   }
   hub(ctx,body,pool);

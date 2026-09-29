@@ -4,6 +4,7 @@ import {normalizeMetro} from './metro.js';
 import {normalizeTutorial} from './tutorial.js';
 import {normalizeDailyPractice} from './daily-practice.js';
 import {normalizeLearning} from './learning.js';
+import {sanitiseKeys} from './keys.js';
 import rooms from '../content/rooms.json' with {type:'json'};
 export const SAVE_KEY='little-mandarin-town.v1';
 /**
@@ -11,7 +12,7 @@ export const SAVE_KEY='little-mandarin-town.v1';
  * to the save format adds one step here; loading runs whatever steps a save still needs, and saving
  * always writes SAVE_VERSION.
  */
-const UPGRADES=[upstairs,bedSpot];
+const UPGRADES=[upstairs,bedSpot,nightstandSpot];
 export const SAVE_VERSION=UPGRADES.length+1;
 /** `notes` collects what an upgrade had to tell the player (loadProfile turns it into `notice`). */
 export function upgradeSave(p,steps=UPGRADES,notes=[]) {
@@ -95,6 +96,36 @@ function bedSpot(p) {
     const clash=other=>other!==r&&upstairs(other)&&other.kind!=='rug'&&!other.on
       &&Math.abs(other.x-to.x)<half(other)[0]+half(to)[0]&&Math.abs(other.z-to.z)<half(other)[1]+half(to)[1];
     return p.home.some(clash)?r:to;
+  })};
+}
+/**
+ * Version 4: the upstairs nightstand slot moved from the back wall (1.3, -4.05, facing the room) to
+ * beside the head of the bed on the east wall, turned to face the landing. A nightstand still standing
+ * exactly in the old spot goes to the new one, unless something else already stands there; whatever
+ * stands on it keeps its place on the top, turned with it. One moved by hand stays put.
+ */
+function nightstandSpot(p) {
+  if (!Array.isArray(p.home)) return p;
+  const slot=rooms.home.slots['up-nightstand'],up=rooms.home.upper.y;
+  const half=r=>{const [fw,fd]=Array.isArray(r.footprint)?r.footprint:[0,0];return ((r.rot??0)/90)%2?[fd/2,fw/2]:[fw/2,fd/2];};
+  const upstairs=r=>plain(r)&&(r.room??'home')==='home'&&r.y===up;
+  const old=r=>upstairs(r)&&r.kind==='nightstand'&&r.x===1.3&&r.z===-4.05&&(r.rot??0)===0;
+  const moves=new Map();
+  for (const r of p.home) {
+    if (!old(r)) continue;
+    const to={...r,x:slot.x,z:slot.z,rot:slot.rot};
+    const clash=other=>other!==r&&other.on!==r.uid&&upstairs(other)&&other.kind!=='rug'&&!other.on
+      &&Math.abs(other.x-to.x)<half(other)[0]+half(to)[0]&&Math.abs(other.z-to.z)<half(other)[1]+half(to)[1];
+    if (!p.home.some(clash)) moves.set(r.uid,{from:r,to});
+  }
+  // A piece on the top turns about the nightstand's middle by as much as the nightstand turned.
+  const turn=(dx,dz,deg)=>{const a=deg*Math.PI/180,round=v=>Math.round(v*1000)/1000;return [round(dx*Math.cos(a)+dz*Math.sin(a)),round(dz*Math.cos(a)-dx*Math.sin(a))];};
+  return {...p,home:p.home.map(r=>{
+    if (moves.has(r.uid)) return moves.get(r.uid).to;
+    const base=plain(r)&&r.on&&moves.get(r.on);
+    if (!base) return r;
+    const [dx,dz]=turn(r.x-base.from.x,r.z-base.from.z,base.to.rot-(base.from.rot??0));
+    return {...r,x:base.to.x+dx,z:base.to.z+dz};
   })};
 }
 export function freshProfile() {
@@ -220,6 +251,8 @@ export function decodeProfile(raw,repairs=[],notes=[]) {
     if (s[key]!==undefined||!['musicVolume','sensitivity','toneColors'].includes(key)) fix('settings');
     s[key]=defaults[key];
   }
+  // Key bindings came later still: absent is fine, and only sound changes from the default are kept.
+  if (s.keys!==undefined) { const keys=sanitiseKeys(s.keys); if (!plain(s.keys)||Object.keys(s.keys).length!==Object.keys(keys).length||Object.entries(keys).some(([action,code])=>s.keys[action]!==code)) fix('settings'); if (Object.keys(keys).length) s.keys=keys; else delete s.keys; }
   return {version:SAVE_VERSION,...(dailyPractice?{dailyPractice}:{}),...(cooking?{cooking}:{}),...(metro?{metro}:{}),...(tutorial?{tutorial}:{}),...(learning?{learning}:{}),wallet:p.wallet,inventory,equipped,claims,words,completed,phrases,discovered,read,clock:p.clock,dayIndex:p.dayIndex,vendors,saved:normaliseBank(saved),...(stats?{stats}:{}),...(debt?{debt}:{}),...(daily?{daily}:{}),...(savings?{savings}:{}),...(permitPlans.length?{permitPlans}:{}),...(builds?{builds:Object.fromEntries(Object.entries(builds).map(([id,record])=>[id,{given:record.given,done:record.done}]))}:{}),home:home.map(r=>({uid:r.uid,item:r.item,kind:r.kind,color:r.color,footprint:[r.footprint[0],r.footprint[1]],x:r.x,z:r.z,rot:r.rot,...(r.room?{room:r.room}:{}),...(r.y?{y:r.y}:{}),...(r.slot?{slot:r.slot}:{}),...(r.on?{on:r.on}:{})})),settings:s,playerName:p.playerName};
 }
 const REPAIRED="存档有一部分读不了，已经修好了，原来的存档另存了一份。 / Part of your save couldn't be read. It has been repaired, and a copy of the original was kept.";
