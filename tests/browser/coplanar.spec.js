@@ -31,12 +31,17 @@ test('the rebuilt exterior pieces have no coplanar faces of different materials'
         for(const a of caps)for(const s of [-1,1]){
           const plane=s<0?lo[a]:hi[a];
           if(a===1&&s<0&&plane<.05)continue;            // standing on the ground
-          out.push({e,mat:mi.material,a,s,plane,lo,hi});
+          // A repainted piece (models.repaint) shares one vertex-colour material; its colour is on the component.
+          out.push({e,mat:mi.material===t.m.painted?e.render.material:mi.material,a,s,plane,lo,hi});
         }
       }
       return out;
     };
     const pairs=list=>{
+      // A face turned down onto the top of an opaque box (a post on a terrace, a slab on a floor) is out of sight.
+      const covers=(g,f)=>g.lo[0]<=f.lo[0]+1e-3&&g.hi[0]>=f.hi[0]-1e-3&&g.lo[2]<=f.lo[2]+1e-3&&g.hi[2]>=f.hi[2]-1e-3;
+      const floor=g=>g.a===1&&g.s>0&&g.e.render.type==='box'&&(g.mat.opacity??1)>=1;
+      list=list.filter(f=>!(f.a===1&&f.s<0&&list.some(g=>floor(g)&&g.e!==f.e&&Math.abs(g.plane-f.plane)<=1e-3&&covers(g,f))));
       const bad=[];
       for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++){
         const p=list[i],q=list[j];
@@ -50,6 +55,7 @@ test('the rebuilt exterior pieces have no coplanar faces of different materials'
     // The auditor must see a planted pair, or a clean result means nothing.
     const scratch=new window.__qinghe.town.root.constructor('coplanar-probe');t.root.addChild(scratch);
     t.m.box(scratch,[0,1,40],[1,1,1],'#123456');t.m.box(scratch,[0,1.25,40],[1,.5,1.2],'#654321');
+    for(const e of scratch.children)t.m.repaint(e);   // as batchStatics does: both end up on the one `painted` material
     const planted=pairs(faces(scratch)).length;scratch.destroy();
 
     const home=t.buildings.get('home'),hall=t.wordhall.root,garden=t.garden?.root??t.root;
@@ -62,9 +68,18 @@ test('the rebuilt exterior pieces have no coplanar faces of different materials'
       notices:t.props.filter(p=>p.kind==='sign').flatMap(p=>faces(p.entity)),
       'wordhall plaque':faces(hall,[-1.3,1.3,4.8,6.1,-18.7,-18.2]),
       'waterside plaque':faces(garden,[10.2,12.2,2.4,3.25,32.8,34.8]),
+      // Wave 3 (T-town): the whole house with its balcony, its glass door inside, and the west quarter's walkways.
+      house:faces(home),
+      'balcony door':(r=>faces(r.root,[r.offsetX-.9,r.offsetX+.9,2.8,5.2,4,4.6]))(t.rooms.get('home')),
+      'west walkways':t.root.find(n=>n.name==='walkway').flatMap(e=>faces(e,[-46,-34,0,5,-4,10])),
+      // Wave 3 (N-interiors): everything standing in the city's rooms, room by room.
+      ...Object.fromEntries(['city-bank','city-bookshop','city-hospital','city-noodles','city-cinema','city-cinema-hall','city-store','city-cafe']
+        .map(id=>[id,t.rooms.get(id).fittings.flatMap(f=>faces(f.entity))])),
     };
     const out={planted};
     for(const [name,list] of Object.entries(scopes))out[name]=pairs(list);
+    // Every town building, whatever its style, each checked on its own (they never touch each other).
+    out.buildings=[...t.buildings.entries()].flatMap(([id,e])=>pairs(faces(e)).map(s=>`${id} ${s}`));
     return out;
   });
   expect(found.planted,'the check finds a planted coplanar pair').toBeGreaterThan(0);

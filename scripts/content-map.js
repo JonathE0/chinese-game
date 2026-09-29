@@ -72,7 +72,7 @@ table(['id','zh','done when','coins'],TASKS.map(t=>[t.id,t.zh,`${t.metric} ≥ $
 `- Towers: ${city.towers.filter(t=>t.sign).map(t=>`${t.sign} ${at(t.x,t.z)}`).join(' · ')}; plus ${city.towers.filter(t=>!t.sign).length} unsigned.`,
 `- Props: ${tally(city.props.map(p=>p.kind))}.`,
 `- People: ${city.people.map(p=>`${p.id} ${p.zh} ${at(p.x,p.z)} (${p.lines.length} lines)`).join(' · ')}.`,
-...(city.department?[`- Door at ${at(city.department.x,city.department.z)} leads to interior ${city.department.room} (${city.department.label}).`]:[]),'',
+'',
 '## Build sites','',
 table(['id','zh','district','x,z','permit','needs','unlocks','income'],sites.map(s=>
   [s.id,s.zh,s.district,at(s.x,s.z),s.permit,s.needs.map(n=>`${n.item} ×${n.count}`).join(', '),s.unlocks,s.income])),'',

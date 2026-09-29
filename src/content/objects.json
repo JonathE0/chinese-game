@@ -1111,6 +1111,18 @@
       "en": "moon",
       "hsk": 2
     },
+    "sun": {
+      "zh": "太阳",
+      "pinyin": "tàiyáng",
+      "en": "sun",
+      "hsk": 2
+    },
+    "star": {
+      "zh": "星星",
+      "pinyin": "xīngxing",
+      "en": "star",
+      "hsk": 2
+    },
     "ticket-machine": {
       "zh": "售票机",
       "pinyin": "shòupiàojī",
@@ -1219,6 +1231,36 @@
       "en": "boat",
       "hsk": 2
     },
+    "ferry": {
+      "zh": "渡轮",
+      "pinyin": "dùlún",
+      "en": "ferry",
+      "hsk": null
+    },
+    "pier": {
+      "zh": "码头",
+      "pinyin": "mǎtou",
+      "en": "pier",
+      "hsk": 5
+    },
+    "ferris-wheel": {
+      "zh": "摩天轮",
+      "pinyin": "mótiānlún",
+      "en": "Ferris wheel",
+      "hsk": null
+    },
+    "tour-boat": {
+      "zh": "游船",
+      "pinyin": "yóuchuán",
+      "en": "tour boat",
+      "hsk": null
+    },
+    "sailboat": {
+      "zh": "帆船",
+      "pinyin": "fānchuán",
+      "en": "sailboat",
+      "hsk": null
+    },
     "writing-desk": {
       "zh": "书案",
       "pinyin": "shū'àn",
@@ -1254,6 +1296,18 @@
       "pinyin": "xuānzhǐ",
       "en": "rice paper",
       "hsk": null
+    },
+    "escalator": {
+      "zh": "自动扶梯",
+      "pinyin": "zìdòng fútī",
+      "en": "escalator",
+      "hsk": null
+    },
+    "lift": {
+      "zh": "电梯",
+      "pinyin": "diàntī",
+      "en": "lift",
+      "hsk": 4
     }
   }
 }

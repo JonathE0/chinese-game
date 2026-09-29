@@ -130,6 +130,16 @@ def collect_lines():
     for line in drones["lines"].values():
         add(line["audio"], line["zh"], drones["speaker"], "dialogue")
 
+    # The harbour in Yunhai: the ferry crew's and the Ferris wheel attendant's lines (harbour-<key>).
+    harbour = read_json(CONTENT / "harbour.json")
+    for key, line in harbour["lines"].items():
+        add("harbour-" + key, line["zh"], harbour["speakers"][line["speaker"]], "dialogue")
+
+    # The 打卡 camera: 打卡成功！ (checkin-success) and each check-in spot's line (checkin-<id>).
+    checkins = read_json(CONTENT / "checkins.json")
+    for line in [checkins["success"], *(spot["line"] for spot in checkins["spots"])]:
+        add(line["audio"], line["zh"], checkins["speaker"], "dialogue")
+
     # People walking around Yunhai (crowd-<n>), each line in its own speaker's voice.
     for line in read_json(CONTENT / "crowd.json")["lines"]:
         add(line["audio"], line["zh"], line["speaker"], "dialogue")

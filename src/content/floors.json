@@ -52,6 +52,7 @@
     "guesthouse": "wide-dark-planks",
     "clothes-shop": "whitewash-planks",
     "hardware": "concrete-tiles",
-    "metro-platform": "station-terrazzo"
+    "metro-platform": "station-terrazzo",
+    "mall": "marble-tiles"
   }
 }

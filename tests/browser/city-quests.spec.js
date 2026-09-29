@@ -37,8 +37,18 @@ test('asking the way: only the student offers it, and finding the bookstore is o
   await page.evaluate(()=>{window.__qinghe.town.enterCity();window.__qinghe.syncPlace();});
   await page.waitForTimeout(300);
   const x=await cityX(page);
-  // 一号书店 (x:-17.5, z:-16, d:12) sits west of the avenue, so its door is at x - (d/2 + .5).
-  const bookstoreX=x-11,bookstoreZ=-16;
+  // 问路 ends inside 一号书店 (wave 3): go in through its door on the street, and back out.
+  const intoBookshop=async()=>{
+    const door=await page.evaluate(()=>window.__qinghe.town.targets().find(t=>t.id==='door:city-bookshop'));
+    await warp(page,door.x,door.z,0);
+    await expect(page.locator('#interact span')).toHaveText('进书店');
+    await page.keyboard.press('e');
+    await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.place)).toBe('city-bookshop');
+  };
+  const backOut=async()=>{
+    await page.evaluate(()=>window.__qinghe.town.onInteract('door:city'));
+    await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.place)).toBe('city');
+  };
 
   // Someone else on the street has a line to keep, but nothing to ask about directions.
   await warp(page,x-4.2,13.6,0);                   // the office worker, per city.json
@@ -47,10 +57,12 @@ test('asking the way: only the student offers it, and finding the bookstore is o
   await expect(page.locator('#ask-directions')).toHaveCount(0);
   await page.keyboard.press('Escape');
 
-  // Walking up to the bookstore's door before ever asking does nothing.
-  await warp(page,bookstoreX,bookstoreZ,0);
+  // Going into the bookstore before ever asking does nothing.
+  await intoBookshop();
+  await page.waitForTimeout(300);
   await expect(page.locator('#panel')).toBeHidden();
   expect((await profileOf(page)).completed).not.toContain('city:found-bookstore');
+  await backOut();
 
   // The student, and only the student, offers directions.
   await warp(page,x+4.6,-3.4,0);                   // the student sits at (4.6,-6); radius 3
@@ -66,25 +78,23 @@ test('asking the way: only the student offers it, and finding the bookstore is o
   await page.getByRole('button',{name:'回到小镇',exact:true}).click();
   expect((await profileOf(page)).completed).toContain('city-directions');
 
-  // Being set down right at the door (a warp, like a taxi drop-off) is not walking there.
-  await warp(page,bookstoreX,bookstoreZ,0);
+  // Being set down right at the door (a warp, like a taxi drop-off) is not finding it yet.
+  const door=await page.evaluate(()=>window.__qinghe.town.targets().find(t=>t.id==='door:city-bookshop'));
+  await warp(page,door.x,door.z,0);
   await expect(page.locator('#panel')).toBeHidden();
   expect((await profileOf(page)).completed).not.toContain('city:found-bookstore');
 
-  // Walking up to the door from down the pavement finds it, and says so. Yaw 0 walks towards -z;
-  // x-10 keeps a player's width clear of the bookstore's facade.
-  await warp(page,x-10,-10,0);
-  await page.keyboard.down('w');
-  try{
-    await expect(page.locator('.panel-dialogue .dialogue-line .zh')).toHaveText('找到了！这就是一号书店。',{timeout:8000});
-  }finally{await page.keyboard.up('w');}
+  // Going in through its door finds it, and says so.
+  await intoBookshop();
+  await expect(page.locator('.panel-dialogue .dialogue-line .zh')).toHaveText('找到了！这就是一号书店。',{timeout:8000});
   const found=await profileOf(page);
   expect(found.completed.filter(f=>f==='city:found-bookstore').length).toBe(1);
   await page.locator('#line-continue').click();
 
-  // Leaving and walking back does not show it a second time.
-  await warp(page,x-10,-10,0);
-  await page.keyboard.down('w');await page.waitForTimeout(1200);await page.keyboard.up('w');
+  // Leaving and going back in does not show it a second time.
+  await backOut();
+  await intoBookshop();
+  await page.waitForTimeout(300);
   await expect(page.locator('#panel')).toBeHidden();
   expect(errors).toEqual([]);
 });

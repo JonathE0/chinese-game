@@ -171,8 +171,11 @@ export function walkwayLayout(w){
     const p=at((lo+hi)/2,w.rail),half=(hi-lo)/2;
     rails.push({...p,hw:ax?half:.08,hd:ax?.08:half});
   }
-  if(w.lanterns!==false)for(let i=0;i<n;i+=2)lanterns.push(at(stops[i]+bay/2,0));
-  return {ax,a0,a1,c,width,bay,posts,rails,lanterns,y:w.y??0,height:w.height??2.7};
+  // The roof is high enough to walk under with room to spare (2.9 m or more under the beams), and
+  // each lantern hangs from just under it, its tassel well above your head.
+  const y=w.y??0,height=w.height??3.3;
+  if(w.lanterns!==false)for(let i=0;i<n;i+=2)lanterns.push({...at(stops[i]+bay/2,0),y:y+height-.7});
+  return {ax,a0,a1,c,width,bay,posts,rails,lanterns,y,height};
 }
 
 /** Posts and railings stop you; the roof is high enough to walk under and is named by its meshes. */

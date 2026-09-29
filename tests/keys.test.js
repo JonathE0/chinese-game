@@ -5,7 +5,7 @@ import {freshProfile,decodeProfile} from '../src/core/profile.js';
 
 test('every action has its default key and the defaults never clash',()=>{
   const map=Object.fromEntries(KEY_ACTIONS.map(a=>[a.id,a.key]));
-  assert.deepEqual(map,{forward:'KeyW',back:'KeyS',left:'KeyA',right:'KeyD',jump:'Space',interact:'KeyE',collect:'KeyF',view:'KeyV',labels:'KeyH',drop:'KeyG',rotate:'KeyR',cancel:'KeyX',journal:'Digit1',inventory:'Digit2',wordbank:'Digit3',status:'Digit4',settings:'Digit5'});
+  assert.deepEqual(map,{forward:'KeyW',back:'KeyS',left:'KeyA',right:'KeyD',jump:'Space',interact:'KeyE',collect:'KeyF',view:'KeyV',labels:'KeyH',camera:'KeyC',drop:'KeyG',rotate:'KeyR',cancel:'KeyX',journal:'Digit1',inventory:'Digit2',wordbank:'Digit3',status:'Digit4',settings:'Digit5'});
   assert.equal(new Set(Object.values(map)).size,KEY_ACTIONS.length);
 });
 

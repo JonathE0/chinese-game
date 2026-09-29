@@ -84,10 +84,12 @@ export class Registry {
    * fitting, the cup on the table.
    */
   look(place,origin,dir,maxDistance=11){
-    const hits=[];
+    const hits=[],length=Math.hypot(dir.x,dir.y,dir.z);
     for(const list of [this.boxes,this.looks])for(const b of list){
       if(!b.name||b.place!==place||(b.entity&&!b.entity.enabled)||contains(b,origin))continue;
       const limit=b.reach??maxDistance;   // `reach`: something far off and big, like the drone show over the bay
+      // Most of a place is further off than the ray reaches: a cheap test first, the same answer.
+      if(further(b,origin,limit*length))continue;
       let span=b.radius?hitCylinder(origin,dir,b,limit):hitBox(origin,dir,b,limit);
       if(span&&b.refine)span=b.refine(origin,dir,limit);
       if(span)hits.push({box:b,near:span[0],far:span[1],size:volume(b)});
@@ -111,6 +113,11 @@ function contains(b,p){
   return Math.abs(p.x-b.x)<=b.hw&&Math.abs(p.z-b.z)<=b.hd;
 }
 function volume(b){return (b.radius?Math.PI*b.radius*b.radius:4*b.hw*b.hd)*(b.y1-b.y0);}
+/** Whether all of a shape's box (a round one's square) lies further than `reach` from p. */
+function further(b,p,reach){
+  const dx=Math.max(Math.abs(p.x-b.x)-b.hw,0),dz=Math.max(Math.abs(p.z-b.z)-b.hd,0),dy=Math.max(b.y0-p.y,p.y-b.y1,0);
+  return dx*dx+dy*dy+dz*dz>reach*reach;
+}
 
 function overlaps(b,x,z,radius){
   if(b.radius!==null&&b.radius!==undefined){

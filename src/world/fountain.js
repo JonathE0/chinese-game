@@ -115,7 +115,7 @@ export function buildFountain(m,app,parent,active=()=>true) {
   const bubble=piece('sphere',[0,2.36,0],[.4,.18,.4],pool);
   // Falling sheets: open-looking cylinders whose caps are hidden inside the stone and the water.
   piece('cylinder',[0,1.03,0],[2.05,1.0,2.05],flow);
-  piece('cylinder',[0,1.925,0],[1.24,.77,1.24],flow);
+  piece('cylinder',[0,1.9225,0],[1.24,.765,1.24],flow);
   const foam=piece('plane',[0,.572,0],[2.7,1,2.7],ringMaterial());
   // The jets: part-ellipse tubes from each spout, streaming along their length.
   const arc=jetArc(SPOUT.r,SPOUT.y,LAND.r,LAND.y,.42);

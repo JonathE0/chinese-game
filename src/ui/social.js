@@ -132,7 +132,10 @@ export function openAssistant(ctx,member,roomId,{browse,sells,led}={}){
   body.querySelector('.button-row button')?.focus();   // keyboard players keep their place
  }
  // Hello and an offer of help first, then the shop's own line with the buttons.
- const pages=[['greet',led?'find':'browse'],...(lines['shop-'+roomId]?[['shop-'+roomId]]:[])];
+ // An assistant may have lines of their own (`line`: keys in assistants.json) in place of the shop's;
+ // one with nothing to sell says just those (the mall's information desk).
+ const own=[].concat(member.line??'shop-'+roomId).filter(key=>lines[key]);
+ const pages=member.line&&!browse?[own]:[['greet',led?'find':'browse'],...(own.length?[own]:[])];
  const writes=(assistants.postcard??[]).includes(roomId);
  function step(i){
   if(i<pages.length-1){

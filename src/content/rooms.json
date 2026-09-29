@@ -2468,7 +2468,9 @@
         "x": 0,
         "z": -1.8,
         "rot": 0,
-        "sign": "取药"
+        "sign": "取药",
+        "action": "shop:pharmacy",
+        "label": "取药 · 青禾药店"
       },
       {
         "kind": "medicineshelf",
@@ -2945,13 +2947,13 @@
       "z": 0
     },
     "interiorOnly": true,
-    "returnPlace": "city",
+    "returnPlace": "mall",
     "returnSpawn": [
-      -9.4,
+      -16.3,
       0,
-      90
+      -90
     ],
-    "returnLabel": "回到步行街",
+    "returnLabel": "进商场",
     "enterLabel": "进五金百货",
     "size": [
       18,
@@ -3813,5 +3815,2237 @@
         "tread": 0.32
       }
     }
+  },
+  "city-bank": {
+    "zh": "云海银行",
+    "pinyin": "Yúnhǎi Yínháng",
+    "en": "Yunhai Bank",
+    "building": "city:bank",
+    "door": {
+      "x": -10.6,
+      "z": 16.5
+    },
+    "interiorOnly": true,
+    "returnPlace": "city",
+    "returnSpawn": [
+      -9.5,
+      16.5,
+      -90
+    ],
+    "returnLabel": "回到步行街",
+    "decoratable": false,
+    "enterLabel": "进银行",
+    "size": [
+      14,
+      10
+    ],
+    "spawn": [
+      0,
+      3.6
+    ],
+    "exit": [
+      0,
+      4.6
+    ],
+    "height": 4.4,
+    "floor": "#c9c5b6",
+    "wall": "#eeeee6",
+    "trim": "#2f5f7a",
+    "roofBeam": "#5d6f80",
+    "window": [
+      -4.5,
+      4.5
+    ],
+    "fittings": [
+      {
+        "kind": "bankcounter",
+        "x": 0,
+        "z": -3.2,
+        "rot": 0,
+        "sign": [
+          "存款",
+          "取款",
+          "咨询"
+        ],
+        "action": "panel:bank",
+        "label": "柜台 · 存钱与借钱"
+      },
+      {
+        "kind": "atm",
+        "x": -6.7,
+        "z": -1.2,
+        "rot": 90
+      },
+      {
+        "kind": "atm",
+        "x": -6.7,
+        "z": 0.4,
+        "rot": 90
+      },
+      {
+        "kind": "queuerail",
+        "x": -1.2,
+        "z": -1.2,
+        "rot": 90
+      },
+      {
+        "kind": "floorsign",
+        "x": -2.6,
+        "z": 0.8,
+        "rot": 0,
+        "sign": "请排队"
+      },
+      {
+        "kind": "sofa",
+        "x": 6.4,
+        "z": 0,
+        "rot": -90
+      },
+      {
+        "kind": "plantpot",
+        "x": -6.3,
+        "z": 4.3
+      },
+      {
+        "kind": "plantpot",
+        "x": 6.3,
+        "z": 4.3
+      },
+      {
+        "kind": "wallclock",
+        "x": 7,
+        "z": -2.4,
+        "rot": -90
+      },
+      {
+        "kind": "noticeboard",
+        "x": 7,
+        "z": 2.2,
+        "rot": -90
+      },
+      {
+        "kind": "poster",
+        "x": -6.94,
+        "z": 2.6,
+        "rot": 90
+      },
+      {
+        "kind": "wallsign",
+        "x": 3.2,
+        "z": 5,
+        "rot": 180,
+        "sign": "营业时间"
+      }
+    ],
+    "staff": [
+      {
+        "id": "city-bank-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#2f5f7a",
+        "path": [
+          [
+            -1,
+            -4.2
+          ],
+          [
+            1,
+            -4.2
+          ]
+        ],
+        "speed": 0.5
+      }
+    ]
+  },
+  "city-bookshop": {
+    "zh": "一号书店",
+    "pinyin": "Yī Hào Shūdiàn",
+    "en": "No. 1 Bookshop",
+    "building": "city:bookshop",
+    "door": {
+      "x": -10.6,
+      "z": -16
+    },
+    "interiorOnly": true,
+    "returnPlace": "city",
+    "returnSpawn": [
+      -9.5,
+      -16,
+      -90
+    ],
+    "returnLabel": "回到步行街",
+    "decoratable": false,
+    "enterLabel": "进书店",
+    "size": [
+      14,
+      12
+    ],
+    "spawn": [
+      0,
+      4.6
+    ],
+    "exit": [
+      0,
+      5.6
+    ],
+    "height": 4.2,
+    "floor": "#b9a58a",
+    "wall": "#f1ebdd",
+    "trim": "#6b4f3a",
+    "roofBeam": "#5c4432",
+    "fittings": [
+      {
+        "kind": "bookcase",
+        "x": -4,
+        "z": -5.6,
+        "rot": 0,
+        "sign": "词典"
+      },
+      {
+        "kind": "bookcase",
+        "x": 0,
+        "z": -5.6,
+        "rot": 0
+      },
+      {
+        "kind": "bookcase",
+        "x": 4,
+        "z": -5.6,
+        "rot": 0
+      },
+      {
+        "kind": "bookcase",
+        "x": -6.74,
+        "z": -1.5,
+        "rot": 90,
+        "sign": "小说"
+      },
+      {
+        "kind": "bookcase",
+        "x": -6.74,
+        "z": 1,
+        "rot": 90
+      },
+      {
+        "kind": "bookcase",
+        "x": 6.74,
+        "z": -1.5,
+        "rot": -90,
+        "sign": "漫画"
+      },
+      {
+        "kind": "bookcase",
+        "x": 6.74,
+        "z": 1,
+        "rot": -90
+      },
+      {
+        "kind": "bookcase",
+        "x": -3,
+        "z": -2,
+        "rot": 0
+      },
+      {
+        "kind": "bookcase",
+        "x": -3,
+        "z": -2.5,
+        "rot": 180
+      },
+      {
+        "kind": "displaytable",
+        "x": -2.2,
+        "z": 2.2,
+        "rot": 0,
+        "sign": "新书"
+      },
+      {
+        "kind": "displaytable",
+        "x": 2,
+        "z": 2.2,
+        "rot": 0
+      },
+      {
+        "kind": "checkout",
+        "x": 5.4,
+        "z": 3.6,
+        "rot": -90,
+        "sign": "收银台",
+        "action": "shop:city-bookshop",
+        "label": "收银台 · 一号书店"
+      },
+      {
+        "kind": "sofa",
+        "x": -6.4,
+        "z": 4.2,
+        "rot": 90
+      },
+      {
+        "kind": "floorlamp",
+        "x": -6.5,
+        "z": 5.5
+      },
+      {
+        "kind": "diningtable",
+        "x": -4.9,
+        "z": 4.2
+      },
+      {
+        "kind": "plantpot",
+        "x": 6.4,
+        "z": 5.4
+      },
+      {
+        "kind": "wallclock",
+        "x": -3.4,
+        "z": 6,
+        "rot": 180
+      },
+      {
+        "kind": "wallsign",
+        "x": 3.4,
+        "z": 6,
+        "rot": 180,
+        "sign": "营业时间"
+      }
+    ],
+    "staff": [
+      {
+        "id": "city-bookshop-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#6b4f3a",
+        "path": [
+          [
+            6.4,
+            3
+          ],
+          [
+            6.4,
+            4.2
+          ]
+        ],
+        "speed": 0.5
+      }
+    ]
+  },
+  "city-hospital": {
+    "zh": "中山医院",
+    "pinyin": "Zhōngshān Yīyuàn",
+    "en": "Zhongshan Hospital",
+    "building": "city:hospital",
+    "door": {
+      "x": 10.6,
+      "z": 16
+    },
+    "interiorOnly": true,
+    "returnPlace": "city",
+    "returnSpawn": [
+      9.5,
+      16,
+      90
+    ],
+    "returnLabel": "回到步行街",
+    "decoratable": false,
+    "enterLabel": "进医院",
+    "size": [
+      16,
+      12
+    ],
+    "spawn": [
+      0,
+      4.6
+    ],
+    "exit": [
+      0,
+      5.6
+    ],
+    "height": 4.4,
+    "floor": "#e3e7e4",
+    "wall": "#f4f6f3",
+    "trim": "#3e8a7e",
+    "roofBeam": "#8fa5a0",
+    "window": [
+      -6.2,
+      0
+    ],
+    "fittings": [
+      {
+        "kind": "servicecounter",
+        "x": -3.5,
+        "z": -3.4,
+        "rot": 0,
+        "sign": "挂号"
+      },
+      {
+        "kind": "servicecounter",
+        "x": 4,
+        "z": -3.4,
+        "rot": 0,
+        "sign": "药房",
+        "action": "shop:city-hospital",
+        "label": "药房 · 中山医院"
+      },
+      {
+        "kind": "medicineshelf",
+        "x": 4,
+        "z": -5.75,
+        "rot": 0
+      },
+      {
+        "kind": "bench",
+        "x": -4.5,
+        "z": 0.2,
+        "rot": 180
+      },
+      {
+        "kind": "bench",
+        "x": -4.5,
+        "z": 1.8,
+        "rot": 180
+      },
+      {
+        "kind": "bench",
+        "x": 4.5,
+        "z": 0.2,
+        "rot": 180
+      },
+      {
+        "kind": "bench",
+        "x": 4.5,
+        "z": 1.8,
+        "rot": 180
+      },
+      {
+        "kind": "wallsign",
+        "x": 8,
+        "z": 1,
+        "rot": -90,
+        "sign": "候诊区"
+      },
+      {
+        "kind": "poster",
+        "x": -7.94,
+        "z": -2,
+        "rot": 90
+      },
+      {
+        "kind": "poster",
+        "x": -7.94,
+        "z": 2.4,
+        "rot": 90
+      },
+      {
+        "kind": "wallclock",
+        "x": -8,
+        "z": -4.2,
+        "rot": 90
+      },
+      {
+        "kind": "noticeboard",
+        "x": 8,
+        "z": -2,
+        "rot": -90
+      },
+      {
+        "kind": "plantpot",
+        "x": -7.3,
+        "z": 5.3
+      },
+      {
+        "kind": "plantpot",
+        "x": 7.3,
+        "z": 5.3
+      }
+    ],
+    "staff": [
+      {
+        "id": "city-hospital-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#3e8a7e",
+        "path": [
+          [
+            -4.3,
+            -4.5
+          ],
+          [
+            -2.7,
+            -4.5
+          ]
+        ],
+        "speed": 0.5
+      },
+      {
+        "id": "city-hospital-pharmacist",
+        "zh": "药剂师",
+        "pinyin": "yàojìshī",
+        "en": "pharmacist",
+        "look": "pharmacist",
+        "color": "#eef0ea",
+        "path": [
+          [
+            3.4,
+            -4.6
+          ],
+          [
+            4.6,
+            -4.6
+          ]
+        ],
+        "speed": 0.5,
+        "talk": false
+      }
+    ]
+  },
+  "city-noodles": {
+    "zh": "海风面馆",
+    "pinyin": "Hǎifēng Miànguǎn",
+    "en": "Sea Breeze Noodles",
+    "building": "city:noodles",
+    "door": {
+      "x": 10.3,
+      "z": 1
+    },
+    "interiorOnly": true,
+    "returnPlace": "city",
+    "returnSpawn": [
+      9.3,
+      1,
+      90
+    ],
+    "returnLabel": "回到步行街",
+    "decoratable": false,
+    "enterLabel": "进面馆",
+    "size": [
+      14,
+      10
+    ],
+    "spawn": [
+      0,
+      3.6
+    ],
+    "exit": [
+      0,
+      4.6
+    ],
+    "height": 4,
+    "floor": "#bfa07a",
+    "wall": "#f2e6d2",
+    "trim": "#8a3b2e",
+    "roofBeam": "#6b4a33",
+    "lanterns": [
+      [
+        -3.2,
+        -0.2
+      ],
+      [
+        3.2,
+        -0.2
+      ]
+    ],
+    "fittings": [
+      {
+        "kind": "kitchen",
+        "x": 2.8,
+        "z": -4.3,
+        "rot": 0
+      },
+      {
+        "kind": "servicecounter",
+        "x": 2.8,
+        "z": -2.4,
+        "rot": 0,
+        "action": "noodles",
+        "label": "海风面馆 · 点面"
+      },
+      {
+        "kind": "menuboard",
+        "x": -3.2,
+        "z": -4.84,
+        "rot": 0,
+        "sign": "菜单"
+      },
+      {
+        "kind": "diningtable",
+        "x": -4.6,
+        "z": -1.6,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -4.6,
+        "z": -2.55,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -4.6,
+        "z": -0.6500000000000001,
+        "rot": 180
+      },
+      {
+        "kind": "diningtable",
+        "x": -1.8,
+        "z": -1.6,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -1.8,
+        "z": -2.55,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -1.8,
+        "z": -0.6500000000000001,
+        "rot": 180
+      },
+      {
+        "kind": "diningtable",
+        "x": -4.6,
+        "z": 1.6,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -4.6,
+        "z": 0.6500000000000001,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -4.6,
+        "z": 2.55,
+        "rot": 180
+      },
+      {
+        "kind": "diningtable",
+        "x": -1.8,
+        "z": 1.6,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -1.8,
+        "z": 0.6500000000000001,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -1.8,
+        "z": 2.55,
+        "rot": 180
+      },
+      {
+        "kind": "diningtable",
+        "x": 3.2,
+        "z": 1.6,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": 3.2,
+        "z": 0.6500000000000001,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": 3.2,
+        "z": 2.55,
+        "rot": 180
+      },
+      {
+        "kind": "diningtable",
+        "x": 5.6,
+        "z": 1.6,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": 5.6,
+        "z": 0.6500000000000001,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": 5.6,
+        "z": 2.55,
+        "rot": 180
+      },
+      {
+        "kind": "floorsign",
+        "x": 2.6,
+        "z": 4,
+        "rot": 0,
+        "sign": "今日推荐"
+      },
+      {
+        "kind": "wallclock",
+        "x": 7,
+        "z": -0.8,
+        "rot": -90
+      },
+      {
+        "kind": "plantpot",
+        "x": -6.4,
+        "z": 4.4
+      }
+    ],
+    "staff": [
+      {
+        "id": "city-noodles-waiter",
+        "zh": "服务员",
+        "pinyin": "fúwùyuán",
+        "en": "waiter",
+        "look": "waiter",
+        "color": "#8a3b2e",
+        "path": [
+          [
+            2,
+            -3.3
+          ],
+          [
+            3.6,
+            -3.3
+          ]
+        ],
+        "speed": 0.5
+      }
+    ]
+  },
+  "city-cinema": {
+    "zh": "光明电影院",
+    "pinyin": "Guāngmíng Diànyǐngyuàn",
+    "en": "Guangming Cinema",
+    "building": "city:cinema",
+    "door": {
+      "x": 10.6,
+      "z": -15
+    },
+    "interiorOnly": true,
+    "returnPlace": "city",
+    "returnSpawn": [
+      9.5,
+      -15,
+      90
+    ],
+    "returnLabel": "回到步行街",
+    "decoratable": false,
+    "enterLabel": "进电影院",
+    "size": [
+      14,
+      10
+    ],
+    "spawn": [
+      0,
+      3.6
+    ],
+    "exit": [
+      0,
+      4.6
+    ],
+    "height": 4.4,
+    "floor": "#5a3b3b",
+    "wall": "#e9dfd0",
+    "trim": "#8a2a25",
+    "roofBeam": "#3a2a2a",
+    "annexes": [
+      {
+        "wall": "back",
+        "x": 0,
+        "z": -5,
+        "room": "city-cinema-hall"
+      }
+    ],
+    "fittings": [
+      {
+        "kind": "servicecounter",
+        "x": -3.6,
+        "z": -3.4,
+        "rot": 0,
+        "sign": "售票处",
+        "action": "shop:city-cinema",
+        "label": "售票处 · 光明电影院"
+      },
+      {
+        "kind": "popcornstand",
+        "x": 3.2,
+        "z": -3.6,
+        "rot": 0,
+        "action": "shop:city-cinema",
+        "label": "看看菜单"
+      },
+      {
+        "kind": "filmposter",
+        "x": -6.97,
+        "z": -1,
+        "rot": 90,
+        "tint": "#c0584a"
+      },
+      {
+        "kind": "filmposter",
+        "x": -6.97,
+        "z": 1.6,
+        "rot": 90,
+        "tint": "#3f6ea8"
+      },
+      {
+        "kind": "filmposter",
+        "x": 6.97,
+        "z": -1,
+        "rot": -90,
+        "tint": "#5d9c6a"
+      },
+      {
+        "kind": "filmposter",
+        "x": 6.97,
+        "z": 1.6,
+        "rot": -90,
+        "tint": "#b0689a"
+      },
+      {
+        "kind": "bench",
+        "x": -3.2,
+        "z": 1.4,
+        "rot": 0
+      },
+      {
+        "kind": "bench",
+        "x": 3.2,
+        "z": 1.4,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": -6.3,
+        "z": 4.3
+      },
+      {
+        "kind": "plantpot",
+        "x": 6.3,
+        "z": 4.3
+      },
+      {
+        "kind": "wallclock",
+        "x": -3.4,
+        "z": 5,
+        "rot": 180
+      }
+    ],
+    "staff": [
+      {
+        "id": "city-cinema-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#8a2a25",
+        "path": [
+          [
+            -4.4,
+            -4.4
+          ],
+          [
+            -2.8,
+            -4.4
+          ]
+        ],
+        "speed": 0.5
+      }
+    ]
+  },
+  "city-cinema-hall": {
+    "zh": "光明电影院",
+    "pinyin": "Guāngmíng Diànyǐngyuàn",
+    "en": "Guangming Cinema",
+    "building": "city:cinema",
+    "door": {
+      "x": 0,
+      "z": -5
+    },
+    "interiorOnly": true,
+    "returnPlace": "city-cinema",
+    "returnSpawn": [
+      0,
+      -3.9,
+      180
+    ],
+    "returnLabel": "出去",
+    "decoratable": false,
+    "ticket": "city-film-ticket",
+    "size": [
+      12,
+      12
+    ],
+    "spawn": [
+      0,
+      4.6
+    ],
+    "exit": [
+      0,
+      5.6
+    ],
+    "height": 5,
+    "floor": "#4a2f33",
+    "wall": "#3a2d33",
+    "trim": "#8a2a25",
+    "roofBeam": "#2a2024",
+    "fittings": [
+      {
+        "kind": "cinemascreen",
+        "x": 0,
+        "z": -5.88,
+        "rot": 0
+      },
+      {
+        "kind": "diningchair",
+        "x": -3,
+        "z": -1.2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": -2.2,
+        "z": -1.2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": -1.4,
+        "z": -1.2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": 1.4,
+        "z": -1.2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": 2.2,
+        "z": -1.2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": 3,
+        "z": -1.2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": -3,
+        "z": 0.4,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": -2.2,
+        "z": 0.4,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": -1.4,
+        "z": 0.4,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": 1.4,
+        "z": 0.4,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": 2.2,
+        "z": 0.4,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": 3,
+        "z": 0.4,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": -3,
+        "z": 2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": -2.2,
+        "z": 2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": -1.4,
+        "z": 2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": 1.4,
+        "z": 2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": 2.2,
+        "z": 2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      },
+      {
+        "kind": "diningchair",
+        "x": 3,
+        "z": 2,
+        "rot": 180,
+        "tint": "#9c2f2f"
+      }
+    ]
+  },
+  "city-store": {
+    "zh": "便利店",
+    "pinyin": "biànlìdiàn",
+    "en": "Convenience store",
+    "building": "city:store",
+    "door": {
+      "x": -12.6,
+      "z": -29
+    },
+    "interiorOnly": true,
+    "returnPlace": "city",
+    "returnSpawn": [
+      -11.5,
+      -29,
+      -90
+    ],
+    "returnLabel": "回到步行街",
+    "decoratable": false,
+    "enterLabel": "进便利店",
+    "size": [
+      10,
+      8
+    ],
+    "spawn": [
+      0,
+      2.6
+    ],
+    "exit": [
+      0,
+      3.6
+    ],
+    "height": 3.6,
+    "floor": "#dfe3e2",
+    "wall": "#f5f7f4",
+    "trim": "#2f8a5a",
+    "roofBeam": "#9aa8a2",
+    "fittings": [
+      {
+        "kind": "fridge",
+        "x": -3.9,
+        "z": -3.6,
+        "rot": 0
+      },
+      {
+        "kind": "fridge",
+        "x": -2.2,
+        "z": -3.6,
+        "rot": 0
+      },
+      {
+        "kind": "shelfunit",
+        "x": 3.2,
+        "z": -3.7,
+        "rot": 0
+      },
+      {
+        "kind": "shelfunit",
+        "x": -2.2,
+        "z": -0.9,
+        "rot": 0
+      },
+      {
+        "kind": "shelfunit",
+        "x": -2.2,
+        "z": -1.5,
+        "rot": 180
+      },
+      {
+        "kind": "shelfunit",
+        "x": -4.72,
+        "z": 0.4,
+        "rot": 90
+      },
+      {
+        "kind": "checkout",
+        "x": 3.2,
+        "z": 1.4,
+        "rot": -90,
+        "sign": "收银台",
+        "action": "shop:city-store",
+        "label": "收银台 · 便利店"
+      },
+      {
+        "kind": "basketstack",
+        "x": -1.8,
+        "z": 3.3,
+        "rot": 0
+      },
+      {
+        "kind": "floorsign",
+        "x": -3,
+        "z": 2.6,
+        "rot": 0,
+        "sign": "欢迎光临"
+      },
+      {
+        "kind": "wallclock",
+        "x": 5,
+        "z": -1.8,
+        "rot": -90
+      }
+    ],
+    "staff": [
+      {
+        "id": "city-store-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#2f8a5a",
+        "path": [
+          [
+            4.3,
+            0.8
+          ],
+          [
+            4.3,
+            2
+          ]
+        ],
+        "speed": 0.5
+      }
+    ]
+  },
+  "city-cafe": {
+    "zh": "海边咖啡",
+    "pinyin": "Hǎibiān Kāfēi",
+    "en": "Seaside Café",
+    "building": "city:cafe",
+    "door": {
+      "x": 19,
+      "z": -35.6
+    },
+    "interiorOnly": true,
+    "returnPlace": "city",
+    "returnSpawn": [
+      19,
+      -36.7,
+      0
+    ],
+    "returnLabel": "回到步行街",
+    "decoratable": false,
+    "enterLabel": "进咖啡馆",
+    "size": [
+      12,
+      9
+    ],
+    "spawn": [
+      0,
+      3.1
+    ],
+    "exit": [
+      0,
+      4.1
+    ],
+    "height": 4,
+    "floor": "#c9b08c",
+    "wall": "#eef2f0",
+    "trim": "#3b7d8c",
+    "roofBeam": "#6f8f96",
+    "fittings": [
+      {
+        "kind": "bayview",
+        "x": -3.5,
+        "z": 4.38,
+        "rot": 180
+      },
+      {
+        "kind": "bayview",
+        "x": 3.5,
+        "z": 4.38,
+        "rot": 180
+      },
+      {
+        "kind": "diningtable",
+        "x": -3.5,
+        "z": 2.9
+      },
+      {
+        "kind": "stool",
+        "x": -3.85,
+        "z": 1.95,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -3.15,
+        "z": 1.95,
+        "rot": 0
+      },
+      {
+        "kind": "diningtable",
+        "x": 3,
+        "z": 2.9
+      },
+      {
+        "kind": "stool",
+        "x": 2.65,
+        "z": 1.95,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": 3.35,
+        "z": 1.95,
+        "rot": 0
+      },
+      {
+        "kind": "diningtable",
+        "x": -1.6,
+        "z": 0.6
+      },
+      {
+        "kind": "stool",
+        "x": -1.6,
+        "z": -0.4,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": -1.6,
+        "z": 1.6,
+        "rot": 180
+      },
+      {
+        "kind": "diningtable",
+        "x": 1.8,
+        "z": 0.6
+      },
+      {
+        "kind": "stool",
+        "x": 1.8,
+        "z": -0.4,
+        "rot": 0
+      },
+      {
+        "kind": "stool",
+        "x": 1.8,
+        "z": 1.6,
+        "rot": 180
+      },
+      {
+        "kind": "diningtable",
+        "x": -1.5,
+        "z": -3.2
+      },
+      {
+        "kind": "stool",
+        "x": -1.5,
+        "z": -2.2,
+        "rot": 180
+      },
+      {
+        "kind": "diningtable",
+        "x": 1.5,
+        "z": -3.2
+      },
+      {
+        "kind": "stool",
+        "x": 1.5,
+        "z": -2.2,
+        "rot": 180
+      },
+      {
+        "kind": "espressobar",
+        "x": 5,
+        "z": 0.4,
+        "rot": -90,
+        "action": "shop:city-cafe",
+        "label": "看看菜单"
+      },
+      {
+        "kind": "cakecase",
+        "x": 5.2,
+        "z": -2.6,
+        "rot": -90,
+        "sign": "点心"
+      },
+      {
+        "kind": "menuboard",
+        "x": -5.84,
+        "z": 0.2,
+        "rot": 90,
+        "sign": "菜单"
+      },
+      {
+        "kind": "sofa",
+        "x": -5.5,
+        "z": -2.4,
+        "rot": 90
+      },
+      {
+        "kind": "diningtable",
+        "x": -4.1,
+        "z": -2.4
+      },
+      {
+        "kind": "plantpot",
+        "x": -5.4,
+        "z": -4
+      },
+      {
+        "kind": "plantpot",
+        "x": 5.4,
+        "z": 3.2
+      },
+      {
+        "kind": "floorsign",
+        "x": -1.6,
+        "z": 3.6,
+        "rot": 0,
+        "sign": "今日推荐"
+      },
+      {
+        "kind": "wallclock",
+        "x": 3.4,
+        "z": -4.5,
+        "rot": 0
+      }
+    ],
+    "staff": [
+      {
+        "id": "city-cafe-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#3b7d8c",
+        "path": [
+          [
+            5.6,
+            -0.4
+          ],
+          [
+            5.6,
+            1.2
+          ]
+        ],
+        "speed": 0.5
+      }
+    ]
+  },
+  "mall": {
+    "zh": "星光百货",
+    "pinyin": "Xīngguāng Bǎihuò",
+    "en": "Starlight Department Store",
+    "building": "city:department",
+    "door": {
+      "x": -10.5,
+      "z": 0
+    },
+    "interiorOnly": true,
+    "returnPlace": "city",
+    "returnSpawn": [
+      -9.4,
+      0,
+      -90
+    ],
+    "returnLabel": "出口",
+    "enterLabel": "进商场",
+    "size": [
+      36,
+      36
+    ],
+    "spawn": [
+      0,
+      15.6
+    ],
+    "exit": [
+      0,
+      17.3
+    ],
+    "height": 24.4,
+    "doorHeight": 3.2,
+    "open": true,
+    "levels": [
+      0,
+      6,
+      12,
+      18
+    ],
+    "floor": "#e2ddd3",
+    "wall": "#eeebe4",
+    "trim": "#6f7880",
+    "roofBeam": "#59616a",
+    "annexes": [
+      {
+        "wall": "west",
+        "x": -18,
+        "z": 0,
+        "room": "hardware",
+        "label": "进五金百货"
+      }
+    ],
+    "fittings": [
+      {
+        "kind": "checkout",
+        "x": 15.8,
+        "z": -6.5,
+        "rot": -90,
+        "action": "shop:mall-phones",
+        "label": "收银台 · 手机店"
+      },
+      {
+        "kind": "displaytable",
+        "x": 13.6,
+        "z": -10.2,
+        "rot": 0,
+        "tint": "#dfe4e8"
+      },
+      {
+        "kind": "displaytable",
+        "x": 13.6,
+        "z": -2.8,
+        "rot": 0,
+        "tint": "#dfe4e8"
+      },
+      {
+        "kind": "shelfunit",
+        "x": 17.72,
+        "z": -11,
+        "rot": -90,
+        "tint": "#dfe4e8"
+      },
+      {
+        "kind": "shelfunit",
+        "x": 17.72,
+        "z": -2,
+        "rot": -90,
+        "tint": "#dfe4e8"
+      },
+      {
+        "kind": "poster",
+        "x": 17.92,
+        "z": -9,
+        "rot": -90
+      },
+      {
+        "kind": "teabar",
+        "x": 15.6,
+        "z": 6.5,
+        "rot": -90,
+        "tint": "#c86f5a",
+        "action": "shop:mall-tea",
+        "label": "看看菜单"
+      },
+      {
+        "kind": "cupshelf",
+        "x": 17.8,
+        "z": 6.5,
+        "rot": -90
+      },
+      {
+        "kind": "menuboard",
+        "x": 17.82,
+        "z": 10.5,
+        "rot": -90
+      },
+      {
+        "kind": "cafetable",
+        "x": 13.4,
+        "z": 3.2,
+        "name": "table"
+      },
+      {
+        "kind": "stool",
+        "x": 13.4,
+        "z": 4.1
+      },
+      {
+        "kind": "stool",
+        "x": 13.4,
+        "z": 2.3
+      },
+      {
+        "kind": "cafetable",
+        "x": 13.4,
+        "z": 10.2,
+        "name": "table"
+      },
+      {
+        "kind": "stool",
+        "x": 13.4,
+        "z": 11.1
+      },
+      {
+        "kind": "stool",
+        "x": 13.4,
+        "z": 9.3
+      },
+      {
+        "kind": "toolwall",
+        "x": -17.78,
+        "z": -7,
+        "rot": 90
+      },
+      {
+        "kind": "toolwall",
+        "x": -17.78,
+        "z": 7,
+        "rot": 90
+      },
+      {
+        "kind": "bedshow",
+        "x": -14.6,
+        "z": -8.5,
+        "rot": 90
+      },
+      {
+        "kind": "lampdisplay",
+        "x": -14.6,
+        "z": 8.5,
+        "rot": 90
+      },
+      {
+        "kind": "displaytable",
+        "x": -14.4,
+        "z": -3.4,
+        "rot": 90
+      },
+      {
+        "kind": "floorsign",
+        "x": -13,
+        "z": 2.6,
+        "rot": 90,
+        "sign": "欢迎光临",
+        "name": "sign"
+      },
+      {
+        "kind": "reception",
+        "x": -5.5,
+        "z": 13,
+        "rot": 90,
+        "tint": "#3f4a55"
+      },
+      {
+        "kind": "bench",
+        "x": -3.6,
+        "z": 7.2,
+        "rot": 0
+      },
+      {
+        "kind": "bench",
+        "x": 3.6,
+        "z": 7.2,
+        "rot": 0
+      },
+      {
+        "kind": "plantpot",
+        "x": -5.4,
+        "z": 7.2
+      },
+      {
+        "kind": "plantpot",
+        "x": 5.4,
+        "z": 7.2
+      },
+      {
+        "kind": "bench",
+        "x": 8.6,
+        "z": -6.5,
+        "rot": 90
+      },
+      {
+        "kind": "bench",
+        "x": 8.6,
+        "z": 6.5,
+        "rot": 90
+      },
+      {
+        "kind": "plantpot",
+        "x": -8.6,
+        "z": 6.5
+      },
+      {
+        "kind": "plantpot",
+        "x": -8.6,
+        "z": -6.5
+      },
+      {
+        "kind": "checkout",
+        "x": 15.8,
+        "z": 0,
+        "rot": -90,
+        "action": "shop:mall-sports",
+        "label": "收银台 · 运动用品",
+        "y": 6
+      },
+      {
+        "kind": "shoeshelf",
+        "x": 17.72,
+        "z": -6,
+        "rot": -90,
+        "y": 6
+      },
+      {
+        "kind": "shoeshelf",
+        "x": 17.72,
+        "z": 6,
+        "rot": -90,
+        "y": 6
+      },
+      {
+        "kind": "clothesrail",
+        "x": 14.2,
+        "z": -9,
+        "rot": 0,
+        "tint": "#3f7a4a",
+        "y": 6
+      },
+      {
+        "kind": "clothesrail",
+        "x": 14.2,
+        "z": 9,
+        "rot": 0,
+        "tint": "#2f5f8f",
+        "y": 6
+      },
+      {
+        "kind": "mannequin",
+        "x": 13,
+        "z": -4.5,
+        "y": 6
+      },
+      {
+        "kind": "mannequin",
+        "x": 13,
+        "z": 4.5,
+        "y": 6
+      },
+      {
+        "kind": "checkout",
+        "x": -15.8,
+        "z": 0,
+        "rot": 90,
+        "action": "shop:mall-clothes",
+        "label": "收银台 · 服装店",
+        "y": 6
+      },
+      {
+        "kind": "clothesrail",
+        "x": -14.2,
+        "z": -8.5,
+        "rot": 0,
+        "tint": "#8a5a7a",
+        "y": 6
+      },
+      {
+        "kind": "clothesrail",
+        "x": -14.2,
+        "z": 8.5,
+        "rot": 0,
+        "tint": "#c9707f",
+        "y": 6
+      },
+      {
+        "kind": "fittingroom",
+        "x": -17.1,
+        "z": -10.8,
+        "rot": 90,
+        "y": 6
+      },
+      {
+        "kind": "mirror",
+        "x": -17.82,
+        "z": -5.5,
+        "rot": 90,
+        "y": 6
+      },
+      {
+        "kind": "hatshelf",
+        "x": -17.78,
+        "z": 5.5,
+        "rot": 90,
+        "y": 6
+      },
+      {
+        "kind": "mannequin",
+        "x": -13,
+        "z": -4,
+        "y": 6
+      },
+      {
+        "kind": "mannequin",
+        "x": -13,
+        "z": 4,
+        "y": 6
+      },
+      {
+        "kind": "bench",
+        "x": 8.6,
+        "z": -6.5,
+        "rot": 90,
+        "y": 6
+      },
+      {
+        "kind": "bench",
+        "x": 8.6,
+        "z": 6.5,
+        "rot": 90,
+        "y": 6
+      },
+      {
+        "kind": "bench",
+        "x": -8.6,
+        "z": -6.5,
+        "rot": 90,
+        "y": 6
+      },
+      {
+        "kind": "bench",
+        "x": -8.6,
+        "z": 6.5,
+        "rot": 90,
+        "y": 6
+      },
+      {
+        "kind": "checkout",
+        "x": 15.8,
+        "z": 0,
+        "rot": -90,
+        "action": "shop:mall-toys",
+        "label": "收银台 · 玩具店",
+        "y": 12
+      },
+      {
+        "kind": "shelfunit",
+        "x": 17.72,
+        "z": -7,
+        "rot": -90,
+        "tint": "#e9a23b",
+        "y": 12
+      },
+      {
+        "kind": "shelfunit",
+        "x": 17.72,
+        "z": 7,
+        "rot": -90,
+        "tint": "#5aa0d8",
+        "y": 12
+      },
+      {
+        "kind": "displaytable",
+        "x": 14,
+        "z": -8,
+        "rot": 0,
+        "tint": "#e5c35a",
+        "y": 12
+      },
+      {
+        "kind": "displaytable",
+        "x": 14,
+        "z": 8,
+        "rot": 0,
+        "tint": "#8fc0a0",
+        "y": 12
+      },
+      {
+        "kind": "basketstack",
+        "x": 13,
+        "z": -3.2,
+        "y": 12
+      },
+      {
+        "kind": "bookcase",
+        "x": -17.76,
+        "z": -6,
+        "rot": 90,
+        "y": 12
+      },
+      {
+        "kind": "bookcase",
+        "x": -17.76,
+        "z": 6,
+        "rot": 90,
+        "y": 12
+      },
+      {
+        "kind": "readingdesk",
+        "x": -14.5,
+        "z": -6,
+        "rot": 90,
+        "y": 12
+      },
+      {
+        "kind": "readingdesk",
+        "x": -14.5,
+        "z": 6,
+        "rot": 90,
+        "y": 12
+      },
+      {
+        "kind": "rug",
+        "x": -14.5,
+        "z": 0,
+        "y": 12
+      },
+      {
+        "kind": "plantpot",
+        "x": -12.8,
+        "z": -11.6,
+        "y": 12
+      },
+      {
+        "kind": "plantpot",
+        "x": -12.8,
+        "z": 11.6,
+        "y": 12
+      },
+      {
+        "kind": "bench",
+        "x": 8.6,
+        "z": -6.5,
+        "rot": 90,
+        "y": 12
+      },
+      {
+        "kind": "bench",
+        "x": 8.6,
+        "z": 6.5,
+        "rot": 90,
+        "y": 12
+      },
+      {
+        "kind": "bench",
+        "x": -8.6,
+        "z": -6.5,
+        "rot": 90,
+        "y": 12
+      },
+      {
+        "kind": "bench",
+        "x": -8.6,
+        "z": 6.5,
+        "rot": 90,
+        "y": 12
+      },
+      {
+        "kind": "servicecounter",
+        "x": 13.4,
+        "z": -8,
+        "rot": -90,
+        "action": "shop:mall-food",
+        "label": "炒饭 · 拉面",
+        "y": 18
+      },
+      {
+        "kind": "bakerycounter",
+        "x": 13.4,
+        "z": 0,
+        "rot": -90,
+        "action": "shop:mall-food",
+        "label": "汉堡 · 披萨",
+        "y": 18
+      },
+      {
+        "kind": "servicecounter",
+        "x": 13.4,
+        "z": 8,
+        "rot": -90,
+        "action": "shop:mall-food",
+        "label": "寿司",
+        "y": 18
+      },
+      {
+        "kind": "menuboard",
+        "x": 17.82,
+        "z": 0,
+        "rot": -90,
+        "y": 18
+      },
+      {
+        "kind": "menuboard",
+        "x": 17.82,
+        "z": 8,
+        "rot": -90,
+        "y": 18
+      },
+      {
+        "kind": "cakecase",
+        "x": -13.4,
+        "z": -5,
+        "rot": 90,
+        "action": "shop:mall-food",
+        "label": "冰淇淋",
+        "y": 18
+      },
+      {
+        "kind": "espressobar",
+        "x": -13.4,
+        "z": 5,
+        "rot": 90,
+        "action": "shop:mall-food",
+        "label": "看看菜单",
+        "y": 18
+      },
+      {
+        "kind": "menuboard",
+        "x": -17.82,
+        "z": 9,
+        "rot": 90,
+        "y": 18
+      },
+      {
+        "kind": "diningtable",
+        "x": -8,
+        "z": 14.6,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": -9,
+        "z": 14.6,
+        "rot": 90,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": -7,
+        "z": 14.6,
+        "rot": -90,
+        "y": 18
+      },
+      {
+        "kind": "diningtable",
+        "x": -3,
+        "z": 14.6,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": -4,
+        "z": 14.6,
+        "rot": 90,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": -2,
+        "z": 14.6,
+        "rot": -90,
+        "y": 18
+      },
+      {
+        "kind": "diningtable",
+        "x": 3,
+        "z": 14.6,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": 2,
+        "z": 14.6,
+        "rot": 90,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": 4,
+        "z": 14.6,
+        "rot": -90,
+        "y": 18
+      },
+      {
+        "kind": "diningtable",
+        "x": 8,
+        "z": 14.6,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": 7,
+        "z": 14.6,
+        "rot": 90,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": 9,
+        "z": 14.6,
+        "rot": -90,
+        "y": 18
+      },
+      {
+        "kind": "diningtable",
+        "x": -8,
+        "z": -14.6,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": -9,
+        "z": -14.6,
+        "rot": 90,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": -7,
+        "z": -14.6,
+        "rot": -90,
+        "y": 18
+      },
+      {
+        "kind": "diningtable",
+        "x": -4.5,
+        "z": -14.6,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": -5.5,
+        "z": -14.6,
+        "rot": 90,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": -3.5,
+        "z": -14.6,
+        "rot": -90,
+        "y": 18
+      },
+      {
+        "kind": "diningtable",
+        "x": 4.5,
+        "z": -14.6,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": 3.5,
+        "z": -14.6,
+        "rot": 90,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": 5.5,
+        "z": -14.6,
+        "rot": -90,
+        "y": 18
+      },
+      {
+        "kind": "diningtable",
+        "x": 8,
+        "z": -14.6,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": 7,
+        "z": -14.6,
+        "rot": 90,
+        "y": 18
+      },
+      {
+        "kind": "diningchair",
+        "x": 9,
+        "z": -14.6,
+        "rot": -90,
+        "y": 18
+      }
+    ],
+    "staff": [
+      {
+        "id": "mall-phones-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#2f6f8f",
+        "shop": "mall-phones",
+        "path": [
+          [
+            17.1,
+            -7.6
+          ],
+          [
+            17.1,
+            -5.4
+          ]
+        ],
+        "speed": 0.4
+      },
+      {
+        "id": "mall-tea-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#c86f5a",
+        "shop": "mall-tea",
+        "path": [
+          [
+            16.85,
+            5.6
+          ],
+          [
+            16.85,
+            7.4
+          ]
+        ],
+        "speed": 0.4
+      },
+      {
+        "id": "mall-info-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#3f4a55",
+        "shop": "mall-info",
+        "path": [
+          [
+            -6.7,
+            12.4
+          ],
+          [
+            -6.7,
+            13.6
+          ]
+        ],
+        "speed": 0.4,
+        "line": [
+          "shop-mall-info",
+          "shop-mall-food"
+        ]
+      },
+      {
+        "id": "mall-sports-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#3f7a4a",
+        "shop": "mall-sports",
+        "y": 6,
+        "path": [
+          [
+            17.1,
+            -0.8
+          ],
+          [
+            17.1,
+            0.8
+          ]
+        ],
+        "speed": 0.4
+      },
+      {
+        "id": "mall-clothes-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#8a5a7a",
+        "shop": "mall-clothes",
+        "y": 6,
+        "path": [
+          [
+            -17.1,
+            -0.8
+          ],
+          [
+            -17.1,
+            0.8
+          ]
+        ],
+        "speed": 0.4
+      },
+      {
+        "id": "mall-toys-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#d08a2e",
+        "shop": "mall-toys",
+        "y": 12,
+        "path": [
+          [
+            17.1,
+            -0.8
+          ],
+          [
+            17.1,
+            0.8
+          ]
+        ],
+        "speed": 0.4
+      },
+      {
+        "id": "mall-food-clerk",
+        "zh": "营业员",
+        "pinyin": "yíngyèyuán",
+        "en": "shop assistant",
+        "look": "clerk",
+        "color": "#b0503c",
+        "shop": "mall-food",
+        "y": 18,
+        "path": [
+          [
+            15.2,
+            -0.8
+          ],
+          [
+            15.2,
+            0.8
+          ]
+        ],
+        "speed": 0.4,
+        "line": "shop-mall-eat"
+      }
+    ]
   }
 }

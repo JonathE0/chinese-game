@@ -1,5 +1,6 @@
 import * as pc from 'playcanvas';
 import {waterOf} from './water.js';
+import {detail,RENDER} from '../core/quality.js';
 
 /**
  * 云海湾: the bay in front of the promenade (task H-water, docs/superpowers/plans/2026-09-26-development-wave-2.md).
@@ -100,7 +101,8 @@ class Mirror {
     // The city's statics are batched by now: whatever was reflected while it was being built can join.
     if(!this.ready){this.ready=true;for(const entity of pending)this.add(entity);pending.clear();}
     const t=this.town,eye=t.camera,main=eye.camera,own=this.camera.camera;
-    const on=t.reflections!==false&&eye.getPosition().y>BAY.level+.05&&main.frustum.containsAabb(this.box)>0;
+    // 水面倒影 as the player set it, else as the graphics level has it (src/core/quality.js).
+    const on=(t.reflections??RENDER[detail()].reflections)&&eye.getPosition().y>BAY.level+.05&&main.frustum.containsAabb(this.box)>0;
     if(own.enabled!==on)own.enabled=on;
     if(this.strength!==+on){this.strength=+on;this.material.setParameter('reflectionStrength',this.strength);}
     if(!on)return;

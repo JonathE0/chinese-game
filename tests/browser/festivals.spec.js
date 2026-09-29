@@ -101,10 +101,17 @@ test('each festival dresses the town with named pieces, and the day after is ord
     const seen=await page.evaluate(coverage);
     expect(seen.bare,id).toEqual([]);
   }
-  // 中秋节 at night: the moon is up and named 月亮.
+  // 中秋节 at night: the festival's moon is the sky's own moon (src/world/sky.js), up, and named 月亮 when looked at.
   await page.evaluate(()=>{window.__qinghe.profile.dayIndex=27;});
   await page.waitForFunction(()=>window.__qinghe.town.festival.moon?.enabled);
-  expect(await page.evaluate(()=>window.__qinghe.town.registry.looks.some(b=>b.name?.id==='yueliang'))).toBe(true);
+  const moon=await page.evaluate(()=>new Promise(done=>{
+    const t=window.__qinghe.town,d=t.sky.moon.getPosition().clone().sub(t.camera.getPosition()).normalize();
+    t.yaw=Math.atan2(-d.x,-d.z)*180/Math.PI;t.pitch=Math.asin(d.y)*180/Math.PI;
+    let k=0;const f=()=>{if(++k<4)return;t.app.off('frameend',f);
+      done({same:t.festival.moon===t.sky.moon,looking:t.looking?.id,box:t.lookingBox?.entity===t.sky.moon});};
+    t.app.on('frameend',f);
+  }));
+  expect(moon).toEqual({same:true,looking:'yueliang',box:true});
   await page.evaluate(()=>{window.__qinghe.profile.dayIndex=28;});
   await page.waitForFunction(()=>window.__qinghe.town.festival.id===null);
   expect(await page.evaluate(()=>window.__qinghe.town.registry.looks.some(b=>b.owner?.startsWith?.('festival')))).toBe(false);

@@ -16,6 +16,8 @@
     "driver":   {"voice": "zh-CN-YunjianNeural",  "rate": "+6%",  "pitch": "+2Hz", "note": "A Yunhai taxi driver. Brisk and friendly."},
     "cook":     {"voice": "zh-CN-YunxiNeural",    "rate": "+4%",  "pitch": "-3Hz", "note": "The cook at 海风面馆 in Yunhai. Warm and quick."},
     "hotpot-waiter": {"voice": "zh-CN-XiaoyiNeural", "rate": "+6%", "pitch": "+3Hz", "note": "The waitress at 山城老火锅 on the hill. Bright and brisk."},
-    "hotpot-chef": {"voice": "zh-CN-YunjianNeural", "rate": "+8%", "pitch": "-6Hz", "note": "The noodle-pulling chef at 山城老火锅. Loud and showy."}
+    "hotpot-chef": {"voice": "zh-CN-YunjianNeural", "rate": "+8%", "pitch": "-6Hz", "note": "The noodle-pulling chef at 山城老火锅. Loud and showy."},
+    "ferry-crew": {"voice": "zh-CN-YunyangNeural", "rate": "+4%", "pitch": "+2Hz", "note": "The crew of the ferry across 云海湾, calling from the gangway. Clear and brisk."},
+    "wheel-attendant": {"voice": "zh-CN-XiaoxiaoNeural", "rate": "+2%", "pitch": "+4Hz", "note": "The attendant at the Ferris wheel on the far landing. Cheerful and careful."}
   }
 }

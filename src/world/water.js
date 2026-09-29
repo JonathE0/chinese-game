@@ -22,14 +22,17 @@ const RING_SPEED=1.1;            // metres a second the front ring travels
 const EDGE=1.1;                  // standing this close to the water, rings lap at its edge
 const TEXELS=128;                // the ripple texture's size, in pixels a side
 
+// Projected camera-relative, like every lit material (town.js cameraRelative): 云海's bay lies 4 km
+// from the origin, where viewProjection * worldPosition in 32-bit floats jitters by a millimetre.
 const VS=`attribute vec3 vertex_position;
 uniform mat4 matrix_model;
-uniform mat4 matrix_viewProjection;
+uniform mat4 matrix_view;
+uniform mat4 matrix_projection;
 varying vec3 vWorld;
 void main(void){
   vec4 world=matrix_model*vec4(vertex_position,1.0);
   vWorld=world.xyz;
-  gl_Position=matrix_viewProjection*world;
+  gl_Position=matrix_projection*vec4(mat3(matrix_view)*(world.xyz+matrix_view[3].xyz*mat3(matrix_view)),1.0);
 }`;
 // Engine chunks finish the colour exactly as the lit materials do: fog, then tone mapping, then gamma.
 const FS=`#include "gammaPS"

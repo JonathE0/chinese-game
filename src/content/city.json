@@ -1,5 +1,5 @@
 {
-  "note": "The metropolis you reach by metro, redone after a night walk round Shenzhen Bay. `station` is the entrance back in the town square; `place` is the district itself, in its own local metres (x east, z south, the metro at the south end), swapped in wholesale the same way an interior is. `walk` lists the ground you can stand on as rectangles [x0, x1, z0, z1]: downtown, the promenade along the bay, and the hill side west of downtown (the hill itself is src/content/hill.json). `farClip` and `haze` [start, end] are how far the camera sees here and where the sky-coloured haze begins and closes in. `street.road` is the carriageway, `street.bays` the taxi lay-bys off it and `street.pavement` the paving round them, each [x0, x1, z0, z1]; `land` is the ground round the bay as [x0, x1, z0, z1, top], its edges on the water the sea walls. Towers, props, the promenade and its lit path, the skyline across the bay and the blocks round the edge are authored here so the layout can be checked without running the game; `leds` on a tower asks for running light bands (`bands`, heights), lit corners (`edges`), a colour-washed crown (`crown`, one of three washes), a washed screen on its front (`screen`), two light lines up its front (`stripes`) and big lit characters (`text`, each a signs.json entry). The gate at the end of the avenue carries a couplet down its posts (`couplet`, first line then second), the first line on the left as you face it from either side, so it reads left to right like the words across the top. `edges` are the low walls [x0, x1, z0, z1] where the ground ends over open land.",
+  "note": "The metropolis you reach by metro, redone after a night walk round Shenzhen Bay. `station` is the entrance back in the town square; `place` is the district itself, in its own local metres (x east, z south, the metro at the south end), swapped in wholesale the same way an interior is. `walk` lists the ground you can stand on as rectangles [x0, x1, z0, z1]: downtown, the promenade along the bay, and the hill side west of downtown (the hill itself is src/content/hill.json). `farClip` and `haze` [start, end] are how far the camera sees here and where the sky-coloured haze begins and closes in. `street.road` is the carriageway, `street.bays` the taxi lay-bys off it and `street.pavement` the paving round them, each [x0, x1, z0, z1]; `land` is the ground round the bay as [x0, x1, z0, z1, top], its edges on the water the sea walls. Towers, props, the promenade and its lit path, the skyline across the bay and the blocks round the edge are authored here so the layout can be checked without running the game; `leds` on a tower asks for running light bands (`bands`, heights), lit corners (`edges`), a colour-washed crown (`crown`, one of three washes), a washed screen on its front (`screen`), two light lines up its front (`stripes`) and big lit characters (`text`, each a signs.json entry). The gate at the end of the avenue carries a couplet down its posts (`couplet`, first line then second), the first line on the left as you face it from either side, so it reads left to right like the words across the top. `edges` are the low walls [x0, x1, z0, z1] where the ground ends over open land. A tower with a `form` is one of the near side's buildings (src/world/city.js `building`): a `podium` {h, style: colonnade, books, lobby, shopfront, cafe, store, marquee or stone} with its door (`door.x` along the front) and `canopy` (glass, slab, wave, marquee or awning), then `tiers` stepping in above it, each {to: the height of its top, inset from the footprint, skin: curtain, piers, ribbons, fins, louvres, balconies, diagrid, screen, bow or garden (a sky garden, which stands where the tiers below and above it overlap), windows, dx/dz to shift it}, and a `crown` (lantern, stepped, fins, helipad, sail, garden, pavilion or slope); its `leds` say which glazing its rooms glow through (`windows`, one of src/world/leds.js GLAZING), the colours of its outlines, uplights and neon sign, and its media wall (`text`). `doors` are the city's doors {room, x, z, label}, each on the pavement just in front of its building's entrance; the rooms return to the city with their own `returnSpawn`.",
   "station": {
     "x": -7.5,
     "z": 14.6,
@@ -54,198 +54,86 @@
     [-600, 600, -800, -170, 0.3]
   ],
   "towers": [
+    {"x": -17.5, "z": 16.5, "w": 12, "d": 12, "h": 58, "rot": 90, "name": "tower",
+     "sign": "云海银行",
+     "color": "#cfc5b1", "trim": "#e8e1d1", "frame": "#c9bca4",
+     "form": {"podium": {"h": 10, "style": "colonnade"}, "canopy": "glass",
+              "tiers": [{"to": 44, "inset": 0.8, "skin": "piers"},
+                        {"to": 53, "inset": 2.1, "skin": "curtain", "windows": "curtain"}],
+              "crown": "lantern"},
+     "leds": {"windows": "punched", "outline": "#ffcf7a", "uplight": "#ffc987", "neon": "#ffc65a",
+              "text": {"zh": "你好", "y": 39, "cell": 3.4, "color": "#ffd36b"}}},
     {
-      "x": -17.5,
-      "z": 16.5,
-      "w": 12,
-      "d": 12,
-      "h": 58,
-      "color": "#2c3d4b",
-      "glass": "#7fa3b8",
-      "sign": "云海银行",
-      "signColor": "#d8e4dd",
-      "signInk": "#2a4a4f",
-      "rot": 90,
-      "name": "tower",
-      "leds": {
-        "edges": true,
-        "crown": 0,
-        "text": {
-          "zh": "你好",
-          "y": 47,
-          "cell": 5,
-          "color": "#ffd36b"
-        }
-      }
-    },
-    {
-      "x": -17.5,
-      "z": 0,
-      "w": 11,
-      "d": 13,
-      "h": 44,
-      "color": "#3a3342",
-      "glass": "#a597c4",
-      "sign": "星光百货",
-      "signColor": "#f2d7a8",
-      "signInk": "#7a3f2f",
-      "rot": 90,
-      "name": "tower",
-      "leds": {
-        "bands": [13, 20, 27, 34],
-        "crown": 1
-      }
-    },
-    {
-      "x": -17.5,
-      "z": -16,
-      "w": 15,
-      "d": 12,
-      "h": 36,
-      "color": "#4a4238",
-      "glass": "#bba98c",
-      "sign": "一号书店",
-      "signColor": "#dfe7cf",
-      "signInk": "#3d5340",
-      "rot": 90,
-      "name": "tower",
-      "leds": {
-        "edges": true,
-        "bands": [33]
-      }
-    },
-    {
-      "x": 17.5,
-      "z": 16,
-      "w": 13.8,
-      "d": 12,
-      "h": 50,
-      "color": "#2c3d4b",
-      "glass": "#7fa3b8",
-      "sign": "中山医院",
-      "signColor": "#e8dfe6",
-      "signInk": "#5b3f63",
-      "rot": -90,
-      "name": "tower",
-      "leds": {
-        "edges": true,
-        "crown": 2
-      }
-    },
-    {
-      "x": 17.5,
-      "z": 1,
-      "w": 15,
-      "d": 13,
-      "h": 32,
-      "color": "#4a4238",
-      "glass": "#bba98c",
-      "sign": "海风面馆",
-      "signColor": "#f4c9a1",
-      "signInk": "#7c3a2c",
-      "rot": -90,
-      "name": "tower",
-      "leds": {
-        "bands": [11, 17, 23, 29]
-      }
-    },
-    {
-      "x": 17.5,
-      "z": -15,
-      "w": 15,
-      "d": 12,
-      "h": 40,
-      "color": "#3a3342",
-      "glass": "#a597c4",
-      "sign": "光明电影院",
-      "signColor": "#d6dff0",
-      "signInk": "#33436b",
-      "rot": -90,
-      "name": "tower",
-      "leds": {
-        "screen": {
-          "y0": 12,
-          "y1": 31,
-          "wash": 1
-        },
-        "text": {
-          "zh": "学中文",
-          "y": 21.5,
-          "cell": 3.8,
-          "color": "#ffffff"
-        }
-      }
-    },
-    {
-      "x": -19,
-      "z": -31,
-      "w": 11,
-      "d": 7,
-      "h": 52,
-      "color": "#3a3342",
-      "glass": "#b08a8a",
-      "rot": 0,
-      "name": "tower",
-      "leds": {
-        "edges": true,
-        "bands": [12, 50],
-        "stripes": true
-      }
-    },
-    {
-      "x": 19,
-      "z": -31,
-      "w": 11,
-      "d": 7,
-      "h": 52,
-      "color": "#3a3342",
-      "glass": "#b08a8a",
-      "rot": 0,
-      "name": "tower",
-      "leds": {
-        "edges": true,
-        "bands": [12, 50],
-        "stripes": true,
-        "crown": 1
-      }
-    },
-    {
-      "x": 49,
-      "z": -22,
-      "w": 20,
-      "d": 14,
-      "h": 80,
-      "color": "#2c3d4b",
-      "glass": "#7fa3b8",
-      "rot": 180,
-      "name": "tower",
-      "street": false,
-      "leds": {
-        "edges": true,
-        "bands": [24, 68],
-        "crown": 0,
-        "text": {
-          "zh": "海风大厦",
-          "y": 46,
-          "cell": 6,
-          "color": "#9fe8ff",
-          "vertical": true
-        }
-      }
-    },
-    {
-      "x": 32,
-      "z": -26,
-      "w": 9,
-      "d": 12,
+      "x": -20.6,
+      "z": -1.15,
+      "w": 13.5,
+      "d": 18.8,
       "h": 26,
-      "color": "#2d3340",
-      "glass": "#9aabb8",
-      "rot": 180,
+      "sign": "星光百货",
+      "rot": 90,
       "name": "tower",
-      "street": false,
-      "leds": {}
-    }
+      "drawnBy": "mall"
+    },
+    {"x": -17.5, "z": -16, "w": 15, "d": 12, "h": 36, "rot": 90, "name": "tower",
+     "sign": "一号书店",
+     "color": "#6d5646", "trim": "#d8c9ae", "finColor": "#b98a58", "canopyColor": "#8a6a4c",
+     "form": {"podium": {"h": 7, "style": "books"}, "canopy": "slab",
+              "tiers": [{"to": 33, "inset": 0.6, "skin": "louvres"}],
+              "crown": "garden"},
+     "leds": {"windows": "hotel", "outline": "#ffe2b4", "uplight": "#ffc07a", "neon": "#fff0cf"}},
+    {"x": 17.5, "z": 16, "w": 13.8, "d": 12, "h": 50, "rot": -90, "name": "tower",
+     "sign": "中山医院",
+     "color": "#dedcd5", "trim": "#f1efe9",
+     "form": {"podium": {"h": 8, "style": "lobby"}, "canopy": "wave",
+              "tiers": [{"to": 46, "inset": 0.7, "skin": "ribbons"}],
+              "crown": "helipad"},
+     "leds": {"windows": "ribbon", "outline": "#c4ecff", "uplight": "#cfe6ff", "neon": "#8ff2d8"}},
+    {"x": 17.5, "z": 1, "w": 15, "d": 13, "h": 32, "rot": -90, "name": "tower",
+     "sign": "海风面馆",
+     "color": "#9a5a44", "trim": "#e9e1d3", "awning": ["#f1e6d0", "#b8392f"],
+     "form": {"podium": {"h": 6, "style": "shopfront"}, "canopy": "awning",
+              "tiers": [{"to": 30, "inset": 0.5, "skin": "balconies"}],
+              "crown": "pavilion"},
+     "leds": {"windows": "home", "outline": "#ffb46e", "neon": "#ff5f86", "bowl": true}},
+    {"x": 17.5, "z": -15, "w": 15, "d": 12, "h": 40, "rot": -90, "name": "tower",
+     "sign": "光明电影院",
+     "color": "#3a3342", "trim": "#4a4256",
+     "form": {"podium": {"h": 7, "style": "marquee"}, "canopy": "marquee",
+              "tiers": [{"to": 37, "inset": 0.4, "skin": "screen", "windows": "dark"}],
+              "crown": "slope"},
+     "leds": {"windows": "dark", "outline": "#ff7ad9", "neon": "#ffe27a",
+              "text": {"zh": "学中文", "y": 22.5, "size": [12.8, 19], "color": "#ffffff"}}},
+    {"x": -19, "z": -31, "w": 7, "d": 11, "h": 52, "rot": 90, "name": "tower",
+     "sign": "便利店", "signWidth": 2.9, "signX": -1.75, "canopyWidth": 2.6,
+     "color": "#2d3340", "trim": "#c9d1d8",
+     "form": {"podium": {"h": 6, "style": "store"}, "canopy": "slab", "door": {"x": -1.85},
+              "tiers": [{"to": 48, "inset": 0.3, "skin": "diagrid", "windows": "curtain"}],
+              "crown": "fins"},
+     "leds": {"windows": "curtain", "outline": "#aee7ff", "neon": "#86ffbf"}},
+    {"x": 19, "z": -31, "w": 11, "d": 7, "h": 52, "rot": 180, "name": "tower",
+     "sign": "海边咖啡", "signWidth": 6,
+     "color": "#d9d2c4", "trim": "#efe9dd", "awning": ["#efe6d2", "#2f6f73"],
+     "form": {"podium": {"h": 6, "style": "cafe"}, "canopy": "awning",
+              "tiers": [{"to": 20, "inset": 0.3, "skin": "curtain", "dx": -0.6},
+                        {"to": 24, "skin": "garden"},
+                        {"to": 38, "inset": 0.3, "skin": "curtain", "dx": 0.7},
+                        {"to": 42, "skin": "garden"},
+                        {"to": 50, "inset": 0.6, "skin": "curtain", "dx": -0.4}],
+              "crown": "pavilion"},
+     "leds": {"windows": "home", "outline": "#ffe6b8", "neon": "#ffd49a"}},
+    {"x": 49, "z": -22, "w": 20, "d": 14, "h": 80, "rot": 180, "name": "tower",
+     "color": "#2c3d4b", "trim": "#c7d3dc", "stone": "#b6b1a8",
+     "form": {"podium": {"h": 12, "style": "stone"},
+              "tiers": [{"to": 66, "inset": 1.2, "skin": "bow", "bulge": 2, "windows": "curtain"}],
+              "crown": "sail"},
+     "leds": {"windows": "curtain", "outline": "#9fe8ff", "uplight": "#bfe4ff",
+              "text": {"zh": "海风大厦", "y": 40, "cell": 5.4, "color": "#9fe8ff", "vertical": true}}},
+    {"x": 32, "z": -26, "w": 9, "d": 12, "h": 26, "rot": 180, "name": "tower",
+     "color": "#2d3340", "trim": "#d7cdbc", "stone": "#a9a196", "finColor": "#a3805c",
+     "form": {"podium": {"h": 5, "style": "stone"},
+              "tiers": [{"to": 24, "inset": 0.3, "skin": "fins", "windows": "hotel"}],
+              "crown": "garden"},
+     "leds": {"windows": "hotel", "outline": "#ffd9a8", "uplight": "#ffcf8f"}}
   ],
   "promenade": {
     "x": [-40, 70],
@@ -261,7 +149,8 @@
       "z": -41,
       "radius": 6
     },
-    "railing": -47.85
+    "railing": -47.85,
+    "gaps": [[20, 24]]
   },
   "skyline": {
     "x": [-150, 170],
@@ -269,6 +158,7 @@
     "shore": -170,
     "seed": 20260926,
     "fill": 34,
+    "keepClear": [[-40, 90, -190, -168]],
     "towers": [
       {
         "x": 20,
@@ -307,7 +197,7 @@
       },
       {
         "x": -45,
-        "z": -190,
+        "z": -206,
         "w": 26,
         "d": 18,
         "h": 58,
@@ -325,7 +215,7 @@
       },
       {
         "x": 72,
-        "z": -186,
+        "z": -205,
         "w": 16,
         "d": 16,
         "h": 96,
@@ -920,15 +810,14 @@
       ]
     }
   ],
-  "department": {
-    "room": "hardware",
-    "x": -10.5,
-    "z": 0,
-    "label": "进星光五金百货"
-  },
-  "noodles": {
-    "x": 10.5,
-    "z": 1,
-    "label": "海风面馆 · 点面"
-  }
+  "doors": [
+    {"room": "city-bank", "x": -10.6, "z": 16.5, "label": "进银行"},
+    {"room": "mall", "x": -10.5, "z": 0, "label": "进商场"},
+    {"room": "city-bookshop", "x": -10.6, "z": -16, "label": "进书店"},
+    {"room": "city-hospital", "x": 10.6, "z": 16, "label": "进医院"},
+    {"room": "city-noodles", "x": 10.3, "z": 1, "label": "进面馆"},
+    {"room": "city-cinema", "x": 10.6, "z": -15, "label": "进电影院"},
+    {"room": "city-store", "x": -12.6, "z": -29, "label": "进便利店"},
+    {"room": "city-cafe", "x": 19, "z": -35.6, "label": "进咖啡馆"}
+  ]
 }

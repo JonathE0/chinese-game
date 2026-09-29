@@ -197,7 +197,7 @@
       "id": "city-directions",
       "zh": "问路找书店",
       "pinyin": "Wèn lù zhǎo shūdiàn",
-      "en": "In Yunhai, ask the student on the avenue where 一号书店 is, then walk there.",
+      "en": "In Yunhai, ask the student on the avenue where 一号书店 is, then walk there and go in.",
       "done": {
         "flag": "city:found-bookstore"
       }

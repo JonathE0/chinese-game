@@ -131,7 +131,7 @@ export function buildGarden(models,parent,lamps){
   box(root,[house.x,house.height/2,house.z],[house.width,house.height,house.depth],C.plaster);
   box(root,[house.x,.25,house.z],[house.width+.1,.5,house.depth+.1],C.stoneDark);
   for(const side of [-1,1])box(root,[house.x+side*house.width/4,house.height+.45,house.z],[house.width/2+.35,.14,house.depth+.5],C.coping,[0,0,-side*28]);
-  box(root,[house.x,house.height+.9,house.z],[.2,.16,house.depth+.5],C.ridge);
+  box(root,[house.x,house.height+.9,house.z],[.2,.16,house.depth+.51],C.ridge);
   box(root,[house.x+house.width/2+.03,1.0,house.z-.3],[.06,2,.9],C.timberDark);          // door, on the path side
   box(root,[house.x,1.5,house.z+house.depth/2+.03],[.9,.7,.06],C.timberDark);            // window over the stream
   cylinder(root,[wheel.x,wheel.y,(house.z+house.depth/2+wheel.z)/2],[.14,wheel.z-house.z-house.depth/2,.14],C.timberDark,[90,0,0]).lookName='watermill';

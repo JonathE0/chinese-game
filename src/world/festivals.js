@@ -1,8 +1,8 @@
 import * as pc from 'playcanvas';
 import catalog from '../content/catalog.json' with {type:'json'};
-import objectNames from '../content/objects.json' with {type:'json'};
 import festivals from '../content/festivals.json' with {type:'json'};
 import {festivalOf,RIDDLES} from '../core/festivals.js';
+import {calendarOf} from '../core/calendar.js';
 import {syncDay,bump} from '../core/daily.js';
 
 /**
@@ -13,10 +13,8 @@ import {syncDay,bump} from '../core/daily.js';
  * is tagged for the naming engine and casts no shadow, and each festival stays within about 60
  * draw calls wherever you stand (the lanterns share three glowing materials).
  */
-const NAMES=objectNames.objects;
 const STALL={x:4.8,z:11.2},BOARD={x:-2.4,z:-2.7,yaw:30},FOUNTAIN={x:0,z:1.8};
 const POND={x:0,z:34,r:4.9,level:.08};             // the boat's loop round the island, under both bridges
-const MOON_DIR=new pc.Vec3(.2,.62,1).normalize();  // south and high, above the park's back hills
 const own=(e,name)=>{e.lookName=name;return e;};
 
 class FestivalDecor {
@@ -40,7 +38,7 @@ class FestivalDecor {
   clear(){
     const reg=this.town.registry;
     this.root?.destroy();this.root=this.boat=this.moon=null;this.list=[];
-    for(const owner of ['festival','festival-moving','festival-moon'])reg.clearLooks('town',owner);
+    for(const owner of ['festival','festival-moving'])reg.clearLooks('town',owner);
     reg.boxes=reg.boxes.filter(b=>!this.boxes.includes(b));this.boxes=[];
   }
   solid(x,z,hw,hd,y1){this.boxes.push(this.town.registry.add({place:'town',x,z,hw,hd,y0:0,y1}));}
@@ -95,13 +93,11 @@ class FestivalDecor {
     box(this.boat,[0,.28,-1.15],[.12,.3,.2],'#d9a441');
     cylinder(this.boat,[0,.27,0],[.28,.2,.28],'#8b3a2a');
   }
-  /** 中秋节: floor lanterns along the park paths, and at night a big full moon. */
+  /** 中秋节: floor lanterns along the park paths, and at night the sky's moon (src/world/sky.js), full and big. */
   zhongqiu(){
     const spots=[[-13,24.4],[-9,24.4],[-5,24.4],[5,24.4],[9,24.4],[13,24.4],[-12.4,29],[-12.4,33],[-12.4,37],[12.8,29],[12.8,33],[12.8,37]];
     spots.forEach(([x,z],i)=>this.lantern(x,.28,z,i%2?1:0,'huadeng'));
-    const m=new pc.StandardMaterial();m.emissive=new pc.Color(1,.95,.8);m.diffuse=new pc.Color(0,0,0);m.useLighting=false;m.useFog=false;m.update();
-    this.moon=this.town.m.ball(this.root,[0,0,0],[10,10,10],'#fff4d6');this.moon.name='sky';
-    this.moon.render.meshInstances[0].material=m;this.moon.enabled=false;
+    this.moon=this.town.sky.moon;
   }
   /** The festival food stall, sold through the order builder (market.json lists its shop). */
   stall(festival){
@@ -137,7 +133,7 @@ class FestivalDecor {
     const m=new pc.StandardMaterial();m.diffuseMap=tex;m.emissiveMap=tex;m.emissive=new pc.Color(.3,.3,.3);m.update();
     return m;
   }
-  /** Per frame: the boat rows, the moon keeps to the sky, and looking at it from the park counts. */
+  /** Per frame: the boat rows, and on 中秋节 looking at the moon from the park counts. */
   update(ctx){
     const town=this.town,reg=town.registry;
     if(this.boat){
@@ -148,21 +144,10 @@ class FestivalDecor {
       reg.clearLooks('town','festival-moving');
       if(town.place==='town')town.registerLooks('town',this.boat,{owner:'festival-moving'});
     }
-    if(!this.moon)return;
-    const hour=town.daylight.hour,night=town.place==='town'&&(hour>=18||hour<5);
-    this.moon.enabled=night;
-    reg.clearLooks('town','festival-moon');
-    if(!night)return;
-    const eye=town.camera.getPosition();
-    this.moon.setPosition(new pc.Vec3().copy(MOON_DIR).mulScalar(150).add(eye));
-    // The moon is far past the look range, so a small box on the way to it carries its name.
-    const near=new pc.Vec3().copy(MOON_DIR).mulScalar(9).add(eye);
-    reg.addLook({place:'town',x:near.x,z:near.z,hw:.7,hd:.7,y0:near.y-.7,y1:near.y+.7,
-      name:{id:'yueliang',...NAMES.yueliang},owner:'festival-moon',entity:this.moon});
-    const daily=syncDay(ctx.profile,ctx.profile.dayIndex??0),pos=town.player.entity.getPosition();
-    if(hour>=18&&!daily.counts.moon&&town.looking?.id==='yueliang'&&town.districtAt(pos.x,pos.z)?.id==='garden'){
-      bump(ctx.profile,'moon');ctx.save();
-    }
+    if(!this.moon||town.place!=='town')return;
+    const hour=town.daylight.hour,pos=town.player.entity.getPosition();
+    if(hour<18||town.looking?.id!=='yueliang'||town.districtAt(pos.x,pos.z)?.id!=='garden')return;
+    if(!syncDay(ctx.profile,ctx.profile.dayIndex??0).counts.moon){bump(ctx.profile,'moon');ctx.save();}
   }
 }
 
@@ -170,5 +155,6 @@ class FestivalDecor {
 export function festivalFrame(ctx,town){
   town.festival??=new FestivalDecor(town);
   town.festival.show(festivalOf(ctx.profile));
+  town.sky.setDay(calendarOf(ctx.profile).day);   // the moon's phase follows the calendar too
   if(town.festival.id)town.festival.update(ctx);
 }

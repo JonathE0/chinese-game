@@ -53,7 +53,7 @@ export function buildWordHall(models,parent,b,lamps){
   const lionZ=stairsFront+1.15;
   for(const s of [-1,1]){
     const x=X+s*3.1;
-    box(root,[x,.35,lionZ],[1.0,.7,1.3],C.lionDark);
+    box(root,[x,.35,lionZ],[1.0,.7,1.31],C.lionDark);
     box(root,[x,1.0,lionZ-.2],[.7,.6,.8],C.lion);                 // haunches
     box(root,[x,1.25,lionZ+.2],[.62,1.1,.5],C.lion);              // chest and forelegs
     ball(root,[x,1.95,lionZ+.18],[.86,.8,.72],C.lionDark);        // the mane
@@ -70,7 +70,7 @@ export function buildWordHall(models,parent,b,lamps){
   mark(X,TZ,TX,TD/2,0,TOP);
   for(let k=1;k*RISE<TOP-1e-6;k++){
     const z0=T0+(TOP/RISE-k)*TREAD,top=k*RISE;
-    box(root,[X,top/2,(z0+T0)/2],[SW*2,top,z0-T0],k%2?C.terraceLip:C.terrace);
+    box(root,[X,top/2,(z0+T0-.01*k)/2],[SW*2+k%2*.01,top,z0-T0+.01*k],k%2?C.terraceLip:C.terrace);   // backs staggered into the terrace
     mark(X,(z0+T0)/2,SW,(z0-T0)/2,0,top,'step');
     for(const s of [-1,1]){                      // the stone cheeks either side of the stairs
       box(root,[X+s*(SW+.3),(top+.45)/2,z0-TREAD/2],[.6,top+.45,TREAD],C.terraceLip).lookName='stone';

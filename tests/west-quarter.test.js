@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {Registry} from '../src/world/registry.js';
-import {sceneryMarks,shoreline,inAny} from '../src/core/garden.js';
+import {rotatedHalf} from '../src/world/navigation.js';
+import {sceneryMarks,shoreline,inAny,walkwayLayout} from '../src/core/garden.js';
 
 // 河边文化街 moved west of the fountain, out of its old hiding place behind the word hall
 // (docs/superpowers/plans/2026-09-24-west-quarter-and-scenery.md, Task W): every riverside thing
@@ -192,4 +193,52 @@ test('no corner of the canal leaves a gap to stand on the water\'s edge',()=>{
       if(!r.blocks('town',x,z,top))perch.push(`${x.toFixed(2)},${z.toFixed(2)}`);
     }
   assert.deepEqual(perch,[]);
+});
+
+// Wave 3 (T-town): the covered walkways were low (the one across the pharmacy front was 2.1 m to
+// its roof) and cramped, with lanterns at head height and streetlights, planters, passers-by and a
+// post in the way. Every walkway now leaves 2.9 m under its beams (the beams hang 0.2 m below the
+// roof line) and hangs its lanterns clear of your head (a lantern reaches 0.53 m below its centre).
+// The park's walkway keeps its own height, tucked under 荷风水榭's eaves; the player asked about the quarter.
+test('every covered walkway in the quarter leaves 2.9 m under its beams, and its lanterns and shop board hang above your head',()=>{
+  const runs=[...scenery.filter(d=>d.kind==='walkway'),
+    {x0:0,x1:6,z0:0,z1:0,width:2}];   // the word hall's corridors take the defaults
+  for(const w of runs){
+    const L=walkwayLayout(w),at=`walkway ${w.x0},${w.z0}`;
+    assert.ok(L.height-.2>=2.9,`${at}: ${(L.height-.2).toFixed(2)} m under the beams`);
+    for(const p of L.lanterns)assert.ok(p.y-L.y-.53>=2,`${at}: lantern down to ${(p.y-L.y-.53).toFixed(2)} m`);
+    if(w.sign)assert.ok(L.height-.37>=2.5,`${at}: its board down to ${(L.height-.37).toFixed(2)} m`);
+  }
+});
+
+// Each prop's footprint as streetProp (src/world/models.js) hands it to the town's collision.
+const PROP_HALF={bench:[1.05,.42],streetlight:[.26,.26],planter:[.78,.53],cafetable:[.5,.5],chair:[.28,.28]};
+const propBox=p=>{const [hw,hd]=rotatedHalf(PROP_HALF[p.kind],p.rot??0);return {x:p.x,z:p.z,hw,hd};};
+
+test('the props in the quarter stand clear of the walls and columns of every building',()=>{
+  for(const p of world.props.filter(p=>p.district==='riverside')){
+    assert.ok(PROP_HALF[p.kind],'no footprint known for '+p.kind);
+    const m=propBox(p);
+    for(const b of world.buildings.filter(b=>b.district==='riverside'))
+      assert.ok(!overlap(m,b.x-b.width/2-.35,b.x+b.width/2+.35,b.z-b.depth/2-.35,b.z+b.depth/2+.35),`${p.kind} at ${p.x},${p.z} in ${b.id}`);
+  }
+});
+
+test('no post, low lantern, prop, tree or passer-by stands in a walking line of the quarter',()=>{
+  const walkways=scenery.filter(d=>d.kind==='walkway').map(walkwayLayout);
+  // Each walkway's floor between its rows of posts, and the ways between the walkways and the doors.
+  const lines=[...walkways.map(L=>{const h=L.width/2-.3;return L.ax?[L.a0,L.a1,L.c-h,L.c+h]:[L.c-h,L.c+h,L.a0,L.a1];}),
+    [-34.6,-22,-3.9,-2.4],    // in from the gate, along the post office's south side
+    [-51,-45.8,4.4,6.4],      // from the west walkway to the restaurant door
+    [-34.3,-29,4.4,6.4]];     // from the east walkway to the post office door
+  const R=district('riverside'),things=[
+    ...world.props.filter(p=>p.district==='riverside').map(p=>({what:p.kind,...propBox(p)})),
+    ...world.people.filter(p=>p.district==='riverside').map(p=>({what:'passer-by',x:p.x,z:p.z,r:.3})),
+    ...world.trees.filter(([x,z])=>inside(R,x,z)).map(([x,z])=>({what:'tree',x,z,r:.22})),
+    ...walkways.flatMap(L=>L.posts.map(p=>({what:'post',...p,r:.14}))),
+    ...walkways.flatMap(L=>L.lanterns.filter(p=>p.y-L.y-.53<2).map(p=>({what:'lantern',...p,r:.2})))];
+  const hits=[];
+  for(const t of things)for(const [x0,x1,z0,z1] of lines)
+    if(t.x+(t.hw??t.r)>x0&&t.x-(t.hw??t.r)<x1&&t.z+(t.hd??t.r)>z0&&t.z-(t.hd??t.r)<z1)hits.push(`${t.what} at ${t.x},${t.z}`);
+  assert.deepEqual(hits,[]);
 });

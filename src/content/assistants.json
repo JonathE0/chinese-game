@@ -24,6 +24,21 @@
     "shop-pharmacy": {"zh": "哪里不舒服？我帮你看看。", "pinyin": "Nǎlǐ bù shūfu? Wǒ bāng nǐ kànkan.", "en": "Where do you feel unwell? Let me help."},
     "shop-hardware": {"zh": "你要修什么？我帮你找工具。", "pinyin": "Nǐ yào xiū shénme? Wǒ bāng nǐ zhǎo gōngjù.", "en": "What do you need to fix? I'll help you find the tools."},
     "shop-clothes-shop": {"zh": "这件衣服你可以试试。", "pinyin": "Zhè jiàn yīfu nǐ kěyǐ shìshi.", "en": "You could try this one on."},
-    "shop-teahouse": {"zh": "来一壶茶吧，慢慢喝。", "pinyin": "Lái yì hú chá ba, mànmàn hē.", "en": "Have a pot of tea, and take your time."}
+    "shop-teahouse": {"zh": "来一壶茶吧，慢慢喝。", "pinyin": "Lái yì hú chá ba, mànmàn hē.", "en": "Have a pot of tea, and take your time."},
+    "shop-city-bank": {"zh": "您好，要办什么业务？", "pinyin": "Nín hǎo, yào bàn shénme yèwù?", "en": "Hello, what can I do for you today?"},
+    "shop-city-bookshop": {"zh": "新书在前面，词典在后面。", "pinyin": "Xīn shū zài qiánmiàn, cídiǎn zài hòumiàn.", "en": "New books are at the front, dictionaries at the back."},
+    "shop-city-hospital": {"zh": "挂号请到这边。", "pinyin": "Guàhào qǐng dào zhèbiān.", "en": "Registration is over here, please."},
+    "shop-city-noodles": {"zh": "我们的牛肉面最有名。", "pinyin": "Wǒmen de niúròumiàn zuì yǒumíng.", "en": "Our beef noodles are the most famous."},
+    "shop-city-cinema": {"zh": "今天的电影七点开始。", "pinyin": "Jīntiān de diànyǐng qī diǎn kāishǐ.", "en": "Today's film starts at seven."},
+    "shop-city-store": {"zh": "需要袋子吗？", "pinyin": "Xūyào dàizi ma?", "en": "Do you need a bag?"},
+    "shop-city-cafe": {"zh": "今天想喝点儿什么？", "pinyin": "Jīntiān xiǎng hē diǎnr shénme?", "en": "What would you like to drink today?"},
+    "no-ticket": {"zh": "没有电影票。请先去售票处买票。", "pinyin": "Méiyǒu diànyǐngpiào. Qǐng xiān qù shòupiàochù mǎi piào.", "en": "No film ticket. Please buy one at the ticket office first."},
+    "shop-mall-tea": {"zh": "奶茶要少糖吗？", "pinyin": "Nǎichá yào shǎo táng ma?", "en": "Would you like your tea with less sugar?"},
+    "shop-mall-phones": {"zh": "这款耳机很受欢迎。", "pinyin": "Zhè kuǎn ěrjī hěn shòu huānyíng.", "en": "These earphones are very popular."},
+    "shop-mall-toys": {"zh": "小朋友都喜欢这只熊。", "pinyin": "Xiǎopéngyǒu dōu xǐhuan zhè zhī xióng.", "en": "Children all love this bear."},
+    "shop-mall-sports": {"zh": "这双鞋可以试一下。", "pinyin": "Zhè shuāng xié kěyǐ shì yíxià.", "en": "You're welcome to try these shoes on."},
+    "shop-mall-food": {"zh": "美食广场在四楼。", "pinyin": "Měishí guǎngchǎng zài sì lóu.", "en": "The food court is on the fourth floor."},
+    "shop-mall-info": {"zh": "您好，需要帮忙吗？", "pinyin": "Nín hǎo, xūyào bāngmáng ma?", "en": "Hello, can I help you?"},
+    "shop-mall-eat": {"zh": "想吃点儿什么？", "pinyin": "Xiǎng chī diǎnr shénme?", "en": "What would you like to eat?"}
   }
 }

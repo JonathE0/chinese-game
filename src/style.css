@@ -778,3 +778,32 @@ body.admin::after{content:'ADMIN';position:fixed;left:8px;bottom:8px;z-index:50;
 .hotpot-bill h3{margin-top:10px;font-size:13px}
 .hotpot-total{display:flex;align-items:baseline;gap:6px;border-top:1px solid #d8d2b8;margin-top:6px;padding-top:6px}
 .hotpot-total span{margin-left:auto;font-weight:600}
+/* The 打卡 camera (src/ui/camera.js) and the journal's 相册 (src/ui/album.js). */
+#viewfinder{position:fixed;inset:9vh 9vw;z-index:6;pointer-events:none;box-shadow:0 0 0 100vmax #0b120e40}
+#viewfinder[hidden]{display:none}
+.vf-corner{position:absolute;width:44px;height:44px;border:0 solid #fffbeee6}
+.vf-corner.tl{left:0;top:0;border-width:3px 0 0 3px}.vf-corner.tr{right:0;top:0;border-width:3px 3px 0 0}
+.vf-corner.bl{left:0;bottom:0;border-width:0 0 3px 3px}.vf-corner.br{right:0;bottom:0;border-width:0 3px 3px 0}
+.vf-name{position:absolute;left:50%;top:calc(50% + 30px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;color:#fffbee;text-shadow:0 2px 10px #000a;white-space:nowrap}
+.vf-name b{font-family:'Noto Serif SC',serif;font-size:40px;font-weight:500;letter-spacing:4px;line-height:1.1}
+.vf-name small{font-size:14px}
+.vf-zoom{position:absolute;right:14px;top:12px;font-size:12px;letter-spacing:1px;color:#fffbeee6;text-shadow:0 1px 4px #000a}
+.vf-hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13px;color:#fffbeee6;text-shadow:0 1px 4px #000a;white-space:nowrap}
+.vf-hint small{font-size:10px}
+body.camera-up #nameplate{display:none}
+.camera-flash{position:fixed;inset:0;z-index:30;background:#fff;opacity:0;pointer-events:none}
+.camera-flash.on{animation:camera-flash .45s ease-out}
+@keyframes camera-flash{from{opacity:.85}to{opacity:0}}
+@media(prefers-reduced-motion:reduce){.camera-flash.on{animation-duration:.01s}}
+@media(max-width:720px){.vf-name b{font-size:28px}.vf-hint{display:none}}
+.checkin-stamps{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}
+.checkin-stamp{padding:4px 8px;border:1px dashed #d4cfb8;border-radius:7px;font-size:12px;color:#a3a58e}
+.checkin-stamp.done{border:1px solid #b9483a;color:#b9483a;background:#fbefe6}
+.album-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.album-photo{position:relative;margin:0;background:#f0ecdb;border-radius:9px;overflow:hidden}
+.album-photo img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.album-photo figcaption{display:flex;flex-direction:column;gap:2px;padding:7px 9px;font-size:12px}
+.album-photo figcaption small{font-size:9.5px;color:#8f9680}
+.album-stamp{align-self:flex-start;font-size:9px;color:#b9483a;border:1px solid #b9483a;border-radius:4px;padding:0 4px}
+.album-delete{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;background:#1f2b25b3;color:#fff;cursor:pointer}
+.album-delete:focus-visible{outline:2px solid #fffbee}

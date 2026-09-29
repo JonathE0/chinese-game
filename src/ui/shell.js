@@ -48,6 +48,7 @@ const CONTROLS=[
   {keys:['collect'],en:'Learn this word',zh:'记住这个词'},
   {keys:['jump'],en:'Jump',zh:'跳'},
   {keys:['view'],en:'Third person',zh:'视角'},
+  {keys:['camera'],en:'Camera',zh:'相机'},
   {keys:['labels'],en:'Hide labels',zh:'隐藏名字'},
   {keys:['Esc'],en:'Free the cursor',zh:'松开鼠标'},
 ];

@@ -25,7 +25,8 @@ export function sellersOf(itemId){
   const shopIds=Array.isArray(item.shop)?item.shop:(item.shop?[item.shop]:[]);
   const sellers=[];
   for(const shopId of shopIds){
-    const room=rooms[shopId];
+    // A shop is a room of its own, or a counter in one (星光百货's shops are counters in the mall).
+    const room=rooms[shopId]??Object.values(rooms).find(r=>r.fittings?.some(f=>f.action==='shop:'+shopId));
     if(room){
       // A room whose building is a city department store points at the town's own metro stair
       // — the same spot `metro` targets in src/world/town.js — not anywhere inside the city.

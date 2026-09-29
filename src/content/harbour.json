@@ -1,0 +1,43 @@
+{
+  "note": "云海's harbour (task B-harbour, docs/superpowers/plans/2026-09-27-development-wave-3.md), in the city's own metres like city.json (x east, z south; the bay lies between the promenade at z −48 and the far shore at z −170, its water at y −0.6). Everything runs off the game clock, a game hour being a real minute: the ferry 渡轮 shuttles between the near pier off the promenade and the far pier on the landing across the bay, waiting `wait` seconds at each and taking `crossing` seconds over; the tour boat 游船 and the sailboat 帆船 leave their moorings every `period` seconds (`offset` into it) to sail their loop once at `speed` metres a second. `route`s are points a smooth curve passes through, the ferry's from the near dock to the far dock, the loops back to where they start. The Ferris wheel 摩天轮 turns once in `turn` seconds. A ride costs `fare` 学习币. `walk` is the ground the harbour adds to 云海's walk areas, [x0, x1, z0, z1] like city.json's: the two piers and the landing. `lines` are what the ferry crew and the wheel attendant say, each in their speaker's cast voice (voices.json), clip harbour-<key>.",
+  "speakers": {"crew": "ferry-crew", "attendant": "wheel-attendant"},
+  "lines": {
+    "board": {"zh": "渡轮马上开了，请上船！", "pinyin": "Dùlún mǎshàng kāi le, qǐng shàng chuán!", "en": "The ferry's about to leave. All aboard!", "audio": "harbour-board", "speaker": "crew"},
+    "ticket": {"zh": "一张船票三块。", "pinyin": "Yì zhāng chuánpiào sān kuài.", "en": "A ferry ticket is three kuai.", "audio": "harbour-ticket", "speaker": "crew"},
+    "arrive": {"zh": "到对岸了，请慢慢下船。", "pinyin": "Dào duì'àn le, qǐng mànmàn xià chuán.", "en": "We've reached the other side. Please get off carefully.", "audio": "harbour-arrive", "speaker": "crew"},
+    "wheel-on": {"zh": "请坐好，摩天轮要转了。", "pinyin": "Qǐng zuò hǎo, mótiānlún yào zhuàn le.", "en": "Please sit down; the wheel's about to turn.", "audio": "harbour-wheel-on", "speaker": "attendant"},
+    "wheel-off": {"zh": "到了，小心下来！", "pinyin": "Dào le, xiǎoxīn xiàlái!", "en": "We're back. Mind your step getting off!", "audio": "harbour-wheel-off", "speaker": "attendant"}
+  },
+  "ui": {
+    "ticket": {"zh": "船票", "pinyin": "chuánpiào", "en": "ferry ticket"},
+    "board": {"zh": "上船", "pinyin": "shàng chuán", "en": "Board"},
+    "off": {"zh": "下船", "pinyin": "xià chuán", "en": "Get off"}
+  },
+  "ferry": {
+    "fare": 3, "wait": 15, "crossing": 30, "closing": 2, "announce": 8, "hear": 12,
+    "length": 16, "beam": 7, "deck": 0.15,
+    "route": [[22, -68.4], [22, -71.4], [24.91, -77.72], [31.86, -84.04], [40.14, -90.36], [47.09, -96.68], [50, -103], [50, -110], [50, -117], [50, -124], [50, -131], [50, -138], [50, -143.6], [50, -147.6]]
+  },
+  "piers": {
+    "near": {"walkway": [20.2, 23.8, -54, -47.9], "head": [14.5, 26, -60, -54], "top": 0.03, "booth": [14.7, 18.1, -59.6, -55.4], "canopy": [18.5, 25.8, -59.8, -54.3], "root": -51, "gate": [22, -59.2], "out": -1},
+    "far": {"walkway": [48.2, 51.8, -170.5, -160], "head": [44, 56, -160, -156], "top": 0.36, "booth": [44.2, 47.4, -159.8, -156.4], "canopy": [47.8, 55.8, -159.8, -156.2], "root": -169.6, "gate": [50, -156.8], "out": 1}
+  },
+  "landing": {
+    "area": [-40, 90, -188.5, -170], "top": 0.36, "railing": -170.25,
+    "plaza": {"x": 20, "z": -178.5, "radius": 6},
+    "lamps": [[-34, -171.1], [-21, -171.1], [-8, -171.1], [5, -171.1], [18, -171.1], [31, -171.1], [44, -171.1], [57, -171.1], [70, -171.1], [83, -171.1]],
+    "benches": [[-27.5, -172], [-14.5, -172], [-1.5, -172], [11.5, -172], [24.5, -172], [37.5, -172], [63.5, -172], [76.5, -172]],
+    "trees": [[-34, -186.6], [-22, -186.6], [-10, -186.6], [2, -186.6], [38, -186.6], [46, -186.6], [86, -186.6], [11, -174.5], [29, -174.5]],
+    "hedges": [[-40, 9], [31, 90]]
+  },
+  "wheel": {
+    "fare": 8, "x": 66, "z": -182, "hub": 25.8, "radius": 22.5, "rims": 1.7, "cabins": 24, "turn": 90,
+    "gate": [66, -177.2], "platform": [58.5, 73.5, -186.5, -177.8], "floor": 0.42, "legs": 12, "spread": 3.4,
+    "colors": ["#d8514a", "#f0b43c", "#3f9a8f", "#4a7fc1"]
+  },
+  "tour": {"speed": 4, "period": 240, "offset": 30, "length": 22, "beam": 5.4,
+    "route": [[-60, -150], [-95, -148], [-125, -128], [-132, -98], [-115, -72], [-85, -62], [-55, -64], [-32, -78], [-24, -104], [-26, -128], [-38, -146]]},
+  "sail": {"speed": 2.8, "period": 180, "offset": 100, "length": 7, "beam": 2.4,
+    "route": [[120, -152], [145, -138], [156, -110], [150, -82], [128, -64], [100, -62], [78, -76], [72, -102], [80, -128], [98, -146]]},
+  "walk": [[20.2, 23.8, -54, -47], [14.5, 26, -60, -54], [48.2, 51.8, -170.5, -160], [44, 56, -160, -156], [-40, 90, -188.5, -170]]
+}

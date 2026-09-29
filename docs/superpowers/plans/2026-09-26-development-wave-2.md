@@ -311,3 +311,24 @@ haze so the far edge never shows.
 - Tests: people move and never walk through things or each other; limits and draw calls; talking.
 - **Owns:** `src/world/crowd.js`, `src/ui/crowd.js`, `src/content/crowd.json`, changes to
   `src/world/visitors.js` (keep `hall-life.spec.js` green), its objects entry, tests.
+
+## What shipped (2026-09-26)
+
+- R-rooms: every room audited (wardrobe facing, plant and lamp out of doorways, the stray study chair),
+  hidden signs cleared (ceilings raised, pieces moved), the kitchen door on the west wall, the word
+  hall's 书案 with its brush set and palace lanterns, restaurant and 旧物铺 counters rebuilt; save
+  steps v5 and v6 move pieces still at their old spots.
+- G-glitch: the walking lines had four causes (flush faces of different materials, float precision
+  far from the origin, shadow crawl from the turning sun, near plane .1). Fixed with a camera-relative
+  vertex transform, PCF5 shadows, near .2 (.15 first person), a sun that turns in steps away from
+  town, and ~60 small offsets; town flicker went from ~113,000 to ~550 px.
+- X-exterior: the bank rebuilt as a Republic-era stone bank (same plot, now facing the west lane),
+  gate hedges and paifang rebuilt, 林阿姨's and 陈叔叔's stalls, the kitchen wing's window with a
+  lit room behind it, hidden town signs cleared (+ signs.spec, coplanar.spec).
+- H-water: one water shader for all water (flow, ripples, floating toys, a leaping koi) and a
+  planar reflection of the skyline, drones and boats on the bay (水面倒影 setting).
+- C-city: 云海 rebuilt after Shenzhen Bay: LED towers, a curving lit promenade, the gate with its
+  couplet, 39 skyline towers with 云海中心, far clip 520 with haze.
+- K-hill, J-hotpot, L-drones, P-crowd: the 山城 hill with lit stairways and the viewpoint, 山城老火锅
+  (51-item menu, waiter, 扯面 show, bill kept in the save, dish names on plates), the drone show at
+  20:00 and 23:00, 32 walkers drawn in one material.

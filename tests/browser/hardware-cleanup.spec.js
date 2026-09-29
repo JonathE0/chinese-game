@@ -4,10 +4,15 @@ async function start(page){
  await page.waitForFunction(()=>window.__qinghe?.hskWords?.length>0);
  await page.evaluate(()=>{const c=window.__qinghe;c.profile.wallet=200;c.profile.completed.push('home:tutorial','home:starter');c.save();});
 }
-test('enter the department store, buy a mixed basket, and walk back to the city',async({page})=>{
+test('through 星光百货 into the hardware store, buy a mixed basket, and walk back into the mall',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await start(page);
- await page.evaluate(()=>{const t=window.__qinghe.town;t.enterCity();t.warp(-4008.8,0,90);});
- await expect(page.locator('#interact span')).toHaveText('进星光五金百货');await page.keyboard.press('e');
+ await page.evaluate(()=>{const t=window.__qinghe.town;t.enterCity();t.warp(-4009.6,0,90);});
+ await expect(page.locator('#interact span')).toHaveText('进商场');
+ await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.nearest?.id)).toBe('door:mall');await page.keyboard.press('e');
+ await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.place)).toBe('mall');
+ // 星光五金百货 is through its door on the mall's ground floor (task Y-mall).
+ await page.evaluate(()=>{const t=window.__qinghe.town;t.warp(t.rooms.get('mall').offsetX-17.1,0,90);});
+ await expect(page.locator('#interact span')).toHaveText('进五金百货');await page.keyboard.press('e');
  await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.place)).toBe('hardware');
  await page.evaluate(()=>{const t=window.__qinghe.town;t.warp(t.rooms.get('hardware').offsetX,-3.3,0);});
  await expect(page.locator('#interact span')).toContainText('五金建材');await page.keyboard.press('e');
@@ -17,8 +22,8 @@ test('enter the department store, buy a mixed basket, and walk back to the city'
  const inventory=await page.evaluate(()=>window.__qinghe.profile.inventory);expect(inventory.timber).toBe(3);expect(inventory.brick).toBe(1);
  await page.locator('.close-button').click();
  await page.evaluate(()=>{const t=window.__qinghe.town;t.warp(t.rooms.get('hardware').offsetX,6.6,180);});
- await expect(page.locator('#interact span')).toHaveText('回到步行街');await page.keyboard.press('e');
- await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.place)).toBe('city');
+ await expect(page.locator('#interact span')).toHaveText('进商场');await page.keyboard.press('e');
+ await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.place)).toBe('mall');
  expect(await page.evaluate(()=>{const t=window.__qinghe.town,p=t.player.entity.getPosition();return t.canMove(p.x,p.z,0);})).toBe(true);
  expect(errors).toEqual([]);
 });

@@ -141,7 +141,7 @@ for(let i=0;i<solidProps.length;i++)for(let j=i+1;j<solidProps.length;j++){
 }
 for(const [id,room] of Object.entries(rooms)){
   require(Number.isFinite(room.door?.x)&&Number.isFinite(room.door?.z),`room ${id} needs a door position`);
-  require(world.buildings.some(b=>b.id===room.building)||room.building==='city:department',`room ${id} has no building ${room.building}`);
+  require(world.buildings.some(b=>b.id===room.building)||/^city:[a-z-]+$/.test(room.building),`room ${id} has no building ${room.building}`);
   if(room.lectern?.shop)require(shopIds.has(room.lectern.shop),`room ${id} sells for unknown shop ${room.lectern.shop}`);
   if(room.lectern)require(!!room.lectern.label,`room ${id} counter needs a label`);
   require(!(room.lectern?.shop&&room.lectern?.panel),`room ${id} counter cannot be both a shop and a panel`);
@@ -155,8 +155,8 @@ for(const [id,room] of Object.entries(rooms)){
     const [, opens,target]=/^(shop|panel):(.+)$/.exec(fitting.action??'')??[];
     if(opens==='shop')require(shopIds.has(target),`room ${id} fitting ${fitting.kind} sells for unknown shop ${target}`);
     if(opens==='panel')require(['bank','resale','library'].includes(target),`room ${id} fitting ${fitting.kind} opens unknown panel ${target}`);
-    // A fitting may stand on the upper floor (`y`), and nowhere else off the ground.
-    require(fitting.y===undefined||fitting.y===room.upper?.y,`room ${id} fitting ${fitting.kind} floats at y ${fitting.y}`);
+    // A fitting may stand on the upper floor (`y`), or on one of a many-storeyed room's `levels`, and nowhere else off the ground.
+    require(fitting.y===undefined||fitting.y===room.upper?.y||(room.levels??[]).includes(fitting.y),`room ${id} fitting ${fitting.kind} floats at y ${fitting.y}`);
     placed.push({name:`${fitting.kind} at ${fitting.x},${fitting.z}`,floor:fitting.y??0,...footprintOf(fitting)});
   }
   if(room.lectern){
@@ -297,6 +297,18 @@ for(const [key,line] of Object.entries((await read('hall-visitors.json')).lines)
 const dronesData=await read('drones.json');
 for(const line of Object.values(dronesData.lines))featureClips.push(line.audio);
 require(!!voices.cast[dronesData.speaker],'No voice cast for the drone show speaker '+dronesData.speaker);
+// The harbour: the ferry crew's and the wheel attendant's lines (harbour-<key>), each in its speaker's cast voice.
+const harbourData=await read('harbour.json');
+for(const [key,line] of Object.entries(harbourData.lines)){
+  featureClips.push('harbour-'+key);
+  require(line.audio==='harbour-'+key,`harbour line ${key}: its clip must be harbour-${key}`);
+  require(!!voices.cast[harbourData.speakers[line.speaker]],`harbour line ${key}: no voice cast for ${line.speaker}`);
+}
+// The 打卡 camera says 打卡成功！ (checkin-success) and each spot's line (checkin-<id>).
+const checkinsData=await read('checkins.json');
+featureClips.push(checkinsData.success.audio,...checkinsData.spots.map(spot=>spot.line.audio));
+for(const spot of checkinsData.spots)require(spot.line.audio==='checkin-'+spot.id,`checkins ${spot.id}: its line's clip must be checkin-${spot.id}`);
+require(!!voices.cast[checkinsData.speaker],'No voice cast for the check-in speaker '+checkinsData.speaker);
 // People walking around 云海 speak crowd-<n>, each line in its speaker's cast voice.
 for(const line of (await read('crowd.json')).lines){
   featureClips.push(line.audio);

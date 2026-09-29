@@ -63,12 +63,16 @@ test('no fitting blocks a door, shelves face the room, and every sign can be see
       // A department sign hung from the ceiling over its fitting (interior.js) can hide a board too.
       for(const f of room.fittings)if(f.sign&&!f.signed&&f.kind!=='hardwarebay'){
         const y=Math.min((f.y??0)+(f.top??2)+.7,h-.45);
-        boxes.push({x:ox+f.x,z:f.z,hw:.9,hd:.04,y0:y-.22,y1:y+.22,name:{id:'the hung sign '+f.sign}});
+        const side=Math.abs(Math.sin((f.rot??0)*Math.PI/180))>.5;   // it turns with its fitting
+        boxes.push({x:ox+f.x,z:f.z,hw:side?.04:.9,hd:side?.9:.04,y0:y-.22,y1:y+.22,name:{id:'the hung sign '+f.sign}});
       }
       // So can a lantern hanging from the ceiling.
       for(const [x,z] of data.lanterns??[])boxes.push({x:ox+x,z,hw:.2,hd:.2,y0:h-1.75,y1:h-1.25,name:{id:'a lantern'}});
       const seen=(label,x,y,z,own)=>{
-        const e=[0,(own?.y??(data.upper&&!own?data.upper.y:0))+1.6,0],len=Math.hypot(x-e[0],y-e[1],z-e[2]);
+        // A room of several floors round an atrium (the mall, `levels`) is looked round from where you come in,
+        // on the board's own floor; its name board, from the top floor.
+        const [ex,ez]=data.levels?data.spawn:[0,0],top=data.upper?.y??data.levels?.at(-1);
+        const e=[ex,(own?.y??(top&&!own?top:0))+1.6,ez],len=Math.hypot(x-e[0],y-e[1],z-e[2]);
         const dir=[(x-e[0])/len,(y-e[1])/len,(z-e[2])/len],stop=len-.02;
         for(const b of boxes){
           if(b===own?.box||(Math.abs(b.x-ox-e[0])<b.hw&&Math.abs(b.z-e[2])<b.hd))continue;   // not what you stand in or under
@@ -88,6 +92,24 @@ test('no fitting blocks a door, shelves face the room, and every sign can be see
         const box=boxes.find(b=>Math.abs(b.x-ox-f.x)<1e-6&&Math.abs(b.z-f.z)<1e-6);
         const r=(f.rot??0)*Math.PI/180;   // aim a little in front of its face
         seen(`the ${f.kind} ${f.sign??''}`,f.x+Math.sin(r)*.1,(f.y??0)+(f.y0!==undefined?(f.y0+f.top)/2:f.top-.55),f.z+Math.cos(r)*.1,{box,y:f.y??0});
+      }
+    }
+    return out;
+  });
+  expect(problems).toEqual([]);
+});
+
+test('no sign or the posts it hangs from reach through a wall, whichever way its fitting is turned',async({page})=>{
+  await start(page);
+  const problems=await page.evaluate(()=>{
+    const t=window.__qinghe.town,out=[];
+    for(const room of t.rooms.values()){
+      const {id,data,offsetX:ox,root}=room;if(data.outdoor)continue;
+      const [w,d]=data.size;
+      for(const e of root.find(n=>!!n.signText&&!!n.render)){
+        const b=e.render.meshInstances[0].aabb,c=b.center,hx=b.halfExtents;
+        if(c.x-hx.x<ox-w/2-.01||c.x+hx.x>ox+w/2+.01||c.z-hx.z<-d/2-.01||c.z+hx.z>d/2+.01)
+          out.push(`${id}: ${e.signText} reaches ${(c.x-ox).toFixed(2)}±${hx.x.toFixed(2)}, ${c.z.toFixed(2)}±${hx.z.toFixed(2)}`);
       }
     }
     return out;

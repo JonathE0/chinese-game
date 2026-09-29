@@ -27,6 +27,7 @@ import {openHallVisitor} from './ui/hall-visitors.js';
 import ambient from './content/ambient.json' with {type:'json'};
 import objectNames from './content/objects.json' with {type:'json'};
 import rooms from './content/rooms.json' with {type:'json'};
+import assistants from './content/assistants.json' with {type:'json'};
 import npcs from './content/npcs.json' with {type:'json'};
 import {loadWords} from './services/hsk-data.js';
 import {districtStates,gateMessage} from './core/progress.js';
@@ -41,8 +42,6 @@ import {openMetro,rideHome} from './ui/metro.js';
 import {openCityTalk} from './ui/citytalk.js';
 import {openTaxi} from './ui/taxi.js';
 import {openNoodles} from './ui/noodles.js';
-import {CITY,CITY_OFFSET} from './world/city.js';
-import {arrivedAtTower,arrivalStep} from './core/city.js';
 import {tickCooking,recipeById} from './core/cooking.js';
 import {openSite} from './ui/build.js';
 import {builtSites,collectIncome} from './core/construction.js';
@@ -55,6 +54,7 @@ import {isTyping,shortcutAllowed} from './core/input.js';
 import {shouldAutoStart} from './core/tutorial.js';
 import {Tutorial} from './ui/tutorial.js';
 import {installTouch} from './ui/touch.js';
+import {installCamera} from './ui/camera.js';
 import {AmbientConversations} from './core/social.js';
 import {openNpcGreeting,openAssistant} from './ui/social.js';
 import {festivalFrame} from './world/festivals.js';
@@ -63,6 +63,9 @@ import {openPostcard} from './ui/postcard.js';
 import {friends,pinned,noteVisit} from './core/friends.js';
 import {openHotpot,settleHotpot} from './ui/hotpot.js';
 import {openCrowd} from './ui/crowd.js';
+import {openHarbour} from './ui/harbour.js';
+import {openMall} from './ui/mall.js';
+import {setQuality} from './core/quality.js';
 
 const loaded=loadProfile(localStorage);
 // holdSync keeps the folder copy untouched until the start-up check below has compared it.
@@ -137,6 +140,8 @@ function interact(id){
  if(id.startsWith('fest:'))return openFestival(ctx,id.slice(5));
  if(id.startsWith('hotpot:'))return openHotpot(ctx,id.slice(7));
  if(id.startsWith('crowd:'))return openCrowd(ctx,id.slice(6));
+ if(id.startsWith('harbour:'))return openHarbour(ctx,id.slice(8));
+ if(id.startsWith('mall:'))return openMall(ctx,id.slice(5));
  if(id==='panel:bank')return openBank(ctx);
  if(id==='panel:resale')return openResale(ctx);
  if(id==='panel:library')return openLibrary(ctx);
@@ -160,9 +165,10 @@ function interact(id){
   // Shop assistants (staff with a look of their own) help you shop; waiters take your order.
   const room=ctx.town.rooms.get(ctx.town.place),member=room?.staff.find(s=>'staff:'+s.id===id);
   if(member?.look){
-   const counter=room.fittings.find(f=>/^(shop|panel):/.test(f.action??'')),led=ctx.ledTo===room.id;
+   // In a room of several shops (the mall) each assistant has a `shop` of their own: its counter and its line.
+   const counter=member.shop?room.fittings.find(f=>f.action==='shop:'+member.shop):room.fittings.find(f=>/^(shop|panel):/.test(f.action??'')),led=ctx.ledTo===room.id||(!!member.shop&&ctx.ledTo===member.shop);
    if(led)ctx.ledTo=null;   // asked once per trip
-   return openAssistant(ctx,member,room.id,{browse:counter&&(()=>interact(counter.action)),sells:counter?.action.startsWith('shop:'),led});
+   return openAssistant(ctx,member,member.shop??room.id,{browse:counter&&(()=>interact(counter.action)),sells:counter?.action.startsWith('shop:'),led});
   }
   return openNpcGreeting(ctx,'staff',()=>openMenu(ctx,'waiter'));
  }
@@ -218,7 +224,16 @@ function showGate(id){
 function enterPlace(id){
  if(id==='town')ctx.town.leaveRoom();
  else{
+  // A room you need a ticket for (the cinema's screening room) takes one at the door.
+  const ticket=rooms[id]?.ticket;
+  if(ticket&&!(ctx.profile.inventory[ticket]>0)){
+   const line=assistants.lines['no-ticket'];
+   ctx.ui.notice(ctx.profile.settings.english===false?line.zh:`${line.zh} / ${line.en}`);
+   if(ctx.voice.available('assistant-no-ticket'))ctx.voice.play('assistant-no-ticket');
+   return;
+  }
   if(!ctx.town.enterRoom(id))return;
+  if(ticket){ctx.profile.inventory[ticket]--;if(!ctx.profile.inventory[ticket])delete ctx.profile.inventory[ticket];ctx.save();}
   // The word hall is one of the places a postcard can say you went to.
   if(noteVisit(ctx.profile,id))ctx.save();
   // Being led to this door? Then you have arrived. A buy-guide route names the shop it is for (the
@@ -226,10 +241,17 @@ function enterPlace(id){
   // need; other routes (去找找, missions) name none. Walking into any other room ends the errand.
   const route=ctx.ui.route;
   if(route?.key===id){ctx.ledTo=route.shop??null;ctx.ui.clearRoute();}
-  else if(id!==ctx.ledTo)ctx.ledTo=null;
+  // The mall keeps the errand too: on the way to its hardware store, or for a shop at a counter inside it.
+  else if(id!==ctx.ledTo&&rooms[ctx.ledTo]?.returnPlace!==id&&!rooms[id]?.fittings?.some(f=>f.action==='shop:'+ctx.ledTo))ctx.ledTo=null;
   // One count per shop per day, so walking in and out is not a way to farm the errand.
   const daily=syncDay(ctx.profile,ctx.profile.dayIndex??0);
   if(!daily.counts['seen-'+id]){daily.counts['seen-'+id]=1;bump(ctx.profile,'visits');ctx.save();}
+  // 问路 ends inside 一号书店: once the way has been asked, walking in through its door finds it, once.
+  if(id==='city-bookshop'&&ctx.profile.completed.includes('city-directions')&&!ctx.profile.completed.includes('city:found-bookstore')){
+   ctx.profile.completed.push('city:found-bookstore');
+   ctx.save();
+   showLine(ctx,'city-directions','found');
+  }
  }
  syncPlace();
  if(id!=='town')ctx.tutorial.event('enter',{id});
@@ -243,21 +265,6 @@ function syncPlace(){
  ctx.ui.setPlace(place,place==='town'?null:(rooms[place]??ctx.town.rooms.get(place)?.data));
 }
 ctx.syncPlace=syncPlace;
-/** Once 问路 has been answered, walking up to 一号书店's door finds it — once. Only walking in
- *  counts: a taxi (or any other warp) that sets you down there does not. */
-let bookstoreStep=null;
-function checkCityArrival(pos){
- if(!started||ctx.town.place!=='city'){bookstoreStep=null;return;}
- if(ctx.ui.panelId)return;
- const tower=CITY.towers.find(t=>t.sign==='一号书店');
- if(!tower)return;
- bookstoreStep=arrivalStep(bookstoreStep,arrivedAtTower(pos.x-CITY_OFFSET,pos.z,tower),ctx.town.warps);
- if(!bookstoreStep.arrived)return;
- if(!ctx.profile.completed.includes('city-directions')||ctx.profile.completed.includes('city:found-bookstore'))return;
- ctx.profile.completed.push('city:found-bookstore');
- ctx.save();
- showLine(ctx,'city-directions','found');
-}
 /**
  * The bank's morning round: interest on what is saved, then any building instalment that has
  * fallen due this week. Both go through claimPeriod, so a long session or a reload cannot pay
@@ -288,6 +295,9 @@ function reportSettlement(events){
  else if(paid.length)ctx.ui.notice(`银行扣了 ${paid.reduce((sum,e)=>sum+e.paid,0)} 学习币的还款。 / The bank took today's repayment.`);
 }
 try{
+ // 画质, before the town is built (src/core/quality.js). The browser tests (vite --mode e2e) run on 高
+ // unless their save picks a level: they count what one level builds, on whatever machine runs them.
+ setQuality(ctx.profile.settings.quality??(import.meta.env.MODE==='e2e'?'high':undefined));
  ctx.town=new Town(document.querySelector('#world'),{onInteract:interact,onNear:target=>ctx.ui.nearby(target),
   onLook:name=>ctx.ui.nameplate(name,{known:!!name&&knowsLook(ctx.profile,name)}),
   onCollect:name=>collect(name),onFrame:town=>{
@@ -313,8 +323,7 @@ try{
    if(district.id!==ctx.district){ctx.district=district.id;ctx.ui.setPlace('town',district);ctx.ui.drawMap(town.data,district);if(noteVisit(ctx.profile,district.id))ctx.save();}
    ctx.ui.drawRoute(town.data,district,pos);
   }
-  checkCityArrival(pos);
-  document.querySelector('#seated').hidden=!town.seated;
+  document.querySelector('#seated').hidden=!town.seated||town.seatLocked();
   const carrying=document.querySelector('#carrying'),held=town.toys.held;
   carrying.hidden=!held;
   if(held)carrying.querySelector('b').textContent=held.name?(objectNames.objects[held.name]?.zh??'东西'):'东西';
@@ -387,12 +396,14 @@ try{
   if(ctx.ui.panelId||speaking)ctx.voice.duck(true);
  };
  ctx.town.sensitivity=ctx.profile.settings.sensitivity??0.12;
- // 水面倒影 (the bay's mirror, src/world/bay.js): the player's choice, else on with a mouse and off on touch.
- ctx.town.reflections=typeof ctx.profile.settings.reflections==='boolean'?ctx.profile.settings.reflections:!matchMedia('(pointer: coarse)').matches;
+ // 水面倒影 (the bay's mirror, src/world/bay.js): the player's choice, else off on touch and otherwise
+ // left to the graphics level (undefined: src/core/quality.js RENDER[level].reflections).
+ ctx.town.reflections=typeof ctx.profile.settings.reflections==='boolean'?ctx.profile.settings.reflections:matchMedia('(pointer: coarse)').matches?false:undefined;
  // Losing pointer lock without noticing is what makes the view feel stuck; say so plainly.
  ctx.town.onLockChange=locked=>{document.body.classList.toggle('unlocked',!locked);};
  document.body.classList.add('unlocked');
  installTouch(ctx.town);
+ installCamera(ctx);
  installPlacement(ctx);
  ctx.town.daylight.setHour(ctx.profile.clock??15);
  // Place the day stalls at the real saved hour, before the first frame — not the constructor's

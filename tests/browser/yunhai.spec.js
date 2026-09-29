@@ -35,7 +35,7 @@ async function enterCity(page){
 function unseen(page,texts=null){
   return page.evaluate(texts=>{
     const t=window.__qinghe.town,room=t.rooms.get('city'),x0=room.offsetX,out=[];
-    const mine=/^(tower|metro-hall|department-door|city-.+|promenade|skyline)$/;
+    const mine=/^(tower|metro-hall|city-.+|promenade|skyline)$/;
     const topOf=e=>{while(e.parent&&e.parent!==room.root)e=e.parent;return e;};
     const spots=[];
     for(let z=-28;z<=24;z+=4)for(const x of [-9.6,-6,-2,2,6,9.6])spots.push([x0+x,z]);
@@ -130,7 +130,8 @@ test('no sign in the city is hidden behind anything, and the towers across the b
     return {towers:group.children.filter(c=>c.name==='tower'||c.name==='landmark').length,
       solid:t.registry.boxes.filter(b=>b.place==='city'&&b.solid&&b.name?.id==='tower'&&b.z<-170).length};
   });
-  expect(skyline.towers).toBeGreaterThan(30);
+  // Dense, though the far landing's strip (skyline.keepClear, src/world/harbour.js) stays clear.
+  expect(skyline.towers).toBeGreaterThan(25);
   expect(skyline.solid).toBeGreaterThanOrEqual(skyline.towers);
 });
 
@@ -183,7 +184,7 @@ test('after dark the LEDs move without rebuilding a material every frame',async(
     const frame=()=>new Promise(done=>requestAnimationFrame(()=>done()));
     for(let i=0;i<3;i++)await frame();
     // Every material city.js draws with, the lit ones among them.
-    const mine=/^(tower|metro-hall|department-door|city-.+|promenade|skyline)$/,materials=new Set();
+    const mine=/^(tower|metro-hall|city-.+|promenade|skyline|block|searchlight)$/,materials=new Set();
     for(const top of room.root.children)if(mine.test(top.name))
       for(const render of top.findComponents('render'))for(const mi of render.meshInstances)materials.add(mi.material);
     const proto=Object.getPrototypeOf([...materials][0]),update=proto.update;

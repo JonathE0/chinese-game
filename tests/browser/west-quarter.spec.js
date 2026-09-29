@@ -72,7 +72,7 @@ test('walking at the canal from the pharmacy walkway stops at the water',async({
   expect(z).toBeLessThan(-1.2-.3);       // and stopped at the canal's head
 });
 
-test('青禾药店\'s name board reads over the low pharmacy walkway, from the crest of either canal bridge',async({page})=>{
+test('青禾药店\'s name board reads through the open bay of the pharmacy walkway, from the crest of either canal bridge',async({page})=>{
   await start(page);
   await openQuarter(page);
   for(const z of [1.4,6.2]){
@@ -85,10 +85,10 @@ test('青禾药店\'s name board reads over the low pharmacy walkway, from the c
 test('the board hung under the pharmacy walkway reads 青禾药店 from under it and from both banks',async({page})=>{
   await start(page);
   await openQuarter(page);
-  // The hanging board: x -41.2, y 1.88, z -2.45. The name board over the door: y 3.65, z -4.28,
+  // The hanging board: x -42.05, y 2.88, z -2.45. The name board over the door: y 3.65, z -4.28,
   // seen from the west bank past the north bridge's (unnamed) guard rails.
-  for(const [x,z,tx,ty,tz] of [[-42.8,-2.45,-41.2,1.88,-2.45],[-44.5,-2.45,-41.2,1.88,-2.45],[-35.6,-2.45,-41.2,1.88,-2.45],
-    [-44.5,0.5,-41.2,1.88,-2.45],[-44.5,3,-40,3.65,-4.28]]){
+  for(const [x,z,tx,ty,tz] of [[-42.8,-2.45,-42.05,2.88,-2.45],[-44.5,-2.45,-42.05,2.88,-2.45],[-35.6,-2.45,-42.05,2.88,-2.45],
+    [-44.5,0.5,-42.05,2.88,-2.45],[-44.5,3,-40,3.65,-4.28]]){
     await page.evaluate(([x,z,tx,ty,tz])=>{const t=window.__qinghe.town,dx=tx-x,dz=tz-z;
       t.warp(x,z,Math.atan2(-dx,-dz)*180/Math.PI);t.pitch=Math.atan2(ty-1.62,Math.hypot(dx,dz))*180/Math.PI;},[x,z,tx,ty,tz]);
     await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.looking?.zh),{message:`from ${x},${z}`}).toBe('青禾药店');

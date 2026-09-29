@@ -44,10 +44,11 @@ test('the post office assistant offers a postcard instead of goods, and waiters 
   await page.locator('#assistant-postcard').click();
   await expect.poll(()=>page.evaluate(()=>window.__qinghe.ui.panelId)).toBe('postcard');
   await page.evaluate(()=>window.__qinghe.ui.close());
-  // The pharmacy has nothing on sale and sends no post: only goodbye.
+  // The pharmacy sells its medicines (wave 3) but sends no post; saying goodbye still works.
   await page.evaluate(()=>{window.__qinghe.town.enterRoom('pharmacy');window.__qinghe.town.onInteract('staff:pharmacist');});
   await page.locator('#assistant-next').click();
-  await expect(page.locator('#assistant-browse, #assistant-postcard')).toHaveCount(0);
+  await expect(page.locator('#assistant-browse')).toHaveCount(1);
+  await expect(page.locator('#assistant-postcard')).toHaveCount(0);
   await page.locator('#assistant-bye').click();
   await expect.poll(()=>page.evaluate(()=>window.__qinghe.ui.panelId)).toBe(null);
   await expect(page.locator('#toast')).toContainText('谢谢光临');

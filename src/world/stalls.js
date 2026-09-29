@@ -58,6 +58,7 @@ export class NightMarket{
       pitch.signLabel.setLocalEulerAngles(0,90,0);
     }
     pitch.vendor=initIdle(this.models.person(this.parent,pitch.color??'#c98a6d',[x,0,z]));
+    this.onMount?.(pitch);   // the town batches the cart and its keeper (Town#batchMoving)
   }
   /** Build the cart out of sight and start it walking in. */
   raise(pitch){

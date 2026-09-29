@@ -1,4 +1,5 @@
 import * as pc from 'playcanvas';
+import {detail,RENDER} from '../core/quality.js';
 
 /**
  * The street, seen from inside a shop. A room stands hundreds of metres from the town, so its
@@ -10,17 +11,24 @@ import * as pc from 'playcanvas';
  * The camera's near plane is tilted onto the building front (an oblique projection), so the
  * building's own walls and door are never drawn, and its frustum is cropped to the openings' part
  * of the screen, so only what can be seen through them is drawn. It renders only while an opening
- * is on screen, at half resolution, and never in the town.
+ * is on screen, at half resolution (a quarter on 低), and never in the town.
  */
 
 const FRONT=.35;    // the view starts this far out from a building's front, past its door leaf, frame and pillars
 const TO_ROOM=new pc.Quat().setFromEulerAngles(0,180,0);
 const VP=new pc.Mat4(),FRUSTUM=new pc.Frustum(),CORNER=new pc.Vec4(),ROT=new pc.Quat();
 
-const VS=`attribute vec3 vertex_position;
+// Camera-relative, as town.js's CAMERA_RELATIVE patches every engine material: a room stands up to
+// 10 km out, where viewProjection * worldPosition in 32-bit floats rounds each corner differently
+// every frame, and the view's edges wobbled against the doorway's frame.
+export const VS=`attribute vec3 vertex_position;
 uniform mat4 matrix_model;
-uniform mat4 matrix_viewProjection;
-void main(void){gl_Position=matrix_viewProjection*matrix_model*vec4(vertex_position,1.0);}`;
+uniform mat4 matrix_view;
+uniform mat4 matrix_projection;
+void main(void){
+  vec3 posW=(matrix_model*vec4(vertex_position,1.0)).xyz;
+  gl_Position=matrix_projection*vec4(mat3(matrix_view)*(posW+matrix_view[3].xyz*mat3(matrix_view)),1.0);
+}`;
 // The texture holds the cropped part of the screen (`viewRect`: centre and half size in NDC).
 const FS=`uniform sampler2D viewMap;
 uniform vec4 viewRect;
@@ -161,9 +169,9 @@ export class Views {
     return true;
   }
 
-  /** Half the canvas size, remade when the canvas changes size. */
+  /** Half the canvas size (a quarter on 低, src/core/quality.js), remade when that changes. */
   target(g){
-    const w=Math.max(1,g.width>>1),h=Math.max(1,g.height>>1),old=this.rt;
+    const k=RENDER[detail()].viewScale,w=Math.max(1,Math.floor(g.width/k)),h=Math.max(1,Math.floor(g.height/k)),old=this.rt;
     if(old?.width===w&&old.height===h)return;
     const texture=new pc.Texture(g,{name:'street-view',width:w,height:h,format:pc.PIXELFORMAT_RGBA8,mipmaps:false,
       minFilter:pc.FILTER_LINEAR,magFilter:pc.FILTER_LINEAR,addressU:pc.ADDRESS_CLAMP_TO_EDGE,addressV:pc.ADDRESS_CLAMP_TO_EDGE});

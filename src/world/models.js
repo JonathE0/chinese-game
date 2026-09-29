@@ -1,17 +1,46 @@
 import * as pc from 'playcanvas';
 import {bridgeRails,shoreline,walkwayLayout,walkwayMarks,latticeWindows,latticeWallMarks,verandaLayout,verandaMarks,canalMarks} from '../core/garden.js';
 import {waterOf} from './water.js';
+/** A piece smaller than SHADOW_MIN in every direction casts no shadow: window bars, lattice, roof
+ *  ribs, railings and ornaments each cost a shadow draw call for a shadow nobody can see. Nor does a
+ *  stick, under SHADOW_THIN across (a lamp post, a pole, a thin beam): its shadow is a texel or two
+ *  of the sun's map wide and crawls as the sun turns (task Q-quality). Pillars (.2 m and up) still do. */
+const SHADOW_MIN=1.2,SHADOW_THIN=.2;
+export const castsShadow=scale=>{const [,across,along]=[...scale].sort((a,b)=>a-b);return along>=SHADOW_MIN&&across>=SHADOW_THIN;};
 export function createModels(app) {
-  const cache=new Map();
+  const cache=new Map(),plain=new Set();
   function material(hex) {
     if(cache.has(hex))return cache.get(hex);
-    const m=new pc.StandardMaterial();m.diffuse=new pc.Color().fromString(hex);m.useMetalness=true;m.metalness=0;m.gloss=0.1;m.update();cache.set(hex,m);return m;
+    const m=new pc.StandardMaterial();m.diffuse=new pc.Color().fromString(hex);m.useMetalness=true;m.metalness=0;m.gloss=0.1;m.update();cache.set(hex,m);plain.add(m);return m;
   }
-  /** A piece smaller than this in every direction casts no shadow: window bars, lattice, roof
-   *  ribs, railings and ornaments each cost a shadow draw call for a shadow nobody can see. */
-  const SHADOW_MIN=1.2;
+  /**
+   * The batcher merges only meshes that share a material, and colours alone made about 300
+   * materials in the town. A repainted piece keeps its shape but carries its colour in its vertices,
+   * and every repainted piece shares `painted`, so the static town merges into a handful of batches
+   * and a crowd into one. Only a piece still wearing a plain colour from `material` is repainted;
+   * its render component keeps that material (`render.material`), which is what it looks like to
+   * anything that asks. The shapes are built exactly as the engine builds its own primitives.
+   */
+  const painted=new pc.StandardMaterial();painted.name='vertex-colour';
+  Object.assign(painted,{diffuseVertexColor:true,vertexColorGamma:true,useMetalness:true,metalness:0,gloss:.1});painted.update();
+  const SHAPES={box:()=>new pc.BoxGeometry(),sphere:()=>new pc.SphereGeometry({radius:.5}),
+    cylinder:()=>new pc.CylinderGeometry({radius:.5,height:1}),cone:()=>new pc.ConeGeometry({baseRadius:.5,peakRadius:0,height:1}),
+    plane:()=>new pc.PlaneGeometry({halfExtents:new pc.Vec2(.5,.5),widthSegments:1,lengthSegments:1})},paints=new Map();
+  function repaint(e) {
+    const r=e.render,made=r?.meshInstances;
+    if(!r||made?.length!==1||!SHAPES[r.type]||made[0].material!==r.material||!plain.has(r.material))return;
+    const c=r.material.diffuse,key=r.type+c.toString();
+    if(!paints.has(key)){
+      const g=SHAPES[r.type](),rgba=[c.r*255,c.g*255,c.b*255,255].map(Math.round);
+      g.colors=Array.from({length:g.positions.length/3},()=>rgba).flat();
+      // Held here as the engine holds its own primitives: a mesh is destroyed with the last piece
+      // drawing it, and a struck cart would take its colours with it for the next one.
+      const mesh=pc.Mesh.fromGeometry(app.graphicsDevice,g);mesh.incRefCount();paints.set(key,mesh);
+    }
+    r.meshInstances=[new pc.MeshInstance(paints.get(key),painted)];   // keeps the part's castShadows
+  }
   function shape(parent,type,xyz,scale,color,rotation=[0,0,0]) {
-    const e=new pc.Entity(type);e.addComponent('render',{type,material:material(color),castShadows:Math.max(...scale)>=SHADOW_MIN,receiveShadows:true});e.setLocalPosition(...xyz);e.setLocalScale(...scale);e.setLocalEulerAngles(...rotation);parent.addChild(e);return e;
+    const e=new pc.Entity(type);e.addComponent('render',{type,material:material(color),castShadows:castsShadow(scale),receiveShadows:true});e.setLocalPosition(...xyz);e.setLocalScale(...scale);e.setLocalEulerAngles(...rotation);parent.addChild(e);return e;
   }
   const box=(p,xyz,s,c,r)=>shape(p,'box',xyz,s,c,r);
   /** Names an entity as one thing to look at (an objects.json key); the town turns every tagged
@@ -236,7 +265,7 @@ export function createModels(app) {
    */
   function houseFront(root,data,w,d,h) {
     const f=d/2,floor=3.05;
-    for(const x of [-w/2+.2,w/2-.2])tag(box(root,[x,h/2,f+.025],[.23,h,.2],'#8e6952'),'pillar');
+    for(const x of [-w/2+.2,w/2-.2])tag(box(root,[x,h/2-.01,f+.025],[.23,h-.02,.2],'#8e6952'),'pillar');   // just under the eave line
     box(root,[0,floor,f+.03],[w+.01,.18,.15],'#9c7558');
     // Ground floor: the door and a window either side.
     box(root,[0,1.15,f+.1],[1.15,2.1,.16],'#6c7661');
@@ -257,7 +286,8 @@ export function createModels(app) {
       box(root,[side*(bw/2-.05),floor+.9,f+reach/2],[.1,.1,reach],rail);
       box(root,[side*(bw/2-.05),floor+.45,f+reach-.05],[.104,.9,.104],rail);
     }
-    box(root,[0,floor+.55,f+reach-.05],[bw-.2,.62,.03],'#b5705f');   // railing infill, one panel
+    // Balusters, not a solid panel: from the glass door inside, a panel read as a wall outside.
+    for(let x=-bw/2+.3;x<bw/2-.2;x+=.3)box(root,[x,floor+.55,f+reach-.05],[.05,.7,.05],'#b5705f');
     for(const x of [-2.4,2.4])cylinder(root,[x,floor+.3,f+.45],[.36,.34,.36],'#b0654f');
     for(const x of [-2.4,2.4])ball(root,[x,floor+.62,f+.45],[.5,.44,.5],'#87996b');
     root.addMark(0,f+reach/2,bw/2,reach/2,floor-.1,floor+1,'balcony');
@@ -399,7 +429,7 @@ export function createModels(app) {
   function tiledFront(root,data,w,d,h) {
     const f=d/2;
     tag(box(root,[0,.22,0],[w+.5,.45,d+.3],'#a39d8f'),'stone');   // stone plinth
-    for(const x of [-w/2+.2,w/2-.2])tag(box(root,[x,h/2,f+.025],[.23,h,.2],'#8e6952'),'pillar');
+    for(const x of [-w/2+.2,w/2-.2])tag(box(root,[x,h/2-.01,f+.025],[.23,h-.02,.2],'#8e6952'),'pillar');   // just under the eave line
     for(const y of [1,h-1])tag(box(root,[0,y,f+.03],[w+.01,.16,.15],'#9c7558'),'beam');
     for(const x of [-w*.3,w*.3])latticeWindow(root,x,1.85,f+.06,1.3,1.5);
     box(root,[0,1.15,f+.1],[1.15,2.1,.16],'#6c7661');
@@ -413,7 +443,7 @@ export function createModels(app) {
   /** Plaster over a rendered base, arched upper windows, an arcade under a striped awning. */
   function shophouseFront(root,data,w,d,h) {
     const trim=data.trim??'#e6dcc4',f=d/2;
-    box(root,[0,h*.62,f+.04],[w+.06,h*.76,.1],trim);           // upper storey plaster
+    box(root,[0,h*.62-.01,f+.04],[w+.06,h*.76-.02,.1],trim);   // upper storey plaster, its top under the body's
     box(root,[0,1.2,f+.05],[w+.08,.16,.16],'#b09572');         // string course
     box(root,[0,h-.12,f+.05],[w+.1,.22,.22],'#b09572');        // cornice
     // Upper windows, each with a little railing; on a low shophouse it sits clear of the awning.
@@ -430,7 +460,7 @@ export function createModels(app) {
     const shopWindow=group(root,'window');
     box(shopWindow,[0,.6,f+.1],[w-1.2,1.2,.1],'#dfe6e2');            // shop window
     for(const x of [-(w-1.2)/2+.06,(w-1.2)/2-.06])box(shopWindow,[x,.6,f+.14],[.1,1.24,.06],'#8e6952');
-    box(root,[0,1.15,f+.12],[1.2,2.1,.14],'#7a5f45');          // door
+    box(root,[0,1.15,f+.12],[1.2,2.1,.16],'#7a5f45');          // door, its back off the shop window's
     for(const x of [-.3,.3])box(root,[x,1.2,f+.2],[.05,1.9,.03],'#d9c6a1');
     // A striped awning over an arcade of columns set against the wall (the pavement in front
     // belongs to café chairs and crates), leaving the doorway clear.
@@ -442,8 +472,8 @@ export function createModels(app) {
     for(let i=1;i<stripes;i+=2)box(awning,[-(w-.3)/2+(i+.5)*sw,2.45,f+.62],[sw,.14,1.26],'#f1e8d4',[-16,0,0]);
     // No column where the hanging sign (x 1.05) comes off the wall.
     const span=w/2-.4,gaps=Math.max(2,Math.round(span));
-    for(let i=0;i<=gaps;i++){const x=-span+i*2*span/gaps;if(Math.abs(x)>.75&&Math.abs(x-1.05)>.3)tag(box(root,[x,1.25,f+.2],[.22,2.5,.22],'#b09572'),'pillar');}
-    box(root,[0,2.52,f+.2],[w-.5,.18,.22],'#9c7558');
+    for(let i=0;i<=gaps;i++){const x=-span+i*2*span/gaps;if(Math.abs(x)>.75&&Math.abs(x-1.05)>.3)tag(box(root,[x,1.25,f+.2],[.225,2.5,.22],'#b09572'),'pillar');}
+    box(root,[0,2.52,f+.2],[w-.5,.18,.24],'#9c7558');   // a shade deeper than the columns under it
     const roof=group(root,'roof');
     for(let i=0;i<3;i++)box(roof,[0,h+.1+i*.2,0],[w+.5-i*.2,.22,d+.6-i*.3],data.roof);
     const board=label(root,data.sign,[0,h-.62,f+.12],Math.min(3.4,w-1),.6);
@@ -465,11 +495,11 @@ export function createModels(app) {
     pane.render.meshInstances[0].material=glass;
     for(let i=-2;i<=2;i++)box(win,[i*(w-.6)/5,1.55,f+.11],[.09,2.95,.06],'#8f9694');   // mullions
     for(const x of [-(w-.4)/2,(w-.4)/2])box(win,[x,1.55,f+.11],[.14,2.95,.12],'#6f7775');   // frame sides
-    box(win,[0,2.45,f+.12],[w-.5,.07,.06],'#8f9694');           // transom
+    box(win,[0,2.45,f+.12],[w-.52,.07,.06],'#8f9694');          // transom, its ends inside the pane's
     box(root,[0,.08,f+.16],[w-.4,.16,.5],'#9aa3a0');
     box(root,[0,3.06,f+.1],[w+.04,.14,.15],'#8f9694');
     box(root,[0,1.15,f+.14],[1.25,2.2,.06],'#5f6a6c');          // sliding door
-    box(root,[0,1.15,f+.17],[.05,2.2,.04],'#c9d3d6');
+    box(root,[0,1.15,f+.17],[.05,2.19,.04],'#c9d3d6');
     // A canopy over the entrance, hung from the wall on two ties, high enough to clear an awning.
     const canopy=group(root,'awning');
     box(canopy,[0,2.97,f+.52],[2.3,.1,1.0],'#8f9694');
@@ -598,7 +628,7 @@ export function createModels(app) {
     const x=style==='shophouse'?w/4:w*.3,y=style==='tiled'?1.12:style==='modern'?.8:.75;
     for(const s of [-1,1]){
       const shelf=group(root,name);
-      box(shelf,[s*x,y,f+.26],[1.3,.08,.32],'#8e6952');
+      box(shelf,[s*x,y,f+.26],[1.29,.08,.32],'#8e6952');
       put(shelf,s*x,y+.04,f+.26);
       root.addMark(s*x,f+.42,.65,.1,y-.1,y+.5,name);
     }
@@ -642,7 +672,7 @@ export function createModels(app) {
     },
     // A green cross on a bracket by the corner, lit after dark.
     'green-cross'(root,data,w,d) {
-      const x=w/2-.6,y=3.1,lit=glow('#4fb06a'),cross=group(root,'sign');
+      const x=w/2-.6,y=2.6,lit=glow('#4fb06a'),cross=group(root,'sign');   // under the pharmacy porch's roof
       box(cross,[x,y,d/2+.25],[.07,.07,.5],'#5b4a3a');
       for(const s of [[.26,.8,.26],[.8,.26,.26]])box(cross,[x,y,d/2+.5],s,'#4fb06a').render.meshInstances[0].material=lit;
       root.lamps.push(lit);
@@ -686,7 +716,7 @@ export function createModels(app) {
     'mannequins'(root,data,w,d) {
       const z=d/2+.4;
       for(const [x,c] of [[-1.9,'#b45b52'],[1.9,'#5f7a9a']]){
-        cylinder(root,[x,.03,z],[.4,.06,.4],'#6f7775');
+        cylinder(root,[x,.035,z],[.4,.06,.4],'#6f7775');
         cylinder(root,[x,.4,z],[.05,.7,.05],'#6f7775');
         box(root,[x,1.05,z],[.46,.62,.26],c);
         ball(root,[x,1.52,z],[.24,.28,.24],'#e8dccb');
@@ -1017,7 +1047,7 @@ export function createModels(app) {
       cylinder(e,[0,3.8,.72],[.03,.24,.03],post);
       box(e,[0,3.65,.72],[.56,.08,.56],post);
       shape(e,'cone',[0,3.74,.72],[.4,.16,.4],post);
-      const head=tag(box(e,[0,3.36,.72],[.44,.5,.44],'#f2e2b4'),'lamp');
+      const head=tag(box(e,[0,3.36,.72],[.446,.5,.446],'#f2e2b4'),'lamp');
       for(const [dx,dz] of [[-.21,-.21],[.21,-.21],[-.21,.21],[.21,.21]])box(e,[dx,3.36,.72+dz],[.05,.52,.05],'#b8322a');
       box(e,[0,3.08,.72],[.48,.06,.48],post);
       cylinder(e,[0,2.9,.72],[.06,.3,.06],'#b8322a');
@@ -1429,7 +1459,7 @@ export function createModels(app) {
       box(e,[0,.32,0],[2.0,.52,.85],tint??'#8fa094');
       box(e,[0,.62,0],[1.86,.16,.72],'#a8b8a8');
       box(e,[0,.76,-.36],[2.0,.72,.18],tint??'#8fa094');
-      for(const x of [-.94,.94])box(e,[x,.62,0],[.14,.5,.85],'#7f9186');
+      for(const x of [-.94,.94])box(e,[x,.62,0],[.14,.5,.86],'#7f9186');
       for(const x of [-.5,.5])tag(box(e,[x,.78,-.24],[.42,.4,.14],'#c6cfc0',[-14,0,0]),'cushion');
       return {entity:e,half:[1.0,.45],top:.7,name:'sofa',seat:.68};
     }
@@ -1441,6 +1471,76 @@ export function createModels(app) {
       for(const [x,y] of [[.42,1.72],[.42,1.44],[.42,1.16]])box(e,[x,y,.06],[.34,.24,.02],['#a8c0ae','#e0c69c','#c9a0a0'][Math.round(y*3)%3]);
       box(e,[0,1.94,.06],[.9,.12,.02],'#7f9a86');
       return {entity:e,half:[.75,.08],top:2.1,name:'poster',face};
+    }
+    // A film poster in a dark frame: a lit print in `tint`, one bold disc and a pale title band.
+    // Layers stand at least 5 mm apart so no two faces lie flush.
+    if(kind==='filmposter') {
+      box(e,[0,1.7,0],[1.0,1.5,.05],'#2a2622');
+      const print=box(e,[0,1.72,.04],[.86,1.3,.02],tint??'#c0584a');
+      print.render.meshInstances[0].material=glow(tint??'#c0584a');
+      cylinder(e,[0,1.9,.065],[.46,.02,.46],'#f1d89a',[90,0,0]);
+      box(e,[0,1.26,.065],[.7,.12,.02],'#f4ecd8');
+      return {entity:e,half:[.5,.06],y0:.95,top:2.45,name:'poster'};
+    }
+    // A popcorn cart: a red cabinet, a glass case heaped with popcorn, buckets on the counter and a
+    // striped canopy on two poles.
+    if(kind==='popcornstand') {
+      box(e,[0,.45,0],[1.4,.9,.8],tint??'#b8352f');
+      box(e,[0,.93,0],[1.46,.06,.86],'#efe3c4');
+      const glass=new pc.StandardMaterial();
+      glass.diffuse=new pc.Color().fromString('#dceaea');glass.opacity=.34;
+      glass.blendType=pc.BLEND_NORMAL;glass.gloss=.9;glass.useMetalness=true;glass.metalness=.1;glass.update();
+      box(e,[0,1.3,-.1],[1.0,.66,.5],'#dceaea').render.meshInstances[0].material=glass;
+      box(e,[0,1.08,-.1],[.9,.2,.4],'#f1dfa4');
+      for(const x of [-.53,.53])box(e,[x,1.31,-.1],[.04,.68,.52],'#8a2a25');
+      for(const x of [-.45,.45])cylinder(e,[x,1.08,.25],[.18,.22,.18],'#c8362f');
+      for(const x of [-.6,.6])cylinder(e,[x,1.46,.3],[.05,.98,.05],'#8a2a25');
+      for(let i=0;i<5;i++)box(e,[-.56+i*.28,1.95,-.05],[.27,.06,.8],i%2?'#f4ecd8':'#c8362f');
+      return {entity:e,half:[.73,.43],top:1.98,name:'counter'};
+    }
+    // A wide window over the bay: sky, the far shore's towers and the water, behind a frame and two
+    // mullions. It hangs on a back wall, like the room's own windows.
+    if(kind==='bayview') {
+      const paint=(xyz,size,hex)=>{const p=box(e,xyz,size,hex);p.render.meshInstances[0].material=glow(hex);return p;};
+      paint([0,2.06,-.04],[4.2,1.48,.02],'#a9cfe3');
+      paint([0,1.11,-.02],[4.2,.38,.02],'#4f8fae');
+      for(const [x,w,h] of [[-1.7,.3,.5],[-1.3,.22,.8],[-.9,.34,.42],[-.35,.26,.95],[.1,.4,.55],[.6,.24,.72],[1.05,.32,.38],[1.55,.28,.62]])
+        box(e,[x,1.32+h/2,-.015],[w,h,.01],'#6d8298');
+      box(e,[0,.86,0],[4.64,.08,.2],'#8d6b4d');
+      box(e,[0,2.85,0],[4.64,.08,.1],'#8d6b4d');
+      for(const x of [-2.26,2.26])box(e,[x,1.85,0],[.08,2.02,.1],'#8d6b4d');
+      for(const x of [-.7,.7])box(e,[x,1.86,.03],[.06,1.88,.04],'#8d6b4d');
+      return {entity:e,half:[2.3,.1],y0:.8,top:2.9,name:'window'};
+    }
+    // A cinema screen on the back wall. A short wordless film loops on it (the sun crossing the sky
+    // over the sea, a boat sailing by, two birds flying the other way) while someone sits watching:
+    // the room calls `animate(dt, watching)` every frame, and only a few transforms move.
+    if(kind==='cinemascreen') {
+      const paint=(parent,xyz,size,hex,rot)=>{const p=box(parent,xyz,size,hex,rot);p.render.meshInstances[0].material=glow(hex);p.noBatch=true;return p;};
+      box(e,[0,2.1,0],[6.4,3.0,.08],'#17161b');
+      paint(e,[0,2.45,.055],[6,2,.02],'#3d5f8f');
+      paint(e,[0,1.1,.075],[6,.7,.02],'#2f6f8f');
+      const sun=cylinder(e,[0,2.5,.1],[.55,.02,.55],'#f6d27a',[90,0,0]);
+      sun.render.meshInstances[0].material=glow('#f6d27a');sun.noBatch=true;
+      const waves=[1.35,1.05,.85].map(y=>({y,entity:paint(e,[0,y,.09],[5.8,.03,.01],'#9cc4d6')}));
+      const boat=new pc.Entity('film-boat');e.addChild(boat);boat.noBatch=true;
+      paint(boat,[0,1.15,.115],[.6,.14,.02],'#7a4a33');
+      paint(boat,[-.05,1.42,.115],[.3,.4,.02],'#f4ecd8');
+      const flock=new pc.Entity('film-birds');e.addChild(flock);flock.noBatch=true;
+      const wings=[];
+      for(const [bx,by] of [[0,2.9],[.45,2.75]])for(const side of [-1,1])
+        wings.push({side,entity:paint(flock,[bx+side*.1,by,.125],[.2,.03,.02],'#1f2a36')});
+      let t=4;
+      const pose=()=>{
+        const p=(t/18)%1;
+        sun.setLocalPosition(-2.5+5*p,1.75+Math.sin(Math.PI*p)*1.3,.1);
+        boat.setLocalPosition(-2.6+5.2*((t/11)%1),Math.sin(t*2)*.02,0);
+        for(let i=0;i<waves.length;i++)waves[i].entity.setLocalPosition(0,waves[i].y+Math.sin(t*1.6+i)*.03,.09);
+        flock.setLocalPosition(2.2-4.8*((t/8)%1),Math.sin(t*1.3)*.08,0);
+        for(const wing of wings)wing.entity.setLocalEulerAngles(0,0,wing.side*(20+Math.sin(t*9)*25));
+      };
+      pose();
+      return {entity:e,half:[3.2,.1],y0:.6,top:3.6,name:'screen',animate(dt,watching){if(watching){t+=dt;pose();}}};
     }
     // The word hall's 书案: a long dark rosewood 翘头案 with upturned ends, a carved apron and carved
     // end panels on runner feet. On it, rice paper written in ink under two paperweights, an inkstone
@@ -1592,7 +1692,7 @@ export function createModels(app) {
       box(e,[0,.66,.055],[2.0,.14,1.28],'#efe3c4');
       tag(box(e,[0,.7,-.42],[1.98,.2,.46],'#fdf6e2'),'pillow');
       tag(box(e,[0,.72,.34],[1.98,.12,.62],'#a8bfa5'),'quilt');
-      box(e,[-1.02,.82,0],[.12,.75,1.4],'#8f6a48');
+      box(e,[-1.02,.82,0],[.12,.75,1.41],'#8f6a48');
       return {entity:e,half:[1.3,.95],top:.85,name:'bed'};
     }
     if(kind==='cratewall') {
@@ -1620,7 +1720,7 @@ export function createModels(app) {
     }
     if(kind==='cupshelf') {
       box(e,[0,1.3,0],[1.8,.06,.34],tint??'#a97d55');
-      box(e,[0,.9,0],[1.8,.06,.34],tint??'#a97d55');
+      box(e,[0,.905,0],[1.8,.06,.34],tint??'#a97d55');
       for(const x of [-.85,.85])box(e,[x,1.1,0],[.08,.5,.32],'#8a6c49');
       const cups=group(e,'cup'),bowls=group(e,'bowl');
       for(let i=0;i<5;i++)cylinder(cups,[-.6+i*.3,1.4,0],[.2,.16,.2],['#efe7d2','#c9dce0','#e0c69c'][i%3]);
@@ -1638,7 +1738,7 @@ export function createModels(app) {
     if(kind==='carrel') {
       box(e,[0,.74,-.42],[1.36,.07,.72],'#b08b60');
       for(const x of [-.71,.71])box(e,[x,.65,-.42],[.06,1.3,.76],'#8f7a5c');
-      box(e,[0,.65,-.78],[1.48,1.3,.05],'#9c8766');
+      box(e,[0,.645,-.78],[1.47,1.29,.05],'#9c8766');
       tag(box(e,[-.2,.79,-.36],[.52,.02,.36],'#f4ecd8'),'paper');
       const lamp=furniture(e,'lamp');lamp.setLocalPosition(.42,.78,-.58);lamp.setLocalScale(.5,.5,.5);
       const chair=group(e,'chair');
@@ -1650,7 +1750,7 @@ export function createModels(app) {
     // A listening booth: padded screens, a shelf with headphones on a stand, and a stool.
     if(kind==='booth') {
       for(const x of [-.72,.72])box(e,[x,1.05,-.05],[.06,2.1,1.1],'#8fa39a');
-      box(e,[0,1.05,-.57],[1.5,2.1,.06],'#7f948a');
+      box(e,[0,1.045,-.565],[1.49,2.09,.06],'#7f948a');
       for(let i=0;i<3;i++)for(let j=0;j<3;j++)box(e,[-.45+j*.45,.6+i*.6,-.53],[.38,.5,.03],'#9fb3a9');
       box(e,[0,.76,-.32],[1.36,.06,.46],'#b08b60');
       tag(box(e,[-.3,.96,-.5],[.46,.32,.03],'#2e3a36'),'monitor');
@@ -1694,7 +1794,7 @@ export function createModels(app) {
       const lit=glow('#8fc0c4');
       const screen=box(e,[0,1.17,.04],[.5,.02,.34],'#8fc0c4',[-18,0,0]);
       screen.render.meshInstances[0].material=lit;
-      box(e,[0,.95,.28],[.8,.06,.02],'#4f7fae');
+      box(e,[0,.95,.28],[.79,.06,.02],'#4f7fae');
       box(e,[.22,.8,.28],[.14,.05,.03],'#c9a97a');
       return {entity:e,half:[.4,.3],top:1.2,name:'ticket-machine',material:lit};
     }
@@ -1856,7 +1956,7 @@ export function createModels(app) {
       const hats=group(e,'hat');
       for(let r=0;r<3;r++){
         const y=.7+r*.55;
-        box(e,[0,y,0],[2.0,.05,.36],'#b39468');
+        box(e,[0,y,0],[1.99,.05,.36],'#b39468');
         for(let i=0;i<4;i++){
           const x=-.72+i*.48,c=jar[(r+i)%6];
           cylinder(hats,[x,y+.12,0],[.28,.2,.28],c);
@@ -1948,7 +2048,7 @@ export function createModels(app) {
     if(kind==='bakerycounter') {
       box(e,[0,.45,0],[2.6,.9,.8],tint??'#b08a60');
       box(e,[0,.93,-.25],[2.66,.08,.36],'#e0cba4');
-      box(e,[0,.92,.15],[2.56,.06,.5],'#e8dcc0');
+      box(e,[0,.92,.145],[2.55,.06,.49],'#e8dcc0');
       const bread=group(e,'bread'),tarts=group(e,'eggtart');
       for(let i=0;i<5;i++)box(bread,[-1+i*.5,1.02,.24],[.34,.16,.22],i%2?'#d9a468':'#e5b87f');
       for(let i=0;i<5;i++)cylinder(tarts,[-1+i*.5,1.2,.06],[.22,.08,.22],'#e8c169');
@@ -1987,8 +2087,8 @@ export function createModels(app) {
       box(e,[0,.45,0],[2.4,.9,.75],tint??'#d6d2c6');
       box(e,[.4,.93,.05],[1.6,.06,.62],'#e2ded0');
       box(e,[.4,.97,.05],[1.5,.03,.52],'#3c4747');                    // the belt
-      for(const x of [-.37,1.17])cylinder(e,[x,.97,.05],[.08,.52,.08],'#8f9694',[90,0,0]);
-      box(e,[-.85,.8,.05],[.7,.05,.62],'#e2ded0');                    // the bagging shelf
+      for(const x of [-.37,1.17])cylinder(e,[x,.97,.05],[.08,.53,.08],'#8f9694',[90,0,0]);
+      box(e,[-.845,.8,.05],[.69,.05,.62],'#e2ded0');                    // the bagging shelf
       box(e,[.4,1,.35],[1.5,.05,.04],'#b9b3a0');
       const till=group(e,'till');
       box(till,[-.4,1.08,-.2],[.4,.22,.3],'#5f6a6c');
@@ -2005,7 +2105,7 @@ export function createModels(app) {
     if(kind==='lendingdesk') {
       box(e,[0,.45,-.05],[2.8,.9,.7],tint??'#8a6a4c');
       box(e,[0,.93,-.05],[2.9,.06,.78],'#c9a97a');
-      box(e,[0,1.02,.33],[2.9,.24,.12],tint??'#8a6a4c');              // the front ledge
+      box(e,[0,1.025,.33],[2.88,.24,.12],tint??'#8a6a4c');              // the front ledge
       box(e,[0,1.16,.33],[2.96,.05,.2],'#c9a97a');
       box(e,[-1.05,.7,.31],[.5,.08,.03],'#3c4747');                   // the return slot
       const books=group(e,'book'),screen=group(e,'monitor'),lamp=group(e,'desklamp');
@@ -2165,10 +2265,10 @@ export function createModels(app) {
     const [cx,cz]=L.ax?[mid,L.c]:[L.c,mid];
     for(const p of L.posts){
       cylinder(root,[p.x,y+.08,p.z],[.36,.16,.36],GC.stoneDark);
-      tag(cylinder(root,[p.x,y+H/2,p.z],[.22,H,.22],GC.timberDark),'pillar');
+      tag(cylinder(root,[p.x,y+(H-.05)/2,p.z],[.22,H-.05,.22],GC.timberDark),'pillar');   // its top inside the beam, not flush with it
     }
     for(const r of L.rails)railing(root,r.x,r.z,r.hw,r.hd,y);
-    for(const p of L.lanterns)sceneryLantern(root,p.x,y+H-.75,p.z,lamps);
+    for(const p of L.lanterns)sceneryLantern(root,p.x,p.y,p.z,lamps);
     // A shop board hung crosswise under the eaves, as arcade shops hang theirs: read along the run.
     if(w.sign){
       const [sx,sz]=L.ax?[w.sign.at,L.c]:[L.c,w.sign.at];
@@ -2243,7 +2343,7 @@ export function createModels(app) {
     for(let i=0;i<ribs;i++)box(eaves,[mid-span/2-.35+(i+.5)*(span+.7)/ribs,H+.19+drop/2,L.f+reach/2],[.1,.08,slope],shade(b.roof,.72),[tilt,0,0]);
     box(eaves,[mid,H+.62,L.f+.1],[span+1.11,.14,.22],shade(b.roof,.72));
     box(eaves,[mid,H+.1,L.f+reach],[span+1.12,.12,.08],GC.timberDark);
-    for(const side of [-1,1])box(eaves,[mid+side*(span/2+.6),H+.2,L.f+reach-.1],[.5,.1,.28],b.roof,[0,0,side*26]);
+    for(const side of [-1,1])box(eaves,[mid+side*(span/2+.6),H+.2,L.f+reach-.1],[.5,.1,.29],b.roof,[0,0,side*26]);
     return {entity:e,marks:verandaMarks(v,b)};
   }
   /** A canal along z (see canalMarks): water, stones along its banks, lotus, rockeries by the
@@ -2273,5 +2373,5 @@ export function createModels(app) {
     for(const b of c.bridges)stoneBridge(turned,{...b,x:-b.z});
     return {entity:e,marks:canalMarks(c,c.group??'scenery')};
   }
-  return {material,shape,box,ball,cylinder,tube,glow,label,pickable,person,tree,building,lantern,furniture,streetProp,groundPatch,fitting,tiledRoof,latticeWindow,redLantern,waterMaterial,sceneryLantern,rockery,stoneBridge,walkway,latticeWall,veranda,waterEdge};
+  return {material,painted,repaint,shape,box,ball,cylinder,tube,glow,label,pickable,person,tree,building,lantern,furniture,streetProp,groundPatch,fitting,tiledRoof,latticeWindow,redLantern,waterMaterial,sceneryLantern,rockery,stoneBridge,walkway,latticeWall,veranda,waterEdge};
 }

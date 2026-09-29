@@ -120,11 +120,21 @@ export function buildRoom(models,parent,data,index,id){
   }
   label(root,data.zh,[0,h-.62,inner+.06],Math.min(3.2,w-2.4),.58);
   // Windows (and glass doors, `door: true`) on the inner face of the front wall, beside the doorway.
+  // A glass door is a panelled leaf, glass over a solid lower panel: the street view behind the
+  // glass starts at the wall's outer face, and the balcony outside stands a little higher than the
+  // floor in here, so glass down to the floor showed the street under the balcony.
   for(const pane of data.frontWindows??[]){
-    const face=front-.04,[sill,pw,ph]=pane.door?[1.1,1.2,2.1]:[1.75,1.1,1.2],y=sill+(pane.y??0);
+    const face=front-.04,lift=pane.y??0,[sill,pw,ph]=pane.door?[1.475,1.2,1.35]:[1.75,1.1,1.2],y=sill+lift;
     openings.panes.push(box(root,[pane.x,y,face-.02],[pw,ph,.06],'#cfe0dd'));
     box(root,[pane.x,y,face-.06],[.07,ph-.05,.05],data.trim);
-    for(const off of [-1,1])box(root,[pane.x+off*pw/2,y,face-.06],[.08,ph+.08,.06],data.trim);
+    const [sy,sh]=pane.door?[(lift+y+ph/2+.04)/2,y+ph/2+.04-lift]:[y,ph+.08];
+    for(const off of [-1,1])box(root,[pane.x+off*pw/2,sy,face-.06],[.08,sh,.06],data.trim);
+    if(pane.door){
+      const top=y-ph/2,mid=(lift+.06+top)/2;
+      box(root,[pane.x,mid,face-.02],[pw,top-lift-.06,.06],data.trim);
+      box(root,[pane.x,mid,face-.06],[pw-.36,top-lift-.36,.04],data.roofBeam);
+      box(root,[pane.x,top,face-.06],[pw+.08,.08,.06],data.trim);
+    }
     box(root,[pane.x,y+ph/2,face-.06],[pw+.08,.08,.06],data.trim);
     box(root,[pane.x,pane.door?(pane.y??0)+.03:y-ph/2,face-(pane.door?.06:.09)],[pw+.2,pane.door?.06:.1,pane.door?.06:.22],data.trim);
   }
@@ -184,11 +194,13 @@ export function buildRoom(models,parent,data,index,id){
     made.entity.setLocalPosition(def.x,def.y??0,def.z);   // `y`: it stands on the upper floor
     made.entity.setLocalEulerAngles(0,def.rot??0,0);
     // A department sign hangs from the ceiling above its counter, so a big shop can be read from
-    // the door. Racks paint their own board, so they are not given a second one.
+    // the door. Racks paint their own board, so they are not given a second one. The sign turns with
+    // its fitting, so one over a shelf along a side wall runs along that wall instead of through it.
     if(def.sign&&!made.signed&&def.kind!=='hardwarebay'){
-      const y=Math.min((def.y??0)+(made.top??2)+.7,h-.45);
-      for(const off of [-.62,.62])box(root,[def.x+off,(y+h)/2,def.z],[.03,h-y,.03],'#7d7563').signText=def.sign;
-      label(root,def.sign,[def.x,y,def.z],1.8,.44,'#f4ead2','#36594f');
+      const y=Math.min((def.y??0)+(made.top??2)+.7,h-.45),hang=new pc.Entity('hung-sign');
+      hang.setLocalPosition(def.x,0,def.z);hang.setLocalEulerAngles(0,def.rot??0,0);root.addChild(hang);
+      for(const off of [-.62,.62])box(hang,[off,(y+h)/2,0],[.03,h-y,.03],'#7d7563').signText=def.sign;
+      label(hang,def.sign,[0,y,0],1.8,.44,'#f4ead2','#36594f');
     }
     const [hw,hd]=rotatedHalf(made.half,def.rot??0);
     fittings.push({...def,...made,hw,hd});

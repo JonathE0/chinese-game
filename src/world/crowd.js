@@ -1,7 +1,7 @@
-import * as pc from 'playcanvas';
 import {makeGrid,findPath,centre,without} from './visitors.js';
 import {initIdle,animateIdle,restIdle} from './idle.js';
 import {CITY_OFFSET} from './city.js';
+import {detail,RENDER} from '../core/quality.js';
 import crowd from '../content/crowd.json' with {type:'json'};
 import objects from '../content/objects.json' with {type:'json'};
 
@@ -24,7 +24,6 @@ import objects from '../content/objects.json' with {type:'json'};
 // centre keeps that plus half its diagonal.
 const CELL=.5,CLEAR=.3,REACH=CLEAR+CELL*.71;
 const BODY=.4,SPACE=.45,PLAYER=.9;  // how close a walker comes to someone else, and to the tourist
-const NEAR=40;                      // closer than this (x plus z distance) limbs and faces animate
 const SEAT_DROP=.66;                // as town.js: how far a body sinks so the hips land on the seat
 const NAME={id:'pedestrian',...objects.objects.pedestrian};
 const NONE=[];
@@ -42,32 +41,6 @@ const clearIn=g=>(a,b)=>{
   for(let i=1;i<=n;i++)if(!freeAt(g,a.x+(b.x-a.x)*i/n,a.z+(b.z-a.z)*i/n))return false;
   return true;
 };
-
-/**
- * Repaints a person built by models.person for the crowd: each box, ball and cylinder gets a mesh
- * of the same shape with its colour in the vertices, and all of them one shared material, since a
- * batch splits wherever the material changes.
- */
-function crowdPaint(device){
-  const material=new pc.StandardMaterial();
-  Object.assign(material,{diffuseVertexColor:true,vertexColorGamma:true,useMetalness:true,metalness:0,gloss:.1});
-  material.update();
-  const SHAPES={box:pc.BoxGeometry,sphere:pc.SphereGeometry,cylinder:pc.CylinderGeometry},meshes=new Map();
-  const paint=e=>{
-    const r=e.render;
-    if(r&&SHAPES[r.type]){
-      const c=r.meshInstances[0].material.diffuse,key=r.type+c.toString();
-      if(!meshes.has(key)){
-        const g=new SHAPES[r.type](),rgba=[c.r*255,c.g*255,c.b*255,255].map(Math.round);
-        g.colors=Array.from({length:g.positions.length/3},()=>rgba).flat();
-        meshes.set(key,pc.Mesh.fromGeometry(device,g));
-      }
-      r.meshInstances=[new pc.MeshInstance(meshes.get(key),material)];   // keeps the part's castShadows
-    }
-    for(const child of e.children)paint(child);
-  };
-  return paint;
-}
 
 export function buildCrowd(town,root){
   const room=town.rooms.get('city'),reg=town.registry;
@@ -100,15 +73,15 @@ export function buildCrowd(town,root){
     const face=b.face??(open(1)>=open(-1)?(along?0:90):(along?180:-90));
     return [-1,1].map(side=>({x:along?x+side*b.hw*.45:x,z:along?b.z:b.z+side*b.hd*.45,bench:{x,z:b.z,face},by:null}));
   });
-  // Every body part in one dynamic batch, all in one material: two draw calls however many people.
-  const paint=crowdPaint(town.app.graphicsDevice);
+  // Every body part in one dynamic batch, all in one material (models.repaint): two draw calls
+  // however many people. A lower graphics level (src/core/quality.js) has fewer of them.
   const group=town.app.batcher.addGroup('city-crowd',true);
-  const batch=e=>{if(e.render)e.render.batchGroupId=group.id;for(const child of e.children)batch(child);};
+  const batch=e=>{if(e.render){town.m.repaint(e);e.render.batchGroupId=group.id;}for(const child of e.children)batch(child);};
   const still=room.people??[];
   const people=[];
-  for(let i=0;i<crowd.count;i++){
+  for(let i=0;i<Math.round(crowd.count*RENDER[detail()].crowd);i++){
     const made=town.m.person(root,crowd.colors[i%crowd.colors.length],[0,0,0]);
-    paint(made.entity);batch(made.entity);
+    batch(made.entity);
     const spot=pick(cells.filter(c=>Math.hypot(c.x-spawn.x,c.z-spawn.z)>3&&people.every(o=>Math.hypot(c.x-o.x,c.z-o.z)>1.5)))??pick(cells);
     const p=initIdle({...made,i,color:crowd.colors[i%crowd.colors.length],line:i%crowd.lines.length,x:spot.x,z:spot.z,
       speed:rand(1,1.4),mode:'idle',wait:rand(0,4),path:[],plan:null,blocked:0,leg:rand(0,6),seat:null,standAt:null,near:false});
@@ -228,8 +201,9 @@ export function buildCrowd(town,root){
       if(paused)return;
       const at=town.player.entity.getPosition();player.x=at.x-CITY_OFFSET;player.z=at.z;
       planned=false;
+      const reach=RENDER[detail()].animate;   // closer than this (x plus z) limbs and faces animate
       for(const p of people){
-        const near=Math.abs(p.x-player.x)+Math.abs(p.z-player.z)<NEAR;
+        const near=Math.abs(p.x-player.x)+Math.abs(p.z-player.z)<reach;
         // Out of range the limbs stop being driven: straighten them rather than freeze mid-stride.
         if(p.near&&!near&&p.mode!=='sit')for(let i=0;i<2;i++){p.legs[i].setLocalEulerAngles(0,0,0);p.arms[i].setLocalEulerAngles(0,0,0);}
         p.near=near;

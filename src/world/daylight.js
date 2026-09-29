@@ -52,19 +52,48 @@ export const clockText=hour=>{
  * takes in the whole town. The engine snaps sun-shadow texels to a grid through the world origin,
  * so any turn shifts a place's shadow edges by its distance from the origin times the angle: in
  * the rooms (400 m to 10 km out) and 云海 (4 km) that was a texel or more every frame, and every
- * shadow edge there flickered. There the sun holds its angle until you are back in town, or the
- * clock is set.
+ * shadow edge there flickered. There the sun turns in steps instead, once every SUN_STEP_HOURS of
+ * game time (half a real minute), so shadows still follow the clock; setting the clock turns it at once.
  */
 export const SUN_TURNS_WITHIN=200;
+export const SUN_STEP_HOURS=.5;
+
+/**
+ * The sky's two lamps, as a unit Vec3 pointing at each (x east, y up, z south), below the horizon
+ * when y < 0. A summer sun: up in the east-north-east at 6:00, 62° high in the south at 12:30,
+ * down in the west-north-west at 19:00, so in 云海 it sets over the bay. The moon takes the night,
+ * up in the east as the sun sets and down in the west as it rises, passing 45° high in the north
+ * at half past midnight: over the bay, where the promenade looks.
+ */
+const SUNRISE=6,SUNSET=19,DEG=Math.PI/180;
+/** Up for `hours` from `rise`, sweeping `sweep` degrees round from `from`; then the mirrored arc under
+ *  the horizon for the rest of the day, all the way round, so it moves smoothly at every hour. */
+function arc(hour,rise,hours,top,from,sweep,out){
+  const h=(((hour-rise)%24)+24)%24,up=h<hours,s=up?h/hours:(h-hours)/(24-hours);
+  const height=(up?top:-top)*DEG*Math.sin(Math.PI*s),round=(up?from+sweep*s:from+sweep+(Math.sign(sweep)*360-sweep)*s)*DEG;
+  return out.set(Math.cos(height)*Math.sin(round),Math.sin(height),Math.cos(height)*Math.cos(round));
+}
+export const sunDirection=(hour,out=new pc.Vec3())=>arc(hour,SUNRISE,SUNSET-SUNRISE,62,120,-240,out);
+export const moonDirection=(hour,out=new pc.Vec3())=>arc(hour,SUNSET,24-SUNSET+SUNRISE,45,90,180,out);
+/** Sunlight or moonlight never grazes lower than this. It fades as its source sinks under FADE_BELOW,
+ *  down to FLOOR of the palette's intensity where sun and moon hand over, never out altogether. */
+const LOWEST=Math.sin(3*DEG),FADE_BELOW=Math.sin(10*DEG),FLOOR=.15,MOON=new pc.Vec3(),LIVE=new pc.Vec3();
 
 export class Daylight {
   constructor(app,sun,camera){
     this.app=app;this.sun=sun;this.camera=camera;
     this.hour=15;this.paused=false;this.lamps=[];this.onPhase=null;this.phase=null;
+    // Where the sun stood when the light last turned: src/world/sky.js draws it there.
+    this.sunUp=new pc.Vec3(0,1,0);
+    // How much of the moon is lit (src/world/sky.js sets it each day): a new moon gives almost no light.
+    this.moonLit=1;
   }
   /** Register a material that should glow after dark (lanterns, street lights, room lamps). */
   addLamp(material,peak=1){this.lamps.push({material,peak,last:-1});return material;}
-  advance(dt){if(!this.paused)this.hour=(this.hour+dt*(24/(MINUTES_PER_DAY*60)))%24;this.apply(this.camera.getPosition().length()<SUN_TURNS_WITHIN);}
+  advance(dt){
+    if(!this.paused)this.hour=(this.hour+dt*(24/(MINUTES_PER_DAY*60)))%24;
+    this.apply(this.camera.getPosition().length()<SUN_TURNS_WITHIN||Math.floor(this.hour/SUN_STEP_HOURS)!==this.sunStep);
+  }
   setHour(hour){this.hour=((hour%24)+24)%24;this.apply();}
   /** `turn`: also move the sun to this hour's angle (see SUN_TURNS_WITHIN). */
   apply(turn=true){
@@ -73,10 +102,18 @@ export class Daylight {
     this.app.scene.ambientLight=state.ambient;
     this.camera.camera.clearColor=state.sky;
     this.sun.light.color=state.sun;
-    this.sun.light.intensity=state.intensity;
-    // The sun swings east to west and dips below the horizon at night.
-    const dayProgress=(this.hour-6)/12;
-    if(turn)this.sun.setEulerAngles(Math.max(8,Math.sin(Math.PI*Math.min(1,Math.max(0,dayProgress)))*62+8),-140+dayProgress*160,0);
+    // By day the light comes from the sun, by night from the moon. A directional light shines down
+    // its entity's −y, so its pitch is measured from straight down: 90° less the source's height.
+    if(turn){
+      const from=sunDirection(this.hour,this.sunUp).y>0?this.sunUp:moonDirection(this.hour,MOON);
+      this.sun.setEulerAngles(90-Math.asin(Math.max(LOWEST,from.y))/DEG,Math.atan2(from.x,from.z)/DEG,0);
+      this.sunStep=Math.floor(this.hour/SUN_STEP_HOURS);
+    }
+    // Its strength follows the live sun or moon every frame, even while its direction holds (far from
+    // town): it dims as its source nears the horizon, so the swap at sunrise and sunset hardly shows.
+    const sunUp=sunDirection(this.hour,LIVE).y>0,height=sunUp?LIVE.y:moonDirection(this.hour,LIVE).y;
+    const fade=Math.min(1,Math.max(0,height/FADE_BELOW)),rise=fade*fade*(3-2*fade),moonlight=sunUp?1:.1+.9*this.moonLit;
+    this.sun.light.intensity=state.intensity*(FLOOR*(1-rise)+rise*moonlight);
     // emissiveIntensity is a shader uniform: it needs an update() to take effect, so only
     // push a change when the value has actually moved.
     for(const lamp of this.lamps){
