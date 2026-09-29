@@ -196,7 +196,7 @@ test('the city has its own street, its own people, and a free way home to the pl
   await page.keyboard.press('Escape');
 
   // A shop that only exists out here.
-  await warp(page,x-3.6,-10.5,90);          // the kiosk window faces +x at (-5.1, -10.5)
+  await warp(page,x-9.6,-10.5,-90);         // the kiosk at (-7.3, -10.5) opens onto the pavement, facing -x
   await expect(page.locator('#interact span')).toHaveText('看看便利店');
   await page.keyboard.press('e');await pastGreeting(page);
   await expect(page.locator('.shop-card',{hasText:'三明治'})).toBeVisible();
@@ -233,7 +233,7 @@ test('the city has its own street, its own people, and a free way home to the pl
   expect(errors).toEqual([]);
 });
 
-test('the city is solid: the towers are walls and the edge of the world holds',async({page})=>{
+test('the city is solid: the towers are walls, and the railing and the edge of the world hold',async({page})=>{
   await seed(page,{metro:{rides:2,trips:0}});
   await start(page);
   await page.evaluate(()=>{window.__qinghe.town.enterCity();window.__qinghe.syncPlace();});
@@ -245,11 +245,13 @@ test('the city is solid: the towers are walls and the edge of the world holds',a
       intoTower:t.canMove(offset-17.5,0),
       onPavement:t.canMove(offset-9.2,9.5),
       downTheMiddle:t.canMove(offset,0),
-      pastTheEnd:t.canMove(offset,-34.5),
-      throughTheSide:t.canMove(offset-28.5,0),
+      // The avenue runs on into the promenade, which ends at the railing along the bay.
+      ontoThePromenade:t.canMove(offset,-40),
+      pastTheEnd:t.canMove(offset,-48.5),
+      throughTheSide:t.canMove(offset+28.5,0),
       intoTheHall:t.canMove(offset,29),
     };
   },x);
   expect(blocked).toEqual({intoTower:false,onPavement:true,downTheMiddle:true,
-    pastTheEnd:false,throughTheSide:false,intoTheHall:true});
+    ontoThePromenade:true,pastTheEnd:false,throughTheSide:false,intoTheHall:true});
 });

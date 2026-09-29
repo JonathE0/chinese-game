@@ -85,7 +85,7 @@ test('the talk step leads to 林阿姨, and only she finishes it',async({page})=
   expect(index).toBe(8);
   const card=page.locator('#tutorial-card');
   await expect(card).toContainText('去茶铺找林阿姨');
-  await expect.poll(()=>page.evaluate(()=>window.__qinghe.ui.route)).toMatchObject({key:'tutorial',district:'square',x:-9,z:-2});
+  await expect.poll(()=>page.evaluate(()=>window.__qinghe.ui.route)).toMatchObject({key:'tutorial',district:'square',x:-4.8,z:-9.4});
   await page.evaluate(()=>window.__qinghe.town.onInteract('chen'));
   await expect(page.locator('#panel')).toBeVisible();
   expect(await page.evaluate(()=>window.__qinghe.profile.tutorial.step)).toBe(8);

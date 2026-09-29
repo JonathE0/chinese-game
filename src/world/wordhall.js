@@ -4,7 +4,7 @@ import * as pc from 'playcanvas';
  * 词语馆 from outside: a temple-style academy at the north of the square, facing the fountain.
  * A paifang with the 学海无涯 plaque, a forecourt with two stone lions, a white terrace with a
  * wide staircase, and on it the main hall (red columns, lattice doors, a double-eaved golden
- * roof, the 词语馆 plaque under the upper eave) between two single-eaved side halls — reading
+ * roof, the 词语馆 plaque over the door) between two single-eaved side halls — reading
  * room west, study room east. Built from the `practice-house` entry in world.json: its footprint
  * is the main hall's, its `wings` are the side halls, `sign` and `paifang` the two plaques.
  * Returns the collision and name marks for the town registry, all sharing the building's group.
@@ -53,7 +53,7 @@ export function buildWordHall(models,parent,b,lamps){
   const lionZ=stairsFront+1.15;
   for(const s of [-1,1]){
     const x=X+s*3.1;
-    box(root,[x,.35,lionZ],[1.0,.7,1.3],C.lionDark);
+    box(root,[x,.35,lionZ],[1.0,.7,1.31],C.lionDark);
     box(root,[x,1.0,lionZ-.2],[.7,.6,.8],C.lion);                 // haunches
     box(root,[x,1.25,lionZ+.2],[.62,1.1,.5],C.lion);              // chest and forelegs
     ball(root,[x,1.95,lionZ+.18],[.86,.8,.72],C.lionDark);        // the mane
@@ -70,7 +70,7 @@ export function buildWordHall(models,parent,b,lamps){
   mark(X,TZ,TX,TD/2,0,TOP);
   for(let k=1;k*RISE<TOP-1e-6;k++){
     const z0=T0+(TOP/RISE-k)*TREAD,top=k*RISE;
-    box(root,[X,top/2,(z0+T0)/2],[SW*2,top,z0-T0],k%2?C.terraceLip:C.terrace);
+    box(root,[X,top/2,(z0+T0-.01*k)/2],[SW*2+k%2*.01,top,z0-T0+.01*k],k%2?C.terraceLip:C.terrace);   // backs staggered into the terrace
     mark(X,(z0+T0)/2,SW,(z0-T0)/2,0,top,'step');
     for(const s of [-1,1]){                      // the stone cheeks either side of the stairs
       box(root,[X+s*(SW+.3),(top+.45)/2,z0-TREAD/2],[.6,top+.45,TREAD],C.terraceLip).lookName='stone';
@@ -104,6 +104,11 @@ export function buildWordHall(models,parent,b,lamps){
     if(x)win.lookName='window';
   }
   mark(X,wallZ+.2,1.1,.16,TOP,TOP+3.5,'door',false);
+  // The 词语馆 plaque hangs over the door, between the two middle columns and under the lower
+  // eave: up under the upper eave, the lower roof hid it from everywhere on the square.
+  box(root,[X,TOP+4.25,wallZ+.04],[2.1,.95,.08],C.gold);
+  label(root,b.sign,[X,TOP+4.25,wallZ+.1],1.9,.75,C.plaque,C.ink);
+  mark(X,wallZ+.1,1.05,.12,TOP+3.75,TOP+4.75,'plaque',false);
   for(const x of [-8.75,-6.25,-3.75,-1.25,1.25,3.75,6.25,8.75]){
     cylinder(root,[X+x,TOP+.12,colZ],[.74,.24,.74],C.stone);
     cylinder(root,[X+x,(TOP+H1)/2,colZ],[.52,H1-TOP,.52],C.red);
@@ -118,7 +123,7 @@ export function buildWordHall(models,parent,b,lamps){
     mark(X+x,colZ,.25,.25,H1-1.5,H1-.7,'lantern',false);
   }
 
-  // --- the double-eaved golden roof and the 词语馆 plaque under the upper eave ---
+  // --- the double-eaved golden roof ---
   const roofZ=b.z,roofD=b.depth-.6;
   tiledRoof(root,X,roofZ,W+.6,roofD,H1,b.roof,3);
   mark(X,roofZ,(W+.6)/2+.65,roofD/2+.75,H1,H1+.25,'roof');   // the eave's full-depth bottom layer
@@ -127,9 +132,6 @@ export function buildWordHall(models,parent,b,lamps){
   box(root,[X,H2-.2,upFront+.02],[UW+.1,.3,.1],C.gold);
   mark(X,roofZ,UW/2,UD/2,H1,H2,b.object);
   for(const x of [-4.9,-2.6,2.6,4.9])latticeWindow(root,X+x,H1+1.5,upFront+.06,1.3,1.1,C.pane).lookName='window';
-  box(root,[X,H1+3,upFront+.04],[3.8,1.3,.08],C.gold);
-  label(root,b.sign,[X,H1+3,upFront+.1],3.5,1.05,C.plaque,C.ink);
-  mark(X,upFront+.1,1.9,.12,H1+2.3,H1+3.7,'plaque',false);
   tiledRoof(root,X,roofZ,UW,UD,H2,b.roof,13);
   mark(X,roofZ,UW/2+.65,UD/2+.75,H2,H2+3,'roof');
 

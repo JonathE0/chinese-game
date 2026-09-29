@@ -8,8 +8,8 @@ const WORLD=JSON.parse(readFileSync('src/content/world.json','utf8'));
 const COUNTERS=['postcounter','checkout','reception'];
 // Where to turn on the way to the counter, where a straight line would clip the furniture.
 const LEGS={'post-office':[],pharmacy:[],guesthouse:[[-.3,-1.2]],'clothes-shop':[[0,-1],[2.4,-1]]};
-// The guesthouse faces the garden wall across a narrow walk, so you come along the walk.
-const APPROACH={guesthouse:[[-21.2,18],[-18,18]]};
+// The guesthouse faces north onto the lane behind 家居小铺, so you come in along the lane.
+const APPROACH={guesthouse:[[-14.5,7.4],[-17.5,8.2]]};
 
 /** Hold W and steer at (x,z) in the current place until there, or until something stops you. */
 async function walkTo(page,x,z,offset=0){
@@ -52,7 +52,8 @@ for(const [id,data] of Object.entries(ROOMS).filter(([id])=>id in LEGS)){
     for(const [x,z] of LEGS[id])await walkTo(page,x,z,offset);
     await walkTo(page,counter.x,counter.z,offset);
     const at=await page.evaluate(()=>{const p=window.__qinghe.town.player.entity.getPosition();return {x:p.x,z:p.z};});
-    const {hw,hd}=await page.evaluate(([id,i])=>window.__qinghe.town.rooms.get(id).fittings[i],[id,data.fittings.indexOf(counter)]);
+    // Only the sizes: a fitting record also holds its scene entity, far too big to send back.
+    const {hw,hd}=await page.evaluate(([id,i])=>{const f=window.__qinghe.town.rooms.get(id).fittings[i];return {hw:f.hw,hd:f.hd};},[id,data.fittings.indexOf(counter)]);
     // Stopped by the counter itself, standing at its customer side.
     expect(Math.abs(at.x-offset-counter.x)).toBeLessThan(hw);
     expect(at.z-(counter.z+hd)).toBeGreaterThan(0);

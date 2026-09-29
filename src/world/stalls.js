@@ -58,6 +58,7 @@ export class NightMarket{
       pitch.signLabel.setLocalEulerAngles(0,90,0);
     }
     pitch.vendor=initIdle(this.models.person(this.parent,pitch.color??'#c98a6d',[x,0,z]));
+    this.onMount?.(pitch);   // the town batches the cart and its keeper (Town#batchMoving)
   }
   /** Build the cart out of sight and start it walking in. */
   raise(pitch){
@@ -195,13 +196,14 @@ export const NIGHT_PITCHES=[
 // signpost and a fruit stall's crate and bin to the east all sit within a couple of metres of
 // 馄饨摊 and 面摊, and the vendor's own trailing offset (1.55m behind the cart) reaches into more
 // of that gap than the cart itself does. Both spots keep a short, clean approach from due east of
-// the cart, close enough that the vendor never swings into any of it. 早点摊 has open ground to its
-// north and walks the whole width of the square in from the west.
+// the cart, close enough that the vendor never swings into any of it. 早点摊 stands at the quiet
+// west end of the lane in front of the 客栈, breakfast on the inn's doorstep, leaving the lane's
+// mouth (and the inn's walk out to the square) clear.
 export const DAY_PITCHES=[
   {id:'wonton',zh:'馄饨摊',shop:'wonton',tint:'#8a6b4f',color:'#c9a15c',sign:true,
    spawn:[-11.9,1.2],path:[[-11.9,1.2],[-11.5,1.2]],spot:[-11.5,1.2],yaw:180,name:'cart'},
   {id:'noodlestall',zh:'面摊',shop:'noodlestall',tint:'#9c7548',color:'#8fae7a',sign:true,
    spawn:[-11.9,4.0],path:[[-11.9,4.0],[-11.5,4.0]],spot:[-11.5,4.0],yaw:180,name:'cart'},
   {id:'breakfast',zh:'早点摊',shop:'breakfast',tint:'#b98a54',color:'#e0a15c',sign:true,
-   spawn:[-18.6,6.8],path:[[-18.6,6.8],[-11.5,6.8]],spot:[-11.5,6.8],yaw:180,name:'cart'},
+   spawn:[-19.6,6.9],path:[[-19.6,6.9],[-19.2,6.9]],spot:[-19.2,6.9],yaw:180,name:'cart'},
 ];

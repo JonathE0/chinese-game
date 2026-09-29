@@ -1,16 +1,46 @@
 import * as pc from 'playcanvas';
 import {bridgeRails,shoreline,walkwayLayout,walkwayMarks,latticeWindows,latticeWallMarks,verandaLayout,verandaMarks,canalMarks} from '../core/garden.js';
+import {waterOf} from './water.js';
+/** A piece smaller than SHADOW_MIN in every direction casts no shadow: window bars, lattice, roof
+ *  ribs, railings and ornaments each cost a shadow draw call for a shadow nobody can see. Nor does a
+ *  stick, under SHADOW_THIN across (a lamp post, a pole, a thin beam): its shadow is a texel or two
+ *  of the sun's map wide and crawls as the sun turns (task Q-quality). Pillars (.2 m and up) still do. */
+const SHADOW_MIN=1.2,SHADOW_THIN=.2;
+export const castsShadow=scale=>{const [,across,along]=[...scale].sort((a,b)=>a-b);return along>=SHADOW_MIN&&across>=SHADOW_THIN;};
 export function createModels(app) {
-  const cache=new Map();
+  const cache=new Map(),plain=new Set();
   function material(hex) {
     if(cache.has(hex))return cache.get(hex);
-    const m=new pc.StandardMaterial();m.diffuse=new pc.Color().fromString(hex);m.useMetalness=true;m.metalness=0;m.gloss=0.1;m.update();cache.set(hex,m);return m;
+    const m=new pc.StandardMaterial();m.diffuse=new pc.Color().fromString(hex);m.useMetalness=true;m.metalness=0;m.gloss=0.1;m.update();cache.set(hex,m);plain.add(m);return m;
   }
-  /** A piece smaller than this in every direction casts no shadow: window bars, lattice, roof
-   *  ribs, railings and ornaments each cost a shadow draw call for a shadow nobody can see. */
-  const SHADOW_MIN=1.2;
+  /**
+   * The batcher merges only meshes that share a material, and colours alone made about 300
+   * materials in the town. A repainted piece keeps its shape but carries its colour in its vertices,
+   * and every repainted piece shares `painted`, so the static town merges into a handful of batches
+   * and a crowd into one. Only a piece still wearing a plain colour from `material` is repainted;
+   * its render component keeps that material (`render.material`), which is what it looks like to
+   * anything that asks. The shapes are built exactly as the engine builds its own primitives.
+   */
+  const painted=new pc.StandardMaterial();painted.name='vertex-colour';
+  Object.assign(painted,{diffuseVertexColor:true,vertexColorGamma:true,useMetalness:true,metalness:0,gloss:.1});painted.update();
+  const SHAPES={box:()=>new pc.BoxGeometry(),sphere:()=>new pc.SphereGeometry({radius:.5}),
+    cylinder:()=>new pc.CylinderGeometry({radius:.5,height:1}),cone:()=>new pc.ConeGeometry({baseRadius:.5,peakRadius:0,height:1}),
+    plane:()=>new pc.PlaneGeometry({halfExtents:new pc.Vec2(.5,.5),widthSegments:1,lengthSegments:1})},paints=new Map();
+  function repaint(e) {
+    const r=e.render,made=r?.meshInstances;
+    if(!r||made?.length!==1||!SHAPES[r.type]||made[0].material!==r.material||!plain.has(r.material))return;
+    const c=r.material.diffuse,key=r.type+c.toString();
+    if(!paints.has(key)){
+      const g=SHAPES[r.type](),rgba=[c.r*255,c.g*255,c.b*255,255].map(Math.round);
+      g.colors=Array.from({length:g.positions.length/3},()=>rgba).flat();
+      // Held here as the engine holds its own primitives: a mesh is destroyed with the last piece
+      // drawing it, and a struck cart would take its colours with it for the next one.
+      const mesh=pc.Mesh.fromGeometry(app.graphicsDevice,g);mesh.incRefCount();paints.set(key,mesh);
+    }
+    r.meshInstances=[new pc.MeshInstance(paints.get(key),painted)];   // keeps the part's castShadows
+  }
   function shape(parent,type,xyz,scale,color,rotation=[0,0,0]) {
-    const e=new pc.Entity(type);e.addComponent('render',{type,material:material(color),castShadows:Math.max(...scale)>=SHADOW_MIN,receiveShadows:true});e.setLocalPosition(...xyz);e.setLocalScale(...scale);e.setLocalEulerAngles(...rotation);parent.addChild(e);return e;
+    const e=new pc.Entity(type);e.addComponent('render',{type,material:material(color),castShadows:castsShadow(scale),receiveShadows:true});e.setLocalPosition(...xyz);e.setLocalScale(...scale);e.setLocalEulerAngles(...rotation);parent.addChild(e);return e;
   }
   const box=(p,xyz,s,c,r)=>shape(p,'box',xyz,s,c,r);
   /** Names an entity as one thing to look at (an objects.json key); the town turns every tagged
@@ -85,11 +115,68 @@ export function createModels(app) {
     return {entity:e,torso,collar,upper,legs,arms,hat:hatRoot,head,neck,eyes,brows,mouth,lips,
       hatBrim:hatRoot.children.filter(c=>c.render)};
   }
-  function tree(parent,x,z,size=1) {
-    const root=new pc.Entity('tree');root.setLocalPosition(x,0,z);root.setLocalScale(size,size,size);parent.addChild(root);
-    cylinder(root,[0,1,0],[.34,2,.34],'#967658');
-    for(const [p,s,c] of [[[0,2.6,0],[2.2,2.4,2.1],'#91a779'],[[-.65,2.2,.25],[1.4,1.7,1.4],'#809a6a'],[[.6,2.8,.15],[1.4,1.8,1.5],'#a5b786']])shape(root,'cone',p,s,c);
-    cylinder(root,[0,.15,0],[1.7,.3,1.7],'#c7bb9e');
+  /**
+   * A street tree (world.json `trees`: [x, z, kind]): a broadleaf `tree`, a weeping `willow`, a
+   * golden `ginkgo`, a dense `osmanthus` in flower, or a `pine` of stacked cones (a courtyard's).
+   * Each has a tapered trunk and a canopy layered in three tones, stands in a stone pit (a willow
+   * straight in the bank), and turns by where it stands so a row never repeats. It is all static
+   * and batches; only the big canopy pieces cast a shadow.
+   */
+  const TREE_LEAVES={
+    tree:['#6c8a58','#88a46c','#a3ba80'],willow:['#88a46c','#9fb86c','#b5c982'],
+    ginkgo:['#c79a39','#d6b048','#e4c65f'],osmanthus:['#5b7a4c','#6c8a58','#7e9a66'],
+    pine:['#557452','#62845c','#6f8f66'],
+  };
+  function tree(parent,x,z,size=1,kind='tree') {
+    const root=tag(new pc.Entity(kind),kind);root.setLocalPosition(x,0,z);root.setLocalScale(size,size,size);
+    root.setLocalEulerAngles(0,Math.abs(x*37+z*53)%360,0);parent.addChild(root);
+    const [dark,mid,light]=TREE_LEAVES[kind]??TREE_LEAVES.tree,bark='#76604a',limbBark='#5f4c3b';
+    if(kind!=='willow'){                                       // a stone pit and its soil
+      cylinder(root,[0,.15,0],[1.7,.3,1.7],'#c7bb9e');cylinder(root,[0,.31,0],[1.4,.03,1.4],'#8a7458');
+    }
+    const trunk=(h,w)=>{cylinder(root,[0,h/2,0],[w,h,w],bark);shape(root,'cone',[0,.55,0],[w*1.9,.6,w*1.9],bark);};
+    // A limb leaves the trunk at height y, leaning `tilt` degrees out towards `turn`.
+    const limb=(y,len,tilt,turn,thick=.13)=>{
+      const pivot=new pc.Entity('limb');pivot.setLocalPosition(0,y,0);pivot.setLocalEulerAngles(0,turn,0);root.addChild(pivot);
+      const t=tilt*Math.PI/180;cylinder(pivot,[Math.sin(t)*len/2,Math.cos(t)*len/2,0],[thick,len,thick],limbBark,[0,0,-tilt]);
+    };
+    const leaves=list=>{for(const [p,s,c] of list)ball(root,p,s,c);};
+    if(kind==='willow'){
+      trunk(1.9,.4);
+      for(const turn of [0,120,240])limb(1.7,1.25,44,turn,.16);
+      leaves([[[0,2.9,0],[2.2,.9,2.1],mid],[[.2,3.25,-.1],[1.4,.7,1.3],light]]);
+      // The hanging curtain: slim cones, point down, in three rings of mixed tone and length. It
+      // casts no shadow: eighteen casters a willow is more than the shadow budget can carry.
+      for(let i=0;i<18;i++){
+        const a=i/18*Math.PI*2+(i%2)*.17,r=[.62,.9,1.08][i%3],h=2.3-(i%4)*.25;
+        shape(root,'cone',[Math.cos(a)*r,3.05-h/2,Math.sin(a)*r],[.3,h,.3],[dark,mid,light][(i>>1)%3],[180,0,0]).render.castShadows=false;
+      }
+    } else if(kind==='pine'){
+      trunk(2.0,.3);
+      for(const [y,w,h,c] of [[1.9,2.2,1.5,dark],[2.7,1.7,1.4,mid],[3.4,1.2,1.3,dark],[4.0,.7,1.0,light]])shape(root,'cone',[0,y,0],[w,h,w],c);
+    } else if(kind==='ginkgo'){
+      trunk(3.4,.28);
+      [[1.9,0],[2.5,120],[3.0,240]].forEach(([y,turn])=>limb(y,.8,55,turn,.1));
+      leaves([[[0,2.3,0],[2.4,.8,2.2],dark],[[0,2.95,0],[2.0,.8,1.9],mid],[[0,3.55,0],[1.5,.75,1.45],light],
+        [[0,4.05,0],[.9,.6,.85],mid],[[.7,2.6,.3],[1.0,.6,.9],light],[[-.6,3.2,-.3],[1.0,.6,.9],dark]]);
+      // A few fan leaves already down on the paving.
+      for(let i=0;i<5;i++){const a=i*2.4;cylinder(root,[Math.cos(a)*(1+i%2*.3),.035,Math.sin(a)*(1+i%2*.3)],[.22,.02,.16],light,[0,i*50,0]);}
+    } else if(kind==='osmanthus'){
+      trunk(1.3,.3);
+      for(const turn of [30,150,270])limb(1.1,.9,45,turn);
+      leaves([[[0,2.25,0],[2.4,1.9,2.3],dark],[[-.6,1.95,.45],[1.4,1.2,1.3],mid],[[.6,2.55,-.35],[1.4,1.2,1.3],mid],[[0,3.05,0],[1.5,.9,1.4],light]]);
+      // Tiny gold flower clusters dotted over the crown.
+      for(let i=0;i<14;i++){
+        const a=i*2.4,e=-.25+(i%5)*.25;
+        ball(root,[Math.cos(a)*Math.cos(e)*1.22,2.25+Math.sin(e)*.97,Math.sin(a)*Math.cos(e)*1.17],[.13,.13,.13],'#eab54d');
+      }
+    } else {
+      trunk(2.2,.3);
+      for(const [y,len,tilt,turn] of [[1.7,1.1,40,0],[1.9,1.0,35,130],[2.0,.9,30,250]])limb(y,len,tilt,turn);
+      leaves([[[0,2.9,0],[2.3,1.6,2.2],mid],[[-.6,2.55,.35],[1.4,1.2,1.3],dark],[[.65,2.7,-.25],[1.4,1.2,1.4],light],
+        [[.1,3.55,.05],[1.5,1.0,1.4],light],[[.25,2.4,-.7],[1.2,.9,1.1],dark],[[-.35,3.2,-.4],[1.1,.9,1.0],mid]]);
+    }
+    return root;
   }
   /**
    * A shop front comes in three builds. They share a footprint and a doorway — the collision
@@ -105,15 +192,17 @@ export function createModels(app) {
   function building(parent,data) {
     const root=new pc.Entity(data.id);root.setLocalPosition(data.x,0,data.z);root.setLocalEulerAngles(0,data.rotation||0,0);parent.addChild(root);
     const w=data.width,d=data.depth,h=data.height,style=data.style??'tiled';
-    box(root,[0,h/2,0],[w,h,d],data.color);
-    if(style!=='tiled'||data.storeys===2)tag(box(root,[0,.2,0],[w+.2,.4,d+.2],'#c7b798'),'stone');   // tiled fronts have a plinth
+    // The bank draws its own body round a recessed entrance, and its own stone base.
+    if(style!=='bank')box(root,[0,h/2,0],[w,h,d],data.color);
+    if((style!=='tiled'&&style!=='bank')||data.storeys===2)tag(box(root,[0,.2,0],[w+.2,.4,d+.2],'#c7b798'),'stone');   // tiled fronts have a plinth
     // Extra named parts (a balcony, a chimney) and lit windows are handed back on the entity, in
     // world coordinates, for the town to register and for the daylight to dim.
     const face=(data.rotation??0)===180?-1:1;
     root.marks=[];root.lamps=[];
     root.addMark=(lx,lz,hw,hd,y0,y1,name,solid=false,round=false)=>root.marks.push({x:data.x+face*lx,z:data.z+face*lz,
       ...(round?{radius:hw}:{hw,hd}),y0,y1,name,solid});
-    if(style==='modern')modernFront(root,data,w,d,h);
+    if(style==='bank')bankFront(root,data,w,d,h);
+    else if(style==='modern')modernFront(root,data,w,d,h);
     else if(style==='shophouse')shophouseFront(root,data,w,d,h);
     else if(data.storeys===2)houseFront(root,data,w,d,h);
     else tiledFront(root,data,w,d,h);
@@ -176,8 +265,8 @@ export function createModels(app) {
    */
   function houseFront(root,data,w,d,h) {
     const f=d/2,floor=3.05;
-    for(const x of [-w/2+.2,w/2-.2])tag(box(root,[x,h/2,f+.025],[.23,h,.2],'#8e6952'),'pillar');
-    box(root,[0,floor,f+.03],[w,.18,.15],'#9c7558');
+    for(const x of [-w/2+.2,w/2-.2])tag(box(root,[x,h/2-.01,f+.025],[.23,h-.02,.2],'#8e6952'),'pillar');   // just under the eave line
+    box(root,[0,floor,f+.03],[w+.01,.18,.15],'#9c7558');
     // Ground floor: the door and a window either side.
     box(root,[0,1.15,f+.1],[1.15,2.1,.16],'#6c7661');
     for(const x of [-.28,.28])box(root,[x,1.2,f+.22],[.045,1.9,.03],'#cdb486');
@@ -186,7 +275,7 @@ export function createModels(app) {
     // First floor: a glazed balcony door between two windows, and the balcony across the front.
     latticeWindow(root,0,4.1,f+.06,1.1,1.85);
     for(const x of [-2.25,2.25])latticeWindow(root,x,4.25,f+.06,1.3,1.3);
-    box(root,[0,h-.55,f+.04],[w,.16,.14],'#9c7558');
+    box(root,[0,h-.55,f+.04],[w+.01,.16,.14],'#9c7558');
     for(let x=-w/2+.7;x<w/2-.5;x+=.9)box(root,[x,h-.3,f+.06],[.12,.34,.16],'#8e6952');
     const bw=w-.6,reach=1.1,rail='#9a4f42';
     box(root,[0,floor,f+reach/2],[bw,.16,reach],'#9c7558');
@@ -195,9 +284,10 @@ export function createModels(app) {
     box(root,[0,floor+.2,f+reach-.05],[bw,.08,.08],rail);
     for(const side of [-1,1]){
       box(root,[side*(bw/2-.05),floor+.9,f+reach/2],[.1,.1,reach],rail);
-      box(root,[side*(bw/2-.05),floor+.45,f+reach-.05],[.1,.9,.1],rail);
+      box(root,[side*(bw/2-.05),floor+.45,f+reach-.05],[.104,.9,.104],rail);
     }
-    box(root,[0,floor+.55,f+reach-.05],[bw-.2,.62,.03],'#b5705f');   // railing infill, one panel
+    // Balusters, not a solid panel: from the glass door inside, a panel read as a wall outside.
+    for(let x=-bw/2+.3;x<bw/2-.2;x+=.3)box(root,[x,floor+.55,f+reach-.05],[.05,.7,.05],'#b5705f');
     for(const x of [-2.4,2.4])cylinder(root,[x,floor+.3,f+.45],[.36,.34,.36],'#b0654f');
     for(const x of [-2.4,2.4])ball(root,[x,floor+.62,f+.45],[.5,.44,.5],'#87996b');
     root.addMark(0,f+reach/2,bw/2,reach/2,floor-.1,floor+1,'balcony');
@@ -222,28 +312,68 @@ export function createModels(app) {
    * door; the study gets a window onto a bookshelf.
    */
   function buildWing(root,data,wing) {
-    const {x,z,width:w,depth:d,height:h}=wing,f=z+d/2,outer=x+Math.sign(x)*w/2;
-    box(root,[x,h/2,z],[w,h,d],wing.color??data.color);
+    const {x,z,width:w,depth:d,height:h}=wing,f=z+d/2,outer=x+Math.sign(x)*w/2,wall=wing.color??data.color;
+    // The kitchen window looks into a shallow lit room, so its front wall is built round the opening
+    // and the room sits in the depth D behind it; any other wing is one solid block.
+    const win=wing.object==='kitchen'?{x,y:1.6,w:2,h:1.1,D:.9}:null;
+    if(win){
+      const x0=x-w/2,x1=x+w/2,wx0=win.x-win.w/2,wx1=win.x+win.w/2,y0=win.y-win.h/2,y1=win.y+win.h/2,zf=f-win.D/2;
+      box(root,[x,h/2,z-win.D/2],[w,h,d-win.D],wall);
+      box(root,[(x0+wx0)/2,h/2,zf],[wx0-x0,h,win.D],wall);
+      box(root,[(wx1+x1)/2,h/2,zf],[x1-wx1,h,win.D],wall);
+      box(root,[win.x,y0/2,zf],[win.w,y0,win.D],wall);
+      box(root,[win.x,(y1+h)/2,zf],[win.w,h-y1,win.D],wall);
+    } else box(root,[x,h/2,z],[w,h,d],wall);
     tag(box(root,[x,.2,z],[w+.2,.4,d+.2],'#c7b798'),'stone');
-    for(const px of [x-w/2+.15,x+w/2-.15])tag(box(root,[px,h/2,f+.025],[.2,h,.18],'#8e6952'),'pillar');
-    box(root,[x,h-.3,f+.03],[w,.14,.12],'#9c7558');
+    for(const px of [x-w/2+.15,x+w/2-.15])tag(box(root,[px,h/2-.01,f+.025],[.2,h-.02,.18],'#8e6952'),'pillar');   // just under the eave line
+    box(root,[x,h-.3,f+.03],[w+.01,.14,.12],'#9c7558');
     tiledRoof(root,x,z,w,d,h,wing.roof??data.roof,3,-Math.sign(x));
     if(wing.object==='kitchen'){
-      // The side door, with its name board over it.
-      const dx=x-Math.sign(x)*.62;
-      tag(box(root,[dx,1.05,f+.08],[.9,2.0,.12],'#7a5f45'),'door');
-      box(root,[dx+Math.sign(x)*.28,1.05,f+.16],[.06,.06,.05],'#d8c07e');
-      if(wing.sign){box(root,[dx,2.47,f+.1],[1.08,.5,.08],'#7d6349');label(root,wing.sign,[dx,2.47,f+.16],.92,.38,'#a4564a','#f2e2c6');}
-      root.addMark(dx,f+.3,.45,.16,0,2.1,'door');
-      // A window lit from inside: the stove, a pot on the flame and a ladle on the wall.
-      const wx=x+Math.sign(x)*.72,wy=1.55,lit=glow('#f2c27a');
-      const pane=tag(box(root,[wx,wy,f+.04],[1.0,1.0,.06],'#f2c27a'),'window');pane.render.meshInstances[0].material=lit;root.lamps.push(lit);
-      tag(box(root,[wx,wy-.34,f+.08],[.92,.3,.04],'#5d5048'),'stove');
-      tag(box(root,[wx-.12,wy-.14,f+.09],[.16,.08,.03],'#e0803c'),'stove');
-      tag(cylinder(root,[wx-.12,wy+.04,f+.1],[.4,.26,.04],'#3f4644'),'pot');
-      box(root,[wx-.12,wy+.2,f+.1],[.44,.05,.04],'#59605e');
-      tag(box(root,[wx,wy,f+.02],[1.2,1.2,.05],'#8e6952'),'window');   // frame, behind the pane
-      root.addMark(wx,f+.42,.55,.06,wy-.55,wy+.55,'window');
+      // No door on the front: the kitchen is reached from inside the house, through its west wall.
+      // A wide window instead, looking into a slice of the kitchen lit from inside: a tiled back
+      // wall, the counter with the stove and a wok on the flame, pans hanging from a rail, a shelf of
+      // jars, a stack of bowls and a lamp. It sits D deep behind the glass, so it shifts against the
+      // frame as you walk by. The name board hangs over the middle.
+      const {x:wx,y:wy,w:ww,h:wh,D}=win,back=f-D,lit=glow('#f2c27a'),tiles=glow('#efe0bf');
+      // The daylight sets every lamp's intensity, so the tiles' soft glow is in their emissive colour.
+      tiles.emissive=new pc.Color(.937*.18,.878*.18,.749*.18);tiles.update();root.lamps.push(lit,tiles);
+      if(wing.sign){box(root,[wx,2.62,f+.1],[1.08,.5,.08],'#7d6349');label(root,wing.sign,[wx,2.62,f+.16],.92,.38,'#a4564a','#f2e2c6');}
+      const tiled=box(root,[wx,wy,back+.01],[ww,wh,.02],'#efe0bf');tiled.render.meshInstances[0].material=tiles;
+      tiled.render.receiveShadows=false;   // lit from inside: the wing's own shadow must not grey it
+      for(let k=1;k<4;k++)box(root,[wx,wy-wh/2+k*wh/4,back+.025],[ww,.012,.01],'#d9c6a1');   // tile joints
+      // Seen through the glass: one group, the kitchen, rather than a name for each piece.
+      const room=group(root,'kitchen'),counter=room,pans=room,jars=room,bowls=room,lamp=room;
+      box(counter,[wx,wy-wh/2+.055,back+.21],[ww-.02,.09,.4],'#8e6952');                      // worktop, clear of the tiles and reveals
+      box(counter,[wx-.55,wy-wh/2+.14,back+.2],[.5,.08,.3],'#3f4644');                      // stove
+      box(counter,[wx-.55,wy-wh/2+.19,back+.2],[.18,.03,.12],'#e0803c').render.meshInstances[0].material=lit;
+      cylinder(counter,[wx-.55,wy-wh/2+.26,back+.2],[.38,.12,.38],'#3f4644');
+      box(pans,[wx,wy+wh/2-.16,back+.12],[ww-.2,.025,.025],'#59605e');                     // rail
+      for(const [k,r,c] of [[-.75,.22,'#3f4644'],[-.45,.28,'#b0654f'],[-.15,.18,'#3f4644'],[.14,.24,'#b0654f']]){
+        box(pans,[wx+k,wy+wh/2-.24,back+.12],[.025,.14,.02],'#59605e');
+        cylinder(pans,[wx+k,wy+wh/2-.31-r/2,back+.1],[r,.025,r],c,[90,0,0]);
+      }
+      box(room,[wx+.6,wy-.12,back+.1],[.5,.03,.18],'#7d6349');                              // shelf
+      for(const [k,c] of [[.44,'#c98568'],[.58,'#e8dcc4'],[.72,'#7f9a76']])cylinder(jars,[wx+k,wy-.03,back+.1],[.09,.15,.09],c);
+      for(let k=0;k<3;k++)cylinder(bowls,[wx+.15,wy-wh/2+.12+k*.035,back+.22],[.18-k*.01,.035,.18-k*.01],'#e8dcc4');
+      box(lamp,[wx-.1,wy+wh/2-.08,f-.35],[.012,.16,.012],'#3b3a35');
+      cylinder(lamp,[wx-.1,wy+wh/2-.18,f-.35],[.2,.08,.2],'#59605e');
+      ball(lamp,[wx-.1,wy+wh/2-.24,f-.35],[.1,.1,.1],'#f2c27a').render.meshInstances[0].material=lit;
+      // A short café curtain across the top, the glass, and the timber frame round the opening.
+      box(root,[wx,wy+wh/2-.1,f-.1],[ww-.04,.18,.02],'#b8453a');
+      const glass=new pc.StandardMaterial();
+      glass.diffuse=new pc.Color().fromString('#cfe0dc');glass.opacity=.18;glass.blendType=pc.BLEND_NORMAL;
+      glass.gloss=.9;glass.useMetalness=true;glass.metalness=.3;glass.depthWrite=false;glass.update();
+      const pane=tag(box(root,[wx,wy,f-.04],[ww+.02,wh+.02,.02],'#cfe0dc'),'window');   // its edges run into the reveals
+      pane.render.meshInstances[0].material=glass;pane.render.castShadows=false;
+      const frame=group(root,'window');
+      for(const s of [-1,1]){
+        box(frame,[wx+s*(ww/2+.05),wy,f+.04],[.104,wh+.2,.08],'#8e6952');   // on the wall face, not in it
+        box(frame,[wx,wy+s*(wh/2+.05),f+.04],[ww+.2,.1,.08],'#8e6952');
+        box(frame,[wx+s*ww/4,wy,f-.02],[.03,wh,.03],'#d9c6a1');
+      }
+      box(frame,[wx,wy,f],[.08,wh,.06],'#8e6952');box(frame,[wx,wy+.12,f-.02],[ww,.04,.03],'#d9c6a1');
+      box(frame,[wx,wy-wh/2-.08,f+.08],[ww+.3,.06,.18],'#9c7558');                            // sill
+      root.addMark(wx,f+.42,1.05,.06,wy-.55,wy+.55,'window');
       // Garlic and dried chillies hang on the outer wall, by the front corner.
       for(const [i,oz] of [[0,f-.45],[1,f-.95]]){
         const ox=outer+Math.sign(x)*.1,string=group(root,i===0?'chilli':'garlic');
@@ -263,7 +393,7 @@ export function createModels(app) {
       // A window onto a full bookshelf.
       const wx=x,wy=1.6;
       tag(box(root,[wx,wy,f+.04],[1.3,1.2,.06],'#3f4c47'),'window');
-      tag(box(root,[wx,wy,f+.06],[1.16,1.08,.02],'#7a5a40'),'shelf');
+      tag(box(root,[wx,wy,f+.063],[1.16,1.08,.02],'#7a5a40'),'shelf');
       const colours=['#a4564a','#5f7a72','#d8c07e','#6d7d8c','#c98568','#e8dcc4','#7f9a76'];
       for(const [row,sy] of [[0,wy-.36],[1,wy],[2,wy+.36]]){
         tag(box(root,[wx,sy-.14,f+.08],[1.1,.04,.03],'#5d4432'),'shelf');
@@ -299,8 +429,8 @@ export function createModels(app) {
   function tiledFront(root,data,w,d,h) {
     const f=d/2;
     tag(box(root,[0,.22,0],[w+.5,.45,d+.3],'#a39d8f'),'stone');   // stone plinth
-    for(const x of [-w/2+.2,w/2-.2])tag(box(root,[x,h/2,f+.025],[.23,h,.2],'#8e6952'),'pillar');
-    for(const y of [1,h-1])tag(box(root,[0,y,f+.03],[w,.16,.15],'#9c7558'),'beam');
+    for(const x of [-w/2+.2,w/2-.2])tag(box(root,[x,h/2-.01,f+.025],[.23,h-.02,.2],'#8e6952'),'pillar');   // just under the eave line
+    for(const y of [1,h-1])tag(box(root,[0,y,f+.03],[w+.01,.16,.15],'#9c7558'),'beam');
     for(const x of [-w*.3,w*.3])latticeWindow(root,x,1.85,f+.06,1.3,1.5);
     box(root,[0,1.15,f+.1],[1.15,2.1,.16],'#6c7661');
     for(const x of [-.28,.28])box(root,[x,1.2,f+.22],[.045,1.9,.03],'#cdb486');
@@ -313,7 +443,7 @@ export function createModels(app) {
   /** Plaster over a rendered base, arched upper windows, an arcade under a striped awning. */
   function shophouseFront(root,data,w,d,h) {
     const trim=data.trim??'#e6dcc4',f=d/2;
-    box(root,[0,h*.62,f+.04],[w+.06,h*.76,.1],trim);           // upper storey plaster
+    box(root,[0,h*.62-.01,f+.04],[w+.06,h*.76-.02,.1],trim);   // upper storey plaster, its top under the body's
     box(root,[0,1.2,f+.05],[w+.08,.16,.16],'#b09572');         // string course
     box(root,[0,h-.12,f+.05],[w+.1,.22,.22],'#b09572');        // cornice
     // Upper windows, each with a little railing; on a low shophouse it sits clear of the awning.
@@ -330,7 +460,7 @@ export function createModels(app) {
     const shopWindow=group(root,'window');
     box(shopWindow,[0,.6,f+.1],[w-1.2,1.2,.1],'#dfe6e2');            // shop window
     for(const x of [-(w-1.2)/2+.06,(w-1.2)/2-.06])box(shopWindow,[x,.6,f+.14],[.1,1.24,.06],'#8e6952');
-    box(root,[0,1.15,f+.12],[1.2,2.1,.14],'#7a5f45');          // door
+    box(root,[0,1.15,f+.12],[1.2,2.1,.16],'#7a5f45');          // door, its back off the shop window's
     for(const x of [-.3,.3])box(root,[x,1.2,f+.2],[.05,1.9,.03],'#d9c6a1');
     // A striped awning over an arcade of columns set against the wall (the pavement in front
     // belongs to café chairs and crates), leaving the doorway clear.
@@ -342,8 +472,8 @@ export function createModels(app) {
     for(let i=1;i<stripes;i+=2)box(awning,[-(w-.3)/2+(i+.5)*sw,2.45,f+.62],[sw,.14,1.26],'#f1e8d4',[-16,0,0]);
     // No column where the hanging sign (x 1.05) comes off the wall.
     const span=w/2-.4,gaps=Math.max(2,Math.round(span));
-    for(let i=0;i<=gaps;i++){const x=-span+i*2*span/gaps;if(Math.abs(x)>.75&&Math.abs(x-1.05)>.3)tag(box(root,[x,1.25,f+.2],[.22,2.5,.22],'#b09572'),'pillar');}
-    box(root,[0,2.52,f+.2],[w-.5,.18,.22],'#9c7558');
+    for(let i=0;i<=gaps;i++){const x=-span+i*2*span/gaps;if(Math.abs(x)>.75&&Math.abs(x-1.05)>.3)tag(box(root,[x,1.25,f+.2],[.225,2.5,.22],'#b09572'),'pillar');}
+    box(root,[0,2.52,f+.2],[w-.5,.18,.24],'#9c7558');   // a shade deeper than the columns under it
     const roof=group(root,'roof');
     for(let i=0;i<3;i++)box(roof,[0,h+.1+i*.2,0],[w+.5-i*.2,.22,d+.6-i*.3],data.roof);
     const board=label(root,data.sign,[0,h-.62,f+.12],Math.min(3.4,w-1),.6);
@@ -361,19 +491,19 @@ export function createModels(app) {
     glass.opacity=.55;glass.blendType=pc.BLEND_NORMAL;glass.gloss=.92;
     glass.useMetalness=true;glass.metalness=.35;glass.update();
     const win=group(root,'window');
-    const pane=box(win,[0,1.55,f+.06],[w-.5,2.9,.08],'#b8d2d6');
+    const pane=box(win,[0,1.55,f+.055],[w-.5,2.9,.08],'#b8d2d6');
     pane.render.meshInstances[0].material=glass;
     for(let i=-2;i<=2;i++)box(win,[i*(w-.6)/5,1.55,f+.11],[.09,2.95,.06],'#8f9694');   // mullions
     for(const x of [-(w-.4)/2,(w-.4)/2])box(win,[x,1.55,f+.11],[.14,2.95,.12],'#6f7775');   // frame sides
-    box(win,[0,2.45,f+.12],[w-.5,.07,.06],'#8f9694');           // transom
+    box(win,[0,2.45,f+.12],[w-.52,.07,.06],'#8f9694');          // transom, its ends inside the pane's
     box(root,[0,.08,f+.16],[w-.4,.16,.5],'#9aa3a0');
-    box(root,[0,3.06,f+.1],[w+.04,.14,.14],'#8f9694');
+    box(root,[0,3.06,f+.1],[w+.04,.14,.15],'#8f9694');
     box(root,[0,1.15,f+.14],[1.25,2.2,.06],'#5f6a6c');          // sliding door
-    box(root,[0,1.15,f+.17],[.05,2.2,.04],'#c9d3d6');
+    box(root,[0,1.15,f+.17],[.05,2.19,.04],'#c9d3d6');
     // A canopy over the entrance, hung from the wall on two ties, high enough to clear an awning.
     const canopy=group(root,'awning');
     box(canopy,[0,2.97,f+.52],[2.3,.1,1.0],'#8f9694');
-    box(canopy,[0,2.97,f+1.02],[2.3,.2,.06],'#c9d3d6');
+    box(canopy,[0,2.97,f+1.02],[2.31,.2,.06],'#c9d3d6');
     for(const x of [-1,1])box(canopy,[x,3.25,f+.5],[.05,.05,1.12],'#6f7775',[26.6,0,0]);
     box(root,[0,h*.72,f+.05],[w+.06,h*.5,.1],data.color);       // upper cladding
     for(let i=0;i<4;i++)box(root,[0,h*.55+i*.42,f+.11],[w-.2,.05,.03],'#9aa3a0');
@@ -387,13 +517,118 @@ export function createModels(app) {
     box(roof,[0,h+.56,0],[w+.1,.12,d+.1],'#8f9694');
     for(const x of [-w*.25,w*.25])box(roof,[x,h+.8,-d*.2],[.5,.5,.5],'#9aa3a0');   // roof plant
   }
+  /**
+   * A Republic-era stone bank, after the banks on Shanghai's Bund: a rusticated granite base, an
+   * entrance recessed behind two columns standing between two solid piers, steps up to a bronze
+   * door under a fanlight, the name in gold on a dark frieze, a pediment carrying a clock, and tall
+   * arched windows between pilasters down both sides. Everything stays inside the footprint.
+   */
+  function bankFront(root,data,w,d,h) {
+    const f=d/2,L=1.3,P=.9,open=w/2-P,back=f-L,sill=.6,top=4.45;
+    const stone=data.color,dark='#a39d8f',trim=data.trim??'#efe9dc',gold='#d4ac4a',bronze='#5b4a3a',glass='#5f7a72',ink='#3b3a35';
+    // The body behind the entrance, the attic over it, the two piers either side, the granite base.
+    box(root,[0,h/2,-L/2],[w,h,d-L],stone);
+    tag(box(root,[0,(top+h)/2,f-L/2],[2*open,h-top,L],stone),'wall');
+    const base=group(root,'stone');
+    box(base,[0,sill/2,-L/2],[w+.16,sill,d-L+.16],dark);
+    for(const s of [-1,1]){
+      const px=s*(w/2-P/2);
+      tag(box(root,[px,h/2,f-L/2],[P,h,L],stone),'wall');
+      box(base,[px,sill/2,f-L/2],[P+.16,sill,L+.16],dark);
+      // Rusticated courses: shadow lines across the pier's face, and along the side's ground storey.
+      for(let y=sill+.5;y<top;y+=.5)box(root,[px,y,f+.01],[P,.05,.02],dark);
+      for(const y of [1.1,1.6])box(root,[s*(w/2+.01),y,0],[.02,.05,d],dark);
+      box(root,[s*(w/2+.03),1.72,0],[.06,.12,d+.02],trim);                          // string course
+    }
+    // Two granite steps up into the entrance; the third is its floor.
+    for(const [i,rise] of [[0,.2],[1,.4]])box(base,[0,rise/2,f-.15-i*.3],[2*open,rise,.3],dark);
+    box(base,[0,sill/2,back+(L-.6)/2],[2*open,sill,L-.6],dark);
+    // The columns: a moulded base, a plain shaft, and a capital with a scroll either side.
+    for(const s of [-1,1]){
+      const x=s*(open-.95),z=f-.4,col=group(root,'pillar');
+      box(base,[x,(sill+.02)/2,z],[.72,sill+.02,.72],dark);                           // pedestal, over the steps
+      box(col,[x,sill+.07,z],[.64,.14,.64],trim);
+      cylinder(col,[x,sill+.2,z],[.58,.12,.58],trim);
+      cylinder(col,[x,(sill+.26+top-.26)/2,z],[.46,top-sill-.52,.46],trim);
+      cylinder(col,[x,top-.19,z],[.56,.14,.56],trim);
+      box(col,[x,top-.06,z],[.68,.12,.68],trim);
+      for(const k of [-1,1])cylinder(col,[x+k*.27,top-.2,z],[.16,.56,.16],trim,[90,0,0]);
+    }
+    // At the back of the entrance: a bronze double door under a fanlight, a tall window either side.
+    const door=group(root,'door');
+    // A closed sign hangs on the door itself, back in the entrance, from the door's header: high
+    // enough to read over the door point out on the pavement.
+    root.closedSignAt={z:back+.2,y:.45};
+    root.addMark(0,back+.1,.8,.1,sill,sill+2.8,'door');
+    box(door,[0,sill+1.25,back+.06],[1.4,2.5,.1],bronze);
+    box(door,[0,sill+1.25,back+.11],[.03,2.46,.02],gold);
+    for(const k of [-.12,.12])cylinder(door,[k,sill+1.2,back+.13],[.1,.03,.1],gold,[90,0,0]);
+    for(const k of [-1,1])box(door,[k*.8,sill+1.4,back+.09],[.2,2.8,.16],trim);
+    box(door,[0,sill+2.85,back+.1],[1.8,.3,.18],trim);
+    const fan=group(root,'window');
+    cylinder(fan,[0,sill+2.85,back+.02],[1.5,.04,1.5],gold,[90,0,0]);
+    cylinder(fan,[0,sill+2.85,back+.04],[1.32,.04,1.32],glass,[90,0,0]);
+    box(fan,[0,sill+3.55,back+.11],[.24,.34,.16],trim);                               // keystone
+    for(const s of [-1,1]){
+      const x=s*(open-.35),win=group(root,'window');
+      box(win,[x,sill+1.6,back+.02],[.62,2.2,.06],trim);
+      box(win,[x,sill+1.6,back+.05],[.48,2.06,.04],glass);
+      box(win,[x,sill+1.6,back+.08],[.04,2.06,.02],trim);
+    }
+    // A bronze lantern on each pier, lit after dark.
+    const lit=glow('#f3d58c');root.lamps.push(lit);
+    for(const s of [-1,1]){
+      const x=s*(w/2-P/2),lamp=group(root,'lamp');
+      box(lamp,[x,2.95,f+.1],[.08,.08,.22],bronze);
+      box(lamp,[x,2.95,f+.3],[.28,.42,.24],bronze);
+      box(lamp,[x,2.95,f+.3],[.2,.32,.3],'#f3d58c').render.meshInstances[0].material=lit;
+      cylinder(lamp,[x,3.22,f+.3],[.34,.08,.34],bronze);
+    }
+    // The entablature: architrave, the dark frieze with the name in gold, dentils, a cornice.
+    const cornice=group(root,'wall');
+    box(cornice,[0,top+.13,f-.15],[w+.06,.34,.5],trim);   // its underside just below the attic's
+    box(cornice,[0,top+.525,f-.15],[w+.06,.45,.5],'#3d4749');
+    label(root,data.sign,[0,top+.525,f+.14],3.2,.4,'#3d4749',gold);
+    for(const y of [top+.3,top+.75])box(cornice,[0,y,f+.11],[3.5,.035,.03],gold);
+    root.addMark(0,f+.02,1.75,.05,top+.3,top+.75,'sign');
+    for(let x=-w/2+.1;x<w/2;x+=.3)box(cornice,[x,top+.8,f+.1],[.12,.1,.08],trim);
+    box(cornice,[0,top+.95,0],[w+.5,.2,d+.5],trim);
+    box(cornice,[0,h+.06,-L/2],[w+.12,.12,d-L+.12],trim);                                // coping
+    for(const s of [-1,1]){box(cornice,[s*(w/2-P/2),h+.06,f-L/2],[P+.12,.12,L+.12],trim);
+      cylinder(cornice,[s*(w/2-P/2),h+.27,f-.45],[.3,.3,.3],trim);ball(cornice,[s*(w/2-P/2),h+.52,f-.45],[.26,.3,.26],trim);}
+    // The pediment: a triangle from a squashed diamond, raking cornices, and the clock in it.
+    const R=2.35,peak=1,base0=top+1.05,tymp=new pc.Entity('pediment');
+    tymp.setLocalPosition(0,base0,f-.12);tymp.setLocalScale(1,peak/R,1);cornice.addChild(tymp);
+    box(tymp,[0,0,0],[R*Math.SQRT2,R*Math.SQRT2,.3],stone,[0,0,45]);
+    const rake=Math.atan2(peak,R)*180/Math.PI;
+    for(const s of [-1,1])box(cornice,[s*R/2,base0+peak/2+.07,f-.08],[Math.hypot(R,peak)+.25,.14,.42],trim,[0,0,-s*rake]);
+    const clock=group(root,'clock'),cy=base0+.36;
+    cylinder(clock,[0,cy,f+.05],[.66,.06,.66],gold,[90,0,0]);
+    cylinder(clock,[0,cy,f+.08],[.56,.04,.56],trim,[90,0,0]);
+    for(let i=0;i<12;i++){const a=i*Math.PI/6;box(clock,[Math.sin(a)*.22,cy+Math.cos(a)*.22,f+.105],[.03,i%3?.04:.08,.01],ink,[0,0,-i*30]);}
+    // Ten past ten.
+    for(const [deg,len] of [[-60,.14],[60,.22]]){const a=deg*Math.PI/180;box(clock,[Math.sin(a)*len/2,cy+Math.cos(a)*len/2,f+.11],[.03,len,.01],ink,[0,0,-deg]);}
+    // Down each side, three tall arched windows between pilasters, over the rusticated base.
+    for(const s of [-1,1]){
+      for(const z of [-1.55,0,1.55]){
+        const x=s*(w/2+.03),win=group(root,'window');
+        box(win,[x,2.6,z],[.06,1.8,.86],trim);
+        box(win,[x+s*.02,2.6,z],[.04,1.66,.7],glass);
+        cylinder(win,[x,3.5,z],[.86,.06,.86],trim,[0,0,90]);
+        cylinder(win,[x+s*.02,3.5,z],[.7,.04,.7],glass,[0,0,90]);
+        box(win,[x+s*.05,2.6,z],[.02,1.66,.04],trim);
+        box(win,[x+s*.04,1.78,z],[.1,.08,1.0],trim);                                  // sill
+      }
+      for(const z of [-2.35,-.78,.78,2.35])tag(box(root,[s*(w/2+.04),(1.78+top)/2,z],[.08,top-1.78,.3],trim),'pillar');
+    }
+  }
   /** A shelf in front of the window either side of the door, and what the shop sets out on it. */
   function windowDisplay(root,data,w,d,name,put) {
     const f=d/2,style=data.style??'tiled';
     const x=style==='shophouse'?w/4:w*.3,y=style==='tiled'?1.12:style==='modern'?.8:.75;
     for(const s of [-1,1]){
       const shelf=group(root,name);
-      box(shelf,[s*x,y,f+.26],[1.3,.08,.32],'#8e6952');
+      box(shelf,[s*x,y,f+.26],[1.29,.08,.32],'#8e6952');
       put(shelf,s*x,y+.04,f+.26);
       root.addMark(s*x,f+.42,.65,.1,y-.1,y+.5,name);
     }
@@ -404,15 +639,24 @@ export function createModels(app) {
    * player can point at through addMark. Anything standing out on the pavement is solid.
    */
   const DETAILS={
-    // Two stone lions guard the door, each with a ball under one paw.
+    // Two stone lions guard the door, sitting up on their plinths, each with a ball under the
+    // paw on the doorway side.
     'lions'(root,data,w,d) {
-      const z=d/2+.5;
+      const z=d/2+.5,stone='#bdb7a9',deep='#a39d8f',ink='#3b3a35';
       for(const x of [-1.35,1.35]){
-        box(root,[x,.25,z],[.62,.5,.62],'#a39d8f');
-        box(root,[x,.78,z-.06],[.44,.56,.5],'#bdb7a9');
-        box(root,[x,1.22,z+.08],[.46,.42,.4],'#bdb7a9');
-        ball(root,[x-Math.sign(x)*.12,.62,z+.24],[.2,.2,.2],'#bdb7a9');
-        root.addMark(x,z,.31,.31,0,1.45,'lion',true);
+        const lion=group(root,'lion'),inner=-Math.sign(x);
+        box(lion,[x,.21,z],[.62,.42,.62],deep);
+        box(lion,[x,.45,z],[.68,.06,.68],stone);
+        box(lion,[x,.66,z-.12],[.5,.36,.4],stone);                                   // haunches
+        box(lion,[x,.9,z],[.42,.5,.3],stone,[-10,0,0]);                             // chest
+        for(const k of [-.13,.13])box(lion,[x+k,.7,z+.17],[.12,.42,.12],stone);     // forelegs
+        ball(lion,[x+inner*.13,.6,z+.25],[.19,.19,.19],deep);                        // the ball
+        ball(lion,[x,1.2,z+.02],[.6,.54,.5],deep);                                   // curled mane
+        box(lion,[x,1.18,z+.22],[.34,.3,.14],stone);                                 // face
+        box(lion,[x,1.1,z+.31],[.18,.11,.1],stone);                                  // muzzle
+        for(const k of [-.08,.08])box(lion,[x+k,1.25,z+.295],[.06,.04,.02],ink);    // eyes
+        for(const k of [-.17,.17])box(lion,[x+k,1.44,z+.02],[.1,.1,.08],deep);      // ears
+        root.addMark(x,z,.31,.31,0,1.5,'lion',true);
       }
     },
     // A gold frame round the name board (the tiled board: centred at h-.55, .67 high).
@@ -428,7 +672,7 @@ export function createModels(app) {
     },
     // A green cross on a bracket by the corner, lit after dark.
     'green-cross'(root,data,w,d) {
-      const x=w/2-.6,y=3.1,lit=glow('#4fb06a'),cross=group(root,'sign');
+      const x=w/2-.6,y=2.6,lit=glow('#4fb06a'),cross=group(root,'sign');   // under the pharmacy porch's roof
       box(cross,[x,y,d/2+.25],[.07,.07,.5],'#5b4a3a');
       for(const s of [[.26,.8,.26],[.8,.26,.26]])box(cross,[x,y,d/2+.5],s,'#4fb06a').render.meshInstances[0].material=lit;
       root.lamps.push(lit);
@@ -472,7 +716,7 @@ export function createModels(app) {
     'mannequins'(root,data,w,d) {
       const z=d/2+.4;
       for(const [x,c] of [[-1.9,'#b45b52'],[1.9,'#5f7a9a']]){
-        cylinder(root,[x,.03,z],[.4,.06,.4],'#6f7775');
+        cylinder(root,[x,.035,z],[.4,.06,.4],'#6f7775');
         cylinder(root,[x,.4,z],[.05,.7,.05],'#6f7775');
         box(root,[x,1.05,z],[.46,.62,.26],c);
         ball(root,[x,1.52,z],[.24,.28,.24],'#e8dccb');
@@ -516,6 +760,48 @@ export function createModels(app) {
     cylinder(g,[x,y-.31,z],[.045,.25,.045],'#e0b86a');
     return {entity:globe,material:lit};
   }
+  /**
+   * A carved fretwork panel, w by h metres: a lattice drawn on a canvas inside a solid frame, cut
+   * out with alpha test so a whole panel is one flat box. `hole` [x,y,r] (metres from the centre)
+   * clears a round opening with a rim. Panels of the same size share one material.
+   */
+  const frets=new Map();
+  function fretwork(w,h,hole,color,rim) {
+    const key=[w,h,hole,color,rim].join();
+    if(frets.has(key))return frets.get(key);
+    const ppm=200,cw=Math.round(w*ppm),ch=Math.round(h*ppm);
+    const canvas=document.createElement('canvas');canvas.width=cw;canvas.height=ch;
+    const c=canvas.getContext('2d');
+    // A square grid with a diamond in every cell touching the middle of each side (菱花 lattice).
+    const nx=Math.max(1,Math.round(w/.15)),ny=Math.max(1,Math.round(h/.15)),sx=cw/nx,sy=ch/ny;
+    c.strokeStyle=color;c.lineWidth=.02*ppm;c.beginPath();
+    for(let i=0;i<=nx;i++){c.moveTo(i*sx,0);c.lineTo(i*sx,ch);}
+    for(let j=0;j<=ny;j++){c.moveTo(0,j*sy);c.lineTo(cw,j*sy);}
+    for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){
+      const x=i*sx,y=j*sy;
+      c.moveTo(x+sx/2,y);c.lineTo(x+sx,y+sy/2);c.lineTo(x+sx/2,y+sy);c.lineTo(x,y+sy/2);c.closePath();
+    }
+    c.stroke();
+    c.strokeStyle=rim;c.lineWidth=.09*ppm;c.strokeRect(0,0,cw,ch);   // half of it lands on the canvas
+    if(hole){
+      const [x,y,r]=hole.map(v=>v*ppm);
+      c.globalCompositeOperation='destination-out';c.beginPath();c.arc(cw/2+x,ch/2-y,r,0,Math.PI*2);c.fill();
+      c.globalCompositeOperation='source-over';c.lineWidth=.03*ppm;c.beginPath();c.arc(cw/2+x,ch/2-y,r+.015*ppm,0,Math.PI*2);c.stroke();
+    }
+    const tex=new pc.Texture(app.graphicsDevice,{width:cw,height:ch,mipmaps:true,anisotropy:4,
+      minFilter:pc.FILTER_LINEAR_MIPMAP_LINEAR,magFilter:pc.FILTER_LINEAR});
+    tex.setSource(canvas);
+    const m=new pc.StandardMaterial();
+    m.diffuseMap=tex;m.opacityMap=tex;m.opacityMapChannel='a';m.alphaTest=.5;
+    m.useMetalness=true;m.metalness=0;m.gloss=.1;m.update();
+    frets.set(key,m);return m;
+  }
+  /** A round rim of n short bars of radius r, standing in the xy plane of a node at xyz turned by yaw. */
+  function hoop(parent,xyz,yaw,r,n,color) {
+    const e=new pc.Entity('hoop');e.setLocalPosition(...xyz);e.setLocalEulerAngles(0,yaw,0);parent.addChild(e);
+    const len=2*r*Math.tan(Math.PI/n)+.012;
+    for(let i=0;i<n;i++){const a=(i+.5)/n*Math.PI*2;box(e,[r*Math.cos(a),r*Math.sin(a),0],[len,.05,.06],color,[0,0,a*180/Math.PI+90]);}
+  }
   // Home furnishings, built from the same blocky vocabulary as the town itself.
   function furniture(parent,kind,color='#b98d62') {
     const e=new pc.Entity('furniture-'+kind);parent.addChild(e);
@@ -524,20 +810,50 @@ export function createModels(app) {
       for(const x of [-.62,.62])for(const z of [-.38,.38])box(e,[x,.2,z],[.11,.42,.11],'#8f6a48');
       box(e,[0,.24,0],[1.2,.06,.7],'#a97d55');
     } else if(kind==='bed') {
-      // A low wooden frame, a mattress that sits inside it, a folded quilt and two pillows.
-      box(e,[0,.15,0],[2.16,.3,1.46],'#8f6a48');
-      for(const x of [-1.0,1.0])for(const z of [-.62,.62])box(e,[x,.07,z],[.14,.14,.14],'#6f5236');
-      box(e,[0,.34,0],[1.98,.24,1.32],'#f4ecd8');                 // mattress
-      box(e,[0,.46,0],[1.96,.05,1.3],'#fdf7e6');
+      // A moon-gate canopy bed (月洞门架子床) in reddish rosewood. Its long side stands against the
+      // wall (-z) and you climb in at the front (+z), through a round opening nearly the height of
+      // the canopy; the sleeper's head is at the -x end. Each end has a round window in its fretwork,
+      // the back is lattice, a low lattice rail runs round the back and ends, and a lattice frieze
+      // runs round the canopy. The platform stands on an apron and short horse-hoof legs. Every
+      // fretwork panel is one flat box with a cut-out texture (see fretwork()).
+      const wood='#8a3f26',fret='#6a2c1b',dark='#5a2616';
+      const base=.44,rail=.78,frieze=2.0,top=2.22,span=1.95,deep=1.25;   // heights; panel widths
+      const frame=group(e,'bed');
+      const panel=(xyz,size,hole)=>{
+        const w=size[0]>size[2]?size[0]:size[2],b=box(frame,xyz,size,fret);
+        b.render.meshInstances[0].material=fretwork(w,size[1],hole,fret,wood);
+      };
+      for(const x of [-.98,.98])for(const z of [-.62,.62]){
+        box(frame,[x,.15,z],[.09,.22,.09],dark,[z>0?-8:8,0,x>0?8:-8]);                  // a leg curving out
+        box(frame,[x*1.03,.025,z*1.04],[.13,.05,.13],dark);                             // to a hoof foot
+      }
+      box(frame,[0,.29,0],[2.02,.12,1.32],wood);                                       // apron
+      box(frame,[0,.235,.665],[1.7,.03,.02],dark);                                     // its carved bead
+      box(frame,[0,.4,0],[2.1,.08,1.4],wood);                                          // platform
+      for(const x of [-1.01,1.01])for(const z of [-.66,.66])box(frame,[x,(base+top)/2,z],[.07,top-base,.07],wood);   // posts
+      box(frame,[0,top+.02,0],[2.12,.05,1.42],wood);                                   // canopy
+      for(const z of [-.66,.66])panel([0,(frieze+top)/2,z],[span,top-frieze,.025]);    // frieze
+      for(const x of [-1.01,1.01])panel([x,(frieze+top)/2,0],[.025,top-frieze,deep]);
+      const gate=(frieze-base)/2-.06,gy=(base+frieze)/2;                               // the moon gate
+      panel([0,gy,.66],[span,frieze-base,.025],[0,0,gate]);
+      hoop(frame,[0,gy,.66],0,gate+.02,16,wood);
+      panel([0,(base+rail)/2,-.66],[span,rail-base,.025]);                             // back rail
+      panel([0,(rail+frieze)/2,-.66],[span,frieze-rail,.025]);                         // back
+      const round=Math.min(deep,frieze-rail)/2-.08,ry=(rail+frieze)/2;                 // round windows
+      for(const x of [-1.01,1.01]){
+        panel([x,(base+rail)/2,0],[.025,rail-base,deep]);
+        panel([x,ry,0],[.025,frieze-rail,deep],[0,0,round]);
+        hoop(frame,[x,ry,0],90,round+.02,12,wood);
+      }
+      box(frame,[0,.5,0],[1.96,.12,1.26],'#efe4c8');                                   // mattress
       const quilt=group(e,'quilt');
-      box(quilt,[0,.5,.2],[1.9,.14,.86],color??'#a8bfa5');            // turned-down quilt
-      box(quilt,[0,.56,.5],[1.9,.1,.3],'#c3d3bd');
-      for(const x of [-.48,.48])tag(box(e,[x,.53,-.44],[.78,.16,.4],'#fdf6e2',[0,x<0?4:-4,0]),'pillow');   // pillows
-      box(e,[-1.13,.66,0],[.1,1.02,1.46],'#8f6a48');              // headboard
-      box(e,[-1.13,1.14,0],[.16,.12,1.5],'#a2764f');
-      for(let i=0;i<4;i++)box(e,[-1.09,.62+i*.14,0],[.03,.06,1.3],'#7d5c3d');
-      box(e,[1.13,.42,0],[.1,.54,1.46],'#8f6a48');                // footboard
-      box(e,[1.13,.68,0],[.16,.1,1.5],'#a2764f');
+      box(quilt,[.25,.595,0],[1.4,.07,1.22],color);                                    // spread to the foot
+      box(quilt,[-.5,.61,0],[.14,.09,1.22],'#ead6a8');                                 // folded back at the head
+      for(const z of [-.27,.27])tag(box(e,[-.72,.62,z],[.28,.13,.46],'#f6efdc'),'pillow');   // pillows at the head
+      tag(cylinder(e,[-.915,.63,0],[.14,1.1,.14],'#e9dcc0',[90,0,0]),'pillow');         // and a bolster
+      const blanket=group(e,'blanket');                                                  // folded at the foot
+      box(blanket,[.78,.68,0],[.3,.1,.95],'#d9b36a');
+      box(blanket,[.78,.68,0],[.312,.104,.18],'#a8453a');
     } else if(kind==='shelf') {
       box(e,[0,.85,0],[1.4,1.7,.55],color);
       box(e,[0,.85,.06],[1.24,1.54,.5],'#eadcbb');
@@ -625,6 +941,70 @@ export function createModels(app) {
       box(e,[0,1.7,.048],[.36,.05,.004],'#b08b60');
       for(let i=0;i<3;i++)box(e,[-.06,1.6-i*.07,.048],[.4,.025,.004],'#c2b79c');
       cylinder(e,[.2,1.42,.05],[.1,.01,.1],color,[90,0,0]);
+    } else if(kind==='scroll-painting') {
+      // Hangs on a wall like the certificate: a hanging scroll of ink hills with a line of writing
+      // and a red seal, mounted on silk (`color`) with a roller top and bottom.
+      box(e,[0,1.7,.012],[.56,1.3,.02],color);
+      box(e,[0,1.66,.026],[.44,.96,.01],'#f3ead3');
+      shape(e,'cone',[-.06,1.56,.034],[.28,.38,.004],'#6f7a74');
+      shape(e,'cone',[.1,1.48,.036],[.22,.24,.004],'#a3aba4');
+      box(e,[.14,1.95,.034],[.03,.34,.004],'#3b3a36');
+      box(e,[-.14,1.24,.034],[.05,.05,.004],'#b8463a');
+      cylinder(e,[0,2.37,.03],[.035,.62,.035],'#6b4a33',[0,0,90]);
+      cylinder(e,[0,1.03,.03],[.045,.66,.045],'#6b4a33',[0,0,90]);
+    } else if(kind==='landscape-painting') {
+      // Hangs on a wall like the certificate: mountains over water under a low sun, in a `color` frame.
+      box(e,[0,1.6,.02],[1.0,.7,.04],color);
+      box(e,[0,1.6,.042],[.88,.58,.01],'#e9e6d6');
+      shape(e,'cone',[-.18,1.53,.047],[.5,.36,.004],'#8aa391');
+      shape(e,'cone',[.2,1.5,.049],[.42,.28,.004],'#5f7d6c');
+      box(e,[0,1.37,.051],[.88,.12,.004],'#9fbccb');
+      cylinder(e,[.28,1.76,.047],[.08,.004,.08],'#e3a869',[90,0,0]);
+    } else if(kind==='vase') {
+      // A `color` glazed vase with a white band, holding a sprig of blossom.
+      cylinder(e,[0,.02,0],[.16,.04,.16],'#f1ece0');
+      ball(e,[0,.21,0],[.28,.34,.28],color);
+      cylinder(e,[0,.21,0],[.285,.05,.285],'#f1ece0');
+      cylinder(e,[0,.42,0],[.12,.16,.12],color);
+      cylinder(e,[0,.5,0],[.16,.03,.16],'#f1ece0');
+      for(const [x,a] of [[-.04,14],[.05,-18]]){
+        box(e,[x,.66,0],[.015,.32,.015],'#5a3d2c',[0,0,a]);
+        ball(e,[x*2.6,.8,0],[.08,.08,.08],'#eaa6ae');
+      }
+    } else if(kind==='folding-screen') {
+      // Four hinged panels standing in a zigzag, each a `color` frame round a painted paper panel.
+      for(let i=0;i<4;i++){
+        const panel=new pc.Entity('panel');panel.setLocalPosition((i-1.5)*.413,0,0);panel.setLocalEulerAngles(0,i%2?20:-20,0);e.addChild(panel);
+        box(panel,[0,.92,0],[.44,1.7,.04],color);
+        box(panel,[0,1.0,0],[.36,1.3,.05],'#efe4c8');
+        box(panel,[0,.2,0],[.36,.2,.05],'#c9a97a');
+        box(panel,[0,1.1,.027],[.02,.8,.004],'#5a3d2c',[0,0,i%2?28:-28]);
+        ball(panel,[i%2?-.1:.1,1.32,.03],[.07,.07,.02],'#d9737b');
+      }
+    } else if(kind==='bonsai') {
+      // A small leaning tree in a shallow `color` glazed tray.
+      box(e,[0,.06,0],[.46,.12,.32],color);
+      box(e,[0,.125,0],[.42,.02,.28],'#6b5842');
+      box(e,[-.04,.22,0],[.05,.2,.05],'#6b4a33',[0,0,-25]);
+      box(e,[.04,.34,0],[.04,.16,.04],'#6b4a33',[0,0,30]);
+      for(const [pos,scale] of [[[-.11,.34,0],[.22,.1,.18]],[[.12,.44,.02],[.24,.1,.2]],[[.02,.52,-.02],[.18,.09,.16]]])ball(e,pos,scale,'#5f7f4f');
+    } else if(kind==='tea-table') {
+      // A low tea table, its top at the height surfaces.js gives it, with a shelf underneath.
+      box(e,[0,.475,0],[1.0,.05,.6],color);
+      box(e,[0,.42,0],[.92,.06,.52],'#8f6a48');
+      for(const x of [-.44,.44])for(const z of [-.24,.24])box(e,[x,.21,z],[.06,.42,.06],'#7a5a3c');
+      box(e,[0,.12,0],[.88,.03,.48],'#a97d55');
+    } else if(kind==='birdcage') {
+      // A round `color` bamboo cage on a tall stand, with a little bird on its perch.
+      cylinder(e,[0,.03,0],[.4,.06,.4],'#7d6349');
+      cylinder(e,[0,.5,0],[.05,.95,.05],'#7d6349');
+      cylinder(e,[0,1.0,0],[.46,.04,.46],'#8a6c49');
+      for(let i=0;i<8;i++){const a=i/8*Math.PI*2;cylinder(e,[Math.cos(a)*.21,1.22,Math.sin(a)*.21],[.015,.44,.015],color);}
+      ball(e,[0,1.44,0],[.44,.2,.44],color);
+      cylinder(e,[0,1.58,0],[.02,.1,.02],'#7d6349');
+      box(e,[0,1.14,0],[.32,.015,.015],'#6b4a33');
+      ball(e,[0,1.2,0],[.09,.08,.13],'#e3c14f');
+      ball(e,[0,1.26,.05],[.06,.06,.06],'#e3c14f');
     } else {box(e,[0,.3,0],[.8,.6,.8],color);return e;}
     // Every drawn kind is also an objects.json key, so the whole piece is one look box
     // (full height, and for a ceiling lamp up where it hangs).
@@ -635,24 +1015,45 @@ export function createModels(app) {
   function streetProp(parent,kind,tint) {
     const e=new pc.Entity('prop-'+kind);parent.addChild(e);
     if(kind==='bench') {
-      box(e,[0,.44,0],[2.0,.14,.62],tint??'#a8875f');
-      box(e,[0,.82,-.26],[2.0,.5,.11],tint??'#b8975f',[12,0,0]);
-      for(const x of [-.78,.78])box(e,[x,.22,0],[.16,.44,.56],'#6c7f6b');
+      // Rounded timber slats on two timber end frames with curled arms.
+      const wood=tint??'#a8875f',frame='#6b5a45';
+      for(let i=0;i<4;i++)cylinder(e,[0,.46,-.2+i*.135],[.13,2.0,.13],wood,[0,0,90]);
+      for(let i=0;i<3;i++)cylinder(e,[0,.64+i*.14,-.28-i*.03],[.12,2.0,.12],wood,[0,0,90]);
+      for(const x of [-.85,.85]){
+        box(e,[x,.2,.2],[.1,.4,.1],frame);
+        box(e,[x,.5,-.27],[.1,1.0,.1],frame,[-8,0,0]);
+        box(e,[x,.4,-.03],[.1,.08,.52],frame);
+        cylinder(e,[x,.68,0],[.09,.5,.09],frame,[90,0,0]);
+        ball(e,[x,.68,.25],[.13,.13,.13],frame);
+      }
       return {entity:e,half:[1.05,.42],top:.52};
     }
     if(kind==='bin') {
+      // Timber-banded bin with a domed lid.
       cylinder(e,[0,.42,0],[.52,.84,.52],'#7f8a72');
-      cylinder(e,[0,.87,0],[.58,.08,.58],'#5f6c58');
+      for(const y of [.12,.72])cylinder(e,[0,y,0],[.55,.07,.55],'#6b5a45');
+      ball(e,[0,.86,0],[.56,.2,.56],'#5f6c58');
+      ball(e,[0,.97,0],[.1,.08,.1],'#6b5a45');
       return {entity:e,half:[.3,.3],top:.9};
     }
     if(kind==='streetlight') {
-      cylinder(e,[0,.12,0],[.42,.24,.42],'#6f6a58');
-      cylinder(e,[0,2.3,0],[.16,4.4,.16],'#7d7563');
-      box(e,[0,4.5,.42],[.16,.16,1.0],'#7d7563');
-      const head=tag(box(e,[0,4.36,.86],[.5,.34,.5],'#f2e2b4'),'lamp');
+      // A dark timber post on a stone foot, with a square palace lantern hung from a bracket.
+      const post='#5f4c3b';
+      box(e,[0,.15,0],[.5,.3,.5],'#b3aa90');
+      cylinder(e,[0,2.1,0],[.17,3.8,.17],post);
+      ball(e,[0,4.08,0],[.24,.24,.24],post);
+      box(e,[0,3.92,.36],[.1,.1,.8],post);
+      box(e,[0,3.7,.12],[.06,.4,.06],post,[40,0,0]);
+      cylinder(e,[0,3.8,.72],[.03,.24,.03],post);
+      box(e,[0,3.65,.72],[.56,.08,.56],post);
+      shape(e,'cone',[0,3.74,.72],[.4,.16,.4],post);
+      const head=tag(box(e,[0,3.36,.72],[.446,.5,.446],'#f2e2b4'),'lamp');
+      for(const [dx,dz] of [[-.21,-.21],[.21,-.21],[-.21,.21],[.21,.21]])box(e,[dx,3.36,.72+dz],[.05,.52,.05],'#b8322a');
+      box(e,[0,3.08,.72],[.48,.06,.48],post);
+      cylinder(e,[0,2.9,.72],[.06,.3,.06],'#b8322a');
       const lit=glow('#f7e9c2');
       head.render.meshInstances[0].material=lit;
-      return {entity:e,half:[.24,.24],top:4.6,material:lit};
+      return {entity:e,half:[.26,.26],top:4.6,material:lit};
     }
     if(kind==='bicycle') {
       // Drawn in side profile: the bike runs along x, the wheels stand in the xy plane, and every
@@ -663,14 +1064,14 @@ export function createModels(app) {
       const HB=[-.44,.58],HT=[-.53,.93];                 // head tube, bottom and top
       for(const [x] of [F,R]){
         cylinder(e,[x,.36,0],[.74,.07,.74],'#33383a',[90,0,0]);          // tyre
-        cylinder(e,[x,.36,0],[.58,.075,.58],'#c9c6ba',[90,0,0]);         // rim
+        cylinder(e,[x,.36,0],[.58,.08,.58],'#c9c6ba',[90,0,0]);         // rim
         for(let i=0;i<7;i++)box(e,[x,.36,0],[.024,.55,.024],'#b6b3a6',[0,0,i*180/7]);
         cylinder(e,[x,.36,0],[.13,.1,.13],'#6b6f6c',[90,0,0]);           // hub
       }
       tube(e,HT,ST,.055,frame);                                          // top tube
       tube(e,HB,BB,.06,frame);                                           // down tube
       tube(e,BB,ST,.055,frame);                                          // seat tube
-      tube(e,HB,HT,.07,frame);                                           // head tube
+      tube(e,HB,HT,.074,frame);                                           // head tube
       for(const z of [-.05,.05]){
         tube(e,HB,F,.04,steel,z);                                        // fork legs
         tube(e,BB,R,.04,frame,z);                                        // chain stays
@@ -694,14 +1095,23 @@ export function createModels(app) {
       return {entity:e,half:[.72,.22],top:1.05};
     }
     if(kind==='planter') {
-      box(e,[0,.3,0],[1.5,.6,1.0],tint??'#c2ad8b');
-      box(e,[0,.64,0],[1.36,.14,.88],'#87996b');
+      // A carved stone trough on a plinth, with a coping rim, leaves and flowers.
+      box(e,[0,.06,0],[1.56,.12,1.04],'#b3aa90');
+      box(e,[0,.34,0],[1.44,.48,.92],tint??'#cfc6ad');
+      for(const z of [-.47,.47])box(e,[0,.34,z],[1.1,.26,.03],'#b3aa90');
+      box(e,[0,.62,0],[1.54,.1,1.02],'#ddd5bd');
+      box(e,[0,.645,0],[1.3,.06,.8],'#8a7458');
+      for(let i=0;i<5;i++)ball(e,[-.52+i*.26,.74,(i%2-.5)*.3],[.36,.22,.34],i%2?'#7f9a66':'#6c8a58');
       const flowers=group(e,'flower');
-      for(let i=0;i<4;i++)ball(flowers,[-.45+i*.3,.86,0],[.3,.28,.32],i%2?'#e5ba77':'#d38e84');
+      for(let i=0;i<5;i++)ball(flowers,[-.5+i*.25,.84,(i%2-.5)*-.26],[.2,.18,.2],['#e5ba77','#d38e84','#eab54d'][i%3]);
       return {entity:e,half:[.78,.53],top:.9};
     }
     if(kind==='crate') {
-      box(e,[0,.28,0],[.9,.56,.7],tint??'#b8935f');
+      // A slatted timber crate: planks round a frame of corner posts.
+      const wood=tint??'#b8935f',dark='#6b5a45';
+      box(e,[0,.28,0],[.86,.52,.66],wood);
+      for(const y of [.16,.4])for(const z of [-.34,.34])box(e,[0,y,z],[.84,.12,.03],dark);
+      for(const x of [-.43,.43])for(const z of [-.33,.33])box(e,[x,.28,z],[.07,.56,.07],dark);
       box(e,[0,.58,0],[.94,.06,.74],'#9c7a4d');
       return {entity:e,half:[.47,.37],top:.62};
     }
@@ -737,11 +1147,6 @@ export function createModels(app) {
       cylinder(e,[0,.36,0],[.2,.72,.2],'#8a8271');
       ball(e,[0,.74,0],[.22,.18,.22],'#9d947f');
       return {entity:e,half:[.14,.14],top:.8};
-    }
-    if(kind==='awning') {
-      box(e,[0,2.6,.55],[3.6,.14,1.4],tint??'#b8765f',[-14,0,0]);
-      for(const x of [-1.6,1.6])cylinder(e,[x,1.35,1.1],[.09,2.7,.09],'#7d7563');
-      return {entity:e,half:[1.85,1.2],top:2.9,soft:true};
     }
     // A night-market handcart: the stall and the vehicle are the same object, so a vendor can
     // simply push their shop through the streets and park it.
@@ -785,8 +1190,14 @@ export function createModels(app) {
       return {entity:e,half:[1.15,.65],top:2.6,material:lit};
     }
     if(kind==='sign') {
-      cylinder(e,[0,1.1,0],[.14,2.2,.14],'#7d7563');
-      box(e,[0,2.1,0],[1.5,.9,.12],tint??'#e6d3a4');
+      // A notice board on two posts under a little tiled hood, with notices pinned to its face.
+      for(const x of [-.7,.7])cylinder(e,[x,1.12,0],[.1,2.24,.1],'#6d5a45');   // tops inside the hood
+      box(e,[0,1.7,0],[1.5,.95,.08],'#8e6952');
+      box(e,[0,1.7,.045],[1.34,.8,.02],tint??'#e6d3a4');
+      for(const [x,y,w,h,c] of [[-.4,1.84,.36,.44,'#e8dcc4'],[.04,1.78,.32,.36,'#f2e2c6'],[.42,1.86,.3,.4,'#e8dcc4'],[-.12,1.47,.5,.22,'#c8453a'],[.4,1.5,.26,.26,'#e8dcc4']])
+        box(e,[x,y,.06],[w,h,.01],c);
+      box(e,[0,2.26,0],[1.6,.08,.42],'#5d7360');
+      box(e,[0,2.34,0],[1.3,.08,.26],'#5d7360');
       return {entity:e,half:[.75,.16],top:2.6};
     }
     box(e,[0,.4,0],[.8,.8,.8],tint??'#b0a98f');
@@ -826,12 +1237,7 @@ export function createModels(app) {
     // A pond: sunken water, a stone rim, lilies, a rockery and a couple of fish.
     box(e,[0,-.08,0],[w-.6,.3,d-.6],'#5c7f80');
     const water=tag(box(e,[0,.06,0],[w-.7,.06,d-.7],'#6f9ea0'),'water');
-    const surface=new pc.StandardMaterial();
-    surface.diffuse=new pc.Color().fromString('#79aaa8');
-    surface.emissive=new pc.Color().fromString('#3f6668');
-    surface.emissiveIntensity=.35;surface.gloss=.85;surface.useMetalness=true;surface.metalness=.15;
-    surface.opacity=.88;surface.blendType=pc.BLEND_NORMAL;surface.update();
-    water.render.meshInstances[0].material=surface;
+    water.render.meshInstances[0].material=waterMaterial();water.render.castShadows=false;
     // Each rim stone is tagged on its own: one box round the ring would swallow the water inside it.
     for(let i=0;i<Math.round((w+d)*1.4);i++){
       const angle=i/Math.round((w+d)*1.4)*Math.PI*2;
@@ -916,7 +1322,7 @@ export function createModels(app) {
       box(e,[0,2.14,0],[1.7,.1,.78],'#9db0ad');
       for(let i=0;i<3;i++)box(e,[0,.6+i*.55,.3],[1.3,.06,.5],'#e2ebe8');
       const milk=group(e,'milk');
-      for(let i=0;i<4;i++)box(milk,[-.5+i*.34,.78,.28],[.22,.3,.24],i%2?'#e6e2d4':'#dfe8ea');
+      for(let i=0;i<4;i++)box(milk,[-.5+i*.34,.78,.285],[.22,.3,.24],i%2?'#e6e2d4':'#dfe8ea');
       return {entity:e,half:[.8,.38],top:2.2,name:'fridge'};
     }
     if(kind==='coffeebar') {
@@ -1053,7 +1459,7 @@ export function createModels(app) {
       box(e,[0,.32,0],[2.0,.52,.85],tint??'#8fa094');
       box(e,[0,.62,0],[1.86,.16,.72],'#a8b8a8');
       box(e,[0,.76,-.36],[2.0,.72,.18],tint??'#8fa094');
-      for(const x of [-.94,.94])box(e,[x,.62,0],[.14,.5,.85],'#7f9186');
+      for(const x of [-.94,.94])box(e,[x,.62,0],[.14,.5,.86],'#7f9186');
       for(const x of [-.5,.5])tag(box(e,[x,.78,-.24],[.42,.4,.14],'#c6cfc0',[-14,0,0]),'cushion');
       return {entity:e,half:[1.0,.45],top:.7,name:'sofa',seat:.68};
     }
@@ -1066,12 +1472,140 @@ export function createModels(app) {
       box(e,[0,1.94,.06],[.9,.12,.02],'#7f9a86');
       return {entity:e,half:[.75,.08],top:2.1,name:'poster',face};
     }
+    // A film poster in a dark frame: a lit print in `tint`, one bold disc and a pale title band.
+    // Layers stand at least 5 mm apart so no two faces lie flush.
+    if(kind==='filmposter') {
+      box(e,[0,1.7,0],[1.0,1.5,.05],'#2a2622');
+      const print=box(e,[0,1.72,.04],[.86,1.3,.02],tint??'#c0584a');
+      print.render.meshInstances[0].material=glow(tint??'#c0584a');
+      cylinder(e,[0,1.9,.065],[.46,.02,.46],'#f1d89a',[90,0,0]);
+      box(e,[0,1.26,.065],[.7,.12,.02],'#f4ecd8');
+      return {entity:e,half:[.5,.06],y0:.95,top:2.45,name:'poster'};
+    }
+    // A popcorn cart: a red cabinet, a glass case heaped with popcorn, buckets on the counter and a
+    // striped canopy on two poles.
+    if(kind==='popcornstand') {
+      box(e,[0,.45,0],[1.4,.9,.8],tint??'#b8352f');
+      box(e,[0,.93,0],[1.46,.06,.86],'#efe3c4');
+      const glass=new pc.StandardMaterial();
+      glass.diffuse=new pc.Color().fromString('#dceaea');glass.opacity=.34;
+      glass.blendType=pc.BLEND_NORMAL;glass.gloss=.9;glass.useMetalness=true;glass.metalness=.1;glass.update();
+      box(e,[0,1.3,-.1],[1.0,.66,.5],'#dceaea').render.meshInstances[0].material=glass;
+      box(e,[0,1.08,-.1],[.9,.2,.4],'#f1dfa4');
+      for(const x of [-.53,.53])box(e,[x,1.31,-.1],[.04,.68,.52],'#8a2a25');
+      for(const x of [-.45,.45])cylinder(e,[x,1.08,.25],[.18,.22,.18],'#c8362f');
+      for(const x of [-.6,.6])cylinder(e,[x,1.46,.3],[.05,.98,.05],'#8a2a25');
+      for(let i=0;i<5;i++)box(e,[-.56+i*.28,1.95,-.05],[.27,.06,.8],i%2?'#f4ecd8':'#c8362f');
+      return {entity:e,half:[.73,.43],top:1.98,name:'counter'};
+    }
+    // A wide window over the bay: sky, the far shore's towers and the water, behind a frame and two
+    // mullions. It hangs on a back wall, like the room's own windows.
+    if(kind==='bayview') {
+      const paint=(xyz,size,hex)=>{const p=box(e,xyz,size,hex);p.render.meshInstances[0].material=glow(hex);return p;};
+      paint([0,2.06,-.04],[4.2,1.48,.02],'#a9cfe3');
+      paint([0,1.11,-.02],[4.2,.38,.02],'#4f8fae');
+      for(const [x,w,h] of [[-1.7,.3,.5],[-1.3,.22,.8],[-.9,.34,.42],[-.35,.26,.95],[.1,.4,.55],[.6,.24,.72],[1.05,.32,.38],[1.55,.28,.62]])
+        box(e,[x,1.32+h/2,-.015],[w,h,.01],'#6d8298');
+      box(e,[0,.86,0],[4.64,.08,.2],'#8d6b4d');
+      box(e,[0,2.85,0],[4.64,.08,.1],'#8d6b4d');
+      for(const x of [-2.26,2.26])box(e,[x,1.85,0],[.08,2.02,.1],'#8d6b4d');
+      for(const x of [-.7,.7])box(e,[x,1.86,.03],[.06,1.88,.04],'#8d6b4d');
+      return {entity:e,half:[2.3,.1],y0:.8,top:2.9,name:'window'};
+    }
+    // A cinema screen on the back wall. A short wordless film loops on it (the sun crossing the sky
+    // over the sea, a boat sailing by, two birds flying the other way) while someone sits watching:
+    // the room calls `animate(dt, watching)` every frame, and only a few transforms move.
+    if(kind==='cinemascreen') {
+      const paint=(parent,xyz,size,hex,rot)=>{const p=box(parent,xyz,size,hex,rot);p.render.meshInstances[0].material=glow(hex);p.noBatch=true;return p;};
+      box(e,[0,2.1,0],[6.4,3.0,.08],'#17161b');
+      paint(e,[0,2.45,.055],[6,2,.02],'#3d5f8f');
+      paint(e,[0,1.1,.075],[6,.7,.02],'#2f6f8f');
+      const sun=cylinder(e,[0,2.5,.1],[.55,.02,.55],'#f6d27a',[90,0,0]);
+      sun.render.meshInstances[0].material=glow('#f6d27a');sun.noBatch=true;
+      const waves=[1.35,1.05,.85].map(y=>({y,entity:paint(e,[0,y,.09],[5.8,.03,.01],'#9cc4d6')}));
+      const boat=new pc.Entity('film-boat');e.addChild(boat);boat.noBatch=true;
+      paint(boat,[0,1.15,.115],[.6,.14,.02],'#7a4a33');
+      paint(boat,[-.05,1.42,.115],[.3,.4,.02],'#f4ecd8');
+      const flock=new pc.Entity('film-birds');e.addChild(flock);flock.noBatch=true;
+      const wings=[];
+      for(const [bx,by] of [[0,2.9],[.45,2.75]])for(const side of [-1,1])
+        wings.push({side,entity:paint(flock,[bx+side*.1,by,.125],[.2,.03,.02],'#1f2a36')});
+      let t=4;
+      const pose=()=>{
+        const p=(t/18)%1;
+        sun.setLocalPosition(-2.5+5*p,1.75+Math.sin(Math.PI*p)*1.3,.1);
+        boat.setLocalPosition(-2.6+5.2*((t/11)%1),Math.sin(t*2)*.02,0);
+        for(let i=0;i<waves.length;i++)waves[i].entity.setLocalPosition(0,waves[i].y+Math.sin(t*1.6+i)*.03,.09);
+        flock.setLocalPosition(2.2-4.8*((t/8)%1),Math.sin(t*1.3)*.08,0);
+        for(const wing of wings)wing.entity.setLocalEulerAngles(0,0,wing.side*(20+Math.sin(t*9)*25));
+      };
+      pose();
+      return {entity:e,half:[3.2,.1],y0:.6,top:3.6,name:'screen',animate(dt,watching){if(watching){t+=dt;pose();}}};
+    }
+    // The word hall's 书案: a long dark rosewood 翘头案 with upturned ends, a carved apron and carved
+    // end panels on runner feet. On it, rice paper written in ink under two paperweights, an inkstone
+    // and a brush pot full of brushes. A pair of standing palace lanterns flanks it, 2.1 m to either
+    // side and a little behind, where town.js puts their hitboxes.
+    if(kind==='writingdesk') {
+      const wood='#4a2216',dark='#321509';
+      const desk=group(e,'writing-desk');
+      box(desk,[0,.86,0],[2.24,.07,.76],wood);                                        // the top
+      for(const s of [-1,1]){
+        box(desk,[s*1.16,.915,0],[.14,.05,.76],wood,[0,0,s*22]);                       // an upturned end (翘头)
+        box(desk,[s*1.215,.955,0],[.05,.05,.78],dark);                                 // and its curled lip
+        for(const z of [-.29,.29])box(desk,[s*.94,.41,z],[.08,.82,.07],wood,[0,0,-s*3]);   // legs, splayed a little
+        box(desk,[s*.965,.04,0],[.12,.08,.72],dark);                                   // a runner foot (托子)
+        box(desk,[s*.945,.44,0],[.03,.62,.5],dark).render.meshInstances[0].material=fretwork(.5,.62,[0,.04,.15],dark,wood);   // carved end panel
+        for(const z of [-.36,.36])box(desk,[s*.8,.74,z],[.16,.16,.03],dark,[0,0,45]);   // spandrels under the apron
+      }
+      for(const z of [-.37,.37])box(desk,[0,.785,z],[1.8,.08,.025],dark).render.meshInstances[0].material=fretwork(1.8,.08,null,dark,wood);   // carved apron
+      // Rice paper with columns of brush strokes, read top to bottom and right to left, and a red seal.
+      const canvas=document.createElement('canvas');canvas.width=320;canvas.height=200;
+      const c=canvas.getContext('2d');c.fillStyle='#f5efdc';c.fillRect(0,0,320,200);
+      c.strokeStyle='#2a2622';c.lineCap='round';
+      const strokes=[[-10,0,10,-1],[0,-11,1,11],[-2,-4,-11,10],[1,-2,11,10],[-9,-7,8,-8],[-8,8,9,7]];
+      for(let col=0;col<6;col++)for(let row=0;row<5;row++)for(let k=0;k<3+(col*7+row*3)%3;k++){
+        const [x0,y0,x1,y1]=strokes[(col*11+row*7+k*(1+(col*3+row)%5))%6],x=282-col*46,y=24+row*34;
+        c.lineWidth=2.5+(col+row+k)%3;c.beginPath();c.moveTo(x+x0,y+y0);c.lineTo(x+x1,y+y1);c.stroke();
+      }
+      c.fillStyle='#b8322a';c.fillRect(24,150,26,26);
+      const tex=new pc.Texture(app.graphicsDevice,{width:320,height:200,mipmaps:true});tex.setSource(canvas);
+      const ink=new pc.StandardMaterial();ink.diffuseMap=tex;ink.useMetalness=true;ink.metalness=0;ink.gloss=.1;ink.update();
+      box(group(e,'rice-paper'),[0,.898,.04],[1.0,.006,.62],'#f5efdc').render.meshInstances[0].material=ink;
+      const weights=group(e,'paperweight');
+      for(const z of [-.23,.31])box(weights,[0,.91,z],[.86,.022,.04],'#2d2a27');
+      const stone=group(e,'inkstone');
+      box(stone,[.8,.915,.05],[.22,.04,.3],'#34393b');
+      box(stone,[.8,.936,-.04],[.16,.004,.1],'#15181a');                              // its ink well
+      const pot=group(e,'brush-pot');
+      cylinder(pot,[-.82,1.0,-.12],[.17,.2,.17],'#e8e4d8');
+      cylinder(pot,[-.82,1.02,-.12],[.176,.05,.176],'#3d5f8a');                       // a blue band
+      const brushes=group(e,'brush');
+      for(const [dx,dz,tilt] of [[-.03,-.03,-8],[.03,-.02,7],[-.02,.03,-4],[.03,.03,10]]){
+        cylinder(brushes,[-.82+dx,1.2,-.12+dz],[.02,.36,.02],'#c9a36a',[tilt,0,tilt]);
+        shape(brushes,'cone',[-.82+dx*2.4,1.41,-.12+dz*2.4],[.035,.09,.035],'#2a2622',[tilt,0,tilt]);   // the pointed hair tip
+      }
+      // Palace lanterns (宫灯) on their stands: a hexagonal silk body on a post, lit after dark.
+      const lit=glow('#f3d9a0');
+      for(const s of [-1,1]){
+        const g=group(e,'lantern'),x=s*2.1,z=-.35;
+        for(const r of [0,90])box(g,[x,.03,z],[.56,.06,.08],dark,[0,r,0]);          // crossed feet
+        box(g,[x,.82,z],[.06,1.52,.06],wood);                                         // the post
+        cylinder(g,[x,1.6,z],[.34,.05,.34],dark);                                     // the base plate
+        cylinder(g,[x,1.88,z],[.4,.5,.4],'#f3d9a0').render.meshInstances[0].material=lit;
+        for(let i=0;i<6;i++){const a=i/6*Math.PI*2;box(g,[x+Math.cos(a)*.2,1.88,z+Math.sin(a)*.2],[.035,.54,.035],dark);}   // six ribs
+        cylinder(g,[x,2.16,z],[.5,.06,.5],dark);                                      // the cap
+        cylinder(g,[x,2.24,z],[.1,.1,.1],'#c9a13b');                                  // a gilt finial
+        for(let i=0;i<3;i++){const a=i/3*Math.PI*2+.5;cylinder(g,[x+Math.cos(a)*.22,1.47,z+Math.sin(a)*.22],[.035,.22,.035],'#b8322a');}   // red tassels
+      }
+      return {entity:e,half:[1.15,.4],top:1.1,name:'writing-desk',material:lit};
+    }
     if(kind==='bookcase') {
       box(e,[0,1.25,0],[2.0,2.5,.42],tint??'#9c7a54');
       box(e,[0,1.25,.05],[1.84,2.34,.36],'#e6d8b8');
       const spines=['#8fa98d','#c47f6b','#d9b072','#7f9ab0','#9db08f','#b58fa4'];
       for(let row=0;row<5;row++){
-        box(e,[0,.34+row*.5,.06],[1.84,.07,.36],'#b08a60');
+        box(e,[0,.34+row*.5,.06],[1.83,.07,.36],'#b08a60');
         const books=group(e,'book');
         for(let i=0;i<9;i++)box(books,[-.8+i*.2,.53+row*.5,.1],[.13,.31,.28],spines[(row*4+i)%6]);
       }
@@ -1084,7 +1618,7 @@ export function createModels(app) {
       box(e,[0,.5,0],[1.5,.05,.7],'#a97d55');
       const book=group(e,'book');
       box(book,[-.4,.79,.05],[.62,.03,.44],'#f4ecd8');
-      box(book,[-.4,.81,.05],[.03,.04,.44],'#c9a97a');
+      box(book,[-.4,.81,.05],[.03,.04,.45],'#c9a97a');
       tag(cylinder(e,[.5,.86,-.2],[.15,.2,.15],'#9db08f'),'pen');
       tag(box(e,[.62,.8,.2],[.34,.06,.24],'#d9c9a8'),'notebook');
       return {entity:e,half:[.85,.45],top:.82,name:'desk'};
@@ -1094,7 +1628,7 @@ export function createModels(app) {
       for(const y of [1.06,2.54])cylinder(e,[0,y,0],[.05,.86,.05],'#8d6b4d',[0,0,90]);
       const ink=group(e,'calligraphy');
       for(let i=0;i<4;i++)box(ink,[0,2.24-i*.3,.03],[.22,.2,.02],'#5f7160');
-      box(ink,[0,1.2,.03],[.2,.2,.02],'#a4564a');
+      box(ink,[0,1.2,.032],[.2,.2,.02],'#a4564a');
       return {entity:e,half:[.35,.04],top:2.6,name:'paper'};
     }
     if(kind==='plantpot') {
@@ -1116,7 +1650,7 @@ export function createModels(app) {
       return {entity:e,half:[1.2,.44],top:1.4,name:'counter'};
     }
     if(kind==='basketstack') {
-      for(let i=0;i<5;i++)box(e,[0,.14+i*.16,0],[.62,.18,.46],i%2?'#c9584f':'#d97a5f');
+      for(let i=0;i<5;i++)box(e,[0,.14+i*.16,0],[.62+i%2*.01,.18,.46+i%2*.01],i%2?'#c9584f':'#d97a5f');
       return {entity:e,half:[.32,.24],top:.95,name:'basket'};
     }
     if(kind==='mannequin') {
@@ -1155,10 +1689,10 @@ export function createModels(app) {
     if(kind==='bedshow') {
       box(e,[0,.09,0],[2.6,.18,1.9],tint??'#c9b89a');
       box(e,[0,.44,0],[2.1,.34,1.4],'#a2764f');
-      box(e,[0,.66,.06],[2.0,.14,1.28],'#efe3c4');
-      tag(box(e,[0,.7,-.42],[2.0,.2,.46],'#fdf6e2'),'pillow');
+      box(e,[0,.66,.055],[2.0,.14,1.28],'#efe3c4');
+      tag(box(e,[0,.7,-.42],[1.98,.2,.46],'#fdf6e2'),'pillow');
       tag(box(e,[0,.72,.34],[1.98,.12,.62],'#a8bfa5'),'quilt');
-      box(e,[-1.02,.82,0],[.12,.75,1.4],'#8f6a48');
+      box(e,[-1.02,.82,0],[.12,.75,1.41],'#8f6a48');
       return {entity:e,half:[1.3,.95],top:.85,name:'bed'};
     }
     if(kind==='cratewall') {
@@ -1186,7 +1720,7 @@ export function createModels(app) {
     }
     if(kind==='cupshelf') {
       box(e,[0,1.3,0],[1.8,.06,.34],tint??'#a97d55');
-      box(e,[0,.9,0],[1.8,.06,.34],tint??'#a97d55');
+      box(e,[0,.905,0],[1.8,.06,.34],tint??'#a97d55');
       for(const x of [-.85,.85])box(e,[x,1.1,0],[.08,.5,.32],'#8a6c49');
       const cups=group(e,'cup'),bowls=group(e,'bowl');
       for(let i=0;i<5;i++)cylinder(cups,[-.6+i*.3,1.4,0],[.2,.16,.2],['#efe7d2','#c9dce0','#e0c69c'][i%3]);
@@ -1204,7 +1738,7 @@ export function createModels(app) {
     if(kind==='carrel') {
       box(e,[0,.74,-.42],[1.36,.07,.72],'#b08b60');
       for(const x of [-.71,.71])box(e,[x,.65,-.42],[.06,1.3,.76],'#8f7a5c');
-      box(e,[0,.65,-.78],[1.48,1.3,.05],'#9c8766');
+      box(e,[0,.645,-.78],[1.47,1.29,.05],'#9c8766');
       tag(box(e,[-.2,.79,-.36],[.52,.02,.36],'#f4ecd8'),'paper');
       const lamp=furniture(e,'lamp');lamp.setLocalPosition(.42,.78,-.58);lamp.setLocalScale(.5,.5,.5);
       const chair=group(e,'chair');
@@ -1216,7 +1750,7 @@ export function createModels(app) {
     // A listening booth: padded screens, a shelf with headphones on a stand, and a stool.
     if(kind==='booth') {
       for(const x of [-.72,.72])box(e,[x,1.05,-.05],[.06,2.1,1.1],'#8fa39a');
-      box(e,[0,1.05,-.57],[1.5,2.1,.06],'#7f948a');
+      box(e,[0,1.045,-.565],[1.49,2.09,.06],'#7f948a');
       for(let i=0;i<3;i++)for(let j=0;j<3;j++)box(e,[-.45+j*.45,.6+i*.6,-.53],[.38,.5,.03],'#9fb3a9');
       box(e,[0,.76,-.32],[1.36,.06,.46],'#b08b60');
       tag(box(e,[-.3,.96,-.5],[.46,.32,.03],'#2e3a36'),'monitor');
@@ -1244,7 +1778,7 @@ export function createModels(app) {
       return {entity:e,half:[.5,1.5],top:.04,name:'path'};
     }
     if(kind==='pine') {
-      tree(e,0,0,.8);
+      tree(e,0,0,.8,'pine');
       return {entity:e,half:[.68,.68],radius:.68,top:4.2,name:'pine'};
     }
     if(kind==='rock') {
@@ -1260,7 +1794,7 @@ export function createModels(app) {
       const lit=glow('#8fc0c4');
       const screen=box(e,[0,1.17,.04],[.5,.02,.34],'#8fc0c4',[-18,0,0]);
       screen.render.meshInstances[0].material=lit;
-      box(e,[0,.95,.28],[.8,.06,.02],'#4f7fae');
+      box(e,[0,.95,.28],[.79,.06,.02],'#4f7fae');
       box(e,[.22,.8,.28],[.14,.05,.03],'#c9a97a');
       return {entity:e,half:[.4,.3],top:1.2,name:'ticket-machine',material:lit};
     }
@@ -1352,7 +1886,7 @@ export function createModels(app) {
       for(const x of [-.97,.97])box(e,[x,1.0,0],[.06,2.0,.56],'#8a8271');
       const parcels=group(e,'parcel');
       for(let i=0;i<3;i++){
-        box(e,[0,.3+i*.7,0],[1.96,.05,.56],'#b9b3a0');
+        box(e,[0,.3+i*.7,0],[1.96,.05,.55],'#b9b3a0');
         for(let j=0;j<4;j++){const s=.26+((i+j)%3)*.08;box(parcels,[-.68+j*.45,.33+i*.7+s/2,.02],[.36,s,.38],['#c9a77a','#b88f5e','#d8bf95'][(i+j)%3]);}
       }
       if(text)label(e,text,[0,2.18,.05],1.0,.3,'#f4ead2','#36594f');
@@ -1422,7 +1956,7 @@ export function createModels(app) {
       const hats=group(e,'hat');
       for(let r=0;r<3;r++){
         const y=.7+r*.55;
-        box(e,[0,y,0],[2.0,.05,.36],'#b39468');
+        box(e,[0,y,0],[1.99,.05,.36],'#b39468');
         for(let i=0;i<4;i++){
           const x=-.72+i*.48,c=jar[(r+i)%6];
           cylinder(hats,[x,y+.12,0],[.28,.2,.28],c);
@@ -1462,8 +1996,215 @@ export function createModels(app) {
       if(text)label(e,text,[0,2.42,.8],1.0,.3,'#f4ead2','#36594f');
       return {entity:e,half:[.9,.82],top:2.6,name:'fitting-room',signed:!!text};
     }
+    // ---- A counter for each trade. The customer stands in front (+z); the shop assistant works
+    // behind it (-z), where the till and tools of the trade face them.
+    // The restaurant's service counter: dark wood faced with red lacquered lattice, a stone top with
+    // the till, stacks of bowls and plates, a pot of tea with cups, and the menu on a little stand.
+    if(kind==='servicecounter') {
+      box(e,[0,.47,0],[2.6,.94,.8],'#4a2a1c');
+      for(const x of [-.87,0,.87])box(e,[x,.49,.405],[.78,.7,.02],'#a33a2c').render.meshInstances[0].material=fretwork(.78,.7,null,'#a33a2c','#8a2c20');
+      box(e,[0,.97,0],[2.7,.06,.86],'#d8cbb0');
+      const till=group(e,'till');
+      box(till,[.85,1.12,-.18],[.42,.24,.3],'#5f6a6c');
+      box(till,[.85,1.29,-.22],[.34,.1,.22],'#8fc0c4',[22,0,0]);
+      const bowls=group(e,'bowl'),plates=group(e,'plate');
+      for(const x of [-1.05,-.8])for(let i=0;i<4;i++)cylinder(bowls,[x,1.03+i*.055,.08],[.22,.05,.22],i%2?'#efe7d6':'#e4ecf0');
+      for(let i=0;i<5;i++)cylinder(plates,[-.4,1.01+i*.022,.1],[.34,.018,.34],'#f3eee2');
+      const pot=group(e,'teapot'),cups=group(e,'cup');
+      cylinder(pot,[.1,1.09,.1],[.22,.18,.22],'#6f4a3a');
+      cylinder(pot,[.1,1.2,.1],[.12,.04,.12],'#5a3a2c');
+      box(pot,[.23,1.1,.1],[.12,.04,.04],'#6f4a3a',[0,0,25]);
+      for(const x of [.32,.44])cylinder(cups,[x,1.04,.2],[.09,.07,.09],'#efe7d2');
+      const menu=group(e,'menu');
+      box(menu,[.45,1.16,-.12],[.3,.34,.02],'#f2e6c8',[-12,0,0]);
+      box(menu,[.45,1.3,-.1],[.3,.06,.025],'#a33a2c',[-12,0,0]);
+      return {entity:e,half:[1.35,.43],top:1.4,name:'counter'};
+    }
+    // 老周's buying counter in the second-hand shop: an old counter of mismatched planks, a glass case
+    // of curios at one end, a pair of scales, a ledger and a stack of boxes waiting to be sorted.
+    if(kind==='resalecounter') {
+      box(e,[0,.46,0],[2.4,.92,.78],'#8a6a4a');
+      for(let i=0;i<5;i++)box(e,[-.96+i*.48,.46,.395],[.44,.84,.02],['#9a7853','#7f6143','#a4845c','#86684a','#94734f'][i]);
+      box(e,[0,.95,0],[2.5,.06,.84],'#6f5236');
+      box(e,[-.7,1.0,.05],[.9,.04,.6],'#b59168');
+      ball(group(e,'vase'),[-.95,1.13,.05],[.16,.22,.16],'#5a7fae');
+      cylinder(group(e,'clock'),[-.65,1.14,.05],[.2,.04,.2],'#c9a13b',[90,0,0]);
+      cylinder(group(e,'cup'),[-.4,1.07,.1],[.1,.09,.1],'#efe7d2');
+      glassOver(box(e,[-.7,1.15,.05],[.92,.3,.62],'#dceaea'));
+      const scales=group(e,'scales');
+      box(scales,[.25,1.0,.05],[.3,.04,.18],'#6b5842');
+      box(scales,[.25,1.16,.05],[.03,.3,.03],'#8a7350');
+      box(scales,[.25,1.3,.05],[.54,.02,.02],'#8a7350');
+      for(const x of [.02,.48]){box(scales,[x,1.22,.05],[.01,.16,.01],'#8a7350');cylinder(scales,[x,1.14,.05],[.18,.015,.18],'#b89a5a');}
+      const ledger=group(e,'notebook');
+      box(ledger,[.68,.99,.2],[.32,.02,.24],'#a4564a');
+      box(ledger,[.68,1.005,.2],[.3,.01,.22],'#f2ead6');
+      const boxes=group(e,'box');
+      box(boxes,[1.0,1.1,-.12],[.34,.24,.3],'#b8905e');
+      box(boxes,[1.02,1.32,-.14],[.28,.2,.26],'#c9a36f');
+      return {entity:e,half:[1.25,.42],top:1.45,name:'counter'};
+    }
+    // A bakery counter: a glass case of bread and tarts in front, a wooden work top behind.
+    if(kind==='bakerycounter') {
+      box(e,[0,.45,0],[2.6,.9,.8],tint??'#b08a60');
+      box(e,[0,.93,-.25],[2.66,.08,.36],'#e0cba4');
+      box(e,[0,.92,.145],[2.55,.06,.49],'#e8dcc0');
+      const bread=group(e,'bread'),tarts=group(e,'eggtart');
+      for(let i=0;i<5;i++)box(bread,[-1+i*.5,1.02,.24],[.34,.16,.22],i%2?'#d9a468':'#e5b87f');
+      for(let i=0;i<5;i++)cylinder(tarts,[-1+i*.5,1.2,.06],[.22,.08,.22],'#e8c169');
+      box(e,[0,1.14,.07],[2.5,.03,.3],'#c9b083');                  // the upper tray
+      glassOver(box(e,[0,1.16,.15],[2.56,.46,.52],'#dceaea'));
+      const till=group(e,'till');
+      box(till,[.85,1.1,-.26],[.42,.26,.3],'#5f6a6c');
+      box(till,[.85,1.27,-.3],[.34,.1,.24],'#8fc0c4',[22,0,0]);
+      return {entity:e,half:[1.33,.42],top:1.45,name:'counter'};
+    }
+    // An espresso bar: a stone-topped bar with a two-group machine, a grinder and a stack of cups.
+    if(kind==='espressobar') {
+      box(e,[0,.52,0],[3,1.04,.8],tint??'#6f5641');
+      for(let i=0;i<9;i++)box(e,[-1.3+i*.325,.5,.41],[.2,.9,.03],'#8d6f52');   // slatted front
+      box(e,[0,1.08,0],[3.2,.1,.95],'#d9d2c3');
+      const machine=group(e,'coffee-machine'),cups=group(e,'cup');
+      box(machine,[-.8,1.4,-.2],[.95,.52,.46],'#b9c2c0');
+      box(machine,[-.8,1.68,-.2],[.98,.05,.5],'#8f9694');
+      for(const x of [-1.05,-.55]){
+        cylinder(machine,[x,1.24,.07],[.16,.1,.16],'#6f7a77');           // group head
+        box(machine,[x,1.2,.2],[.05,.04,.22],'#3c4747');                // portafilter handle
+      }
+      cylinder(machine,[-.25,1.3,.02],[.03,.3,.03],'#a1b1ae',[20,0,0]);  // steam wand
+      cylinder(machine,[.05,1.3,-.25],[.28,.36,.28],'#3c4747');         // grinder
+      shape(machine,'cone',[.05,1.62,-.25],[.3,.28,.3],'#8d6b4d',[180,0,0]);
+      for(let i=0;i<3;i++)cylinder(cups,[-1.05+i*.25,1.76,-.2],[.14,.1,.14],'#efe7d2');
+      for(let i=0;i<4;i++)cylinder(cups,[.45,1.18+i*.08,.15],[.16,.08,.16],'#efe7d2');
+      const till=group(e,'till');
+      box(till,[1.1,1.25,-.2],[.42,.24,.34],'#5f6a6c');
+      box(till,[1.1,1.42,-.24],[.34,.12,.04],'#8fc0c4',[20,0,0]);
+      return {entity:e,half:[1.6,.48],top:1.8,name:'counter'};
+    }
+    // A supermarket checkout lane: a belt runs to the till, then a bagging shelf, and the lane's
+    // number light stands on a pole where the cashier sits.
+    if(kind==='checkoutlane') {
+      box(e,[0,.45,0],[2.4,.9,.75],tint??'#d6d2c6');
+      box(e,[.4,.93,.05],[1.6,.06,.62],'#e2ded0');
+      box(e,[.4,.97,.05],[1.5,.03,.52],'#3c4747');                    // the belt
+      for(const x of [-.37,1.17])cylinder(e,[x,.97,.05],[.08,.53,.08],'#8f9694',[90,0,0]);
+      box(e,[-.845,.8,.05],[.69,.05,.62],'#e2ded0');                    // the bagging shelf
+      box(e,[.4,1,.35],[1.5,.05,.04],'#b9b3a0');
+      const till=group(e,'till');
+      box(till,[-.4,1.08,-.2],[.4,.22,.3],'#5f6a6c');
+      box(till,[-.4,1.32,-.18],[.36,.24,.04],'#8fc0c4',[-12,0,0]);
+      box(till,[-.12,1.02,.12],[.14,.08,.2],'#3c4747');               // card reader
+      const lane=group(e,'sign');
+      cylinder(lane,[-1.1,1.15,-.3],[.06,2.3,.06],'#8f9694');
+      box(lane,[-1.1,2.3,-.3],[.34,.26,.1],'#c9584f');
+      box(lane,[-1.1,2.3,-.24],[.12,.16,.02],'#f4ead2');
+      return {entity:e,half:[1.2,.38],top:1.4,name:'counter'};
+    }
+    // A library lending desk: a raised front ledge to hand books over, a return slot, the
+    // librarian's screen and lamp, and books waiting to be shelved.
+    if(kind==='lendingdesk') {
+      box(e,[0,.45,-.05],[2.8,.9,.7],tint??'#8a6a4c');
+      box(e,[0,.93,-.05],[2.9,.06,.78],'#c9a97a');
+      box(e,[0,1.025,.33],[2.88,.24,.12],tint??'#8a6a4c');              // the front ledge
+      box(e,[0,1.16,.33],[2.96,.05,.2],'#c9a97a');
+      box(e,[-1.05,.7,.31],[.5,.08,.03],'#3c4747');                   // the return slot
+      const books=group(e,'book'),screen=group(e,'monitor'),lamp=group(e,'desklamp');
+      for(let i=0;i<5;i++)box(books,[-1.1,.99+i*.07,-.15],[.38,.06,.28],jar[i%6]);
+      for(let i=0;i<3;i++)box(books,[-.55+i*.12,1.1,-.2],[.08,.28,.24],jar[(i+2)%6]);
+      box(screen,[.55,1.25,-.2],[.6,.4,.04],'#2f3a3d');
+      box(screen,[.55,1.25,-.18],[.54,.34,.02],'#8fc0c4');
+      box(screen,[.55,1,-.24],[.2,.08,.16],'#5f6a6c');
+      cylinder(lamp,[1.2,.98,-.25],[.2,.04,.2],'#5f7160');
+      cylinder(lamp,[1.2,1.2,-.25],[.03,.44,.03],'#5f7160');
+      shape(lamp,'cone',[1.2,1.42,-.15],[.26,.18,.26],'#8fa98a',[200,0,0]);
+      tag(box(e,[-.1,.99,-.1],[.14,.08,.1],'#c9584f'),'stamp');       // the date stamp
+      return {entity:e,half:[1.45,.45],top:1.35,name:'counter'};
+    }
+    // A lighting shop's display counter: small lamps lit under a glass top, table lamps on it.
+    if(kind==='lightcounter') {
+      const lit=glow('#f7e7bb');
+      box(e,[0,.45,0],[2.4,.9,.75],tint??'#e8e2d6');
+      box(e,[0,.72,.1],[2.24,.03,.5],'#c8bda6');
+      const lamps=group(e,'lamp');
+      for(let i=0;i<4;i++)ball(lamps,[-.84+i*.56,.8,.1],[.18,.14,.18],'#f7e7bb').render.meshInstances[0].material=lit;
+      box(e,[0,.8,.37],[2.3,.18,.02],'#dceaea');                      // glass front strip
+      glassOver(box(e,[0,.94,0],[2.46,.06,.8],'#dceaea'));
+      for(const x of [-.85,.85]){
+        cylinder(lamps,[x,1.0,-.15],[.2,.06,.2],'#8f7355');
+        cylinder(lamps,[x,1.2,-.15],[.04,.36,.04],'#8f7355');
+        shape(lamps,'cone',[x,1.46,-.15],[.46,.3,.46],'#f2e0b4',[180,0,0]).render.meshInstances[0].material=lit;
+      }
+      const till=group(e,'till');
+      box(till,[0,1.08,-.22],[.4,.22,.3],'#5f6a6c');
+      return {entity:e,half:[1.23,.4],top:1.65,name:'counter',material:lit};
+    }
+    // A homeware wrapping table: rolls of paper on a rod at the back, ribbon, a wrapped present.
+    if(kind==='wrapdesk') {
+      box(e,[0,.45,0],[2.6,.9,.85],tint??'#c2a077');
+      box(e,[0,.93,0],[2.7,.06,.92],'#e6d9bd');
+      const paper=group(e,'paper');
+      for(const x of [-1.2,.2])box(paper,[x,1.2,-.36],[.06,.5,.1],'#8d6b4d');
+      cylinder(paper,[-.5,1.38,-.36],[.04,1.44,.04],'#8f9694',[0,0,90]);
+      ['#c9584f','#7f9ab0','#e0c05e'].forEach((c,i)=>cylinder(paper,[-1+i*.45,1.3,-.36],[.16,.4,.16],c,[0,0,90]));
+      box(paper,[-.4,.97,.05],[.9,.01,.6],'#c9584f');                 // a sheet spread out
+      const gift=group(e,'box');
+      box(gift,[-.4,1.07,.05],[.36,.2,.3],'#7f9ab0');
+      box(gift,[-.4,1.07,.05],[.38,.22,.05],'#e0c05e');
+      box(gift,[-.4,1.07,.05],[.05,.22,.32],'#e0c05e');
+      for(let i=0;i<3;i++)cylinder(e,[.35+i*.18,1.0,.2],[.13,.08,.13],jar[i*2]);   // ribbon spools
+      const till=group(e,'till');
+      box(till,[1,1.08,-.2],[.4,.22,.3],'#5f6a6c');
+      box(till,[1,1.23,-.24],[.34,.1,.04],'#8fc0c4',[20,0,0]);
+      return {entity:e,half:[1.35,.46],top:1.6,name:'counter'};
+    }
+    // A tea bar: dark wood with slats, caddies of leaf tea along the back, a set laid for tasting
+    // and a kettle on a little stove.
+    if(kind==='teabar') {
+      box(e,[0,.47,0],[2.8,.94,.8],tint??'#6e533b');
+      for(let i=0;i<8;i++)box(e,[-1.23+i*.35,.47,.41],[.06,.8,.03],'#8a6a4c');
+      box(e,[0,.97,0],[2.96,.08,.9],'#8a6a4c');
+      const jars=group(e,'jar');
+      for(let i=0;i<5;i++){
+        cylinder(jars,[-1.2+i*.3,1.13,-.28],[.2,.26,.2],['#5f7a5e','#b45b52','#c9a45f','#7f6d55','#4f6a72'][i]);
+        cylinder(jars,[-1.2+i*.3,1.28,-.28],[.21,.04,.21],'#3c4747');
+      }
+      furniture(e,'teaset').setLocalPosition(.1,1.01,.1);
+      const kettle=group(e,'teapot');
+      box(kettle,[1.0,1.06,-.15],[.34,.1,.3],'#3c4747');
+      cylinder(kettle,[1.0,1.2,-.15],[.24,.2,.24],'#a1b1ae');
+      box(kettle,[1.0,1.33,-.15],[.16,.04,.04],'#3c4747');
+      return {entity:e,half:[1.48,.45],top:1.35,name:'counter'};
+    }
+    // A hardware trade counter: a steel top on a green cabinet, a cabinet of small-parts drawers,
+    // tins of screws and nails, and the till.
+    if(kind==='tradecounter') {
+      box(e,[0,.5,0],[3,1,.85],tint??'#54776e');
+      box(e,[0,.08,.41],[2.98,.16,.04],'#3c4747');                       // kick plate
+      box(e,[0,1.04,0],[3.1,.08,.95],'#a1b1ae');
+      const drawers=group(e,'box');
+      box(drawers,[-1.05,1.33,-.2],[.8,.5,.4],'#82918c');
+      for(let r=0;r<3;r++)for(let c=0;c<4;c++)box(drawers,[-1.35+c*.2,1.17+r*.15,.01],[.16,.1,.02],jar[(r+c)%6]);
+      const goods=group(e,'goods');
+      for(let i=0;i<4;i++)cylinder(goods,[-.3+i*.24,1.14,.15],[.18,.12,.18],'#8f9694');
+      box(goods,[.3,1.12,-.2],[.5,.08,.3],'#d2ad7e');                 // a plank to be cut
+      const till=group(e,'till');
+      box(till,[1.05,1.2,-.2],[.44,.24,.34],'#5f6a6c');
+      box(till,[1.05,1.38,-.24],[.36,.12,.04],'#8fc0c4',[20,0,0]);
+      return {entity:e,half:[1.55,.48],top:1.6,name:'counter'};
+    }
     box(e,[0,.5,0],[1,1,.6],tint??'#b0a98f');
     return {entity:e,half:[.5,.3],top:1};
+  }
+  /** The trade counters' glass: one see-through material for all of them. */
+  let counterGlass=null;
+  function glassOver(mesh) {
+    if(!counterGlass){
+      counterGlass=new pc.StandardMaterial();
+      counterGlass.diffuse=new pc.Color().fromString('#dceaea');counterGlass.opacity=.3;
+      counterGlass.blendType=pc.BLEND_NORMAL;counterGlass.gloss=.9;counterGlass.useMetalness=true;counterGlass.metalness=.1;counterGlass.update();
+    }
+    mesh.render.meshInstances[0].material=counterGlass;
+    return mesh;
   }
   // ---- Classical garden pieces: a covered walkway, a lattice wall, a veranda front, and a canal
   // edged with stones and rockery and crossed by arched stone bridges. Layouts and collision marks
@@ -1471,14 +2212,11 @@ export function createModels(app) {
   // uses), so every piece batches into the draw calls that are already there.
   const GC={plaster:'#efe9dc',coping:'#6d7471',ridge:'#565c5a',timber:'#8a6a4c',timberDark:'#6e533b',
     stone:'#c9c0a8',stoneDark:'#a9a08a',rock:'#9d968a',rockLight:'#b0a899',pad:'#7f9e6a',lotus:'#e3a1b8'};
-  /** One opaque water material for every pond, stream and canal, so they share a draw call. */
+  /** Still water (src/world/water.js), one material for every pond without a flow of its own, so
+   *  they share a draw call; the park, the canal, the fountain and the bay make their own. */
   let waterMat=null;
   function waterMaterial() {
-    if(waterMat)return waterMat;
-    waterMat=new pc.StandardMaterial();
-    waterMat.diffuse=new pc.Color().fromString('#79aaa8');waterMat.emissive=new pc.Color().fromString('#3f6668');
-    waterMat.emissiveIntensity=.35;waterMat.gloss=.85;waterMat.useMetalness=true;waterMat.metalness=.15;waterMat.update();
-    return waterMat;
+    return waterMat??=waterOf(app).surface({flow:[.02,.03],tile:2.2,ripple:.14});
   }
   /** Every scenery lantern shares one lit material; the first builder to hang one hands it to `lamps`. */
   let sceneryLit=null;
@@ -1497,7 +2235,7 @@ export function createModels(app) {
   /** A bridge along z: stepped slabs, a pier under an arched crest, and hand-rails that follow the steps. */
   function stoneBridge(parent,b,color=GC.stone,railColor=GC.stoneDark) {
     const g=group(parent,'bridge');
-    for(const [z0,z1,y] of b.steps)box(g,[b.x,y-.14,(z0+z1)/2],[b.width,.28,z1-z0],color);
+    for(const [z0,z1,y] of b.steps)box(g,[b.x,y-.137,(z0+z1)/2],[b.width+.01,.28,z1-z0],color);
     const crest=b.steps.reduce((a,s)=>s[2]>a[2]?s:a);
     if(!b.flat)box(g,[b.x,crest[2]/2,(crest[0]+crest[1])/2],[b.width-.5,crest[2]-.2,.5],GC.stoneDark);
     for(const r of bridgeRails(b)){
@@ -1527,10 +2265,10 @@ export function createModels(app) {
     const [cx,cz]=L.ax?[mid,L.c]:[L.c,mid];
     for(const p of L.posts){
       cylinder(root,[p.x,y+.08,p.z],[.36,.16,.36],GC.stoneDark);
-      tag(cylinder(root,[p.x,y+H/2,p.z],[.22,H,.22],GC.timberDark),'pillar');
+      tag(cylinder(root,[p.x,y+(H-.05)/2,p.z],[.22,H-.05,.22],GC.timberDark),'pillar');   // its top inside the beam, not flush with it
     }
     for(const r of L.rails)railing(root,r.x,r.z,r.hw,r.hd,y);
-    for(const p of L.lanterns)sceneryLantern(root,p.x,y+H-.75,p.z,lamps);
+    for(const p of L.lanterns)sceneryLantern(root,p.x,p.y,p.z,lamps);
     // A shop board hung crosswise under the eaves, as arcade shops hang theirs: read along the run.
     if(w.sign){
       const [sx,sz]=L.ax?[w.sign.at,L.c]:[L.c,w.sign.at];
@@ -1603,9 +2341,9 @@ export function createModels(app) {
     box(eaves,[mid,H+.1+drop/2,L.f+reach/2],[span+1.1,.14,slope],b.roof,[tilt,0,0]);
     const ribs=Math.max(3,Math.round(span/.9));
     for(let i=0;i<ribs;i++)box(eaves,[mid-span/2-.35+(i+.5)*(span+.7)/ribs,H+.19+drop/2,L.f+reach/2],[.1,.08,slope],shade(b.roof,.72),[tilt,0,0]);
-    box(eaves,[mid,H+.62,L.f+.1],[span+1.1,.14,.22],shade(b.roof,.72));
-    box(eaves,[mid,H+.1,L.f+reach],[span+1.1,.12,.08],GC.timberDark);
-    for(const side of [-1,1])box(eaves,[mid+side*(span/2+.6),H+.2,L.f+reach-.1],[.5,.1,.28],b.roof,[0,0,side*26]);
+    box(eaves,[mid,H+.62,L.f+.1],[span+1.11,.14,.22],shade(b.roof,.72));
+    box(eaves,[mid,H+.1,L.f+reach],[span+1.12,.12,.08],GC.timberDark);
+    for(const side of [-1,1])box(eaves,[mid+side*(span/2+.6),H+.2,L.f+reach-.1],[.5,.1,.29],b.roof,[0,0,side*26]);
     return {entity:e,marks:verandaMarks(v,b)};
   }
   /** A canal along z (see canalMarks): water, stones along its banks, lotus, rockeries by the
@@ -1613,10 +2351,14 @@ export function createModels(app) {
   function waterEdge(parent,c) {
     const e=new pc.Entity('canal');parent.addChild(e);
     const level=c.water.level,DEG=180/Math.PI;
+    // The water runs down the canal, along z (src/world/water.js); a thrown thing floats on it,
+    // except where a bridge crosses.
+    const water=waterOf(app),surface=water.surface({flow:[0,.3],tile:2.8,ripple:.15});
     for(const s of c.channel){
       const sheet=tag(box(e,[(s.x0+s.x1)/2,level,(s.z0+s.z1)/2],[s.x1-s.x0,.04,s.z1-s.z0],'#79aaa8'),'water');
-      sheet.render.meshInstances[0].material=waterMaterial();sheet.render.castShadows=false;
+      sheet.render.meshInstances[0].material=surface;sheet.render.castShadows=false;
     }
+    water.body('town',c.channel,level+.02,(x,z)=>c.bridges.some(b=>Math.abs(z-b.z)<b.width/2&&x>b.steps[0][0]&&x<b.steps.at(-1)[1]));
     const landing=(x,z)=>c.bridges.some(b=>Math.abs(z-b.z)<b.width/2+.3&&x>b.steps[0][0]-.3&&x<b.steps.at(-1)[1]+.3);
     shoreline(c.channel,1.3,landing).forEach((p,i)=>
       tag(shape(e,'sphere',[p.x,.12,p.z],[1.0,.3,.7],i%2?GC.stone:GC.stoneDark,[0,-p.angle*DEG,0]),'stone'));
@@ -1631,5 +2373,5 @@ export function createModels(app) {
     for(const b of c.bridges)stoneBridge(turned,{...b,x:-b.z});
     return {entity:e,marks:canalMarks(c,c.group??'scenery')};
   }
-  return {material,shape,box,ball,cylinder,tube,glow,label,pickable,person,tree,building,lantern,furniture,streetProp,groundPatch,fitting,tiledRoof,latticeWindow,redLantern,waterMaterial,sceneryLantern,rockery,stoneBridge,walkway,latticeWall,veranda,waterEdge};
+  return {material,painted,repaint,shape,box,ball,cylinder,tube,glow,label,pickable,person,tree,building,lantern,furniture,streetProp,groundPatch,fitting,tiledRoof,latticeWindow,redLantern,waterMaterial,sceneryLantern,rockery,stoneBridge,walkway,latticeWall,veranda,waterEdge};
 }

@@ -40,8 +40,8 @@ test('the kitchen is a room off the house, and walking out of it goes back insid
   await page.waitForTimeout(240);
   await expect(page.locator('#interact span')).toHaveText('做饭 · 厨房');
 
-  // The doorway leads back into the living room rather than out onto the street.
-  await page.evaluate(()=>window.__qinghe.town.warp(window.__qinghe.town.rooms.get('kitchen').offsetX,3.4,0));
+  // The side door leads back into the living room rather than out onto the street.
+  await page.evaluate(()=>{const t=window.__qinghe.town,r=t.rooms.get('kitchen');t.warp(r.offsetX+r.data.exit[0],r.data.exit[1],90);});
   await page.waitForTimeout(240);
   await page.keyboard.press('e');
   await page.waitForTimeout(320);

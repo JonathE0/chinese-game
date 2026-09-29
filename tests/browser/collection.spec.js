@@ -33,9 +33,9 @@ test('图鉴 counts a named fountain in the square and lists the 氵 hunt',async
 
 test('a finished hunt pays its coins once from the claim button',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  // 石 hunt: 石狮子, 石头 and 碗 are its only targets in the world.
+  // 石 hunt: 石狮子, 石头, 碗 and the harbour's 码头 are its only targets in the world.
   await page.addInitScript(([key,value])=>{if(!localStorage.getItem(key))localStorage.setItem(key,value);},[SAVE_KEY,JSON.stringify({
-    version:1,wallet:0,inventory:{},equipped:{},claims:{},words:{},completed:['home:tutorial','home:starter'],phrases:[],saved:[],home:[],discovered:['lion','stone','bowl'],
+    version:1,wallet:0,inventory:{},equipped:{},claims:{},words:{},completed:['home:tutorial','home:starter'],phrases:[],saved:[],home:[],discovered:['lion','stone','bowl','pier'],
     settings:{pinyin:true,english:true,dialogueVolume:0.9,ambientVolume:0.35,musicVolume:0},playerName:'旅人',
   })]);
   await page.goto('/');

@@ -75,7 +75,8 @@ test('the bakery sells a basket of things in one transaction',async({page})=>{
   await start(page);
   await page.evaluate(()=>window.__qinghe.town.setUnlocked('market',true));
   await enter(page,'bakery',2.6);
-  await warp(page,await offsetOf(page,'bakery'),1.0,0);
+  await warp(page,await offsetOf(page,'bakery'),-1.1,0);        // in front of the glass counter
+  await page.evaluate(()=>{window.__qinghe.town.pitch=-30;});   // looking at the counter, not the assistant behind it
   await expect(page.locator('#interact span')).toHaveText('看看今天的面包');
   await page.keyboard.press('e');
   await expect(page.locator('#panel-title')).toHaveText('麦香面包');
@@ -151,7 +152,7 @@ test('night stalls stay away by day and are pushed into place after dark',async(
 test('a tea set goes on the table, never on the bed, and the two become one piece',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   // A new player's starter bed is upstairs now, so this living room keeps a bed from an older save.
-  const bed={uid:'bed-old',item:'wooden-bed',kind:'bed',color:'#b98b5f',footprint:[2.1,1.4],x:2.9,z:-2.6,rot:0,slot:'bed'};
+  const bed={uid:'bed-old',item:'wooden-bed',kind:'bed',color:'#b98b5f',footprint:[2.1,1.4],x:2.9,z:-3.75,rot:0,slot:'bed'}   // at its slot by the wall;
   await seed(page,{inventory:{'low-table':1,'tea-set':1,'wooden-bed':1},home:[bed],completed:['home:tutorial','home:starter']});
   await start(page);
   await enter(page,'home',3.0);
@@ -176,7 +177,7 @@ test('a tea set goes on the table, never on the bed, and the two become one piec
 
   // Over the bed the tea set is refused, and it says why.
   await place(teaset);
-  await warp(page,home+2.9,-0.6,0);
+  await warp(page,home+2.9,-1.75,0);   // two metres short of the bed, facing it
   const onBed=await page.evaluate(()=>{
     const g=window.__qinghe.town.ghost;return {valid:g.valid,problem:g.problem?.zh??null,on:g.on};
   });
@@ -216,7 +217,8 @@ test('the library shelves books by what you can read, and hands over what you ar
   await start(page);
   await page.evaluate(()=>window.__qinghe.town.setUnlocked('market',true));
   await enter(page,'library',3.4);
-  await warp(page,await offsetOf(page,'library'),1.0,0);
+  await warp(page,await offsetOf(page,'library'),-1.7,0);       // in front of the lending desk
+  await page.evaluate(()=>{window.__qinghe.town.pitch=-30;});   // looking at the counter, not the assistant behind it
   await expect(page.locator('#interact span')).toHaveText('借书 · 所有书架');
   await page.keyboard.press('e');
   await expect(page.locator('#panel-title')).toHaveText('青禾书馆');
@@ -248,7 +250,8 @@ test('the bank takes deposits, pays capped interest and sells a permit on instal
   await seed(page,{wallet:400,completed:['home:tutorial','home:starter','practice:first']});
   await start(page);
   await enter(page,'bank',2.6);
-  await warp(page,await offsetOf(page,'bank'),0.5,0);
+  await warp(page,await offsetOf(page,'bank')-2.8,0,90);         // at the teller windows on the west wall
+  await page.evaluate(()=>{window.__qinghe.town.pitch=-30;});   // looking at the counter, not the assistant behind it
   await page.keyboard.press('e');
   await expect(page.locator('#panel-title')).toHaveText('青禾银行');
 

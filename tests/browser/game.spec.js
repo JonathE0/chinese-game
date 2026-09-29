@@ -16,7 +16,7 @@ test('town loads, stays player initiated, and Chinese help is opt-in',async({pag
 test('denied microphone keeps the response editable and does not alter rewards',async({page})=>{
   await page.addInitScript(()=>{window.SpeechRecognition=class{start(){queueMicrotask(()=>this.onerror?.({error:'not-allowed'}));}abort(){}};});
   await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
-  await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));await walk(page,'a','cx',-9);await walk(page,'w','cy',-1.1);await page.keyboard.press('e');await pastGreeting(page);
+  await toLin(page);await page.keyboard.press('e');await pastGreeting(page);
   await page.getByRole('button',{name:'麦克风回答'}).click();await expect(page.locator('#speech-status')).toContainText('denied');
   await expect(page.getByRole('textbox',{name:'你的回答'})).toBeEditable();await expect(page.locator('#wallet-count')).toHaveText('0');
   await page.getByRole('textbox',{name:'你的回答'}).fill('您好');await page.getByRole('button',{name:'提交回答'}).click();await expect(page.getByRole('button',{name:'继续',exact:true})).toBeVisible();
@@ -41,6 +41,12 @@ test('practice gives saved rewards and repeat completion cannot farm coins',asyn
 });
 
 // Walking slides about 0.7 m after the key comes up, so let go that much early and let it settle.
+/** From the fountain's north side to 林阿姨's tea stall beside the tea-house: west past the market
+ *  carts, across in front of the tea-house, and up to her counter. */
+async function toLin(page){
+  await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));
+  await walk(page,'a','cx',-9);await walk(page,'w','cy',-1.1);await walk(page,'d','cx',-4.8);await walk(page,'w','cy',-7.2);
+}
 async function walk(page,key,axis,target){
   const start=Number(await page.locator('#map-player').getAttribute(axis)),early=target>start?target-.7:target+.7;
   await page.keyboard.down(key);
@@ -57,7 +63,7 @@ test('walk to NPC, introduce yourself, bargain and confirm a wearable purchase',
   const clips=[];page.on('request',r=>{if(r.url().includes('/audio/clips/'))clips.push(r.url());});
   await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
   await page.screenshot({path:'test-results/town.png'});
-  await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));await walk(page,'a','cx',-9);await walk(page,'w','cy',-1.1);
+  await toLin(page);
   await expect(page.locator('#interact')).toBeVisible();await expect(page.locator('#panel')).toBeHidden();
   await page.keyboard.press('e');await pastGreeting(page);await expect(page.getByRole('heading',{name:'初次见面'})).toBeVisible();
   // The clip manifest is fetched in the background, so the label starts as "loading".
@@ -69,7 +75,7 @@ test('walk to NPC, introduce yourself, bargain and confirm a wearable purchase',
     await page.getByRole('textbox',{name:'你的回答'}).fill(answer);await page.getByRole('button',{name:'提交回答'}).click();await page.getByRole('button',{name:i===3?'完成对话':'继续',exact:true}).click();
   }
   await expect(page.locator('#wallet-count')).toHaveText('60');await page.getByRole('button',{name:'回到小镇',exact:true}).click();
-  await walk(page,'d','cx',9);await page.keyboard.press('e');await pastGreeting(page);await expect(page.getByRole('heading',{name:'带一点青禾回家'})).toBeVisible();
+  await walk(page,'s','cy',-4);await walk(page,'d','cx',4.8);await walk(page,'w','cy',-7.2);await page.keyboard.press('e');await pastGreeting(page);await expect(page.getByRole('heading',{name:'带一点青禾回家'})).toBeVisible();
   await page.locator('[data-shop-item="travel-hat"]').click();
   // How low the vendor will go depends on their mood today, so read it off the counter.
   const floorText=await page.locator('.negotiation h3 small').textContent();
@@ -133,7 +139,7 @@ test('mouse look turns the view and walking follows where you face',async({page}
 });
 test('typing in a dialogue field never drives the town or repeats the interaction',async({page})=>{
   await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
-  await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));await walk(page,'a','cx',-9);await walk(page,'w','cy',-1.1);await page.keyboard.press('e');await pastGreeting(page);
+  await toLin(page);await page.keyboard.press('e');await pastGreeting(page);
   await expect(page.getByRole('heading',{name:'初次见面'})).toBeVisible();
   const box=page.getByRole('textbox',{name:'你的回答'});await box.click();
   const before={cx:Number(await page.locator('#map-player').getAttribute('cx')),cy:Number(await page.locator('#map-player').getAttribute('cy'))};

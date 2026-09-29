@@ -16,10 +16,11 @@ const NO_FUNDS='<div class="feedback gentle">学习币不够。再练习一下�
 // Vendor lines play one after another. A newer sequence, or the panel closing, ends an older one.
 let sequence=0;
 export async function say(ctx,el,entries){
-  const run=++sequence;
+  const run=++sequence,panel=el.closest?.('#panel');
   for(const entry of entries){
     const [id,slow]=[].concat(entry);
-    if(run!==sequence||!el.isConnected)return;
+    // Closing a panel only hides it, so its content stays connected: a hidden panel ends it too.
+    if(run!==sequence||!el.isConnected||panel?.hidden)return;
     if(!ctx.voice.available(id))continue;
     // Wait for the clip to finish, fail to load, or be refused (play() settles with the audio still paused).
     const started=ctx.voice.play(id,{slow:!!slow}),audio=ctx.voice.foreground;

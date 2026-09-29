@@ -109,6 +109,41 @@ def collect_lines():
         for key, line in {**friends["lines"][npc], **friends["shared"]}.items():
             add(f"friend-{npc}-{key}", line["zh"], npc, "dialogue")
 
+    # Shop assistants: assistant-<key>, all in one voice.
+    assistants = read_json(CONTENT / "assistants.json")
+    for key, line in assistants["lines"].items():
+        add("assistant-" + key, line["zh"], assistants["speaker"], "dialogue")
+
+    # 山城老火锅: the waiter's lines (hotpot-<key>) and the noodle chef's (hotpot-chef-<key>).
+    hotpot = read_json(CONTENT / "hotpot.json")
+    for key, line in hotpot["lines"].items():
+        add("hotpot-" + key, line["zh"], hotpot["speakers"]["waiter"], "dialogue")
+    for key, line in hotpot["chef"].items():
+        add("hotpot-chef-" + key, line["zh"], hotpot["speakers"]["chef"], "dialogue")
+
+    # People in the word hall (hall-<key>), each line in its own speaker's voice.
+    for line in read_json(CONTENT / "hall-visitors.json")["lines"].values():
+        add(line["audio"], line["zh"], line["speaker"], "dialogue")
+
+    # The drone show over the bay: its start and end announcements (drones-<key>).
+    drones = read_json(CONTENT / "drones.json")
+    for line in drones["lines"].values():
+        add(line["audio"], line["zh"], drones["speaker"], "dialogue")
+
+    # The harbour in Yunhai: the ferry crew's and the Ferris wheel attendant's lines (harbour-<key>).
+    harbour = read_json(CONTENT / "harbour.json")
+    for key, line in harbour["lines"].items():
+        add("harbour-" + key, line["zh"], harbour["speakers"][line["speaker"]], "dialogue")
+
+    # The 打卡 camera: 打卡成功！ (checkin-success) and each check-in spot's line (checkin-<id>).
+    checkins = read_json(CONTENT / "checkins.json")
+    for line in [checkins["success"], *(spot["line"] for spot in checkins["spots"])]:
+        add(line["audio"], line["zh"], checkins["speaker"], "dialogue")
+
+    # People walking around Yunhai (crowd-<n>), each line in its own speaker's voice.
+    for line in read_json(CONTENT / "crowd.json")["lines"]:
+        add(line["audio"], line["zh"], line["speaker"], "dialogue")
+
     # The 易混词 deck: its two prompts, and members without an HSK clip (homophones share one).
     confusables = read_json(CONTENT / "confusables.json")
     for prompt in confusables["prompts"].values():

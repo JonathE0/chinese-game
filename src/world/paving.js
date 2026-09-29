@@ -13,3 +13,101 @@ export function pavingMaterial(app,width,depth){
  const material=new pc.StandardMaterial();material.diffuseMap=texture;material.diffuseMapTiling=new pc.Vec2(width/4,depth/4);material.shininess=0;material.update();
  return material;
 }
+
+/**
+ * Room floors, each drawn once as a repeating canvas tile. `style` comes from floors.json:
+ * `pattern` picks the drawing, `tones` its colours, `line` the seams or grout, and `tile` how many
+ * metres one repeat covers. A small seeded random keeps the same room looking the same every visit.
+ */
+const floorTextures=new Map();
+export function floorMaterial(app,style,width,depth,du=0,dv=0){
+ if(!floorTextures.has(style)){
+  const S=256,canvas=document.createElement('canvas');canvas.width=canvas.height=S;
+  const c=canvas.getContext('2d');
+  let seed=[...JSON.stringify(style)].reduce((h,ch)=>(h*31+ch.charCodeAt(0))>>>0,7);
+  const rnd=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
+  const tones=style.tones,tone=()=>tones[Math.floor(rnd()*tones.length)];
+  // Every shape is drawn with its copies one repeat over, so it wraps across the tile's edges.
+  const put=(x,y,w,h)=>{for(const dx of [-S,0,S])for(const dy of [-S,0,S])c.fillRect(x+dx,y+dy,w,h);};
+  c.fillStyle=style.line??tones[0];c.fillRect(0,0,S,S);
+  const draw={
+   planks(){
+    const rows=style.rows??8,bh=S/rows;
+    for(let r=0;r<rows;r++){
+     let x=rnd()*S;const end=x+S;
+     while(x<end-1){
+      let len=S*(.3+rnd()*.35);if(end-x-len<S*.15)len=end-x;
+      c.fillStyle=tone();put(x,r*bh,len-1.5,bh-1.5);
+      c.fillStyle='rgba(60,40,20,.08)';for(let i=0;i<3;i++)put(x,r*bh+rnd()*bh,len-1.5,1);
+      x+=len;
+     }
+    }
+   },
+   herringbone(){
+    // Staggered k-by-1 blocks: in row y a flat block starts wherever (x - y) mod 2k is 0, and in
+    // column x an upright one starts wherever it is 2k-1. The two families fill the plane exactly.
+    const k=style.k??3,n=style.cells??18,s=S/n,m=v=>((v%(2*k))+2*k)%(2*k);
+    for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+     if(m(x-y)===0){c.fillStyle=tone();put(x*s,y*s,k*s-1.5,s-1.5);}
+     else if(m(x-y)===2*k-1){c.fillStyle=tone();put(x*s,y*s,s-1.5,k*s-1.5);}
+    }
+   },
+   tiles(){
+    const n=style.count??2,s=S/n;
+    for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+     const ox=style.offset&&y%2?s/2:0;
+     c.fillStyle=tone();put(x*s+ox+1,y*s+1,s-2,s-2);
+     c.fillStyle='rgba(255,255,255,.12)';put(x*s+ox+1,y*s+1,s-2,1);
+     for(let i=0;i<14;i++){c.fillStyle=`rgba(90,80,70,${.04+rnd()*.06})`;put(x*s+ox+rnd()*s,y*s+rnd()*s,2+rnd()*6,1+rnd()*3);}
+    }
+   },
+   checker(){
+    const n=style.count??4,s=S/n;
+    for(let y=0;y<n;y++)for(let x=0;x<n;x++){c.fillStyle=tones[(x+y)%2];put(x*s+1,y*s+1,s-2,s-2);}
+   },
+   terrazzo(){
+    c.fillStyle=tones[0];c.fillRect(0,0,S,S);
+    for(let i=0;i<900;i++){c.fillStyle=tones[1+Math.floor(rnd()*(tones.length-1))];const r=1+rnd()*rnd()*5;put(rnd()*S,rnd()*S,r,r*(.6+rnd()*.6));}
+    // Brass strips divide the poured floor into squares.
+    const n=style.count??2;c.fillStyle=style.line??'#b39a6a';
+    for(let i=0;i<n;i++){put(i*S/n,0,1.5,S);put(0,i*S/n,S,1.5);}
+   },
+   tatami(){
+    // One repeat is four half-tiles: two mats lying one way beside two lying the other, each mat
+    // woven along its length with a dark cloth border down both long edges.
+    const H=S/2,mat=(x,y,w,h)=>{
+     const long=w>h;c.fillStyle=tone();c.fillRect(x+1,y+1,w-2,h-2);
+     c.fillStyle='rgba(90,80,40,.12)';
+     if(long)for(let v=y+4;v<y+h-3;v+=3)c.fillRect(x+1,v,w-2,1);else for(let u=x+4;u<x+w-3;u+=3)c.fillRect(u,y+1,1,h-2);
+     c.fillStyle=style.border??'#3f4a3c';
+     if(long){c.fillRect(x+1,y+1,w-2,5);c.fillRect(x+1,y+h-6,w-2,5);}else{c.fillRect(x+1,y+1,5,h-2);c.fillRect(x+w-6,y+1,5,h-2);}
+    };
+    for(const [qx,qy,flat] of [[0,0,true],[H,0,false],[0,H,false],[H,H,true]])
+     for(const i of [0,1])flat?mat(qx,qy+i*H/2,H,H/2):mat(qx+i*H/2,qy,H/2,H);
+   },
+   patterned(){
+    // Encaustic tiles: a diamond in the middle and a quarter circle in each corner, so four tiles
+    // together make a round flower where they meet.
+    const n=style.count??4,s=S/n,[ground,diamond,corner]=tones;
+    for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+     const x0=x*s,y0=y*s;
+     c.save();c.beginPath();c.rect(x0+1,y0+1,s-2,s-2);c.clip();
+     c.fillStyle=ground;c.fillRect(x0,y0,s,s);
+     c.fillStyle=diamond;c.beginPath();c.moveTo(x0+s/2,y0+s*.18);c.lineTo(x0+s*.82,y0+s/2);c.lineTo(x0+s/2,y0+s*.82);c.lineTo(x0+s*.18,y0+s/2);c.fill();
+     c.fillStyle=corner;for(const [cx,cy] of [[x0,y0],[x0+s,y0],[x0,y0+s],[x0+s,y0+s]]){c.beginPath();c.arc(cx,cy,s*.28,0,Math.PI*2);c.fill();}
+     c.fillStyle=ground;c.beginPath();c.arc(x0+s/2,y0+s/2,s*.1,0,Math.PI*2);c.fill();
+     c.restore();
+    }
+   },
+  };
+  (draw[style.pattern]??draw.tiles)();
+  const texture=new pc.Texture(app.graphicsDevice,{name:'floor-'+style.pattern,mipmaps:true,anisotropy:8,minFilter:pc.FILTER_LINEAR_MIPMAP_LINEAR,magFilter:pc.FILTER_LINEAR,addressU:pc.ADDRESS_REPEAT,addressV:pc.ADDRESS_REPEAT});
+  texture.setSource(canvas);floorTextures.set(style,texture);
+ }
+ const material=new pc.StandardMaterial();material.diffuseMap=floorTextures.get(style);
+ const tile=style.tile??2;material.diffuseMapTiling=new pc.Vec2(width/tile,depth/tile);
+ // A piece of a larger floor starts its pattern `du,dv` metres in (a box's top face runs u towards +x, v towards -z).
+ material.diffuseMapOffset=new pc.Vec2(du/tile,dv/tile);
+ material.useMetalness=true;material.metalness=0;material.gloss=style.gloss??.2;material.update();
+ return material;
+}

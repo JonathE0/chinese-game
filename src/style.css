@@ -391,14 +391,10 @@ body.unlocked.playing #look-hint{background:#3c5548ee;color:#fdf6e2;border-color
   #seated{bottom:96px;font-size:10.5px}
 }
 
-/* Frequent actions stay at the top; condition and settings sit beside the location. */
-.utility-dock{position:absolute;left:32px;bottom:96px;display:flex;gap:7px;z-index:10}
-.utility-dock .icon-button{width:36px;height:36px;background:#fcf7e8d9}
-.utility-dock svg{width:17px;height:17px}
+/* Every panel button, the labels switch included, sits in one row at the top. */
 .icon-button kbd{position:absolute;right:-2px;bottom:-2px;min-width:15px;height:15px;padding:0 3px;line-height:13px;font-size:9px;border:1px solid #d5d7c9;border-radius:4px;background:var(--paper);color:var(--muted)}
-body:not(.playing) .utility-dock{display:none}
-@media(max-width:900px),(max-height:760px){.utility-dock{left:14px;bottom:111px}.utility-dock .icon-button{width:32px;height:32px}}
-@media(max-width:420px){.brand h1{font-size:15px;letter-spacing:1px}.brand-mark{width:29px;height:34px}.brand{gap:5px}.top-actions{gap:5px}.wallet{padding:7px}.top-actions .icon-button{width:31px;height:31px}}
+@media(max-width:420px){.brand h1{font-size:15px;letter-spacing:1px}.brand-mark{width:29px;height:34px}.brand{gap:5px}.topbar{left:10px;right:10px}.top-actions{gap:3px}.wallet{padding:7px 5px;gap:3px}.top-actions .icon-button{width:27px;height:27px}}
+.key-bind{min-width:64px;margin-left:0}
 
 
 /* -------------------------------------------------------------- shopping cart */
@@ -764,5 +760,50 @@ body.riding .controls,body.riding #crosshair,body.riding #interact,body.riding #
 #metro-ride{--tone-1:#de6a6a;--tone-2:#d9831f;--tone-3:#2f9e5b;--tone-4:#628ce0;--tone-0:#8a8a8a}
 .tone-1{color:var(--tone-1)}.tone-2{color:var(--tone-2)}.tone-3{color:var(--tone-3)}.tone-4{color:var(--tone-4)}.tone-0{color:var(--tone-0)}
 .setting-row select{padding:7px 9px;background:#f2efdf;border:1px solid #ccd2b9;border-radius:7px;color:#58694f;font-size:12px}
-/* Dev mode badge (?dev on the dev server). */
-body.dev::after{content:'DEV';position:fixed;left:8px;bottom:8px;z-index:50;padding:2px 7px;border-radius:6px;background:#b8463a;color:#fff;font:600 11px/1.4 system-ui,sans-serif;letter-spacing:1px;pointer-events:none}
+/* Admin mode badge (?admin on the dev server). */
+body.admin::after{content:'ADMIN';position:fixed;left:8px;bottom:8px;z-index:50;padding:2px 7px;border-radius:6px;background:#b8463a;color:#fff;font:600 11px/1.4 system-ui,sans-serif;letter-spacing:1px;pointer-events:none}
+/* 山城老火锅: the hotpot menu (src/ui/hotpot.js). Tabs, choices and steppers reuse the shared styles. */
+.hotpot-tabs{margin:14px 0 6px}
+.hotpot-choices{display:flex;flex-direction:column;gap:6px}
+.hotpot-choices .choice{display:flex;align-items:baseline;gap:8px;text-align:left}
+.hotpot-choices .choice span{margin-left:auto}
+.hotpot-menu,.hotpot-bill ul{list-style:none;margin:0;padding:0}
+.hotpot-menu li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e7e2cd}
+.hotpot-menu .grow{flex:1;min-width:0}
+.hotpot-menu b{font-family:'Noto Serif SC',serif;font-size:14px;font-weight:500}
+.hotpot-menu small,.hotpot-choices small,.hotpot-bill small{color:#909883;font-size:10px}
+.hotpot-price{font-size:12px;white-space:nowrap}
+.hotpot-bill{margin:14px 0;padding:10px 12px;background:#f6f1e0;border-radius:10px;font-size:12px}
+.hotpot-bill li{display:flex;justify-content:space-between;padding:3px 0}
+.hotpot-bill h3{margin-top:10px;font-size:13px}
+.hotpot-total{display:flex;align-items:baseline;gap:6px;border-top:1px solid #d8d2b8;margin-top:6px;padding-top:6px}
+.hotpot-total span{margin-left:auto;font-weight:600}
+/* The 打卡 camera (src/ui/camera.js) and the journal's 相册 (src/ui/album.js). */
+#viewfinder{position:fixed;inset:9vh 9vw;z-index:6;pointer-events:none;box-shadow:0 0 0 100vmax #0b120e40}
+#viewfinder[hidden]{display:none}
+.vf-corner{position:absolute;width:44px;height:44px;border:0 solid #fffbeee6}
+.vf-corner.tl{left:0;top:0;border-width:3px 0 0 3px}.vf-corner.tr{right:0;top:0;border-width:3px 3px 0 0}
+.vf-corner.bl{left:0;bottom:0;border-width:0 0 3px 3px}.vf-corner.br{right:0;bottom:0;border-width:0 3px 3px 0}
+.vf-name{position:absolute;left:50%;top:calc(50% + 30px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;color:#fffbee;text-shadow:0 2px 10px #000a;white-space:nowrap}
+.vf-name b{font-family:'Noto Serif SC',serif;font-size:40px;font-weight:500;letter-spacing:4px;line-height:1.1}
+.vf-name small{font-size:14px}
+.vf-zoom{position:absolute;right:14px;top:12px;font-size:12px;letter-spacing:1px;color:#fffbeee6;text-shadow:0 1px 4px #000a}
+.vf-hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13px;color:#fffbeee6;text-shadow:0 1px 4px #000a;white-space:nowrap}
+.vf-hint small{font-size:10px}
+body.camera-up #nameplate{display:none}
+.camera-flash{position:fixed;inset:0;z-index:30;background:#fff;opacity:0;pointer-events:none}
+.camera-flash.on{animation:camera-flash .45s ease-out}
+@keyframes camera-flash{from{opacity:.85}to{opacity:0}}
+@media(prefers-reduced-motion:reduce){.camera-flash.on{animation-duration:.01s}}
+@media(max-width:720px){.vf-name b{font-size:28px}.vf-hint{display:none}}
+.checkin-stamps{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}
+.checkin-stamp{padding:4px 8px;border:1px dashed #d4cfb8;border-radius:7px;font-size:12px;color:#a3a58e}
+.checkin-stamp.done{border:1px solid #b9483a;color:#b9483a;background:#fbefe6}
+.album-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.album-photo{position:relative;margin:0;background:#f0ecdb;border-radius:9px;overflow:hidden}
+.album-photo img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.album-photo figcaption{display:flex;flex-direction:column;gap:2px;padding:7px 9px;font-size:12px}
+.album-photo figcaption small{font-size:9.5px;color:#8f9680}
+.album-stamp{align-self:flex-start;font-size:9px;color:#b9483a;border:1px solid #b9483a;border-radius:4px;padding:0 4px}
+.album-delete{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;background:#1f2b25b3;color:#fff;cursor:pointer}
+.album-delete:focus-visible{outline:2px solid #fffbee}

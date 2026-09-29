@@ -26,7 +26,13 @@ async function enterKitchen(page){
   await page.waitForTimeout(240);
 }
 const profileOf=page=>page.evaluate(()=>window.__qinghe.profile);
-const cityX=page=>page.evaluate(()=>window.__qinghe.town.rooms.get('city').offsetX);
+/** Through 海风面馆's door on the street (the lesson moved inside in wave 3) and up to its counter. */
+async function atCounter(page){
+  await page.evaluate(()=>{const q=window.__qinghe;q.town.enterCity();q.syncPlace();q.town.onInteract('door:city-noodles');});
+  await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.place)).toBe('city-noodles');
+  const x=await page.evaluate(()=>window.__qinghe.town.rooms.get('city-noodles').offsetX);
+  await warp(page,x+2.8,-1.3,0);
+}
 
 /** Types a reply into the open dialogue, submits it, then clicks past the feedback screen. */
 async function answer(page,text){
@@ -52,11 +58,7 @@ test('ordering noodles teaches the home recipe once, serves what you paid for, a
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await seed(page,{inventory:{noodles:1,egg:1,tomato:1}});
   await start(page);
-  await page.evaluate(()=>{window.__qinghe.town.enterCity();window.__qinghe.syncPlace();});
-  await page.waitForTimeout(300);
-  const x=await cityX(page);
-
-  await warp(page,x+10.5,1,0);
+  await atCounter(page);
   await expect(page.locator('#interact span')).toHaveText('海风面馆 · 点面');
   await page.keyboard.press('e');
   await expect(page.locator('#panel-title')).toHaveText('来一碗面');
@@ -119,10 +121,7 @@ test('an order you cannot afford shows the cook saying so, and cancelling leaves
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await seed(page,{wallet:20});
   await start(page);
-  await page.evaluate(()=>{window.__qinghe.town.enterCity();window.__qinghe.syncPlace();});
-  await page.waitForTimeout(300);
-  const x=await cityX(page);
-  await warp(page,x+10.5,1,0);
+  await atCounter(page);
 
   // First visit still teaches the recipe, win or lose the sale. That conversation pays its own
   // lesson reward before the purchase step even starts, so capture the balance after it lands.

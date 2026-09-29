@@ -3,6 +3,7 @@ import {Town} from './world/town.js';
 import {Shell,pinyinText,pinyinWith} from './ui/shell.js';
 import {VoicePlayer} from './services/audio.js';
 import {Ambience} from './services/music.js';
+import {FOUNTAIN,fountainLevel,fountainSound} from './world/fountain.js';
 import {Dictionary} from './services/dictionary.js';
 import {installLookup} from './ui/lookup.js';
 import {SpeechInput} from './services/speech.js';
@@ -22,13 +23,16 @@ import {cloudConfigured} from './services/cloud.js';
 import {syncSave,keepUnreadable} from './services/filesync.js';
 import {openHsk} from './ui/hsk.js';
 import {openDecorate,installPlacement,applyStarterHome} from './ui/decorate.js';
+import {openHallVisitor} from './ui/hall-visitors.js';
 import ambient from './content/ambient.json' with {type:'json'};
 import objectNames from './content/objects.json' with {type:'json'};
 import rooms from './content/rooms.json' with {type:'json'};
+import assistants from './content/assistants.json' with {type:'json'};
 import npcs from './content/npcs.json' with {type:'json'};
 import {loadWords} from './services/hsk-data.js';
 import {districtStates,gateMessage} from './core/progress.js';
 import {openStatus} from './ui/status.js';
+import {readKeysFrom,isKey,keyLabel} from './core/keys.js';
 import {openBank,openResale} from './ui/money.js';
 import {openGuide} from './ui/guide.js';
 import {openSleep,openClosed} from './ui/rest.js';
@@ -38,8 +42,6 @@ import {openMetro,rideHome} from './ui/metro.js';
 import {openCityTalk} from './ui/citytalk.js';
 import {openTaxi} from './ui/taxi.js';
 import {openNoodles} from './ui/noodles.js';
-import {CITY,CITY_OFFSET} from './world/city.js';
-import {arrivedAtTower,arrivalStep} from './core/city.js';
 import {tickCooking,recipeById} from './core/cooking.js';
 import {openSite} from './ui/build.js';
 import {builtSites,collectIncome} from './core/construction.js';
@@ -52,25 +54,33 @@ import {isTyping,shortcutAllowed} from './core/input.js';
 import {shouldAutoStart} from './core/tutorial.js';
 import {Tutorial} from './ui/tutorial.js';
 import {installTouch} from './ui/touch.js';
+import {installCamera} from './ui/camera.js';
 import {AmbientConversations} from './core/social.js';
-import {openNpcGreeting} from './ui/social.js';
+import {openNpcGreeting,openAssistant} from './ui/social.js';
 import {festivalFrame} from './world/festivals.js';
 import {openFestival} from './ui/festivals.js';
 import {openPostcard} from './ui/postcard.js';
 import {friends,pinned,noteVisit} from './core/friends.js';
+import {openHotpot,settleHotpot} from './ui/hotpot.js';
+import {openCrowd} from './ui/crowd.js';
+import {openHarbour} from './ui/harbour.js';
+import {openMall} from './ui/mall.js';
+import {setQuality} from './core/quality.js';
 
 const loaded=loadProfile(localStorage);
 // holdSync keeps the folder copy untouched until the start-up check below has compared it.
 // readOnly: the save comes from a newer build, so nothing may be written over it this session.
 // holdSave: a damaged save's original did not fit beside it, so it goes to IndexedDB before any save.
 const ctx={profile:loaded.profile,hinted:false,town:null,holdSync:true,readOnly:!!loaded.readOnly,holdSave:!!loaded.unkept};
-// Dev mode, for previewing (`?dev`, and only on the Vite dev server): every district gate stands open
+// Key bindings always come from whichever save is current (an import or restore swaps ctx.profile).
+readKeysFrom(()=>ctx.profile.settings.keys);
+// Admin mode, for play-testing (`?admin`, and only on the Vite dev server): every district gate stands open
 // and the wallet is topped up to 1000. The save folder is never read or written in this mode, so none
 // of it can leak into a real save.
-const DEV=import.meta.env.DEV&&new URLSearchParams(location.search).has('dev');
+const ADMIN=import.meta.env.DEV&&new URLSearchParams(location.search).has('admin');
 // The cloud save exists only when configured, and never in dev mode (like the folder).
-if(cloudConfigured&&!DEV)ctx.cloud={};
-if(DEV){ctx.profile.wallet=Math.max(ctx.profile.wallet??0,1000);document.body.classList.add('dev');}
+if(cloudConfigured&&!ADMIN)ctx.cloud={};
+if(ADMIN){ctx.profile.wallet=Math.max(ctx.profile.wallet??0,1000);document.body.classList.add('admin');}
 if(loaded.unkept)keepUnreadable(loaded.unkept).then(()=>{loaded.warning=loaded.keptWarning;},()=>{}).finally(()=>{ctx.holdSave=false;});
 ctx.voice=new VoicePlayer(ctx.profile.settings,t=>ctx.ui.notice(t));ctx.music=new Ambience(ctx.profile.settings);ctx.speech=new SpeechInput();ctx.dictionary=new Dictionary();ctx.ui=new Shell(ctx);ctx.lookup=installLookup(ctx);ctx.tutorial=new Tutorial(ctx);
 // Backups, the progress log and the folder copy follow a save within 5 s, at most one write per 5 s
@@ -107,7 +117,7 @@ function interact(id){
  }
  if(id==='grab')return void ctx.town.grabLoose();
  if(id.startsWith('sit:')){
-  if(ctx.town.sit(Number(id.slice(4)))){bump(ctx.profile,'sits');ctx.save();ctx.ui.notice('坐下了。按 空格 站起来。 / Seated — press Space to stand.');}
+  if(ctx.town.sit(Number(id.slice(4)))){bump(ctx.profile,'sits');ctx.save();ctx.ui.notice(`坐下了。按 ${keyLabel('jump')} 站起来。 / Seated — press ${keyLabel('jump')} to stand.`);}
   return;
  }
  if(id==='stand')return void ctx.town.stand();
@@ -128,6 +138,10 @@ function interact(id){
  if(id==='listen')return openHsk(ctx,{mode:'listening'});
  if(id.startsWith('shop:'))return openShop(ctx,id.slice(5));
  if(id.startsWith('fest:'))return openFestival(ctx,id.slice(5));
+ if(id.startsWith('hotpot:'))return openHotpot(ctx,id.slice(7));
+ if(id.startsWith('crowd:'))return openCrowd(ctx,id.slice(6));
+ if(id.startsWith('harbour:'))return openHarbour(ctx,id.slice(8));
+ if(id.startsWith('mall:'))return openMall(ctx,id.slice(5));
  if(id==='panel:bank')return openBank(ctx);
  if(id==='panel:resale')return openResale(ctx);
  if(id==='panel:library')return openLibrary(ctx);
@@ -145,7 +159,19 @@ function interact(id){
  if(id==='decorate')return openDecorate(ctx);
  if(id==='studydesk')return openWordBank(ctx,{venue:'desk'});
  if(id==='menu')return openMenu(ctx,'tablet');
- if(id.startsWith('staff:')){bump(ctx.profile,'talks');return openNpcGreeting(ctx,'staff',()=>openMenu(ctx,'waiter'));}
+ if(id.startsWith('hall:')){bump(ctx.profile,'talks');return openHallVisitor(ctx,ctx.town.visitors.people[Number(id.slice(5))]);}
+ if(id.startsWith('staff:')){
+  bump(ctx.profile,'talks');
+  // Shop assistants (staff with a look of their own) help you shop; waiters take your order.
+  const room=ctx.town.rooms.get(ctx.town.place),member=room?.staff.find(s=>'staff:'+s.id===id);
+  if(member?.look){
+   // In a room of several shops (the mall) each assistant has a `shop` of their own: its counter and its line.
+   const counter=member.shop?room.fittings.find(f=>f.action==='shop:'+member.shop):room.fittings.find(f=>/^(shop|panel):/.test(f.action??'')),led=ctx.ledTo===room.id||(!!member.shop&&ctx.ledTo===member.shop);
+   if(led)ctx.ledTo=null;   // asked once per trip
+   return openAssistant(ctx,member,member.shop??room.id,{browse:counter&&(()=>interact(counter.action)),sells:counter?.action.startsWith('shop:'),led});
+  }
+  return openNpcGreeting(ctx,'staff',()=>openMenu(ctx,'waiter'));
+ }
 }
 // Looking at something and pressing F is the main way to pick up everyday words.
 function collect(name){
@@ -170,7 +196,7 @@ function collect(name){
 let hskWords=null;
 function refreshGates(){
  if(!ctx.town?.gates)return;
- const states=districtStates(ctx.profile,ctx.town.data.districts,hskWords).map(s=>DEV?{...s,unlocked:true}:s);
+ const states=districtStates(ctx.profile,ctx.town.data.districts,hskWords).map(s=>ADMIN?{...s,unlocked:true}:s);
  ctx.gateStates=states;
  for(const state of states)ctx.town.setUnlocked(state.id,state.unlocked);
 }
@@ -191,21 +217,41 @@ function showGate(id){
  body.innerHTML=`<p class="panel-intro">${pinyinWith(d.pinyin,d.zh,d.en)}</p>
   <div class="gate-note"><b>${esc(gateMessage(state))}</b>
   <div class="gate-bar"><i style="width:${percent}%"></i></div>
-  <p class="microcopy">在词语馆复习 HSK ${state.level} 的词，或在城里用 <kbd>F</kbd> 记住看到的东西。两种都算。<br>
-  Review HSK ${state.level} words in the word hall, or look at things around town and press F. Both count.</p></div>`;
+  <p class="microcopy">在词语馆复习 HSK ${state.level} 的词，或在城里用 <kbd>${esc(keyLabel('collect'))}</kbd> 记住看到的东西。两种都算。<br>
+  Review HSK ${state.level} words in the word hall, or look at things around town and press ${esc(keyLabel('collect'))}. Both count.</p></div>`;
  ctx.ui.update();
 }
 function enterPlace(id){
  if(id==='town')ctx.town.leaveRoom();
  else{
+  // A room you need a ticket for (the cinema's screening room) takes one at the door.
+  const ticket=rooms[id]?.ticket;
+  if(ticket&&!(ctx.profile.inventory[ticket]>0)){
+   const line=assistants.lines['no-ticket'];
+   ctx.ui.notice(ctx.profile.settings.english===false?line.zh:`${line.zh} / ${line.en}`);
+   if(ctx.voice.available('assistant-no-ticket'))ctx.voice.play('assistant-no-ticket');
+   return;
+  }
   if(!ctx.town.enterRoom(id))return;
+  if(ticket){ctx.profile.inventory[ticket]--;if(!ctx.profile.inventory[ticket])delete ctx.profile.inventory[ticket];ctx.save();}
   // The word hall is one of the places a postcard can say you went to.
   if(noteVisit(ctx.profile,id))ctx.save();
-  // Being led to this door? Then you have arrived.
-  if(ctx.ui.route?.key===id)ctx.ui.clearRoute();
+  // Being led to this door? Then you have arrived. A buy-guide route names the shop it is for (the
+  // city's store is reached through the metro platform), and that shop's assistant asks what you
+  // need; other routes (去找找, missions) name none. Walking into any other room ends the errand.
+  const route=ctx.ui.route;
+  if(route?.key===id){ctx.ledTo=route.shop??null;ctx.ui.clearRoute();}
+  // The mall keeps the errand too: on the way to its hardware store, or for a shop at a counter inside it.
+  else if(id!==ctx.ledTo&&rooms[ctx.ledTo]?.returnPlace!==id&&!rooms[id]?.fittings?.some(f=>f.action==='shop:'+ctx.ledTo))ctx.ledTo=null;
   // One count per shop per day, so walking in and out is not a way to farm the errand.
   const daily=syncDay(ctx.profile,ctx.profile.dayIndex??0);
   if(!daily.counts['seen-'+id]){daily.counts['seen-'+id]=1;bump(ctx.profile,'visits');ctx.save();}
+  // 问路 ends inside 一号书店: once the way has been asked, walking in through its door finds it, once.
+  if(id==='city-bookshop'&&ctx.profile.completed.includes('city-directions')&&!ctx.profile.completed.includes('city:found-bookstore')){
+   ctx.profile.completed.push('city:found-bookstore');
+   ctx.save();
+   showLine(ctx,'city-directions','found');
+  }
  }
  syncPlace();
  if(id!=='town')ctx.tutorial.event('enter',{id});
@@ -219,21 +265,6 @@ function syncPlace(){
  ctx.ui.setPlace(place,place==='town'?null:(rooms[place]??ctx.town.rooms.get(place)?.data));
 }
 ctx.syncPlace=syncPlace;
-/** Once 问路 has been answered, walking up to 一号书店's door finds it — once. Only walking in
- *  counts: a taxi (or any other warp) that sets you down there does not. */
-let bookstoreStep=null;
-function checkCityArrival(pos){
- if(!started||ctx.town.place!=='city'){bookstoreStep=null;return;}
- if(ctx.ui.panelId)return;
- const tower=CITY.towers.find(t=>t.sign==='一号书店');
- if(!tower)return;
- bookstoreStep=arrivalStep(bookstoreStep,arrivedAtTower(pos.x-CITY_OFFSET,pos.z,tower),ctx.town.warps);
- if(!bookstoreStep.arrived)return;
- if(!ctx.profile.completed.includes('city-directions')||ctx.profile.completed.includes('city:found-bookstore'))return;
- ctx.profile.completed.push('city:found-bookstore');
- ctx.save();
- showLine(ctx,'city-directions','found');
-}
 /**
  * The bank's morning round: interest on what is saved, then any building instalment that has
  * fallen due this week. Both go through claimPeriod, so a long session or a reload cannot pay
@@ -264,11 +295,15 @@ function reportSettlement(events){
  else if(paid.length)ctx.ui.notice(`银行扣了 ${paid.reduce((sum,e)=>sum+e.paid,0)} 学习币的还款。 / The bank took today's repayment.`);
 }
 try{
+ // 画质, before the town is built (src/core/quality.js). The browser tests (vite --mode e2e) run on 高
+ // unless their save picks a level: they count what one level builds, on whatever machine runs them.
+ setQuality(ctx.profile.settings.quality??(import.meta.env.MODE==='e2e'?'high':undefined));
  ctx.town=new Town(document.querySelector('#world'),{onInteract:interact,onNear:target=>ctx.ui.nearby(target),
   onLook:name=>ctx.ui.nameplate(name,{known:!!name&&knowsLook(ctx.profile,name)}),
   onCollect:name=>collect(name),onFrame:town=>{
   const pos=town.player.entity.getPosition(),outside=town.place==='town';
   ctx.music.setPlace(town.place);
+  fountainSound(ctx.music,outside?fountainLevel(Math.hypot(pos.x-FOUNTAIN.x,pos.z-FOUNTAIN.z)):0);
   const dot=document.querySelector('#map-player');
   dot.dataset.y=pos.y.toFixed(3);   // height is read indoors too: up the stairs at home
   if(outside){
@@ -288,8 +323,7 @@ try{
    if(district.id!==ctx.district){ctx.district=district.id;ctx.ui.setPlace('town',district);ctx.ui.drawMap(town.data,district);if(noteVisit(ctx.profile,district.id))ctx.save();}
    ctx.ui.drawRoute(town.data,district,pos);
   }
-  checkCityArrival(pos);
-  document.querySelector('#seated').hidden=!town.seated;
+  document.querySelector('#seated').hidden=!town.seated||town.seatLocked();
   const carrying=document.querySelector('#carrying'),held=town.toys.held;
   carrying.hidden=!held;
   if(held)carrying.querySelector('b').textContent=held.name?(objectNames.objects[held.name]?.zh??'东西'):'东西';
@@ -354,11 +388,22 @@ try{
  }});
  ctx.town.equip(outfit(ctx.profile));
  ctx.town.onNotice=message=>ctx.ui.notice(message);
+ // A loudspeaker line out in the world (the drone show): shown, and played without cutting into a conversation.
+ // Under an open panel or a voice already speaking it starts ducked, as the ambient lane would be.
+ ctx.town.onAnnounce=line=>{
+  ctx.ui.notice(`${line.zh} / ${line.en}`);ctx.voice.play(line.audio,{ambient:true});
+  const speaking=ctx.voice.foreground&&!ctx.voice.foreground.paused&&!ctx.voice.foreground.ended;
+  if(ctx.ui.panelId||speaking)ctx.voice.duck(true);
+ };
  ctx.town.sensitivity=ctx.profile.settings.sensitivity??0.12;
+ // 水面倒影 (the bay's mirror, src/world/bay.js): the player's choice, else off on touch and otherwise
+ // left to the graphics level (undefined: src/core/quality.js RENDER[level].reflections).
+ ctx.town.reflections=typeof ctx.profile.settings.reflections==='boolean'?ctx.profile.settings.reflections:matchMedia('(pointer: coarse)').matches?false:undefined;
  // Losing pointer lock without noticing is what makes the view feel stuck; say so plainly.
  ctx.town.onLockChange=locked=>{document.body.classList.toggle('unlocked',!locked);};
  document.body.classList.add('unlocked');
  installTouch(ctx.town);
+ installCamera(ctx);
  installPlacement(ctx);
  ctx.town.daylight.setHour(ctx.profile.clock??15);
  // Place the day stalls at the real saved hour, before the first frame — not the constructor's
@@ -389,13 +434,13 @@ refreshShops();
 if(ctx.town)for(const site of builtSites(ctx.profile))ctx.town.revealSite(site.id);
 // A postcard 陈叔叔 has received stays pinned up on his shop.
 if(ctx.town)for(const [npc,person] of Object.entries(friends.people))if(person.pin&&pinned(ctx.profile,npc))ctx.town.pinPostcard(person.pin);
-document.querySelector('#start-button').onclick=()=>{started=true;document.querySelector('#arrival').hidden=true;document.body.classList.add('playing');ctx.town.setPaused(false);ctx.music.start();if(loaded.warning||loaded.notice)ctx.ui.notice([loaded.warning,loaded.notice].filter(Boolean).join(' '));
+document.querySelector('#start-button').onclick=()=>{started=true;document.querySelector('#arrival').hidden=true;document.body.classList.add('playing');ctx.town.setPaused(false);ctx.music.start();settleHotpot(ctx);if(loaded.warning||loaded.notice)ctx.ui.notice([loaded.warning,loaded.notice].filter(Boolean).join(' '));
  // A brand-new traveller is walked through the basics; a save already mid-way picks up where it was.
  ctx.tutorial.started=true;
  if(shouldAutoStart(ctx.profile))ctx.tutorial.start();else ctx.tutorial.sync();
  // A connected folder with more progress than this browser's save is offered before anything overwrites it.
  // The cloud is checked after that, against whichever save the player kept.
- if(!DEV)offerFolderRestore(ctx).then(offered=>{if(!offered){ctx.holdSync=false;cloudSync(ctx);}},()=>{ctx.holdSync=false;cloudSync(ctx);});
+ if(!ADMIN)offerFolderRestore(ctx).then(offered=>{if(!offered){ctx.holdSync=false;cloudSync(ctx);}},()=>{ctx.holdSync=false;cloudSync(ctx);});
 };
 // With the cloud on, the arrival screen offers signing in or playing as a guest.
 if(ctx.cloud&&!ctx.readOnly)mountArrivalCloud(ctx);
@@ -405,15 +450,16 @@ document.querySelector('#journal-button').onclick=()=>{if(started)openJournal(ct
 document.querySelector('#interact-button').onclick=()=>interact(ctx.town.nearest?.id);document.querySelector('#ambient-bubble').onclick=()=>openAmbient(ctx);
 // Debug handle: lets the layout tools and the browser tests drive the game directly.
 window.__qinghe=ctx;
-// H hides the name that follows the crosshair, for anyone who would rather just look at the town.
+// H (or its rebinding) hides the name that follows the crosshair, for anyone who would rather just look at the town.
 addEventListener('keydown',e=>{
- if(e.code!=='KeyH'||!started||ctx.ui.panelId||isTyping(e.target)||e.repeat||e.isComposing)return;
+ if(!isKey(e,'labels')||!started||ctx.ui.panelId||isTyping(e.target)||e.repeat||e.isComposing)return;
  ctx.ui.toggleNames();
 });
-const shortcuts={Digit1:['journal',openJournal],Digit2:['inventory',openInventory],Digit3:['wordbank',openWordBank],Digit4:['status',openStatus],Digit5:['settings',openSettings]};
+const shortcuts=[['journal',openJournal],['inventory',openInventory],['wordbank',openWordBank],['status',openStatus],['settings',openSettings]];
 addEventListener('keydown',e=>{
- const choice=shortcuts[e.code.replace('Numpad','Digit')];
- if(!choice||!shortcutAllowed(e,{started,panelId:ctx.ui.panelId,placing:!!ctx.town.ghost,
+ const choice=shortcuts.find(([action])=>isKey(e,action));
+ // Nothing opens behind a fade (a taxi ride, a night's sleep): the veil holds all input until it lifts.
+ if(!choice||document.querySelector('.fade-veil')||!shortcutAllowed(e,{started,panelId:ctx.ui.panelId,placing:!!ctx.town.ghost,
    reviewing:!!document.querySelector('#panel .drill-prompt')})||isTyping(document.activeElement))return;
  e.preventDefault();
  if(ctx.ui.panelId===choice[0])ctx.ui.close();else choice[1](ctx);

@@ -11,7 +11,9 @@ import {test,expect} from '@playwright/test';
  * sublayer), so it is about double the number of live mesh instances.
  */
 const SPOTS=[['the square, facing the word hall',0,2,0],['the square, facing home',1,5,-128],
-  ['the park entrance',0,21.5,180],['the snack stalls',-5.5,4,90]];
+  ['the park entrance',0,21.5,180],['the snack stalls',-5.5,4,90],
+  // Once 1,441 draw calls (task Q-quality): the west quarter looking east down the market street.
+  ['the west quarter, looking east',-36,4,-90]];
 
 test('the outdoor town stays inside its draw-call and mesh budget',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));

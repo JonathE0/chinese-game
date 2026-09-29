@@ -25,8 +25,8 @@ test('every visible mesh in town, every room and the city is covered by a named 
   const report=await page.evaluate(()=>{
     const t=window.__qinghe.town;t.ensureCity();
     const places=[['town',t.root],...[...t.rooms.values()].map(room=>[room.id,room.root])];
-    // Waiters walk and are boxed only in the room you stand in; the spot check covers them.
-    const walking=new Set([...t.rooms.values()].flatMap(room=>room.staff.map(one=>one.entity)));
+    // Waiters and the word hall's visitors walk, and are boxed only in the room you stand in.
+    const walking=new Set([...t.rooms.values()].flatMap(room=>room.staff.map(one=>one.entity)).concat(t.visitors.people.map(one=>one.entity)));
     const uncovered=[],signTexts=new Set(),names=new Set();
     // Only true backdrop is skipped, by exact name, and its children are still walked. The base
     // slab of a ground patch (its first child) is ground too; what stands on it is checked.

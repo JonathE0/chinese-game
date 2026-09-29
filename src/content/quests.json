@@ -11,8 +11,8 @@
       },
       "where": {
         "district": "square",
-        "x": -9,
-        "z": -2,
+        "x": -4.8,
+        "z": -9.4,
         "zh": "茶铺 · 林阿姨"
       }
     },
@@ -35,7 +35,7 @@
       "id": "name-things",
       "zh": "认出十样东西",
       "pinyin": "Rèn chū shí yàng dōngxi",
-      "en": "Name ten things around town — look at anything and press F.",
+      "en": "Name ten things around town — look at anything and press {collect}.",
       "done": {
         "metric": "discovered",
         "count": 10
@@ -57,8 +57,8 @@
       },
       "where": {
         "district": "square",
-        "x": 9,
-        "z": -2,
+        "x": 4.8,
+        "z": -9.4,
         "zh": "小小商店 · 陈叔叔"
       }
     },
@@ -197,7 +197,7 @@
       "id": "city-directions",
       "zh": "问路找书店",
       "pinyin": "Wèn lù zhǎo shūdiàn",
-      "en": "In Yunhai, ask the student on the avenue where 一号书店 is, then walk there.",
+      "en": "In Yunhai, ask the student on the avenue where 一号书店 is, then walk there and go in.",
       "done": {
         "flag": "city:found-bookstore"
       }

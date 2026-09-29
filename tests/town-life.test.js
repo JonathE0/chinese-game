@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {freshProfile,decodeProfile} from '../src/core/profile.js';
 import {openAt,sessionDay,claimPeriod,periodClaimed,periodsSince,calendarOf} from '../src/core/calendar.js';
 import {newCart,addToCart,setQuantity,cartLines,cartTotal,cartCount,cartProblem,checkout,clearCart} from '../src/core/cart.js';
-import {surfaceHeight,offersSurface,canStack,fitsOn,decorOn,isAssembly,placementProblem} from '../src/core/surfaces.js';
+import {surfaceHeight,offersSurface,canStack,fitsOn,decorOn,isAssembly,placementProblem,hangsOnWall} from '../src/core/surfaces.js';
 import {Toybox,Container} from '../src/world/physics.js';
 import {deposit,withdraw,savingsOf,interestOn,balanceForCap,INTEREST_CAP,
   permitById,permitTotal,buyPermit,holdsPermit,permitPlan,settleWeeks} from '../src/core/finance.js';
@@ -371,4 +371,15 @@ test('F on a sign saves its phrase to the word bank without counting it as a nam
   assert.deepEqual(p.discovered,['cup']);
   assert.equal(collectLook(p,cup).isNew,false);
   assert.equal(knowsLook(p,cup),true);
+});
+
+test('a vase and a bonsai can stand on a tea table, and the paintings hang on the wall', () => {
+  assert.equal(canStack('vase'),true);
+  assert.equal(canStack('bonsai'),true);
+  assert.equal(canStack('folding-screen'),false);
+  assert.equal(offersSurface('tea-table'),true);
+  const teaTable={kind:'tea-table',footprint:[1.0,.6],rot:0,uid:'tt'};
+  assert.equal(fitsOn(teaTable,{footprint:[.65,.45],x:0,z:0}),true);          // a tea set on a tea table
+  for(const kind of ['certificate','scroll-painting','landscape-painting'])assert.equal(hangsOnWall(kind),true,kind);
+  for(const kind of ['vase','rug','tea-table'])assert.equal(hangsOnWall(kind),false,kind);
 });

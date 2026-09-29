@@ -103,7 +103,10 @@ export class Toybox{
 
   step(body,dt){
     body.vy-=GRAVITY*dt;
-    const ground=this.registry.groundAt(body.place,body.x,body.z,body.y,body.radius)+body.radius;
+    // Over a pond, the canal, the fountain or the bay (`surfaceAt`, from the town) it floats at the
+    // surface rather than resting on the water's taller collision box.
+    const surface=this.surfaceAt?.(body.place,body.x,body.z)??null;
+    const ground=surface!==null?surface+body.radius*.3:this.registry.groundAt(body.place,body.x,body.z,body.y,body.radius)+body.radius;
 
     // Move one axis at a time so a wall reflects the object instead of swallowing it.
     const nextX=body.x+body.vx*dt;
@@ -115,14 +118,16 @@ export class Toybox{
 
     body.y+=body.vy*dt;
     if(body.y<=ground){
+      if(surface!==null&&!body.afloat)this.onSplash?.(body);     // it lands in the water
+      body.afloat=surface!==null;
       body.y=ground;
-      if(Math.abs(body.vy)>1.2)body.vy=-body.vy*body.bounce;      // a real bounce
+      if(!body.afloat&&Math.abs(body.vy)>1.2)body.vy=-body.vy*body.bounce;      // a real bounce; water takes it
       else{body.vy=0;}
       // Rolling friction only applies once it is actually touching down.
       const drag=Math.max(0,1-2.6*dt);
       body.vx*=drag;body.vz*=drag;
       body.spinRate=Math.hypot(body.vx,body.vz)*2.4;
-    }
+    } else body.afloat=false;
 
     const speed=Math.hypot(body.vx,body.vy,body.vz);
     body.rest=speed<REST_SPEED&&body.y<=ground+.02?body.rest+dt:0;

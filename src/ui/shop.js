@@ -11,6 +11,9 @@ import {newCart,cartLines,cartTotal,cartCount,addToCart,setQuantity,clearCart,ca
 import {ordersAt,mountOrder} from './order.js';
 import festivals from '../content/festivals.json' with {type:'json'};
 import market from '../content/market.json' with {type:'json'};
+import rooms from '../content/rooms.json' with {type:'json'};
+import assistants from '../content/assistants.json' with {type:'json'};
+import mall from '../content/mall.json' with {type:'json'};
 
 /** A shop can share stock with another: the square carries the basics the market also sells. */
 export const shopsOf=item=>[].concat(item.shop??'chen');
@@ -46,6 +49,11 @@ const SHOPS={
 };
 // A festival's stall is named for the festival and greets you the way the snack stalls do.
 for(const f of festivals.festivals)SHOPS['fest-'+f.id]={title:f.zh,sub:festivals.ui.festival.zh,greeting:market.lines.greet,foot:''};
+// Any other shop in a room (its id is the room's: 云海's rooms, 青禾药店) is named for the room and
+// greeted with its assistant's line.
+for(const [id,room] of Object.entries(rooms))if(assistants.lines['shop-'+id])SHOPS[id]??={title:room.zh,sub:room.en,greeting:assistants.lines['shop-'+id],foot:''};
+// 星光百货's shops (src/content/mall.json) are named for their sign, with the floor they are on.
+for(const s of mall.shops)SHOPS[s.id]??={title:s.title,sub:`${rooms.mall.zh} · ${mall.signs.floors[s.level]}`,greeting:assistants.lines[s.greeting],foot:''};
 
 export function openShop(ctx,shopId='chen'){
  const shop=SHOPS[shopId]??SHOPS.chen;

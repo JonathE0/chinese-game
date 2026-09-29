@@ -170,7 +170,7 @@ test('the sign-in nonce: Google gets the SHA-256 hex of a fresh random value, Su
 });
 
 test('the arrival screen offers sign-in or guest only with the cloud on and nobody signed in',()=>{
-  assert.equal(arrivalChoice(false,null),'plain');                 // no env, ?dev, read-only, e2e
+  assert.equal(arrivalChoice(false,null),'plain');                 // no env, ?admin, read-only, e2e
   assert.equal(arrivalChoice(false,{email:'a@b.c'}),'plain');
   assert.equal(arrivalChoice(true,{email:'a@b.c'}),'signed-in');
   assert.equal(arrivalChoice(true,null),'choose');

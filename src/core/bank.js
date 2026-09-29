@@ -43,10 +43,11 @@ export const dueWords=(profile,now=Date.now())=>
 
 /**
  * F on whatever the crosshair names. An object joins `discovered` (and the bank) once; a sign's
- * exact phrase only joins the bank, so reading signs never counts as naming objects.
+ * exact phrase only joins the bank, so reading signs never counts as naming objects. A name that
+ * carries its own `audio` (a dish on the hotpot table: its catalog clip) keeps that clip.
  */
 export function collectLook(profile,name){
-  const clip=name.sign?'sign-'+name.id.replace(/^sign:/,''):'obj-'+name.id;
+  const clip=name.audio??(name.sign?'sign-'+name.id.replace(/^sign:/,''):'obj-'+name.id);
   if(knowsLook(profile,name))return {clip,isNew:false};
   if(!name.sign)profile.discovered.push(name.id);
   const added=addWord(profile,{zh:name.zh,pinyin:name.pinyin,en:name.en,audio:clip});

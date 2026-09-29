@@ -331,6 +331,16 @@
       "pinyin": "dìtiě yī hào xiàn",
       "en": "Metro Line 1"
     },
+    "青禾站": {
+      "id": "metro-qinghe-station",
+      "pinyin": "Qīnghé Zhàn",
+      "en": "Qinghe Station"
+    },
+    "A出入口": {
+      "id": "metro-entrance-a",
+      "pinyin": "A chūrùkǒu",
+      "en": "Entrance A"
+    },
     "公交站": {
       "id": "bus-stop",
       "pinyin": "gōngjiāo zhàn",
@@ -341,10 +351,130 @@
       "pinyin": "biànlìdiàn",
       "en": "Convenience store"
     },
+    "海边咖啡": {
+      "id": "seaside-cafe",
+      "pinyin": "Hǎibiān Kāfēi",
+      "en": "Seaside Café"
+    },
+    "挂号": {
+      "id": "registration",
+      "pinyin": "guàhào",
+      "en": "Registration"
+    },
+    "药房": {
+      "id": "hospital-pharmacy",
+      "pinyin": "yàofáng",
+      "en": "Pharmacy"
+    },
+    "候诊区": {
+      "id": "waiting-area",
+      "pinyin": "hòuzhěnqū",
+      "en": "Waiting area"
+    },
+    "售票处": {
+      "id": "ticket-office",
+      "pinyin": "shòupiàochù",
+      "en": "Ticket office"
+    },
+    "小说": {
+      "id": "shelf-novels",
+      "pinyin": "xiǎoshuō",
+      "en": "Novels"
+    },
+    "词典": {
+      "id": "shelf-dictionaries",
+      "pinyin": "cídiǎn",
+      "en": "Dictionaries"
+    },
+    "漫画": {
+      "id": "shelf-comics",
+      "pinyin": "mànhuà",
+      "en": "Comic books"
+    },
     "欢迎来到云海": {
       "id": "welcome-yunhai",
       "pinyin": "huānyíng láidào Yúnhǎi",
       "en": "Welcome to Yunhai"
+    },
+    "我爱云海": {
+      "id": "love-yunhai",
+      "pinyin": "wǒ ài Yúnhǎi",
+      "en": "I love Yunhai"
+    },
+    "云海中心": {
+      "id": "yunhai-centre",
+      "pinyin": "Yúnhǎi Zhōngxīn",
+      "en": "Yunhai Centre"
+    },
+    "好好学习": {
+      "id": "study-hard",
+      "pinyin": "hǎohǎo xuéxí",
+      "en": "Study hard"
+    },
+    "天天向上": {
+      "id": "make-progress",
+      "pinyin": "tiāntiān xiàngshàng",
+      "en": "Make progress every day"
+    },
+    "万家灯火": {
+      "id": "lights-homes",
+      "pinyin": "wàn jiā dēnghuǒ",
+      "en": "Lights in ten thousand homes"
+    },
+    "一路平安": {
+      "id": "safe-journey",
+      "pinyin": "yílù píng'ān",
+      "en": "Have a safe journey"
+    },
+    "你好": {
+      "id": "hello",
+      "pinyin": "nǐ hǎo",
+      "en": "Hello"
+    },
+    "晚安": {
+      "id": "good-night",
+      "pinyin": "wǎn'ān",
+      "en": "Good night"
+    },
+    "学中文": {
+      "id": "learn-chinese",
+      "pinyin": "xué Zhōngwén",
+      "en": "Learn Chinese"
+    },
+    "城市之光": {
+      "id": "city-light",
+      "pinyin": "chéngshì zhī guāng",
+      "en": "Light of the city"
+    },
+    "海风大厦": {
+      "id": "sea-breeze-tower",
+      "pinyin": "Hǎifēng Dàshà",
+      "en": "Sea Breeze Tower"
+    },
+    "云海湾": {
+      "id": "yunhai-bay",
+      "pinyin": "Yúnhǎi Wān",
+      "en": "Yunhai Bay"
+    },
+    "渡轮码头": {
+      "id": "ferry-pier",
+      "pinyin": "dùlún mǎtou",
+      "en": "Ferry pier"
+    },
+    "摩天轮": {
+      "id": "ferris-wheel",
+      "pinyin": "mótiānlún",
+      "en": "Ferris wheel"
+    },
+    "滨海步道": {
+      "id": "seaside-promenade",
+      "pinyin": "bīnhǎi bùdào",
+      "en": "Seaside promenade"
+    },
+    "无人机表演": {
+      "id": "drone-show",
+      "pinyin": "wúrénjī biǎoyǎn",
+      "en": "Drone show"
     },
     "五金 · 家居 · 灯具": {
       "id": "hardware-banner",
@@ -540,6 +670,121 @@
       "id": "buy-second-hand",
       "pinyin": "jiùwù huíshōu",
       "en": "We buy second-hand goods"
+    },
+    "山城步道": {
+      "id": "hill-trail",
+      "pinyin": "Shānchéng bùdào",
+      "en": "Mountain City Trail"
+    },
+    "观景台": {
+      "id": "viewpoint",
+      "pinyin": "guānjǐngtái",
+      "en": "Viewing platform"
+    },
+    "小心台阶": {
+      "id": "mind-the-steps",
+      "pinyin": "xiǎoxīn táijiē",
+      "en": "Mind the steps"
+    },
+    "山城老火锅": {
+      "id": "hotpot",
+      "pinyin": "Shānchéng Lǎo Huǒguō",
+      "en": "Mountain City Old Hotpot"
+    },
+    "蘸料台": {
+      "id": "hotpot-sauce",
+      "pinyin": "zhànliàotái",
+      "en": "Sauce station"
+    },
+    "福": {
+      "id": "good-fortune",
+      "pinyin": "fú",
+      "en": "Good fortune"
+    },
+    "加油": {
+      "id": "keep-going",
+      "pinyin": "jiāyóu",
+      "en": "Keep going!"
+    },
+    "楼层导览": {
+      "id": "mall-directory",
+      "pinyin": "lóucéng dǎolǎn",
+      "en": "Floor directory"
+    },
+    "一楼": {
+      "id": "mall-1f",
+      "pinyin": "yī lóu",
+      "en": "1F"
+    },
+    "二楼": {
+      "id": "mall-2f",
+      "pinyin": "èr lóu",
+      "en": "2F"
+    },
+    "三楼": {
+      "id": "mall-3f",
+      "pinyin": "sān lóu",
+      "en": "3F"
+    },
+    "四楼": {
+      "id": "mall-4f",
+      "pinyin": "sì lóu",
+      "en": "4F"
+    },
+    "美食广场": {
+      "id": "mall-food-court",
+      "pinyin": "měishí guǎngchǎng",
+      "en": "Food court"
+    },
+    "自动扶梯": {
+      "id": "mall-escalator",
+      "pinyin": "zìdòng fútī",
+      "en": "Escalator"
+    },
+    "电梯": {
+      "id": "mall-lift",
+      "pinyin": "diàntī",
+      "en": "Lift"
+    },
+    "洗手间": {
+      "id": "mall-toilets",
+      "pinyin": "xǐshǒujiān",
+      "en": "Toilets"
+    },
+    "入口": {
+      "id": "mall-entrance",
+      "pinyin": "rùkǒu",
+      "en": "Entrance"
+    },
+    "出口": {
+      "id": "mall-exit",
+      "pinyin": "chūkǒu",
+      "en": "Exit"
+    },
+    "奶茶店": {
+      "id": "mall-tea",
+      "pinyin": "nǎichá diàn",
+      "en": "Bubble tea"
+    },
+    "手机店": {
+      "id": "mall-phones",
+      "pinyin": "shǒujī diàn",
+      "en": "Phone shop"
+    },
+    "玩具店": {
+      "id": "mall-toys",
+      "pinyin": "wánjù diàn",
+      "en": "Toy shop"
+    },
+    "运动用品": {
+      "id": "mall-sports",
+      "pinyin": "yùndòng yòngpǐn",
+      "en": "Sportswear"
+    },
+    "服务台": {
+      "id": "mall-info",
+      "pinyin": "fúwùtái",
+      "en": "Information desk"
     }
   }
 }

@@ -1,0 +1,44 @@
+{
+  "note": "The 山城 hill west of downtown 云海 (src/world/hill.js). City-local metres, x east, z south. The hill is a grid of 4 m cells: every cell off the stairway is a terrace column whose height falls away from the summit in 2 m retaining-wall steps. Routes are chains of nodes [x, z, y] on cell centres, joined along one axis: a run between two nodes is a flight of steps (rise `rise`, tread = run / steps) or, at equal heights, a flat path. A node at y 0 is the street end of a route and has no landing. Every side of the stairway that is not open to the next part of the way has a stone parapet. Benches sit against the named side of a landing and face into it. The sea wall (stone to y, a railing of height rail on top, solid to the railing's top) closes the strip between the hill's north face and the water.",
+  "grid": {"x0": -120, "z0": -46, "cols": 20, "rows": 20, "cell": 4},
+  "summit": {"x": -98, "z": -26, "peak": 25, "fall": 0.39, "jitter": 1.2, "seed": 20260926},
+  "level": 2,
+  "min": 2,
+  "rise": 0.2,
+  "width": 4,
+  "terrace": {"x0": -84, "x1": -60, "z0": -46, "z1": -30, "y": 14, "bank": 16},
+  "routes": [
+    {"id": "promenade", "nodes": [[-38, -40, 0], [-46, -40, 2], [-46, -24, 2], [-46, -8, 6]]},
+    {"id": "downtown", "nodes": [[-38, 8, 0], [-46, 8, 2], [-46, -8, 6]]},
+    {"id": "terrace", "nodes": [[-46, -8, 6], [-54, -8, 8], [-54, -20, 11], [-54, -36, 14], [-58, -36, 14]]},
+    {"id": "summit", "nodes": [[-58, -36, 14], [-58, -24, 18], [-74, -24, 22], [-94, -24, 26]]}
+  ],
+  "open": [{"cell": [-58, -36], "side": "w"}],
+  "platform": {"y": 26, "cells": [[-102, -28], [-98, -28], [-94, -28], [-102, -24], [-98, -24], [-94, -24]]},
+  "rails": [
+    {"from": [-59.85, -46], "to": [-59.85, -38], "y": 14},
+    {"from": [-59.85, -34], "to": [-59.85, -30], "y": 14}
+  ],
+  "benches": [
+    {"cell": [-46, -8], "side": "e"},
+    {"cell": [-54, -20], "side": "w"},
+    {"cell": [-74, -24], "side": "s"},
+    {"cell": [-102, -24], "side": "s"},
+    {"cell": [-98, -24], "side": "s"}
+  ],
+  "signs": [
+    {"text": "山城步道", "at": [-39.85, -43.5, 1.25], "face": "e", "size": [2.6, 0.62]},
+    {"text": "小心台阶", "at": [-39.85, -36.8, 1.25], "face": "e", "size": [2.2, 0.52]},
+    {"text": "山城步道", "at": [-39.85, 4.5, 1.25], "face": "e", "size": [2.6, 0.62]},
+    {"text": "小心台阶", "at": [-39.85, 11.2, 1.25], "face": "e", "size": [2.2, 0.52]},
+    {"text": "观景台", "at": [-103.62, -26, 26.72], "face": "e", "size": [2.4, 0.7]}
+  ],
+  "seawall": {"x0": -120, "x1": -40, "z0": -48, "z1": -46, "y": 1.6, "rail": 1},
+  "trees": 0.35,
+  "colors": {
+    "wall": "#8c8373", "grass": "#6c8a58", "terrace": "#a8a293", "step": "#b8b1a3", "landing": "#aca597",
+    "parapet": "#9d968a", "stripLight": "#ffc98a", "lampLight": "#ffd9a0", "post": "#5e5a52",
+    "trunk": "#6b5a44", "crowns": ["#5f7f4e", "#6d8a5c", "#57744a"], "bench": "#8a6a4a", "benchFrame": "#5e5a52",
+    "signBg": "#2f3b33", "signInk": "#f3e6c4"
+  }
+}

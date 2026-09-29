@@ -23,6 +23,14 @@ const EXPECT={
   listening:['sign:keep-quiet','sofa','noticeboard'],
   courtyard:['pine','plant','bench'],
   'metro-platform':['wallclock','poster','sign:please-queue','sign:metro-line-1'],
+  'city-bank':['atm','sign:deposits','sign:please-queue','railing','sofa','noticeboard'],
+  'city-bookshop':['shelf','sign:shelf-dictionaries','sign:shelf-novels','sign:shelf-comics','sign:new-books','sign:checkout','sofa','lamp'],
+  'city-hospital':['sign:registration','sign:hospital-pharmacy','sign:waiting-area','bench','medicine-cabinet','poster'],
+  'city-noodles':['stove','menu','table','stool','lantern','sign:recommended','sign:menu'],
+  'city-cinema':['sign:ticket-office','poster','bench','counter'],
+  'city-cinema-hall':['screen','chair'],
+  'city-store':['fridge','goods-shelf','sign:checkout','sign:welcome','basket'],
+  'city-cafe':['window','sign:menu','sign:dept-pastries','sofa','stool'],
 };
 
 test('each interior has its own named things, reachable counters and no fittings inside each other',async({page})=>{

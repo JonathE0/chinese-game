@@ -6,25 +6,76 @@ import rooms from '../content/rooms.json' with {type:'json'};
 import {buildRoom,ROOM_OFFSET,annexDoor,annexApproach,upperParts} from './interior.js';
 import {Registry,raySpan} from './registry.js';
 import {walkClear,rotatedHalf} from './navigation.js';
+import {Visitors} from './visitors.js';
 import {pavingMaterial} from './paving.js';
 import {Daylight} from './daylight.js';
+import {Sky} from './sky.js';
+import {Views} from './views.js';
 import {initIdle,animateIdle,restIdle} from './idle.js';
 import objectNames from '../content/objects.json' with {type:'json'};
 import signTexts from '../content/signs.json' with {type:'json'};
 import {isTyping,queueLook,drainLook} from '../core/input.js';
 import {Toybox,Container} from './physics.js';
 import {NightMarket,NIGHT_PITCHES,DAY_PITCHES} from './stalls.js';
-import {surfaceHeight,offersSurface,canStack,fitsOn,decorOn,placementProblem} from '../core/surfaces.js';
+import {surfaceHeight,offersSurface,canStack,fitsOn,decorOn,placementProblem,hangsOnWall} from '../core/surfaces.js';
 import sites from '../content/sites.json' with {type:'json'};
 import {buildCity,buildStationEntrance,CITY,CITY_OFFSET} from './city.js';
+import {onCityGround} from '../core/city.js';
 import {buildGarden} from './garden.js';
+import {buildFountain,FOUNTAIN,FOUNTAIN_MARK,FOUNTAIN_LOOKS} from './fountain.js';
 import {buildWordHall} from './wordhall.js';
 import friends from '../content/friends.json' with {type:'json'};
 import {stepVelocity,inputWish,GRAVITY,JUMP} from '../core/movement.js';
+import {KEY_ACTIONS,isKey,codeOf,normalCode} from '../core/keys.js';
+import {buildBay} from './bay.js';
+import {waterOf} from './water.js';
+import {buildHill} from './hill.js';
+import {buildHotpot} from './hotpot.js';
+import {buildDrones} from './drones.js';
+import {buildCrowd} from './crowd.js';
+import {buildHarbour} from './harbour.js';
+import {buildMall,mallFloors} from './mall.js';
+import {detail,RENDER,setGpu,frameTime} from '../core/quality.js';
 
 const NAMES=objectNames.objects;
 const SEAT_DROP=.66;    // how far the body sinks so the hips land on the seat
+const SLEEP_HOP=.6;     // seconds from standing by the bed to lying on it
 const SIGNS=signTexts.signs;
+// The sun's shadow filter, by graphics level (RENDER[level].shadow in src/core/quality.js): 5x5 PCF
+// blends each shadow edge over a few texels, so the texel steps neither show as a sawtooth nor crawl
+// as the sun turns (3x3 left both visible when walking), but it samples 9 times a pixel to 3x3's 4.
+const SUN_SHADOWS={pcf5:pc.SHADOW_PCF5_32F,pcf3:pc.SHADOW_PCF3_32F,pcf1:pc.SHADOW_PCF1_32F};
+/**
+ * Each view's field of view and near plane. Depth precision grows with the near plane (the old .1
+ * let layered pieces a few millimetres apart flicker at street distances), but its corners must stay
+ * inside the tourist's .34 m collision radius, or a wall stood against is cut open at the screen
+ * corners: .15 first person reaches .26 m at 16:9 and .29 m at 2.13:1; .2 third person, .26 and .28.
+ */
+export const VIEWS={first:{fov:70,near:.15},third:{fov:46,near:.2}};
+/** How far from the eye the near plane's corners are, for a vertical fov in degrees. */
+export const nearReach=(fov,aspect,near)=>{const h=Math.tan(fov*Math.PI/360);return near*Math.hypot(1,h,h*aspect);};
+/**
+ * Rooms stand up to 10 km from the origin and 云海 4 km off. The engine projects a vertex as
+ * viewProjection * worldPosition in 32-bit floats, and numbers that large round each vertex by up to
+ * a millimetre, differently every frame as the camera moves, so layered pieces (a painting on its
+ * board, a sign on its wall) flickered through each other while walking. Taking the camera's own
+ * position off first leaves small numbers, which project exactly. The camera position comes from
+ * the view matrix itself, so custom views (a mirrored reflection camera) stay right.
+ */
+export const ENGINE_PROJECTION='screenPos = matrix_viewProjection * posW;';
+export const CAMERA_RELATIVE='screenPos = matrix_projection * vec4(mat3(matrix_view) * (posW.xyz + matrix_view[3].xyz * mat3(matrix_view)), 1.0);';
+/** True once patched. An engine without that exact line (tests/glitch.test.js checks it) keeps its
+ *  own projection, with a warning: far rooms may flicker, but nothing breaks. */
+export function cameraRelative(device) {
+  const chunks=pc.ShaderChunks?.get(device,pc.SHADERLANGUAGE_GLSL),code=chunks?.get('transformVS');
+  if(typeof code!=='string'||!code.includes(ENGINE_PROJECTION)){
+    console.warn('Camera-relative projection skipped: the engine vertex chunk has no "'+ENGINE_PROJECTION+'"');
+    return false;
+  }
+  chunks.set('transformVS','#ifndef VIEWMATRIX\n#define VIEWMATRIX\nuniform mat4 matrix_view;\n#endif\nuniform mat4 matrix_projection;\n'+
+    code.replace(ENGINE_PROJECTION,CAMERA_RELATIVE));
+  return true;
+}
 
 /** What a tagged entity is called: an object key from objects.json, or a sign's exact text. */
 function lookNameOf(entity) {
@@ -54,6 +105,9 @@ function meshSpan(entity,origin,dir,limit) {
   visit(entity);
   return near<=far?[near,far]:null;
 }
+/** Whether an entity's meshes can go into a batch: one without geometry (a mesh built empty, or
+ *  already destroyed) throws inside the batcher on every frame after. */
+const batchable=e=>!!e.render&&(e.render.meshInstances??[]).every(mi=>mi.mesh?.vertexBuffer);
 /** The world-space box round every mesh under an entity, as registry fields; null if it has none. */
 function meshBounds(entity) {
   const lo=[Infinity,Infinity,Infinity],hi=[-Infinity,-Infinity,-Infinity];
@@ -74,18 +128,23 @@ export class Town {
   constructor(canvas,{onInteract,onNear,onFrame,onLook,onCollect}) {
     this.data=structuredClone(worldData);this.onInteract=onInteract;this.onNear=onNear;this.onFrame=onFrame;this.onLook=onLook;this.onCollect=onCollect;this.keys=new Set();this.paused=true;this.target=null;this.clock=0;
     this.app=new pc.Application(canvas,{graphicsDeviceOptions:{antialias:true,alpha:false,powerPreference:'high-performance'}});
-    this.app.graphicsDevice.maxPixelRatio=Math.min(devicePixelRatio,1.8);
+    setGpu(this.app.graphicsDevice.unmaskedRenderer);   // where 自动 starts (src/core/quality.js)
+    cameraRelative(this.app.graphicsDevice);
     this.app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);this.app.setCanvasResolution(pc.RESOLUTION_AUTO);
     this.app.scene.ambientLight=new pc.Color(.59,.62,.58);
     this.app.scene.toneMapping=pc.TONEMAP_ACES;
-    const sun=new pc.Entity('sun');sun.addComponent('light',{type:'directional',color:new pc.Color(1,.96,.88),intensity:1.05,castShadows:true,shadowDistance:75,shadowResolution:2048,shadowBias:.25,normalOffsetBias:.08});sun.setEulerAngles(48,-25,0);this.app.root.addChild(sun);this.sun=sun;
-    this.camera=new pc.Entity('camera');this.camera.addComponent('camera',{clearColor:new pc.Color(.77,.84,.79),fov:43,nearClip:.1,farClip:200});this.app.root.addChild(this.camera);
+    const sun=new pc.Entity('sun');sun.addComponent('light',{type:'directional',color:new pc.Color(1,.96,.88),intensity:1.05,castShadows:true,shadowDistance:75,shadowResolution:2048,shadowBias:.25,normalOffsetBias:.08,shadowType:SUN_SHADOWS.pcf5});sun.setEulerAngles(48,-25,0);this.app.root.addChild(sun);this.sun=sun;
+    this.camera=new pc.Entity('camera');this.camera.addComponent('camera',{clearColor:new pc.Color(.77,.84,.79),fov:43,nearClip:VIEWS.first.near,farClip:200});this.app.root.addChild(this.camera);
+    // 自动 steps down while play stays slow; frames under a panel or the arrival card are not judged.
+    this.applyQuality();this.app.on('frameupdate',ms=>{if(frameTime(ms,!this.paused))this.applyQuality();});
     this.m=createModels(this.app);this.root=new pc.Entity('town');this.app.root.addChild(this.root);this.actors=new Map();this.buildings=new Map();
     this.registry=new Registry();this.playerY=0;this.velocityY=0;this.velocity={x:0,z:0};this.grounded=true;this.looking=null;
     this.build();this.registerTown();
     this.batchStatics('town-scenery',this.root,new Set([...this.hoardings.values(),
       ...[...this.gates.values()].map(gate=>gate.door).filter(Boolean),...this.closedSigns.values(),
       ...this.data.buildings.filter(b=>b.site).map(b=>this.buildings.get(b.id)).filter(Boolean)]));
+    // The townsfolk share one dynamic batch, as 云海's crowd does: a few draw calls, not twenty a person.
+    this.batchMoving(this.app.batcher.addGroup('town-people',true),[...this.actors.values(),...this.people,...this.friends].map(one=>one.entity));
     this.player=this.m.person(this.root,'#e9bb78',[...this.data.spawn.slice(0,1),0,this.data.spawn[1]],false);
     this.player.pack=this.m.box(this.player.upper,[0,1.05,-.25],[.38,.45,.2],'#91a69a');
     // The tourist is seen from behind their own eyes; third person stays available so worn items are visible.
@@ -95,11 +154,18 @@ export class Town {
     this.lookPending={x:0,y:0};this.speedScale=1;this.seated=null;this.roomOpen=new Map();
     initIdle(this.player,.37);
     this.place='town';this.rooms=new Map();this.buildRooms();this.registerRooms();
+    // People in the word hall (src/world/visitors.js), walking whether or not you are there.
+    this.visitors=new Visitors({registry:this.registry,rooms:this.rooms,models:this.m,seatDrop:SEAT_DROP,
+      player:()=>{const p=this.player.entity.getPosition();return {place:this.place,x:p.x,z:p.z,seat:this.seated?.index};}});
     // Loose objects hang off their own node at the origin, so a body's coordinates are the same
     // numbers the collision registry uses whichever place it is rolling around in.
     this.toyRoot=new pc.Entity('loose');this.app.root.addChild(this.toyRoot);
     this.toys=new Toybox({registry:this.registry,models:this.m});
     this.toys.outOfBounds=(place,x,z)=>!this.withinPlace(place,x,z,.15);
+    // All the water (src/world/water.js): a thrown thing floats on it, and rings spread where it lands.
+    this.water=waterOf(this.app);
+    this.toys.surfaceAt=(place,x,z)=>this.water.levelAt(place,x,z);
+    this.toys.onSplash=body=>this.water.ripple(body.x,body.z,1.3);
     this.buildContainers();
     this.market=new NightMarket({models:this.m,parent:this.root,pitches:NIGHT_PITCHES,registry:this.registry,
       player:()=>this.place==='town'?this.player.entity.getPosition():null});
@@ -108,13 +174,18 @@ export class Town {
     this.dayMarket=new NightMarket({models:this.m,parent:this.root,pitches:DAY_PITCHES,schedule:{from:6,to:18},registry:this.registry,
       player:()=>this.place==='town'?this.player.entity.getPosition():null});
     this.daylight=new Daylight(this.app,sun,this.camera);
+    this.sky=new Sky(this);   // the sun, the moon and the stars (src/world/sky.js)
     for(const material of this.lampMaterials)this.daylight.addLamp(material);
     this.market.onLit=material=>this.daylight.addLamp(material);
     this.dayMarket.onLit=material=>this.daylight.addLamp(material);
+    // Carts and their keepers, one dynamic batch too: remade when a cart comes or goes, out of sight.
+    const carts=this.app.batcher.addGroup('market-carts',true);
+    this.market.onMount=this.dayMarket.onMount=pitch=>this.batchMoving(carts,[pitch.cart,pitch.vendor.entity]);
     // Not `openInstantly` here: the clock is still at its default (15:00), not the saved hour —
     // main.js calls it once that is set, so a save from the night does not open the day stalls
     // and then walk them straight back out again in view.
     this.daylight.apply();
+    this.views=new Views(this);   // the street, seen from inside a shop through its door and windows
     this.applyView();this.placeCamera(this.player.entity.getPosition());
     this.bind(canvas);this.app.on('update',dt=>this.update(dt));
     // PlayCanvas fires postUpdate on app.systems, not on the app, so an app-level listener for it
@@ -133,8 +204,8 @@ export class Town {
     for(const d of this.data.districts){
       const [x0,x1]=d.bounds.x,[z0,z1]=d.bounds.z,cx=(x0+x1)/2,cz=(z0+z1)/2,w=x1-x0,h=z1-z0;
       // A park is lawn, not paving; its own paths are laid on top of it.
-      if(d.surface==='grass'){box(p,[cx,-.04,cz],[w,.12,h],'#93ab7c');continue;}
-      const pavement=box(p,[cx,-.04,cz],[w-1,.12,h-1],'#d9cfb5');
+      if(d.surface==='grass'){box(p,[cx,-.04,cz],[w-.01,.12,h-.01],'#93ab7c');continue;}
+      const pavement=box(p,[cx,-.04+.01*this.data.districts.indexOf(d),cz],[w-1,.12,h-1],'#d9cfb5');
       pavement.render.meshInstances[0].material=pavingMaterial(this.app,w-1,h-1);
     }
     // Ground dressing goes down before the buildings so paths run under their steps.
@@ -166,7 +237,7 @@ export class Town {
       ?this.m.veranda(p,def,this.data.buildings.find(b=>b.id===def.building)):this.m[def.kind](p,def,this.lampMaterials)).marks);
     this.hoardings=new Map();
     for(const site of sites.sites)this.hoardings.set(site.id,this.buildHoarding(site));
-    for(const [x,z]of this.data.trees)tree(p,x,z,1.15);
+    for(const [x,z,kind]of this.data.trees)tree(p,x,z,1.15,kind);
     this.props=this.data.props.map(def=>{
       const made=streetProp(p,def.kind,def.tint);
       if(made.material)this.lampMaterials.push(made.material);
@@ -175,14 +246,33 @@ export class Town {
       return {...def,...made};
     });
     // A fountain and a lantern line keep the original square as the heart of the city.
-    cylinder(p,[0,.2,1.8],[4.2,.45,4.2],'#b6b499');cylinder(p,[0,.45,1.8],[3.75,.2,3.75],'#719f99');
-    cylinder(p,[0,.8,1.8],[.5,1,.5],'#c4bda2');cylinder(p,[0,1.25,1.8],[1.8,.18,1.8],'#d4c9ac');cylinder(p,[0,1.36,1.8],[1.55,.05,1.55],'#8cb5ad');ball(p,[0,1.56,1.8],[.28,.4,.28],'#c3cec1');
+    buildFountain(this.m,this.app,p,()=>this.place==='town');
     for(const x of [-12,12]) {box(p,[x,2.25,0],[.18,4.5,.18],'#866b52');box(p,[x,4.4,0],[1.3,.13,.13],'#866b52');lamp(p,x-.47,4.05,0);lamp(p,x+.47,4.05,0);}
     for(let x=-11;x<=11;x+=2.2)lamp(p,x,5.9-Math.sin((x+11)/22*Math.PI)*.8,-5);
     box(p,[0,6.12,-5],[24,.025,.025],'#8b7b62').lookName='lantern-string';
-    for(const x of [-10,10]){box(p,[x,.7,-4.1],[3.2,1.4,1.15],'#b88b63');box(p,[x,1.44,-4.1],[3.5,.13,1.3],'#e6cf9e');}
-    for(let i=0;i<3;i++)cylinder(p,[-10.8+i*.7,1.65,-4.1],[.3,.28,.3],'#ede4ce').lookName='goods';
-    for(let i=0;i<3;i++)box(p,[9.2+i*.65,1.68,-4.1],[.42,.38,.38],['#d9ae68','#91a494','#c98568'][i]).lookName='goods';
+    // 林阿姨's tea stall and 陈叔叔's souvenir counter stand beside their shops, clear of the doors,
+    // each keeper behind the counter.
+    const at=id=>{const n=this.data.npcs.find(n=>n.id===id);return [n.x,n.z+1.3];},tea=at('lin'),gifts=at('chen');
+    this.stalls=[tea,gifts];
+    // Each is a panelled timber counter under a striped cloth canopy on four posts, all standing
+    // inside the counter's own hitbox; the canopy reaches back over the keeper.
+    for(const [[x,z],stripe] of [[tea,'#6f8f6a'],[gifts,'#b8453a']]){
+      box(p,[x,.06,z],[3.1,.12,1.05],'#6d5a45');
+      box(p,[x,.75,z],[3.0,1.26,.95],'#a97d55').lookName='counter';
+      for(const k of [-1,0,1]){
+        box(p,[x+k*1,.74,z+.49],[.84,.86,.03],'#8e6952').lookName='counter';
+        box(p,[x+k*1,.74,z+.505],[.7,.72,.02],'#b98d62').lookName='counter';
+      }
+      box(p,[x,1.44,z],[3.5,.13,1.3],'#e6cf9e').lookName='counter';
+      for(const [px,pz,top] of [[-1.6,.55,2.35],[1.6,.55,2.35],[-1.6,-.5,2.56],[1.6,-.5,2.56]])
+        cylinder(p,[x+px,top/2,z+pz],[.09,top,.09],'#6d5a45').lookName='counter';
+      const canopy=new pc.Entity('canopy');canopy.setLocalPosition(x,2.55,z-.45);canopy.setLocalEulerAngles(10,0,0);p.addChild(canopy);
+      for(let i=0;i<7;i++)box(canopy,[-1.8+(i+.5)*3.6/7,0,0],[3.6/7+(i%2?.01:0),i%2?.07:.06,2.7+(i%2?.01:0)],i%2?'#f1e8d4':stripe).lookName='awning';
+      box(canopy,[0,-.14,1.36],[3.6,.26,.03],stripe).lookName='awning';                 // the valance
+      lamp(p,x+1.35,1.75,z+.62);
+    }
+    for(let i=0;i<3;i++)cylinder(p,[tea[0]-.8+i*.7,1.65,tea[1]],[.3,.28,.3],'#ede4ce').lookName='goods';
+    for(let i=0;i<3;i++)box(p,[gifts[0]-.8+i*.65,1.68,gifts[1]],[.42,.38,.38],['#d9ae68','#91a494','#c98568'][i]).lookName='goods';
     for(const def of this.data.npcs) {const info=npcs.find(n=>n.id===def.id);this.actors.set(def.id,person(p,info.color,[def.x,0,def.z]));}
     // Townsfolk who are just going about their day. They are scenery, and a word to learn.
     this.people=(this.data.people??[]).map(def=>{
@@ -211,7 +301,7 @@ export class Town {
    */
   ensureCity() {
     if(this.rooms.has('city'))return this.rooms.get('city');
-    const built=buildCity(this.m,this.app.root);
+    const built=buildCity(this.m,this.app.root,this);   // the city reads the hour (its rooms light up)
     built.root.enabled=false;
     for(const material of built.lamps)this.daylight.addLamp(material);
     const room={id:'city',data:CITY.place,root:built.root,fittings:[],staff:[],
@@ -219,12 +309,18 @@ export class Town {
     this.rooms.set('city',room);
     this.registry.clear('city');
     this.mark('city',CITY_OFFSET,0,CITY.place.size[0]/2,CITY.place.size[1]/2,-.2,.02,'path',false);
+    // A mark may be open ground with a name (the road, a crossing) and a bench says which way you sit.
     for(const mark of built.marks)
-      this.mark('city',CITY_OFFSET+mark.x,mark.z,mark.hw,mark.hd,mark.y0,mark.y1,mark.name);
+      this.mark('city',CITY_OFFSET+mark.x,mark.z,mark.hw,mark.hd,mark.y0,mark.y1,mark.name,mark.solid).face=mark.face;
     for(const person of built.people)
       this.mark('city',CITY_OFFSET+person.x,person.z,.52,.48,0,1.95,'person');
+    // The parts of 云海 kept in their own files. Each adds its entities under the city root and its
+    // own marks, and may hand back {update(dt,paused), targets()}; anything that moves sets noBatch.
+    room.parts=[buildBay,buildHill,buildHotpot,buildDrones,buildHarbour,buildMall,buildCrowd].map(build=>build(this,built.root)).filter(Boolean);
+    room.parts.push({update:built.update});   // the city's own LED façades (src/world/leds.js)
     this.registerLooks('city',built.root,{skip:new Set(built.people.map(one=>one.entity))});
     this.batchStatics('city-scenery',built.root);
+    this.batchMoving(this.app.batcher.addGroup('city-people',true),built.people.map(one=>one.entity));   // as the townsfolk
     
     return room;
   }
@@ -232,6 +328,20 @@ export class Town {
   enterCity() {this.ensureCity();return this.enterRoom('city');}
   /** The train home pulls in at the platform under the square, not out on the street. */
   leaveCity() {return this.place==='city'?this.enterRoom(CITY.place.returnPlace):false;}
+  /**
+   * 云海 is seen from much further off than a street or a room: while you are there the camera
+   * sees out to city.json's `farClip`, through a haze the colour of the sky so its far edge never
+   * shows. Anywhere else the camera is exactly as it was before.
+   */
+  fitCamera() {
+    const cam=this.camera.camera,here=this.place==='city';
+    if(here===(this.farAway!==undefined))return;
+    if(!here){cam.farClip=this.farAway;this.farAway=undefined;cam.fog=null;return;}
+    this.farAway=cam.farClip;cam.farClip=CITY.place.farClip;
+    this.haze??=Object.assign(new pc.FogParams(),{type:pc.FOG_LINEAR,start:CITY.place.haze[0],end:CITY.place.haze[1]});
+    this.haze.color=cam.clearColor;   // the very Color the daylight keeps updating, so the two never drift apart
+    cam.fog=this.haze;
+  }
 
   /** Boards, scaffold poles and a notice: what stands on a lot before the shop does. */
   buildHoarding(site) {
@@ -241,7 +351,7 @@ export class Town {
     this.root.addChild(root);
     for(const side of [-1,1]){
       box(root,[side*3.6,1.1,0],[.3,2.2,5.4],'#b08a60');
-      for(let i=0;i<4;i++)box(root,[side*3.6,.5+i*.55,0],[.36,.1,5.6],'#8d6b4d');
+      for(let i=0;i<4;i++)box(root,[side*3.6,.495+i*.55,0],[.36,.1,5.6],'#8d6b4d');
     }
     box(root,[0,1.1,-2.6],[7.4,2.2,.3],'#b08a60');
     for(const x of [-2.4,0,2.4])cylinder(root,[x,1.3,-2.5],[.14,2.6,.14],'#8f9694');
@@ -288,25 +398,54 @@ export class Town {
         const from=span-.2,to=g.half;
         if(to<=from+.4)continue;
         const mid=(from+to)/2,length=to-from;
-        box(root,[side*mid,.7,0],[length,1.4,.34],'#cbbb9a');
-        box(root,[side*mid,1.46,0],[length+.15,.14,.5],'#a8967a');
-        // Two rows of hedge, tall enough that the wall you can see is the wall you cannot jump.
-        for(let x=from+.7;x<to-.25;x+=1.2)ball(root,[side*x,1.92,0],[1.34,1.04,.94],'#93a97e');
-        for(let x=from+1.3;x<to-.25;x+=1.2)ball(root,[side*x,2.16,0],[1.08,.78,.8],'#87a074');
+        // A clipped hedge in a stone-kerbed bed, broken by stone piers: tall enough that the
+        // boundary you can see is the boundary you cannot jump.
+        const leaf=['#5b7a4c','#6c8a58','#7e9a66'];   // the osmanthus trees' greens
+        // Stone piers break the run every 4 m or so; the last one caps the far end, standing a
+        // little proud of the kerb so no two faces share a plane. Each is one thing to look at; the
+        // hedge itself is named by its hitbox.
+        const piers=Math.max(1,Math.round(length/4)),pierAt=[];
+        for(let k=1;k<=piers;k++)pierAt.push(from+k*length/piers-(k===piers?.22:0));
+        for(const at of pierAt){
+          const pier=new pc.Entity('pier');pier.lookName='wall';root.addChild(pier);
+          box(pier,[side*at,1.3,0],[.5,2.6,.68],'#c7bb9e');
+          box(pier,[side*at,2.66,0],[.64,.12,.72],'#a39d8f');
+          ball(pier,[side*at,2.84,0],[.3,.26,.3],'#a39d8f');
+        }
+        box(root,[side*mid,.22,0],[length,.44,.6],'#b6a486');
+        box(root,[side*mid,.46,0],[length+.04,.06,.64],'#a39d8f');
+        box(root,[side*mid,1.42,0],[length-.1,1.9,.54],leaf[1]);
+        box(root,[side*mid,2.4,0],[length-.2,.08,.44],leaf[2]);                   // the clipped top
+        // Leafy clumps swelling out of both faces and along the top, so the block reads as clipped
+        // leaves and not a painted box; none where a pier stands, or it would poke through.
+        const clear=x=>pierAt.every(at=>Math.abs(x-at)>.57);
+        for(let x=from+.3,i=0;x<to-.3;x+=.5,i++){
+          if(clear(x))ball(root,[side*x,2.36,0],[.62,.22,.5],leaf[i%2?2:1]);
+          for(const face of [-1,1])for(const row of [0,1]){
+            const k=i+row*2+(face>0?1:0),cx=x+(row?.25:0);
+            if(clear(cx))ball(root,[side*cx,.95+row*.8+(k%3)*.12,face*.27],[.64,.54,.16],leaf[k%3]);
+          }
+        }
         const world=g.axis==='x'
           ? {x:g.x,z:g.z+side*mid,hw:.28,hd:length/2}
           : {x:g.x+side*mid,z:g.z,hw:length/2,hd:.28};
         wallBoxes.push(this.mark('town',world.x,world.z,world.hw,world.hd,0,2.5,'hedge',true));
       }
+      // The paifang: lacquered posts on stone drums, a name board between two beams, a row of
+      // brackets and a tiled roof with upturned eaves.
       for(const side of [-1,1]){
-        cylinder(root,[side*span,2.4,0],[.62,4.8,.62],'#8d6b4d').lookName='paifang';
-        box(root,[side*span,.3,0],[1.2,.6,1.2],'#b6a486').lookName='paifang';
-        box(root,[side*span,4.05,0],[1.0,.22,1.0],'#6f8570').lookName='paifang';
+        cylinder(root,[side*span,2.4,0],[.5,4.8,.5],'#9a4f42').lookName='paifang';
+        cylinder(root,[side*span,.3,0],[.72,.6,.72],'#b6a486').lookName='paifang';
+        cylinder(root,[side*span,.64,0],[.6,.08,.6],'#a39d8f').lookName='paifang';
       }
-      box(root,[0,4.75,0],[span*2.5,.42,.72],'#8d6b4d').lookName='paifang';
-      box(root,[0,5.16,0],[span*2.7,.3,1.15],'#6f8570').lookName='paifang';
-      box(root,[0,5.42,0],[span*2.4,.22,.85],'#5d7360').lookName='paifang';
-      label(root,d.zh,[0,3.9,.46],3.9,.78);
+      const beam=span*2+.9;
+      box(root,[0,3.3,0],[beam,.32,.44],'#6d5a45').lookName='paifang';
+      box(root,[0,3.9,0],[4.1,.92,.05],'#6d5a45');   // a frame round the name, read as the name
+      box(root,[0,4.5,0],[beam+.3,.36,.5],'#5d7360').lookName='paifang';
+      for(const y of [4.4,4.6])box(root,[0,y,.255],[beam+.26,.035,.02],'#d4ac4a').lookName='paifang';
+      for(let x=-beam/2+.25;x<beam/2-.2;x+=.5)box(root,[x,4.8,0],[.2,.24,.6],'#6d5a45').lookName='paifang';
+      this.m.tiledRoof(root,0,0,beam-.4,.5,4.92,'#5d7360',3);
+      label(root,d.zh,[0,3.9,0],3.9,.78);   // one board, read from either side
       // A district with nothing to earn has no door and no door hitbox: open from the first frame,
       // even if the word list never loads.
       if(!g.requires)continue;
@@ -359,9 +498,9 @@ export class Town {
     for(const side of [-1,1])box(root,[side*(sect+.2),top+.2,0],[.5,.12,T+.3],coping,[0,0,side*18]).lookName='moongate';
     // A stone band round the opening, on both faces.
     for(let i=0;i<20;i++){
-      const a=i/20*Math.PI*2,y=cy+Math.sin(a)*(R+.07);
+      const a=i/20*Math.PI*2,y=cy+Math.sin(a)*(R+.068);
       if(y<.06)continue;
-      box(root,[Math.cos(a)*(R+.07),y,0],[2*Math.PI*(R+.07)/20+.04,.14,T+.08],trim,[0,0,a*180/Math.PI+90]);
+      box(root,[Math.cos(a)*(R+.068),y,0],[2*Math.PI*(R+.07)/20+.04,.14,T+.08],trim,[0,0,a*180/Math.PI+90]);
     }
     for(const face of [-1,1])label(root,d.zh,[0,crown+.4,face*(T/2+.05)],2.3,.5);
     for(const side of [-1,1])side<0?mark(-sect,-gap,0,top,'moongate'):mark(gap,sect,0,top,'moongate');
@@ -418,19 +557,31 @@ export class Town {
   addLookBox(place,entity,name,owner=null) {
     const bounds=meshBounds(entity);
     const refine=(origin,dir,limit)=>meshSpan(entity,origin,dir,limit);
-    return bounds?this.registry.addLook({place,...bounds,name,owner,entity,refine}):null;
+    const box=bounds?this.registry.addLook({place,...bounds,name,owner,entity,refine}):null;
+    if(box&&entity.lookReach)box.reach=entity.lookReach;   // big and far off: 云海's LED characters
+    return box;
   }
   /** Things that move re-register their look boxes every frame, the way stall hitboxes do. */
   syncMovingLooks() {
     const place=this.place;
-    this.registry.clearLooks(place,'moving');
     if(place==='town'){
+      // Carts stand still for hours: their boxes are worked out again only when one has moved, come
+      // or gone (walking every cart's meshes each frame cost a slow laptop as much as the look ray).
+      let key='';
+      for(const market of [this.market,this.dayMarket])for(const pitch of market.pitches)
+        if(pitch.cart)key+=pitch.cart.guid+pitch.x+','+pitch.z+','+pitch.heading+';';
+      if(key===this.movingKey)return;
+      this.movingKey=key;
+      this.registry.clearLooks(place,'moving');
       for(const market of [this.market,this.dayMarket])for(const pitch of market.pitches)
         if(pitch.cart)this.registerLooks(place,pitch.cart,{owner:'moving'});
       return;
     }
+    this.movingKey=null;
+    this.registry.clearLooks(place,'moving');
     for(const member of this.rooms.get(place)?.staff??[])
       this.addLookBox(place,member.entity,lookNameOf(member.entity)??{id:'waiter',...NAMES.waiter},'moving');
+    for(const one of this.visitors.here(place))this.addLookBox(place,one.entity,lookNameOf(one.entity),'moving');
   }
   /** Plaques that hang on the door of a shop that has not opened yet. */
   buildClosedSigns() {
@@ -441,7 +592,9 @@ export class Town {
       const building=this.data.buildings.find(b=>b.id===data.building);
       const face=(building?.rotation??0)===180?-1:1;
       const sign=new pc.Entity('closed-'+id);
-      sign.setLocalPosition(data.door.x,0,data.door.z+face*.12);
+      // A model can say where on its front the sign hangs (the bank's door is set back behind columns).
+      const at=this.buildings.get(data.building)?.closedSignAt;
+      sign.setLocalPosition(data.door.x,at?.y??0,at?building.z+face*at.z:data.door.z+face*.12);
       sign.setLocalEulerAngles(0,face<0?180:0,0);
       this.root.addChild(sign);
       for(const x of [-.5,.5])box(sign,[x,2.62,0],[.035,.42,.035],'#7d6349').signText='暂停营业';
@@ -456,6 +609,8 @@ export class Town {
   /**
    * Static scenery goes into one PlayCanvas batch group: every mesh that shares a material is
    * merged into a single draw call, which is what makes the outdoor town affordable on a laptop.
+   * Plain colours are repainted into one shared material first (models.repaint), so the town's
+   * 300-odd colours merge too: its batches went from 404 to about 110.
    * A batched mesh leaves its entity's layer, so anything that is switched on and off, moves, or
    * is built later has to stay out: people (`noBatch` from `person`), display stock (`noBatch`
    * from `pickable`), stall carts and loose objects (built after this runs), gate doors, closed
@@ -465,12 +620,32 @@ export class Town {
     const group=this.app.batcher.addGroup(name,false);
     const walk=entity=>{
       if(skip.has(entity)||entity.noBatch)return;
-      if(entity.render)entity.render.batchGroupId=group.id;
+      if(batchable(entity)){this.m.repaint(entity);entity.render.batchGroupId=group.id;}
       for(const child of entity.children)walk(child);
     };
     walk(root);
     // The batches themselves are built by the batcher's own first `updateAll`, before the first
     // frame is drawn. Calling `generate` here as well would build them twice over.
+  }
+  /** People and carts: repainted and put in a dynamic batch group, whose batch follows every part
+   *  as it moves. Adding or removing one remakes the group's batch, so only things that come and go
+   *  rarely (a cart at the market's hours) belong here. */
+  batchMoving(group,roots) {
+    for(const root of roots)root.forEach(e=>{if(batchable(e)){this.m.repaint(e);e.render.batchGroupId=group.id;}});
+  }
+  /**
+   * The graphics level (src/core/quality.js) in the renderer: the pixel ratio, MSAA and the sun's
+   * shadows. At start, when the player picks another 画质, and when 自动 steps down.
+   */
+  applyQuality() {
+    const r=RENDER[detail()],g=this.app.graphicsDevice,sun=this.sun.light;
+    g.maxPixelRatio=Math.min(devicePixelRatio,r.pixelRatio);
+    // ponytail: PlayCanvas 2.22 draws into its own back buffer with `samples` and remakes it when
+    // told the framebuffer changed; there is no public switch. An engine without these just keeps MSAA.
+    const samples=r.msaa?g.maxSamples??1:1;
+    if('_defaultFramebufferChanged' in g&&g.samples!==samples){g.samples=samples;g._defaultFramebufferChanged=true;}
+    sun.shadowType=SUN_SHADOWS[r.shadow];sun.shadowResolution=r.shadowSize;sun.shadowDistance=r.shadowDistance;
+    this.app.resizeCanvas();
   }
   registerBuilding(b) {
     // A rotated building has its door and sign on the other face.
@@ -480,10 +655,11 @@ export class Town {
     for(const wing of b.wings??[])
       this.mark('town',b.x+face*wing.x,b.z+face*wing.z,wing.width/2+.35,wing.depth/2+.35,0,wing.height+.8,
         wing.object??b.object??'wall').group=b.id;
-    this.mark('town',b.x,front,.7,.16,0,2.2,'door',false);
+    // The door point out on the pavement, unless the model marks its own door (the bank's is set back).
+    const parts=this.buildings.get(b.id)?.marks??[];
+    if(!parts.some(m=>m.name==='door'))this.mark('town',b.x,front,.7,.16,0,2.2,'door',false);
     // The parts a building's model names for itself: a balcony, a chimney, the pots by the door.
     // A model that hangs its own name board somewhere else marks that board itself.
-    const parts=this.buildings.get(b.id)?.marks??[];
     if(!parts.some(m=>m.name==='sign'))this.mark('town',b.x,front+face*.02,1.8,.1,b.height-.9,b.height-.2,'sign',false);
     for(const m of parts)
       (m.radius?this.markDisc('town',m.x,m.z,m.radius,m.y0,m.y1,m.name,m.solid)
@@ -497,10 +673,12 @@ export class Town {
     }
     // A shop that has not been built yet is not there to bump into: `revealSite` registers it.
     for(const b of d.buildings)if(!b.bespoke&&!b.site)this.registerBuilding(b);
-    for(const [x,z] of d.trees){
-      this.markDisc('town',x,z,.98,0,.35,'tree');
-      this.markDisc('town',x,z,.22,.35,2.4,'tree');
-      this.markDisc('town',x,z,1.5,1.55,4.3,'tree');
+    for(const [x,z,kind='tree'] of d.trees){
+      const pit=kind==='willow'?0:.35;   // a willow stands straight in the bank, with no stone pit to step on
+      if(pit)this.markDisc('town',x,z,.98,0,pit,kind);
+      this.markDisc('town',x,z,.22,pit,2.4,kind);
+      // A willow's curtain is soft: you walk through the strands, and only its crown is in the way.
+      this.markDisc('town',x,z,1.5,kind==='willow'?2.8:1.55,4.3,kind);
     }
     // Street furniture is named from the same table the world data uses.
     const propName={bench:'bench',bin:'bin',streetlight:'streetlight',bicycle:'bicycle',planter:'planter',
@@ -518,12 +696,12 @@ export class Town {
     this.siteWalls=new Map(sites.sites.map(site=>[site.id,this.mark('town',site.x,site.z,3.8,2.9,0,2.4,'wall')]));
     for(const mark of this.station?.marks??[])
       this.mark('town',mark.x,mark.z,mark.hw,mark.hd,mark.y0,mark.y1,mark.name);
-    this.markDisc('town',0,1.8,2.12,0,.46,'fountain');
-    this.markDisc('town',0,1.8,.95,.46,1.75,'fountain',false);
+    this.markDisc('town',FOUNTAIN.x,FOUNTAIN.z,FOUNTAIN_MARK.radius,FOUNTAIN_MARK.y0,FOUNTAIN_MARK.y1,null);
+    for(const part of FOUNTAIN_LOOKS)this.markDisc('town',FOUNTAIN.x,FOUNTAIN.z,part.radius,part.y0,part.y1,'fountain',false);
     // Only the posts are in the way; the board is high enough to walk under.
     for(const x of [-2.2,2.2])this.mark('town',x,17,.14,.14,0,3.8,'sign');
     this.mark('town',0,17,2,.12,2.95,3.8,'sign');
-    for(const x of [-10,10])this.mark('town',x,-4.1,1.75,.7,0,1.5,'counter');
+    for(const [x,z] of this.stalls)this.mark('town',x,z,1.75,.7,0,1.5,'counter');
     for(const x of [-12,12]){
       this.markDisc('town',x,0,.3,0,4.6,'streetlight');
       for(const off of [-.47,.47])this.mark('town',x+off,0,.25,.25,3.7,4.4,'lantern',false);
@@ -564,6 +742,9 @@ export class Town {
       const sill=data.upper?.entrance?data.upper.y:0;
       if(sill)this.mark(room.id,offsetX,d/2+.15,.85,.2,0,sill,'wall');
       this.mark(room.id,offsetX,d/2+.15,.85,.2,sill,sill+.6,'door',false);
+      // The doorway itself is shut to walking: the room floats far from the town, so stepping through
+      // it led into nothing. You leave with E; the door mark above only names it.
+      if(!data.returnWall)this.mark(room.id,offsetX,d/2+.15,.85,.2,sill,top,null);
       // A room whose way back is on another wall has its front doorway walled up, and that way marked.
       if(data.returnWall){
         this.mark(room.id,offsetX,d/2+.15,.85,.2,0,top,'wall');
@@ -575,7 +756,9 @@ export class Town {
         this.mark(room.id,offsetX+near.x,near.z,hw,hd,0,2.2,'door',false);
       }
       // An upper floor, its stairs and railings are solid but unnamed: their meshes carry the names.
-      for(const part of upperParts(data))this.mark(room.id,offsetX+part.x,part.z,part.hw,part.hd,part.y0,part.y1,null);
+      // So are the solid parts of a room that builds its own floors (`solids`: the mall's, src/world/mall.js),
+      // but for any that says what it is (its shop windows).
+      for(const part of [...upperParts(data),...room.solids??[]])this.mark(room.id,offsetX+part.x,part.z,part.hw,part.hd,part.y0,part.y1,part.name??null);
       if(data.window)for(const x of data.window)this.mark(room.id,offsetX+x,-d/2+.06,.78,.1,1.1,2.6,'window',false);
       // A glass door onto the balcony is looked at, not walked through.
       for(const pane of data.frontWindows??[])this.mark(room.id,offsetX+pane.x,d/2-.08,pane.door?.64:.6,.1,(pane.y??0)+(pane.door?0:1.1),(pane.y??0)+(pane.door?2.2:2.4),pane.name,!!pane.door);
@@ -585,8 +768,10 @@ export class Town {
           name:fitting.name?{id:fitting.name,...NAMES[fitting.name]}:null});
       if(data.desk)this.mark(room.id,offsetX+data.desk.x,data.desk.z,.45,.95,0,1.2,'desk');
       if(data.lectern){
-        this.mark(room.id,offsetX+data.lectern.x,data.lectern.z,1.15,.5,0,1.3,'counter');
-        for(const dx of [-2.1,2.1])this.mark(room.id,offsetX+data.lectern.x+dx,data.lectern.z-.35,.2,.78,0,2.2,'shelf');
+        // The word hall's 书案 (`look`) is a writing desk between two standing lanterns, not a counter between shelves.
+        const look=!!data.lectern.look;
+        this.mark(room.id,offsetX+data.lectern.x,data.lectern.z,1.15,.5,0,1.3,look?'writing-desk':'counter');
+        for(const dx of [-2.1,2.1])this.mark(room.id,offsetX+data.lectern.x+dx,data.lectern.z-.35,look?.3:.2,look?.3:.78,0,look?2.3:2.2,look?'lantern':'shelf');
       }
       // Waiters walk, so they are boxed every frame instead (`syncMovingLooks`).
       for(const fitting of room.fittings??[])if(fitting.name&&fitting.entity)fitting.entity.lookName??=fitting.name;
@@ -596,16 +781,18 @@ export class Town {
   }
   buildRooms() {
     Object.entries(rooms).forEach(([id,data],index)=>{
-      const built=buildRoom(this.m,this.app.root,data,index);
+      const built=buildRoom(this.m,this.app.root,data,index,id);
       built.root.enabled=false;
       for(const fitting of built.fittings)if(fitting.material)this.lampMaterials.push(fitting.material);
       this.lampMaterials.push(...built.lamps);
       const staff=(data.staff??[]).map(def=>{
-        const made=this.m.person(built.root,def.color,[def.path[0][0],0,def.path[0][1]]);
+        const made=this.m.person(built.root,def.color,[def.path[0][0],def.y??0,def.path[0][1]]);   // `y`: on an upper floor
         if(def.look)made.entity.lookName=def.look;   // a clerk or pharmacist, not a waiter
         return initIdle({...def,...made,leg:0,target:1,wait:Math.random()*2,x:def.path[0][0],z:def.path[0][1]});
       });
-      this.rooms.set(id,{id,data,root:built.root,ceilings:built.ceilings,sun:built.sun,fittings:built.fittings,staff,index,offsetX:ROOM_OFFSET*(index+1),props:new Map()});
+      this.rooms.set(id,{id,data,root:built.root,ceilings:built.ceilings,sun:built.sun,fittings:built.fittings,openings:built.openings,staff,index,offsetX:ROOM_OFFSET*(index+1),props:new Map()});
+      // Several floors (`levels`, the mall): only its floors and hitboxes now; the rest on first entry.
+      if(data.levels)mallFloors(this,this.rooms.get(id));
     });
   }
   /** Everything the tourist can press E on, in whichever place they are standing. */
@@ -647,9 +834,10 @@ export class Town {
     // Sitting down narrows the world to the table you are at: stand up, or use what is on it.
     if(this.seated){
       const seat=room.fittings[this.seated.index];
+      if(seat.locked)return [];   // a seat that moves (a Ferris wheel's cabin) lets you up when it stops
       const list=[{id:'stand',x:room.offsetX+seat.x,z:seat.z,radius:2.4,label:'站起来',wide:true}];
       for(const [index,fitting] of (room.fittings??[]).entries())
-        if(fitting.action&&Math.hypot(fitting.x-seat.x,fitting.z-seat.z)<2.4)
+        if(fitting.action&&(fitting.y??0)===(seat.y??0)&&Math.hypot(fitting.x-seat.x,fitting.z-seat.z)<2.4)
           list.push({id:fitting.action,x:room.offsetX+fitting.x,z:fitting.z,radius:2.4,label:fitting.label??'看看',wide:true,seatIndex:index});
       return list;
     }
@@ -670,12 +858,18 @@ export class Town {
         x:room.offsetX+counter.x,z:counter.z+1.6,radius:2.6,label:counter.label,wide:true});
     }
     for(const [index,fitting] of (room.fittings??[]).entries()){
-      if(fitting.action)list.push({id:fitting.action,x:room.offsetX+fitting.x,z:fitting.z,y:fitting.y,radius:1.9,label:fitting.label??'看看',wide:true});
-      if(fitting.seat!==undefined)list.push({id:'sit:'+index,x:room.offsetX+fitting.x,z:fitting.z,radius:1.7,label:'坐下',wide:true});
+      // A counter served from in front (`approach`, metres out from its face) is reached from there, as
+      // the old lectern was, so a waiter walking by does not win the E key from the customer at it.
+      const out=fitting.approach??0,turn=(fitting.rot??0)*Math.PI/180;
+      if(fitting.action)list.push({id:fitting.action,x:room.offsetX+fitting.x+Math.sin(turn)*out,z:fitting.z+Math.cos(turn)*out,y:fitting.y,radius:out?2.6:1.9,label:fitting.label??'看看',wide:true});
+      if(fitting.seat!==undefined)list.push({id:'sit:'+index,x:room.offsetX+fitting.x,z:fitting.z,y:fitting.y,radius:1.7,label:'坐下',wide:true});
     }
-    // Only waiters take orders; other staff (`talk: false`) are there to be seen and named.
+    // Staff who talk (`talk: false` are only there to be seen). Someone you are looking at (the
+    // same look box the word hall's visitors use) wins over the counter they stand behind.
     for(const member of room.staff??[])if(member.talk!==false)
-      list.push({id:'staff:'+member.id,x:room.offsetX+member.x,z:member.z,radius:2.6,label:'和'+member.zh+'说话',wide:false});
+      list.push({id:'staff:'+member.id,x:room.offsetX+member.x,z:member.z,y:member.y,radius:2.6,label:'和'+member.zh+'说话',wide:false,
+        aimed:this.lookingBox?.entity===member.entity});
+    list.push(...this.visitors.targets(this.place,this.lookingBox?.entity));
     if(room.data.desk)list.push({id:'studydesk',x:room.offsetX+room.data.desk.x+1.1,z:room.data.desk.z,radius:2.2,label:room.data.desk.label,wide:true});
     // A bed you own is somewhere to sleep, and sleeping is how you choose the time of day.
     for(const prop of room.props.values())if(prop.kind==='bed')
@@ -685,26 +879,35 @@ export class Town {
       list.push({id:'decorate',x:room.offsetX+x,z,radius:2.4,label:'布置房间',wide:true});
       if(up?.decorateAt)list.push({id:'decorate',x:room.offsetX+up.decorateAt[0],z:up.decorateAt[1],y:up.y,radius:2.4,label:'布置房间',wide:true});
     }
+    for(const part of room.parts??[])list.push(...part.targets?.()??[]);   // a room built with parts of its own (the mall)
     this.addLooseTargets(list);
     // Two floors share one floor plan: offer only what is on the floor the tourist is standing on.
     const floor=this.floorY();
-    return room.data.upper?list.filter(t=>(t.y??0)===floor):list;
+    return room.data.upper||room.data.levels?list.filter(t=>(t.y??0)===floor):list;
   }
-  /** Which floor the tourist is on in a room with an upper floor: its height upstairs, else 0. */
-  floorY() {const up=this.rooms.get(this.place)?.data.upper;return up&&this.playerY>up.y-.5?up.y:0;}
-  /** Out in 云海: the way home, the people on the street, the shop window, the taxis and the noodle counter. */
+  /** Which floor the tourist is on in a room with an upper floor, or several (`levels`): its height, else 0. */
+  floorY() {
+    const data=this.rooms.get(this.place)?.data,floors=data?.levels??(data?.upper?[0,data.upper.y]:[0]);
+    let at=0;for(const y of floors)if(this.playerY>y-.5)at=y;
+    return at;
+  }
+  /** Out in 云海: the way home, the doors, the people on the street, the shop window and the taxis. */
   cityTargets(room) {
     const list=[{id:'metro:home',x:room.offsetX+room.data.exit[0],z:room.data.exit[1],
       radius:3.0,label:room.data.returnLabel,wide:true}];
-    if(CITY.department)list.push({id:'door:'+CITY.department.room,x:room.offsetX+CITY.department.x,z:CITY.department.z,radius:2.6,label:CITY.department.label,wide:true});
+    // Doors into the city's buildings (city.json `doors`: {room, x, z, label}); each room returns here.
+    for(const door of CITY.doors??[])list.push({id:'door:'+door.room,x:room.offsetX+door.x,z:door.z,radius:2.6,label:door.label,wide:true});
     for(const person of room.people??[])
       list.push({id:'city:'+person.id,x:room.offsetX+person.x,z:person.z,radius:3.0,
         label:'和'+person.zh+'说话',wide:false});
-    for(const prop of CITY.props)if(prop.kind==='citykiosk')
-      list.push({id:'shop:kiosk',x:room.offsetX+prop.x+1.6,z:prop.z,radius:2.6,label:'看看便利店',wide:true});
+    // The kiosk's window is 1.6 m out on whichever side it faces.
+    for(const prop of CITY.props)if(prop.kind==='citykiosk'){
+      const turn=(prop.rot??0)*Math.PI/180;
+      list.push({id:'shop:kiosk',x:room.offsetX+prop.x+1.6*Math.sin(turn),z:prop.z+1.6*Math.cos(turn),radius:2.6,label:'看看便利店',wide:true});
+    }
     CITY.props.forEach((prop,i)=>{if(prop.kind==='taxi')
       list.push({id:'taxi:'+i,x:room.offsetX+prop.x,z:prop.z,radius:2.8,label:'打车 · TAXI',wide:true});});
-    if(CITY.noodles)list.push({id:'noodles',x:room.offsetX+CITY.noodles.x,z:CITY.noodles.z,radius:2.6,label:CITY.noodles.label,wide:true});
+    for(const part of room.parts??[])list.push(...part.targets?.()??[]);
     this.addLooseTargets(list);
     return list;
   }
@@ -741,8 +944,8 @@ export class Town {
     if(!seat||seat.seat===undefined)return false;
     const from=this.player.entity.getPosition().clone();
     const bodyYaw=(seat.rot??0)+180;
-    this.seated={index,from:{x:from.x,z:from.z},bodyYaw};
-    this.playerY=seat.seat-SEAT_DROP;this.velocityY=0;this.velocity={x:0,z:0};this.grounded=true;
+    this.seated={index,from:{x:from.x,z:from.z,y:this.playerY},bodyYaw};
+    this.playerY=(seat.y??0)+seat.seat-SEAT_DROP;this.velocityY=0;this.velocity={x:0,z:0};this.grounded=true;   // `y`: a seat upstairs
     this.player.entity.setPosition(room.offsetX+seat.x,this.playerY,seat.z);
     this.yaw=bodyYaw;this.pitch=-8;
     restIdle(this.player);
@@ -751,16 +954,70 @@ export class Town {
     this.clearNearest();this.placeCamera(this.player.entity.getPosition());
     return true;
   }
+  /** Sitting where you cannot get up yet: a fitting that moves says `locked` (src/world/harbour.js). */
+  seatLocked() {return !!(this.seated&&this.rooms.get(this.place)?.fittings?.[this.seated.index]?.locked);}
   stand() {
     if(!this.seated)return false;
     const {from}=this.seated;this.seated=null;
-    const spot=this.canMove(from.x,from.z,0)?from:(this.nearestFreeSpot(from.x,from.z)??from);
-    this.playerY=0;this.velocityY=0;this.grounded=true;
-    this.player.entity.setPosition(spot.x,0,spot.z);
+    // Back onto the floor you sat down from: the hotpot terrace is 14 m up the hill.
+    const y=from.y??0,spot=this.canMove(from.x,from.z,y)?from:(this.nearestFreeSpot(from.x,from.z)??from);
+    this.playerY=y;this.velocityY=0;this.grounded=true;
+    this.player.entity.setPosition(spot.x,y,spot.z);
     this.player.legs.forEach(leg=>leg.setLocalEulerAngles(0,0,0));
     this.player.arms.forEach(arm=>arm.setLocalEulerAngles(0,0,0));
     this.clearNearest();this.placeCamera(this.player.entity.getPosition());
     return true;
+  }
+  // --- sleeping ---------------------------------------------------------
+  /** The bed nearest the tourist, on the floor they stand on, if this room has one. */
+  bedHere() {
+    const room=this.rooms.get(this.place),floor=this.floorY(),p=this.player.entity.getPosition();
+    let best=null,far=Infinity;
+    for(const prop of room?.props.values()??[]){
+      const d=Math.hypot(room.offsetX+prop.x-p.x,prop.z-p.z);
+      if(prop.kind==='bed'&&(prop.y??0)===floor&&d<far){best=prop;far=d;}
+    }
+    return best;
+  }
+  /** A point in a bed's own frame (x towards its foot, z out of its front, y up from its floor), in the world. */
+  onBed(bed,x,y,z) {
+    const r=(bed.rot??0)*Math.PI/180,c=Math.cos(r),s=Math.sin(r);
+    return new pc.Vec3(this.rooms.get(this.place).offsetX+bed.x+x*c+z*s,(bed.y??0)+y,bed.z-x*s+z*c);
+  }
+  /**
+   * Hop onto the bed and lie back looking up at the canopy: a short arc from where the tourist
+   * stands onto the mattress, head on the pillows. The caller pauses the town first, so nothing else
+   * moves them; getUp() ends it. Returns the milliseconds until they are settled.
+   */
+  lieDown(bed) {
+    const body=this.player.entity,from=body.getPosition().clone(),eye=new pc.Vec3(from.x,from.y+this.eyeHeight,from.z);
+    // Lying on your back: the body's up runs to the head end (-x), its face to the sky.
+    const flat=new pc.Quat().setFromEulerAngles(0,(bed.rot??0)+90,0).mul(new pc.Quat().setFromEulerAngles(-90,0,0));
+    this.sleeping={t:0,view:this.view,from,to:this.onBed(bed,.85,.81,0),turn:body.getRotation().clone(),flat,
+      eyeFrom:eye,eyeTo:this.onBed(bed,-.79,1.04,0),eye:eye.clone(),
+      yaw:this.yaw,pitch:this.pitch,yawTo:(bed.rot??0)-90};
+    this.view='first';this.applyView();   // lying down is seen from your own eyes
+    restIdle(this.player);this.clearNearest();
+    return (SLEEP_HOP+.3)*1000;
+  }
+  stepSleep(dt) {
+    const z=this.sleeping;z.t=Math.min(1,z.t+dt/SLEEP_HOP);
+    const k=z.t*z.t*(3-2*z.t),lift=4*z.t*(1-z.t)*.5,body=this.player.entity;   // eased, over a half-metre arc
+    const at=(a,b)=>new pc.Vec3().lerp(a,b,k).add(new pc.Vec3(0,lift,0));
+    body.setPosition(at(z.from,z.to));
+    body.setRotation(new pc.Quat().slerp(z.turn,z.flat,k));
+    z.eye.copy(at(z.eyeFrom,z.eyeTo));
+    this.yaw=z.yaw+((((z.yawTo-z.yaw)%360)+540)%360-180)*k;   // the short way round
+    this.pitch=z.pitch+(70-z.pitch)*k;
+  }
+  /** Stand up at the front of the bed, facing into the room. */
+  getUp(bed) {
+    const was=this.sleeping;this.sleeping=null;
+    if(was){this.view=was.view;this.applyView();}
+    const floor=bed.y??0,spot=this.onBed(bed,0,0,1.25);
+    this.playerY=floor;
+    const free=this.canMove(spot.x,spot.z,floor)?spot:(this.nearestFreeSpot(spot.x,spot.z)??spot);
+    this.warp(free.x,free.z,(bed.rot??0)+180,floor);
   }
   // --- furnishing -------------------------------------------------------
   /** Rebuild a room's furniture from saved records. Returns the records it could place. */
@@ -792,9 +1049,9 @@ export class Town {
     entity.setLocalEulerAngles(0,record.rot??0,0);
     const [fw,fd]=record.footprint,turned=((record.rot??0)/90)%2!==0;
     const hw=(turned?fd:fw)/2,hd=(turned?fw:fd)/2;
-    const height={rug:.03,table:.47,bed:.62,shelf:1.7,lamp:1.3,plant:1.1}[record.kind]??.8;
+    const height={rug:.03,table:.47,bed:.62,shelf:1.7,lamp:1.3,plant:1.1,'tea-table':.5,'folding-screen':1.7,birdcage:1.5}[record.kind]??.8;
     // A certificate hangs on the wall, so like a vase on a table it has no footing to bump into.
-    const box=base||record.kind==='certificate'?null
+    const box=base||hangsOnWall(record.kind)?null
       :this.mark(id,room.offsetX+record.x,record.z,hw*.86,hd*.86,floor,floor+height,record.kind,record.kind!=='rug');
     // Named by its own meshes too, so a vase on a table reads 花瓶 and not 桌子.
     entity.lookName??=record.kind;
@@ -903,6 +1160,7 @@ export class Town {
   }
   enterRoom(id) {
     const room=this.rooms.get(id);if(!room||this.place===id)return false;
+    room.prepare?.();   // a room fitted out the first time it is entered (the mall)
     this.warps=(this.warps??0)+1;   // stepping through a door is a jump too, not a walk
     const leaving=this.rooms.get(this.place)?.data;
     this.tidyLoose();
@@ -913,7 +1171,7 @@ export class Town {
     // The town stays switched on: rooms stand 400 m and more away, past the camera's 200 m far clip,
     // so it is never drawn from inside. Switching it off made the batcher pull every static mesh out
     // of its batches and rebuild them all on the way back out, a visible freeze at each door.
-    room.root.enabled=true;this.place=id;
+    room.root.enabled=true;this.place=id;this.fitCamera();
     // Coming back out of a back room, you step out of its doorway rather than teleporting to
     // the middle of the room you started in.
     // A room entered upstairs (the metro platform) puts you on its landing.
@@ -951,14 +1209,13 @@ export class Town {
     this.resetInput();
     if(this.seated)this.stand();
     const left=this.rooms.get(this.place);
-    left.root.enabled=false;this.place='town';
+    left.root.enabled=false;this.place='town';this.fitCamera();
     // Step out away from the front wall: a building turned round faces north, not south.
     const building=this.data.buildings.find(b=>b.id===left.data?.building);
     const face=(building?.rotation??0)===180?-1:1;
     // Back at the height you went in at: the word hall's door is up on its terrace.
     const y=this.exitPoint?.y??0;
-    // One step further out than where you went in, unless that step is into something: the
-    // guesthouse door opens onto a narrow walk along the garden wall.
+    // One step further out than where you went in, unless that step is into something.
     if(this.exitPoint){const {x,z}=this.exitPoint,out=z+face*.6;this.player.entity.setPosition(x,y,this.canMove(x,out,y)?out:z);}
     this.playerY=y;this.velocityY=0;this.grounded=true;
     this.yaw=this.exitYaw!==undefined?this.exitYaw+180:180;this.pitch=-4;this.clearNearest();
@@ -969,22 +1226,24 @@ export class Town {
     this.canvas=canvas;
     addEventListener('keydown',e=>{
       if(this.paused||isTyping(e.target)||e.isComposing)return;
-      if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
-      this.keys.add(e.code);
-      // Sitting down takes over the space bar, so you can always get up again.
-      if(e.code==='Space'&&this.seated){this.stand();return;}
-      if(e.code==='KeyG'&&this.toys.held){this.toys.drop();return;}
-      if(e.code==='KeyE'&&this.nearest)this.onInteract(this.nearest.id);
-      if(e.code==='KeyV')this.setView(this.view==='first'?'third':'first');
-      if(e.code==='KeyF'&&this.looking)this.onCollect?.(this.looking);
+      // Keys go through the player's bindings (core/keys.js); the arrows always walk too.
+      // Any bound key, so a rebound Space or Enter never also clicks a focused HUD button.
+      if(e.code.startsWith('Arrow')||KEY_ACTIONS.some(a=>isKey(e,a.id)))e.preventDefault();
+      this.keys.add(normalCode(e.code));
+      // Sitting down takes over the jump key, so you can always get up again.
+      if(isKey(e,'jump')&&this.seated){if(!this.seatLocked())this.stand();return;}
+      if(isKey(e,'drop')&&this.toys.held){this.toys.drop();return;}
+      if(isKey(e,'interact')&&this.nearest)this.onInteract(this.nearest.id);
+      if(isKey(e,'view'))this.setView(this.view==='first'?'third':'first');
+      if(isKey(e,'collect')&&this.looking)this.onCollect?.(this.looking);
       // Edge-triggered so a quick tap between frames still counts.
-      if(e.code==='Space'&&this.grounded&&!this.ghost&&!this.seated){this.velocityY=JUMP;this.grounded=false;}
+      if(isKey(e,'jump')&&this.grounded&&!this.ghost&&!this.seated){this.velocityY=JUMP;this.grounded=false;}
       if(this.ghost){
-        if(e.code==='KeyR')this.rotatePlacement();
-        if(e.code==='KeyX'){const item=this.ghost.item;this.cancelPlacement();this.onPlace?.({status:'cancelled',item});}
+        if(isKey(e,'rotate'))this.rotatePlacement();
+        if(isKey(e,'cancel')){const item=this.ghost.item;this.cancelPlacement();this.onPlace?.({status:'cancelled',item});}
       }
     });
-    addEventListener('keyup',e=>this.keys.delete(e.code));
+    addEventListener('keyup',e=>this.keys.delete(normalCode(e.code)));
     addEventListener('blur',()=>{this.resetInput();this.freshLock=true;});
     document.addEventListener('visibilitychange',()=>{if(document.hidden){this.resetInput();this.freshLock=true;}});
     document.addEventListener('focusin',e=>{if(isTyping(e.target))this.resetInput();});
@@ -1014,13 +1273,21 @@ export class Town {
     // Losing the pointer silently is what makes the view feel stuck: the cursor runs into the
     // edge of the screen and the world simply stops turning. Say so, and take it back.
     document.addEventListener('pointerlockerror',()=>{this.onLockChange?.(false);});
+    // Mouse buttons. Placing and a held toy take any click, as always; otherwise the right button
+    // held up is the 打卡 camera (src/ui/camera.js) and a left click while it is up takes the photo.
+    // A button pressed or let go while another is held arrives as a pointermove (pointer "chording").
+    const mousePress=button=>{
+      if(this.ghost&&this.locked()){this.tryPlace();return;}
+      if(this.toys.held&&this.locked()){this.throwHeld();return;}
+      if(button===2)this.onCamera?.(true);
+      else if(button===0&&this.viewfinder){this.onShutter?.();return;}
+      this.requestLook();
+    };
+    canvas.addEventListener('contextmenu',e=>e.preventDefault());
+    addEventListener('pointerup',e=>{if(e.pointerType==='mouse'&&e.button===2)this.onCamera?.(false);});
     canvas.addEventListener('pointerdown',e=>{
       if(this.paused)return;
-      if(e.pointerType==='mouse'){
-        if(this.ghost&&this.locked()){this.tryPlace();return;}
-        if(this.toys.held&&this.locked()){this.throwHeld();return;}
-        this.requestLook();return;
-      }
+      if(e.pointerType==='mouse'){mousePress(e.button);return;}
       // A touch on the thumbstick walks, even while placing; anywhere else it puts the piece down.
       const stickZone=e.clientX<innerWidth*.42&&e.clientY>innerHeight*.45;
       if(this.ghost&&!stickZone){this.tryPlace();return;}
@@ -1030,6 +1297,11 @@ export class Town {
       try{canvas.setPointerCapture?.(e.pointerId);}catch{}   // ignore ids the browser will not capture
     });
     canvas.addEventListener('pointermove',e=>{
+      if(e.pointerType==='mouse'&&e.button>=0){
+        if(e.buttons&[1,4,2][e.button]){if(!this.paused)mousePress(e.button);}
+        else if(e.button===2)this.onCamera?.(false);
+        return;
+      }
       if(this.paused)return;
       if(e.pointerId===this.drag.id){this.lookBy((e.clientX-this.drag.x)*1.5,(e.clientY-this.drag.y)*1.5);this.drag.x=e.clientX;this.drag.y=e.clientY;}
       else if(e.pointerId===this.stick.id){
@@ -1073,7 +1345,7 @@ export class Town {
     this.player.upper.enabled=!first;
     if(this.player.pack)this.player.pack.enabled=!first;
     for(const leg of this.player.legs)leg.setLocalScale(first?.84:1,1,first?.84:1);
-    this.camera.camera.fov=first?70:46;
+    const view=VIEWS[first?'first':'third'];this.camera.camera.fov=view.fov;this.camera.camera.nearClip=view.near;
   }
   /** Third person needs room to swing the camera; a shop floor has none, so it stays off. */
   thirdPersonAllowed() {
@@ -1091,6 +1363,7 @@ export class Town {
   facing() {const r=this.yaw*Math.PI/180;return {fx:-Math.sin(r),fz:-Math.cos(r),rx:Math.cos(r),rz:-Math.sin(r)};}
   placeCamera(pos) {
     this.camera.setEulerAngles(this.pitch,this.yaw,0);
+    if(this.sleeping){this.camera.setPosition(this.sleeping.eye);return;}
     if(this.view==='first'){this.camera.setPosition(pos.x,pos.y+this.eyeHeight,pos.z);return;}
     const yr=this.yaw*Math.PI/180,pr=this.pitch*Math.PI/180,cos=Math.cos(pr);
     const dx=-Math.sin(yr)*cos,dy=Math.sin(pr),dz=-Math.cos(yr)*cos;
@@ -1106,8 +1379,9 @@ export class Town {
     // Opening a panel while in mouse-look should give the mouse back when the panel closes —
     // otherwise you are left looking at a world that will not turn until you click it again.
     // If the cursor was already free, it stays free, so the buttons stay clickable.
-    if(value){this.relock=this.locked();this.releaseLook();}
-    else if(this.relock){this.relock=false;this.relockTimer=setTimeout(()=>this.requestLook(),200);}
+    // A pause straight after another ends (a panel closing into the hop into bed) keeps that promise.
+    if(value){this.relock||=this.locked();this.releaseLook();}
+    else if(this.relock)this.relockTimer=setTimeout(()=>{this.relock=false;this.requestLook();},200);
   }
   /** Closest spot within a few metres that is not inside anything. */
   nearestFreeSpot(x,z) {
@@ -1126,6 +1400,8 @@ export class Town {
     const room=this.rooms.get(place);
     if(!room)return false;
     const [w,d]=room.data.size,lx=x-room.offsetX;
+    // 云海 is several stretches of ground (city.json `walk`), not one rectangle.
+    if(room.data.walk)return onCityGround(room.data.walk,lx,z,edge);
     if(Math.abs(lx)>w/2-edge)return false;
     // A district has an edge all the way round; a room has a doorway in one wall of it.
     if(room.data.outdoor)return Math.abs(z)<=d/2-edge;
@@ -1136,7 +1412,9 @@ export class Town {
   canMove(x,z,feetY=this.playerY) {
     if(!this.withinPlace(this.place,x,z))return false;
     const room=this.rooms.get(this.place);
-    if(feetY<1.9&&(room?.staff??[]).some(s=>Math.hypot(x-room.offsetX-s.x,z-s.z)<.86))return false;
+    if((room?.staff??[]).some(s=>Math.abs(feetY-(s.y??0))<1.9&&Math.hypot(x-room.offsetX-s.x,z-s.z)<.86))return false;
+    if(feetY<1.9&&this.visitors.blocks(this.place,x,z,this.player.entity.getPosition()))return false;
+    if(feetY<1.9&&this.crowd?.blocks(this.place,x,z,this.player.entity.getPosition()))return false;
     return !this.registry.blocks(this.place,x,z,feetY);
   }
   // --- things you can pick up -------------------------------------------
@@ -1179,10 +1457,12 @@ export class Town {
     dt=Math.min(dt,.05);this.clock+=dt;this.drainLook(dt);
     const pos=this.player.entity.getPosition();
     const {fx,fz,rx,rz}=this.facing();let moving=false;
+    if(this.sleeping)this.stepSleep(dt);
     if(!this.paused&&!this.seated) {
       // Walking is relative to where the tourist is looking, not to the world axes.
-      const advance=(this.keys.has('KeyW')||this.keys.has('ArrowUp')?1:0)-(this.keys.has('KeyS')||this.keys.has('ArrowDown')?1:0)-this.stick.dz;
-      const strafe=(this.keys.has('KeyD')||this.keys.has('ArrowRight')?1:0)-(this.keys.has('KeyA')||this.keys.has('ArrowLeft')?1:0)+this.stick.dx;
+      const held=(action,arrow)=>this.keys.has(codeOf(action))||this.keys.has(arrow)?1:0;
+      const advance=held('forward','ArrowUp')-held('back','ArrowDown')-this.stick.dz;
+      const strafe=held('right','ArrowRight')-held('left','ArrowLeft')+this.stick.dx;
       const {forward,side}=inputWish(advance,strafe);
       let dx=fx*forward+rx*side,dz=fz*forward+rz*side;
       const len=Math.hypot(dx,dz);
@@ -1211,24 +1491,30 @@ export class Town {
       if(vertical.grounded||vertical.ceiling)this.velocityY=0;
       this.player.entity.setPosition(x,this.playerY,z);
     }
-    this.player.entity.setEulerAngles(0,(this.seated?this.seated.bodyYaw:this.yaw)+180,0);
+    if(!this.sleeping)this.player.entity.setEulerAngles(0,(this.seated?this.seated.bodyYaw:this.yaw)+180,0);
     if(moving){
       restIdle(this.player);
       this.player.legs.forEach((leg,i)=>leg.setLocalEulerAngles(Math.sin(this.clock*12+i*Math.PI)*23,0,0));
       this.player.arms.forEach((arm,i)=>arm.setLocalEulerAngles(Math.sin(this.clock*12+i*Math.PI)*-18,0,0));
-    } else if(!this.seated) animateIdle(this.player,dt);
+    } else if(!this.seated&&!this.sleeping) animateIdle(this.player,dt);
     this.daylight.advance(dt);
     this.lightRoom();
     this.updatePlacement();
     if(this.place==='town'){
-      for(const [,actor]of this.actors){const p=actor.entity.getPosition();actor.entity.setLocalPosition(p.x,Math.sin(this.clock*1.3+p.x)*.025,p.z);animateIdle(actor,dt);}
-      for(const one of this.people){one.entity.setLocalPosition(one.x,Math.sin(this.clock*1.1+one.x)*.022,one.z);animateIdle(one,dt);}
+      // Only those near enough to see it move (RENDER[level].animate, as 云海's crowd); the rest stand.
+      const eye=this.player.entity.getPosition(),reach=RENDER[detail()].animate;
+      for(const [,actor]of this.actors){const p=actor.entity.getPosition();if(Math.abs(p.x-eye.x)+Math.abs(p.z-eye.z)>reach)continue;actor.entity.setLocalPosition(p.x,Math.sin(this.clock*1.3+p.x)*.025,p.z);animateIdle(actor,dt);}
+      for(const one of this.people){if(Math.abs(one.x-eye.x)+Math.abs(one.z-eye.z)>reach)continue;one.entity.setLocalPosition(one.x,Math.sin(this.clock*1.1+one.x)*.022,one.z);animateIdle(one,dt);}
     } else {
       for(const one of this.rooms.get(this.place)?.people??[]){
         one.entity.setLocalPosition(one.x,Math.sin(this.clock*1.1+one.x)*.022,one.z);animateIdle(one,dt);
       }
+      // A fitting that moves (the cinema's screen) is told whether someone is sitting down to watch.
+      for(const fitting of this.rooms.get(this.place)?.fittings??[])fitting.animate?.(dt,!!this.seated);
     }
     this.walkStaff(dt);
+    if(!this.paused)this.visitors.update(dt);   // hold still while a panel is open: you may be talking to one
+    for(const part of this.rooms.get(this.place)?.parts??[])part.update?.(dt,this.paused);   // 云海's parts, and a room's own (the mall)
     for(const container of this.containers)if(container.place===this.place)container.tick(this.clock);
     this.market.update(dt,{hour:this.daylight.hour,place:this.place,offCamera:(x,z)=>this.offCamera(x,z)});
     // The one pushing the cart is its stall keeper, not just anybody.
@@ -1239,6 +1525,7 @@ export class Town {
     this.dayMarket.syncHitboxes(this.registry,id=>({id:role(id),...NAMES[role(id)]}));
     for(const material of this.dayMarket.claimLamps())this.dayMarket.onLit?.(material);
     this.toys.update(dt,this.place);
+    this.water.update(dt,this);   // every pond, stream, fountain and the bay: one update a frame
     if(this.toys.held){
       const forward=this.camera.forward,eye=this.camera.getPosition();
       this.toys.carry(eye,{fx:-forward.x,fy:-forward.y,fz:-forward.z});
@@ -1247,10 +1534,10 @@ export class Town {
     const here=this.player.entity.getPosition();let nearest=null,best=Infinity;
     for(const t of this.targets()) {
       const d=Math.hypot(here.x-t.x,here.z-t.z);
-      if(d>t.radius||d>=best)continue;
+      if(d>t.radius||(d>=best&&!t.aimed))continue;
       const aim=d<1e-3?1:((t.x-here.x)/d)*fx+((t.z-here.z)/d)*fz;
       if(d>1.3&&aim<(t.wide?.1:.35))continue;
-      nearest=t;best=d;
+      nearest=t;best=t.aimed?-1:d;   // a person looked at in range beats anything merely nearer
     }
     if(nearest?.id!==this.nearest?.id){this.nearest=nearest;this.onNear(nearest);}
   }
@@ -1260,10 +1547,12 @@ export class Town {
     this.placeCamera(this.player.entity.getPosition());
     const eye=this.camera.getPosition(),forward=this.camera.forward;
     this.syncMovingLooks();
+    this.sky.update();
     const seen=this.paused?null:this.registry.look(this.place,eye,forward);
     const name=seen?.box.name??null;
     // Two cups on two tables share a name but not a box: a new box is a new thing to point at.
     if(seen?.box!==this.lookingBox){this.lookingBox=seen?.box;this.looking=name;this.onLook?.(name);}
+    this.views.update();
     this.onFrame?.(this);
   }
   /** Waiters pace a fixed loop, so the room feels staffed without needing pathfinding. */
@@ -1282,16 +1571,17 @@ export class Town {
       const step=Math.min(distance,member.speed*dt);
       const from={x:room.offsetX+member.x,z:member.z};
       const to={x:from.x+dx/distance*step,z:from.z+dz/distance*step};
-      const others=(room.staff??[]).filter(s=>s!==member).map(s=>({x:room.offsetX+s.x,z:s.z}));
-      const player=this.player.entity.getPosition();others.push({x:player.x,z:player.z,radius:.34});
-      if(!walkClear(this.registry,this.place,from,to,others)){
+      // Only who is on the same floor is in the way (`y`: staff on an upper floor).
+      const y=member.y??0,others=(room.staff??[]).filter(s=>s!==member&&(s.y??0)===y).map(s=>({x:room.offsetX+s.x,z:s.z}));
+      const player=this.player.entity.getPosition();if(Math.abs(this.playerY-y)<1.9)others.push({x:player.x,z:player.z,radius:.34});
+      if(!walkClear(this.registry,this.place,from,to,others,undefined,y)){
         member.blocked=(member.blocked??0)+dt;
         if(member.blocked>2){member.target=(member.target+1)%member.path.length;member.blocked=0;}
         restIdle(member);animateIdle(member,dt);continue;
       }
       member.blocked=0;member.x=to.x-room.offsetX;member.z=to.z;
       member.leg+=dt*7;
-      member.entity.setLocalPosition(member.x,0,member.z);
+      member.entity.setLocalPosition(member.x,y,member.z);
       // The model's face looks down its own +z, so the heading is atan2 with no half turn added.
       member.entity.setLocalEulerAngles(0,Math.atan2(dx,dz)*180/Math.PI,0);
       member.legs.forEach((leg,i)=>leg.setLocalEulerAngles(Math.sin(member.leg+i*Math.PI)*21,0,0));

@@ -95,7 +95,7 @@ for(const b of world.buildings){
   require(districtIds.has(b.district),`building ${b.id} is in unknown district ${b.district}`);
   require(!b.object||objectIds.includes(b.object),`building ${b.id} names unknown object ${b.object}`);
   require([0,180].includes(b.rotation??0),`building ${b.id} may only face 0 or 180`);
-  require(['tiled','shophouse','modern'].includes(b.style??'tiled'),`building ${b.id} has an unknown style`);
+  require(['tiled','shophouse','modern','bank'].includes(b.style??'tiled'),`building ${b.id} has an unknown style`);
   require(b.label===undefined||(typeof b.label==='string'&&b.label.trim().length>0),`building ${b.id} has an empty map label`);
 }
 for(const prop of world.props??[])require(districtIds.has(prop.district),'prop in unknown district '+prop.kind);
@@ -141,7 +141,7 @@ for(let i=0;i<solidProps.length;i++)for(let j=i+1;j<solidProps.length;j++){
 }
 for(const [id,room] of Object.entries(rooms)){
   require(Number.isFinite(room.door?.x)&&Number.isFinite(room.door?.z),`room ${id} needs a door position`);
-  require(world.buildings.some(b=>b.id===room.building)||room.building==='city:department',`room ${id} has no building ${room.building}`);
+  require(world.buildings.some(b=>b.id===room.building)||/^city:[a-z-]+$/.test(room.building),`room ${id} has no building ${room.building}`);
   if(room.lectern?.shop)require(shopIds.has(room.lectern.shop),`room ${id} sells for unknown shop ${room.lectern.shop}`);
   if(room.lectern)require(!!room.lectern.label,`room ${id} counter needs a label`);
   require(!(room.lectern?.shop&&room.lectern?.panel),`room ${id} counter cannot be both a shop and a panel`);
@@ -151,8 +151,12 @@ for(const [id,room] of Object.entries(rooms)){
   for(const fitting of room.fittings??[]){
     require(modelKinds.has(fitting.kind),`room ${id} uses unknown fitting ${fitting.kind}`);
     if(fitting.action)require(!!fitting.label,`room ${id} fitting ${fitting.kind} needs a label for its action`);
-    // A fitting may stand on the upper floor (`y`), and nowhere else off the ground.
-    require(fitting.y===undefined||fitting.y===room.upper?.y,`room ${id} fitting ${fitting.kind} floats at y ${fitting.y}`);
+    // A counter opens a shop that sells something, or one of the panels src/main.js knows.
+    const [, opens,target]=/^(shop|panel):(.+)$/.exec(fitting.action??'')??[];
+    if(opens==='shop')require(shopIds.has(target),`room ${id} fitting ${fitting.kind} sells for unknown shop ${target}`);
+    if(opens==='panel')require(['bank','resale','library'].includes(target),`room ${id} fitting ${fitting.kind} opens unknown panel ${target}`);
+    // A fitting may stand on the upper floor (`y`), or on one of a many-storeyed room's `levels`, and nowhere else off the ground.
+    require(fitting.y===undefined||fitting.y===room.upper?.y||(room.levels??[]).includes(fitting.y),`room ${id} fitting ${fitting.kind} floats at y ${fitting.y}`);
     placed.push({name:`${fitting.kind} at ${fitting.x},${fitting.z}`,floor:fitting.y??0,...footprintOf(fitting)});
   }
   if(room.lectern){
@@ -274,6 +278,41 @@ const friendsData=await read('friends.json');
 for(const [npc,person] of Object.entries(friendsData.people)){
   featureClips.push(...Object.keys({...friendsData.lines[npc],...friendsData.shared}).map(k=>`friend-${npc}-${k}`));
   for(const id of [...person.liked,person.present.item].filter(Boolean))require(catalog.some(i=>i.id===id),`friends ${npc}: unknown item ${id}`);
+}
+// Shop assistants' lines are assistant-<key>, in one cast voice.
+const assistantsData=await read('assistants.json');
+featureClips.push(...Object.keys(assistantsData.lines).map(k=>'assistant-'+k));
+require(!!voices.cast[assistantsData.speaker],'No voice cast for shop assistant speaker '+assistantsData.speaker);
+// 山城老火锅: the waiter's hotpot-<key> and the noodle chef's hotpot-chef-<key>; every menu id is a hotpot catalog row.
+const hotpotData=await read('hotpot.json');
+featureClips.push(...Object.keys(hotpotData.lines).map(k=>'hotpot-'+k),...Object.keys(hotpotData.chef).map(k=>'hotpot-chef-'+k));
+for(const who of Object.values(hotpotData.speakers))require(!!voices.cast[who],'No voice cast for hotpot speaker '+who);
+for(const id of hotpotData.categories.flatMap(c=>c.items))require(catalog.some(i=>i.id===id&&i.shop==='hotpot'),`hotpot menu: ${id} is not a hotpot catalog row`);
+// People in the word hall speak their own clips (hall-<key>), each in their speaker's cast voice.
+for(const [key,line] of Object.entries((await read('hall-visitors.json')).lines)){
+  featureClips.push(line.audio);
+  require(!!voices.cast[line.speaker],`word hall line ${key}: no voice cast for ${line.speaker}`);
+}
+// The drone show announces its start and end (drones-<key>) over the bay.
+const dronesData=await read('drones.json');
+for(const line of Object.values(dronesData.lines))featureClips.push(line.audio);
+require(!!voices.cast[dronesData.speaker],'No voice cast for the drone show speaker '+dronesData.speaker);
+// The harbour: the ferry crew's and the wheel attendant's lines (harbour-<key>), each in its speaker's cast voice.
+const harbourData=await read('harbour.json');
+for(const [key,line] of Object.entries(harbourData.lines)){
+  featureClips.push('harbour-'+key);
+  require(line.audio==='harbour-'+key,`harbour line ${key}: its clip must be harbour-${key}`);
+  require(!!voices.cast[harbourData.speakers[line.speaker]],`harbour line ${key}: no voice cast for ${line.speaker}`);
+}
+// The 打卡 camera says 打卡成功！ (checkin-success) and each spot's line (checkin-<id>).
+const checkinsData=await read('checkins.json');
+featureClips.push(checkinsData.success.audio,...checkinsData.spots.map(spot=>spot.line.audio));
+for(const spot of checkinsData.spots)require(spot.line.audio==='checkin-'+spot.id,`checkins ${spot.id}: its line's clip must be checkin-${spot.id}`);
+require(!!voices.cast[checkinsData.speaker],'No voice cast for the check-in speaker '+checkinsData.speaker);
+// People walking around 云海 speak crowd-<n>, each line in its speaker's cast voice.
+for(const line of (await read('crowd.json')).lines){
+  featureClips.push(line.audio);
+  require(!!voices.cast[line.speaker],`crowd line ${line.audio}: no voice cast for ${line.speaker}`);
 }
 const lessonAudioSources=lessons.flatMap(l=>[...l.nodes,...Object.values(l.extraLines??{})]);
 const needed=[...words,...ambient,...lessonAudioSources,...catalog].map(x=>x.audio).filter(Boolean)

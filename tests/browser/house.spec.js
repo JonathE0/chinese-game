@@ -34,6 +34,16 @@ async function press(page,label){
   await page.keyboard.press('e');
   await page.waitForTimeout(320);
 }
+/** Click to put down the piece in hand. Once the world has the pointer, Playwright's jump to the
+ *  click point reads as a mouse turn and the piece would go wherever the view drifted, so
+ *  mouse-look is off. The first click takes the pointer (or, if the world already has it, puts
+ *  the piece down); the second waits until the world has the pointer. */
+async function clickToPlace(page){
+  await page.evaluate(()=>{window.__qinghe.town.sensitivity=0;});
+  await page.mouse.click(700,520);
+  await expect.poll(()=>page.evaluate(()=>!!document.pointerLockElement)).toBe(true);
+  await page.mouse.click(700,520);
+}
 
 test('the study is through the west door: shelves lend books, the desk pays +4, and the door leads back',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -85,21 +95,23 @@ test('the stairs are walked up with W alone, the starter bed is upstairs, and W 
   const warps=await page.evaluate(()=>window.__qinghe.town.warps);
   const height=async()=>Number(await page.locator('#map-player').getAttribute('data-y'));
   expect(await height()).toBeLessThan(.3);   // at the foot of the flight, on the first step at most
+  // W stays down until the tourist stands on the upper floor. Under load frames come slowly, so a
+  // fixed hold, or letting go a step or two short and waiting for the slide, varies with frame rate.
   await page.keyboard.down('w');
-  try{await expect.poll(height,{timeout:8000,intervals:[100]}).toBeGreaterThan(2.5);}finally{await page.keyboard.up('w');}
+  try{await expect.poll(height,{timeout:20000,intervals:[100]}).toBeCloseTo(2.9,2);}finally{await page.keyboard.up('w');}
   await page.waitForTimeout(300);
   expect(await height()).toBeCloseTo(2.9,2);
   expect(await page.evaluate(()=>window.__qinghe.town.warps)).toBe(warps);
   expect((await where(page)).place).toBe('home');
   // Upstairs, the bed is somewhere to sleep; standing on the same spot downstairs offers nothing of the kind.
-  await stand(page,'home',3.6,-2.6,0,2.9);
+  await stand(page,'home',3.0,.5,-90,2.9);
   await expect(page.locator('#interact span')).toHaveText('睡觉 · 选时间');
-  await stand(page,'home',3.6,-2.6,0);
+  await stand(page,'home',3.0,.5,-90);
   expect(await page.evaluate(()=>window.__qinghe.town.nearest?.id??null)).not.toBe('sleep');
   // From the landing, W walks back down to the ground floor.
   await stand(page,'home',-4.45,-.9,180,2.9);
   await page.keyboard.down('w');
-  try{await expect.poll(height,{timeout:8000,intervals:[100]}).toBeLessThan(.01);}finally{await page.keyboard.up('w');}
+  try{await expect.poll(height,{timeout:20000,intervals:[100]}).toBe(0);}finally{await page.keyboard.up('w');}
   expect(await height()).toBe(0);
   expect((await page.evaluate(()=>window.__prompts)).filter(t=>t.includes('上楼'))).toEqual([]);
   expect(errors).toEqual([]);
@@ -120,8 +132,7 @@ test('upstairs furniture, in a slot or placed by hand, is still upstairs after a
   // The plant goes down by hand, two metres ahead on the upper floor, towards the balcony.
   await page.locator('[data-place="potted-plant"]').click();
   await expect(page.locator('#placing')).toContainText('放得下');
-  await page.mouse.click(700,520);
-  await page.mouse.click(700,520);
+  await clickToPlace(page);
   await expect(page.locator('#toast')).toContainText('放好了');
   const home=(await saved(page)).home;
   expect(home).toEqual([
@@ -132,18 +143,18 @@ test('upstairs furniture, in a slot or placed by hand, is still upstairs after a
   await page.getByRole('button',{name:'开始旅行'}).click();
   await page.waitForTimeout(500);
   const props=await propsIn(page,'home');
-  expect(props).toEqual(expect.arrayContaining([expect.objectContaining({kind:'bed',x:2.8,z:-3.6,y:2.9}),expect.objectContaining({kind:'plant',y:2.9})]));
+  expect(props).toEqual(expect.arrayContaining([expect.objectContaining({kind:'bed',x:4.25,z:.5,y:2.9}),expect.objectContaining({kind:'plant',y:2.9})]));
   expect(await page.evaluate(()=>[...window.__qinghe.town.rooms.get('home').props.values()].every(p=>Math.abs(p.entity.getLocalPosition().y-2.9)<.01))).toBe(true);
   expect(errors).toEqual([]);
 });
 
-test('an existing save with a bed in the living room loads with the bed where it was',async({page})=>{
+test('an existing save with a bed in the living room loads, with the bed moved back against the wall of its slot',async({page})=>{
   const bed={uid:'bed-old',item:'wooden-bed',kind:'bed',color:'#b98b5f',footprint:[2.1,1.4],x:2.9,z:-2.6,rot:0,slot:'bed'};
   await seed(page,{inventory:{'wooden-bed':1},home:[bed]});
   await start(page);
-  expect(await propsIn(page,'home')).toEqual([{uid:'bed-old',kind:'bed',x:2.9,z:-2.6}]);
-  expect(await page.evaluate(()=>window.__qinghe.profile.home)).toEqual([bed]);
-  await stand(page,'home',2.9,-1.4,0);
+  expect(await propsIn(page,'home')).toEqual([{uid:'bed-old',kind:'bed',x:2.9,z:-3.75}]);
+  expect(await page.evaluate(()=>window.__qinghe.profile.home)).toEqual([{...bed,z:-3.75}]);
+  await stand(page,'home',2.9,-2.4,0);
   await expect(page.locator('#interact span')).toHaveText('睡觉 · 选时间');
 });
 
@@ -154,7 +165,8 @@ test('an HSK certificate you own hangs on the wall and is still there after a re
   await stand(page,'home',-1.6,-2.4,0);
   await press(page,'布置房间');
   await page.locator('[data-slot="wall-1"]').click();
-  await expect(page.locator('[data-choose]')).toHaveCount(1);
+  // The wall spot also sells paintings; of the certificates, only the one you own is offered.
+  await expect(page.locator('[data-choose^="hsk-cert"]')).toHaveCount(1);
   await page.locator('[data-choose="hsk-cert-1"]').click();
   const after=await saved(page);
   expect(after.wallet).toBe(200);

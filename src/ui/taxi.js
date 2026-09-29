@@ -28,8 +28,8 @@ function arrive(ctx,state){
  * so nothing here needs to touch a mission flag — only the fare.
  */
 function ride(ctx,tower){
-  // The drop-off stands clear of the tower's facade. Being set down there is not the same as
-  // walking there, so it never counts as finding 一号书店 (see checkCityArrival in main.js).
+  // The drop-off stands clear of the tower's facade. 一号书店 is only found by going in through its
+  // door (enterPlace in main.js), so being set down outside it finds nothing yet.
   const town=ctx.town,spot=dropOffAtTower(tower);
   town.setPaused(true);
   fadeThrough(()=>town.warp(spot.x+CITY_OFFSET,spot.z),{onDone:()=>{
