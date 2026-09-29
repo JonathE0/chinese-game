@@ -1,5 +1,5 @@
 {
-  "note": "The metropolis you reach by metro. `station` is the entrance back in the town square; `place` is the district itself, laid out in its own local coordinates and swapped in wholesale the same way an interior is. Towers, props and people are authored here so the layout can be checked without running the game.",
+  "note": "The metropolis you reach by metro, redone after a night walk round Shenzhen Bay. `station` is the entrance back in the town square; `place` is the district itself, in its own local metres (x east, z south, the metro at the south end), swapped in wholesale the same way an interior is. `walk` lists the ground you can stand on as rectangles [x0, x1, z0, z1]: downtown, the promenade along the bay, and the hill side west of downtown (the hill itself is src/content/hill.json). `farClip` and `haze` [start, end] are how far the camera sees here and where the sky-coloured haze begins and closes in. `street.road` is the carriageway, `street.bays` the taxi lay-bys off it and `street.pavement` the paving round them, each [x0, x1, z0, z1]; `land` is the ground round the bay as [x0, x1, z0, z1, top], its edges on the water the sea walls. Towers, props, the promenade and its lit path, the skyline across the bay and the blocks round the edge are authored here so the layout can be checked without running the game; `leds` on a tower asks for running light bands (`bands`, heights), lit corners (`edges`), a colour-washed crown (`crown`, one of three washes), a washed screen on its front (`screen`), two light lines up its front (`stripes`) and big lit characters (`text`, each a signs.json entry). The gate at the end of the avenue carries a couplet down its posts (`couplet`, first line then second), the first line on the left as you face it from either side, so it reads left to right like the words across the top. `edges` are the low walls [x0, x1, z0, z1] where the ground ends over open land.",
   "station": {
     "x": -7.5,
     "z": 14.6,
@@ -19,133 +19,372 @@
     "pinyin": "Yúnhǎi shì zhōngxīn",
     "en": "Downtown Yunhai",
     "outdoor": true,
-    "size": [
-      56,
-      68
-    ],
-    "spawn": [
-      0,
-      24.5
-    ],
-    "exit": [
-      0,
-      28.6
-    ],
+    "size": [56, 68],
+    "spawn": [0, 24.5],
+    "exit": [0, 28.6],
     "ground": "#8d8f93",
     "pave": "#a3a49f",
     "sky": "#6d7d8c",
     "returnLabel": "坐地铁回青禾 · BACK TO TOWN",
     "returnPlace": "metro-platform",
-    "returnSpawn": [1.7, 2.3, 125]
+    "returnSpawn": [1.7, 2.3, 125],
+    "walk": [
+      [-28, 28, -34, 34],
+      [-40, 70, -48, -34],
+      [-120, -28, -48, 34]
+    ],
+    "farClip": 520,
+    "haze": [140, 500]
   },
+  "street": {
+    "road": [-3.6, 3.6, -30, 20.5],
+    "bays": [
+      [3.6, 5.3, 15.4, 20.5]
+    ],
+    "pavement": [-40, 28, -34, 34],
+    "asphalt": "#4b5057",
+    "kerb": "#c3c5c0"
+  },
+  "land": [
+    [-600, -40, -48, 400, -0.1],
+    [70, 600, -48, 400, -0.1],
+    [-40, 70, -34, 400, -0.1],
+    [-600, -160, -170, -48, -0.1],
+    [170, 600, -170, -48, -0.1],
+    [-600, 600, -800, -170, 0.3]
+  ],
   "towers": [
     {
       "x": -17.5,
-      "z": 15,
-      "w": 13.8,
+      "z": 16.5,
+      "w": 12,
       "d": 12,
-      "h": 26,
-      "color": "#7c8794",
-      "glass": "#a9bcc6",
+      "h": 58,
+      "color": "#2c3d4b",
+      "glass": "#7fa3b8",
       "sign": "云海银行",
       "signColor": "#d8e4dd",
       "signInk": "#2a4a4f",
       "rot": 90,
-      "name": "tower"
+      "name": "tower",
+      "leds": {
+        "edges": true,
+        "crown": 0,
+        "text": {
+          "zh": "你好",
+          "y": 47,
+          "cell": 5,
+          "color": "#ffd36b"
+        }
+      }
     },
     {
       "x": -17.5,
       "z": 0,
-      "w": 15,
+      "w": 11,
       "d": 13,
-      "h": 34,
-      "color": "#6f7a86",
-      "glass": "#9fb3c0",
+      "h": 44,
+      "color": "#3a3342",
+      "glass": "#a597c4",
       "sign": "星光百货",
       "signColor": "#f2d7a8",
       "signInk": "#7a3f2f",
       "rot": 90,
-      "name": "tower"
+      "name": "tower",
+      "leds": {
+        "bands": [13, 20, 27, 34],
+        "crown": 1
+      }
     },
     {
       "x": -17.5,
       "z": -16,
       "w": 15,
       "d": 12,
-      "h": 21,
-      "color": "#88837c",
-      "glass": "#b4bcc0",
+      "h": 36,
+      "color": "#4a4238",
+      "glass": "#bba98c",
       "sign": "一号书店",
       "signColor": "#dfe7cf",
       "signInk": "#3d5340",
       "rot": 90,
-      "name": "tower"
+      "name": "tower",
+      "leds": {
+        "edges": true,
+        "bands": [33]
+      }
     },
     {
       "x": 17.5,
       "z": 16,
       "w": 13.8,
       "d": 12,
-      "h": 30,
-      "color": "#78828f",
-      "glass": "#a4b8c4",
+      "h": 50,
+      "color": "#2c3d4b",
+      "glass": "#7fa3b8",
       "sign": "中山医院",
       "signColor": "#e8dfe6",
       "signInk": "#5b3f63",
       "rot": -90,
-      "name": "tower"
+      "name": "tower",
+      "leds": {
+        "edges": true,
+        "crown": 2
+      }
     },
     {
       "x": 17.5,
       "z": 1,
       "w": 15,
       "d": 13,
-      "h": 24,
-      "color": "#8a8279",
-      "glass": "#b6bcbd",
+      "h": 32,
+      "color": "#4a4238",
+      "glass": "#bba98c",
       "sign": "海风面馆",
       "signColor": "#f4c9a1",
       "signInk": "#7c3a2c",
       "rot": -90,
-      "name": "tower"
+      "name": "tower",
+      "leds": {
+        "bands": [11, 17, 23, 29]
+      }
     },
     {
       "x": 17.5,
       "z": -15,
       "w": 15,
       "d": 12,
-      "h": 32,
-      "color": "#737e8b",
-      "glass": "#9db2c1",
+      "h": 40,
+      "color": "#3a3342",
+      "glass": "#a597c4",
       "sign": "光明电影院",
       "signColor": "#d6dff0",
       "signInk": "#33436b",
       "rot": -90,
-      "name": "tower"
+      "name": "tower",
+      "leds": {
+        "screen": {
+          "y0": 12,
+          "y1": 31,
+          "wash": 1
+        },
+        "text": {
+          "zh": "学中文",
+          "y": 21.5,
+          "cell": 3.8,
+          "color": "#ffffff"
+        }
+      }
     },
     {
       "x": -19,
       "z": -31,
       "w": 11,
       "d": 7,
-      "h": 18,
-      "color": "#7f8892",
-      "glass": "#aabbc6",
-      "rot": 180,
-      "name": "tower"
+      "h": 52,
+      "color": "#3a3342",
+      "glass": "#b08a8a",
+      "rot": 0,
+      "name": "tower",
+      "leds": {
+        "edges": true,
+        "bands": [12, 50],
+        "stripes": true
+      }
     },
     {
       "x": 19,
       "z": -31,
       "w": 11,
       "d": 7,
-      "h": 16,
-      "color": "#858d95",
-      "glass": "#aebfc9",
+      "h": 52,
+      "color": "#3a3342",
+      "glass": "#b08a8a",
+      "rot": 0,
+      "name": "tower",
+      "leds": {
+        "edges": true,
+        "bands": [12, 50],
+        "stripes": true,
+        "crown": 1
+      }
+    },
+    {
+      "x": 49,
+      "z": -22,
+      "w": 20,
+      "d": 14,
+      "h": 80,
+      "color": "#2c3d4b",
+      "glass": "#7fa3b8",
       "rot": 180,
-      "name": "tower"
+      "name": "tower",
+      "street": false,
+      "leds": {
+        "edges": true,
+        "bands": [24, 68],
+        "crown": 0,
+        "text": {
+          "zh": "海风大厦",
+          "y": 46,
+          "cell": 6,
+          "color": "#9fe8ff",
+          "vertical": true
+        }
+      }
+    },
+    {
+      "x": 32,
+      "z": -26,
+      "w": 9,
+      "d": 12,
+      "h": 26,
+      "color": "#2d3340",
+      "glass": "#9aabb8",
+      "rot": 180,
+      "name": "tower",
+      "street": false,
+      "leds": {}
     }
   ],
+  "promenade": {
+    "x": [-40, 70],
+    "z": [-48, -34],
+    "path": {
+      "z": -41,
+      "swing": 2.5,
+      "wave": 40,
+      "width": 3
+    },
+    "plaza": {
+      "x": 0,
+      "z": -41,
+      "radius": 6
+    },
+    "railing": -47.85
+  },
+  "skyline": {
+    "x": [-150, 170],
+    "z": [-230, -175],
+    "shore": -170,
+    "seed": 20260926,
+    "fill": 34,
+    "towers": [
+      {
+        "x": 20,
+        "z": -200,
+        "w": 22,
+        "d": 22,
+        "h": 160,
+        "landmark": true,
+        "glass": "#7fa3b8",
+        "leds": {
+          "text": {
+            "zh": "云海中心",
+            "y": 81.4,
+            "cell": 7.2,
+            "color": "#ffffff",
+            "vertical": true
+          }
+        }
+      },
+      {
+        "x": -98,
+        "z": -186,
+        "w": 18,
+        "d": 16,
+        "h": 70,
+        "glass": "#7fa3b8",
+        "leds": {
+          "crown": 0,
+          "text": {
+            "zh": "我爱云海",
+            "y": 61,
+            "cell": 4,
+            "color": "#ff4d5e"
+          }
+        }
+      },
+      {
+        "x": -45,
+        "z": -190,
+        "w": 26,
+        "d": 18,
+        "h": 58,
+        "glass": "#9aabb8",
+        "leds": {
+          "edges": true,
+          "stripes": true,
+          "text": {
+            "zh": "万家灯火",
+            "y": 50,
+            "cell": 5.5,
+            "color": "#ffd27a"
+          }
+        }
+      },
+      {
+        "x": 72,
+        "z": -186,
+        "w": 16,
+        "d": 16,
+        "h": 96,
+        "glass": "#7fa3b8",
+        "leds": {
+          "crown": 2,
+          "text": {
+            "zh": "城市之光",
+            "y": 62,
+            "cell": 6,
+            "color": "#7fe3ff",
+            "vertical": true
+          }
+        }
+      },
+      {
+        "x": 128,
+        "z": -192,
+        "w": 18,
+        "d": 16,
+        "h": 74,
+        "glass": "#a597c4",
+        "leds": {
+          "bands": [22, 36],
+          "screen": {
+            "y0": 26,
+            "y1": 52,
+            "wash": 2
+          },
+          "text": {
+            "zh": "晚安",
+            "y": 62,
+            "cell": 6,
+            "color": "#c9a6ff"
+          }
+        }
+      }
+    ]
+  },
+  "edges": [
+    [70, 70.5, -48, -34],
+    [28, 70.5, -34, -33.5],
+    [28, 28.5, -34, 34],
+    [-40, 28.5, 34, 34.5]
+  ],
+  "backdrop": {
+    "seed": 20260910,
+    "zones": [
+      [34, 130, -30, 80, 16],
+      [-40, 130, 42, 130, 16],
+      [-130, -40, 42, 120, 8],
+      [178, 330, -165, -45, 8]
+    ],
+    "hills": [
+      [-250, -110, 60, 26],
+      [-235, -10, 55, 30],
+      [-270, 70, 70, 22]
+    ]
+  },
   "props": [
     {
       "kind": "citylamp",
@@ -157,6 +396,7 @@
       "kind": "citylamp",
       "x": 7.7,
       "z": 20,
+      "rot": 180,
       "name": "streetlight"
     },
     {
@@ -169,6 +409,7 @@
       "kind": "citylamp",
       "x": 7.7,
       "z": 12,
+      "rot": 180,
       "name": "streetlight"
     },
     {
@@ -181,6 +422,7 @@
       "kind": "citylamp",
       "x": 7.7,
       "z": 4,
+      "rot": 180,
       "name": "streetlight"
     },
     {
@@ -193,18 +435,20 @@
       "kind": "citylamp",
       "x": 7.7,
       "z": -4,
+      "rot": 180,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
       "x": -7.7,
-      "z": -12,
+      "z": -13.8,
       "name": "streetlight"
     },
     {
       "kind": "citylamp",
       "x": 7.7,
       "z": -12,
+      "rot": 180,
       "name": "streetlight"
     },
     {
@@ -217,6 +461,7 @@
       "kind": "citylamp",
       "x": 7.7,
       "z": -20,
+      "rot": 180,
       "name": "streetlight"
     },
     {
@@ -229,6 +474,28 @@
       "kind": "citylamp",
       "x": 7.7,
       "z": -25.6,
+      "rot": 180,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": -26.2,
+      "z": -26,
+      "rot": 180,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": -26.2,
+      "z": 13,
+      "rot": 180,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citylamp",
+      "x": -26.2,
+      "z": 27,
+      "rot": 180,
       "name": "streetlight"
     },
     {
@@ -315,7 +582,7 @@
     {
       "kind": "bin",
       "x": -7.4,
-      "z": -11,
+      "z": -17,
       "name": "bin"
     },
     {
@@ -325,37 +592,49 @@
       "name": "crossing"
     },
     {
-      "kind": "trafficlight",
-      "x": -7.6,
-      "z": 6,
-      "name": "traffic-light"
+      "kind": "citycrossing",
+      "x": 0,
+      "z": -22,
+      "name": "crossing"
     },
     {
       "kind": "trafficlight",
-      "x": 7.6,
-      "z": 6,
+      "x": -4,
+      "z": 3.3,
       "rot": 180,
       "name": "traffic-light"
     },
     {
+      "kind": "trafficlight",
+      "x": 4,
+      "z": 8.7,
+      "name": "traffic-light"
+    },
+    {
       "kind": "cityshelter",
-      "x": 9.6,
-      "z": 20,
-      "rot": -90,
+      "x": -12.5,
+      "z": 26.5,
+      "rot": 90,
       "name": "bus-stop"
     },
     {
       "kind": "citykiosk",
-      "x": -5.1,
+      "x": -7.3,
       "z": -10.5,
-      "rot": 90,
+      "rot": -90,
       "name": "kiosk"
     },
     {
-      "kind": "bigscreen",
+      "kind": "gate",
       "x": 0,
       "z": -31.5,
-      "name": "screen"
+      "text": "欢迎来到云海",
+      "back": "一路平安",
+      "couplet": [
+        "好好学习",
+        "天天向上"
+      ],
+      "name": "paifang"
     },
     {
       "kind": "taxi",
@@ -366,8 +645,187 @@
     {
       "kind": "taxi",
       "x": 3.8,
-      "z": 18.099999999999998,
+      "z": 18.1,
       "name": "taxi"
+    },
+    {
+      "kind": "promenadelamp",
+      "x": -38,
+      "z": -47.1,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citytree",
+      "x": -35,
+      "z": -45.6,
+      "name": "tree"
+    },
+    {
+      "kind": "citybench",
+      "x": -31.5,
+      "z": -46.2,
+      "rot": 180,
+      "name": "bench"
+    },
+    {
+      "kind": "promenadelamp",
+      "x": -28,
+      "z": -47.1,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citytree",
+      "x": -24.5,
+      "z": -45.6,
+      "name": "tree"
+    },
+    {
+      "kind": "citybench",
+      "x": -21,
+      "z": -46.2,
+      "rot": 180,
+      "name": "bench"
+    },
+    {
+      "kind": "promenadelamp",
+      "x": -18,
+      "z": -47.1,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citytree",
+      "x": -18.5,
+      "z": -36.2,
+      "name": "tree"
+    },
+    {
+      "kind": "ledsign",
+      "x": -14.5,
+      "z": -36.3,
+      "rot": 180,
+      "text": "滨海步道",
+      "cell": 0.8,
+      "color": "#8fe9ff",
+      "name": "sign"
+    },
+    {
+      "kind": "ledsign",
+      "x": 11,
+      "z": -46.4,
+      "text": "我爱云海",
+      "cell": 1.5,
+      "color": "#ff4d5e",
+      "name": "sign"
+    },
+    {
+      "kind": "droneboard",
+      "x": -9,
+      "z": -46.4,
+      "text": "无人机表演",
+      "name": "screen"
+    },
+    {
+      "kind": "promenadelamp",
+      "x": 16,
+      "z": -47.1,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citybench",
+      "x": 18.5,
+      "z": -46.2,
+      "rot": 180,
+      "name": "bench"
+    },
+    {
+      "kind": "citytree",
+      "x": 24,
+      "z": -36.2,
+      "name": "tree"
+    },
+    {
+      "kind": "promenadelamp",
+      "x": 25,
+      "z": -47.1,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citytree",
+      "x": 29.5,
+      "z": -36.2,
+      "name": "tree"
+    },
+    {
+      "kind": "citytree",
+      "x": 35,
+      "z": -36.2,
+      "name": "tree"
+    },
+    {
+      "kind": "promenadelamp",
+      "x": 35,
+      "z": -47.1,
+      "name": "streetlight"
+    },
+    {
+      "kind": "ledsign",
+      "x": 40.5,
+      "z": -46.5,
+      "text": "云海湾",
+      "cell": 0.9,
+      "color": "#ffd36b",
+      "name": "sign"
+    },
+    {
+      "kind": "citybench",
+      "x": 44,
+      "z": -46.2,
+      "rot": 180,
+      "name": "bench"
+    },
+    {
+      "kind": "promenadelamp",
+      "x": 47.5,
+      "z": -47.1,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citybench",
+      "x": 51,
+      "z": -46.2,
+      "rot": 180,
+      "name": "bench"
+    },
+    {
+      "kind": "promenadelamp",
+      "x": 57,
+      "z": -47.1,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citybench",
+      "x": 60.5,
+      "z": -46.2,
+      "rot": 180,
+      "name": "bench"
+    },
+    {
+      "kind": "promenadelamp",
+      "x": 64,
+      "z": -47.1,
+      "name": "streetlight"
+    },
+    {
+      "kind": "citytree",
+      "x": 64,
+      "z": -36.2,
+      "name": "tree"
+    },
+    {
+      "kind": "citytree",
+      "x": 69,
+      "z": -36.2,
+      "name": "tree"
     }
   ],
   "people": [

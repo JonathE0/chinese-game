@@ -35,7 +35,7 @@ test('the taxi drop-off stands clear of the tower\'s hitbox and of every solid s
     // Same side of the avenue as frontOfTower, and still within the arrival radius of it.
     assert.equal(Math.sign(spot.x-tower.x),Math.sign(frontOfTower(tower).x-tower.x));
     assert.equal(arrivedAtTower(spot.x,spot.z,tower),true);
-    for(const prop of city.props.filter(p=>!['citycrossing','bigscreen'].includes(p.kind)))
+    for(const prop of city.props.filter(p=>p.kind!=='citycrossing'))
       assert.ok(Math.hypot(prop.x-spot.x,prop.z-spot.z)>1.5,`${tower.sign} drop-off is on top of a ${prop.kind}`);
   }
   // 一号书店 (x -17.5, d 12): a metre clear of the facade, not half a metre.
@@ -65,4 +65,30 @@ test('only walking into the arrival radius counts: a warp into it never does',as
   // A warp that lands outside counts as having left: walking in afterwards arrives.
   s=arrivalStep(s,false,2);assert.equal(s.arrived,false);
   s=arrivalStep(s,true,2);assert.equal(s.arrived,true);
+});
+
+test('云海 ground: downtown, the promenade and the hill side are walkable; the bay and past the edges are not',async()=>{
+  const {onCityGround}=await import('../src/core/city.js');
+  const walk=city.place.walk,edge=.42;
+  // The avenue, the plaza on the promenade, both ends of the promenade, and the ground up to the hill.
+  for(const [x,z] of [[0,0],[0,24.5],[0,-41],[-38,-41],[68,-40],[-34,8],[-60,-40]])
+    assert.equal(onCityGround(walk,x,z,edge),true,`(${x},${z}) should be walkable`);
+  // Past the railing into the bay, behind the promenade's east end, off the east and south edges.
+  for(const [x,z] of [[0,-48.5],[40,-20],[28.5,0],[0,34.5],[71,-40],[-121,0]])
+    assert.equal(onCityGround(walk,x,z,edge),false,`(${x},${z}) should be off the ground`);
+  // Where two stretches of ground meet there is no seam: the avenue runs straight on into the plaza,
+  // and the promenade's west end runs on to the foot of the hill.
+  for(let z=-30;z>=-47;z-=.1)assert.equal(onCityGround(walk,0,z,edge),true,`seam at z ${z.toFixed(1)}`);
+  for(let x=-30;x>=-45;x-=.1)assert.equal(onCityGround(walk,x,-41,edge),true,`seam at x ${x.toFixed(1)}`);
+});
+
+test('the promenade path curves inside the promenade and runs through the middle of its plaza',async()=>{
+  const {promenadeZ}=await import('../src/core/city.js');
+  const p=city.promenade,half=p.path.width/2;
+  assert.equal(promenadeZ(p,p.plaza.x),p.plaza.z);
+  let low=Infinity,high=-Infinity;
+  for(let x=p.x[0];x<=p.x[1];x+=.5){const z=promenadeZ(p,x);low=Math.min(low,z);high=Math.max(high,z);}
+  assert.ok(high-low>3,'the path should visibly curve');
+  // At least two metres of paving on either side of it all the way along, for the benches, lamps and trees.
+  assert.ok(low-half>=p.z[0]+2&&high+half<=p.z[1]-2,`path spans ${low-half}..${high+half}`);
 });

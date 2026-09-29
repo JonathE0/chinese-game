@@ -75,11 +75,22 @@ function walk(r,[x0,z0],[x1,z1]){
   return dist[tj*W+ti]<0?Infinity:dist[tj*W+ti]*st;
 }
 
-test('from the west lane\'s mouth to 青禾银行\'s door is a short, direct walk down the side alley',()=>{
-  // The door point sits against the wall; you stand a step out from it (青禾银行 faces north).
-  const d=walk(square(),[-11,-2],[rooms.bank.door.x,rooms.bank.door.z-.7]);
-  // The straight-line grid distance is 13.8 m; the way round the far side of the tea-house is 20 m.
-  assert.ok(d<=15,`${d} m`);
+// Wave 2 (Task X-exterior) turned 青禾银行 round: it used to face north into the corner behind the
+// tea-house, reached down a side alley. Now its columned front faces south onto the west lane, the
+// street from the fountain to 河边文化街.
+test('青禾银行\'s door opens onto the west lane, a straight walk from the square with nothing in the way',()=>{
+  const b=building('bank-branch'),door=rooms.bank.door,front=b.z+b.depth/2;
+  assert.equal(b.rotation??0,0,'the front faces south, onto the lane');
+  assert.deepEqual([door.x,door.z],[b.x,front+.1],'the door point is at the middle of the front');
+  const where=quests.quests.find(q=>q.id==='teahouse-permit').where;
+  assert.ok(Math.abs(where.x-b.x)<=b.width/2&&Math.abs(where.z-b.z)<=b.depth/2,'the permit marker points at the bank');
+  // Clear paving in front of the steps, between the two lions.
+  const approach=({x,z})=>Math.abs(x-b.x)<1.1&&z>front&&z<front+2.4;
+  for(const one of standing())assert.ok(!approach(one),`${one.kind??one.id} at ${one.x},${one.z}`);
+  // From the lane's mouth by the square you stand a step out from the door in about the straight
+  // line (7.7 m on the grid); the old way round the tea-house was 14 m.
+  const d=walk(square(),[-11,-2],[door.x,door.z+.7]);
+  assert.ok(d<=9,`${d} m`);
 });
 
 test('the guesthouse door opens north onto the open lane that runs east into the square',()=>{
@@ -93,8 +104,20 @@ test('the guesthouse door opens north onto the open lane that runs east into the
   for(const one of standing())assert.ok(!approach(one),`${one.kind??one.id} at ${one.x},${one.z}`);
 });
 
-test('云海\'s streetlights stand on the kerb, leaving the pavement clear',()=>{
-  // The kerb strip is drawn 0.9 m wide at x ±7.6 (src/world/city.js).
-  for(const p of city.props.filter(p=>p.kind==='citylamp'||p.kind==='trafficlight'))
-    assert.ok(Math.abs(Math.abs(p.x)-7.6)<=.45,`${p.kind} at ${p.x},${p.z}`);
+test('云海\'s poles and lamps stand clear of every walking line: pavements, crossing landings, the road and the lit path',async()=>{
+  const {promenadeZ}=await import('../src/core/city.js');
+  // A pole's hitbox reaches 0.3 m round it (a promenade lamp's 0.2 m). The pavements run from the
+  // line of lamps and planters (x ±8.35) to the colonnades at ±11.2; a crossing's landings are the
+  // pavement at either end of it, from the kerb out to that line of lamps and planters.
+  const {road:[x0,x1,z0,z1],bays}=city.street,p=city.promenade;
+  const lines=[[-11.2,-8.35,-34,34],[8.35,11.2,-34,34],[x0,x1,z0,z1],...bays];
+  for(const c of city.props.filter(one=>one.kind==='citycrossing'))
+    lines.push([x1,5.6,c.z-2.2,c.z+2.2],[-5.6,x0,c.z-2.2,c.z+2.2]);
+  const inside=(one,r,[ax,bx,az,bz])=>one.x+r>ax&&one.x-r<bx&&one.z+r>az&&one.z-r<bz;
+  for(const one of city.props.filter(one=>['citylamp','trafficlight','promenadelamp'].includes(one.kind))){
+    const r=one.kind==='promenadelamp'?.2:.3;
+    for(const line of lines)assert.ok(!inside(one,r,line),`${one.kind} at ${one.x},${one.z} stands in [${line}]`);
+    if(one.kind==='promenadelamp')
+      assert.ok(Math.abs(one.z-promenadeZ(p,one.x))>p.path.width/2+r,`${one.kind} at ${one.x},${one.z} stands on the lit path`);
+  }
 });

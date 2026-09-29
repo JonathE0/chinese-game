@@ -32,12 +32,14 @@ export function makeGrid(blocked,[x0,z0,x1,z1],cell=CELL,seed=null){
   }
   return g;
 }
-function centre(g,n){return {x:g.x0+(n%g.nx+.5)*g.cell,z:g.z0+(Math.floor(n/g.nx)+.5)*g.cell};}
+export function centre(g,n){return {x:g.x0+(n%g.nx+.5)*g.cell,z:g.z0+(Math.floor(n/g.nx)+.5)*g.cell};}
 function nearestFree(g,p){
   let best=-1,bestD=Infinity;
-  for(let n=0;n<g.free.length;n++)if(g.free[n]){const c=centre(g,n),d=(c.x-p.x)**2+(c.z-p.z)**2;if(d<bestD){bestD=d;best=n;}}
+  for(let n=0;n<g.free.length;n++)if(g.free[n]){const d=gap(g,n,p);if(d<bestD){bestD=d;best=n;}}
   return best;
 }
+/** Squared distance from a cell's centre to a point, without making the centre. */
+function gap(g,n,p){const dx=g.x0+(n%g.nx+.5)*g.cell-p.x,dz=g.z0+(Math.floor(n/g.nx)+.5)*g.cell-p.z;return dx*dx+dz*dz;}
 /** Breadth first over free cells, eight ways round, never cutting the corner of a blocked cell. */
 function flood(g,start){
   const prev=new Int32Array(g.free.length).fill(-1),queue=[start];prev[start]=start;
@@ -61,7 +63,7 @@ export function findPath(g,from,to,clear){
   const start=nearestFree(g,from);if(start<0)return [];
   const {prev,queue}=flood(g,start);
   let best=start,bestD=Infinity;
-  for(const n of queue){const c=centre(g,n),d=(c.x-to.x)**2+(c.z-to.z)**2;if(d<bestD){bestD=d;best=n;}}
+  for(const n of queue){const d=gap(g,n,to);if(d<bestD){bestD=d;best=n;}}
   const points=[];for(let n=best;n!==start;n=prev[n])points.unshift(centre(g,n));
   points.unshift(from,centre(g,start));
   const out=[];
@@ -72,10 +74,10 @@ export function findPath(g,from,to,clear){
   return out;
 }
 /** A grid with the cells round some spots ({x,z,radius} plus the grid's clearance) taken out. */
-function without(g,spots){
+export function without(g,spots){
   if(!spots.length)return g;
   const free=g.free.slice();
-  for(let n=0;n<free.length;n++)if(free[n]){const c=centre(g,n);if(spots.some(s=>Math.hypot(c.x-s.x,c.z-s.z)<s.radius+CLEAR))free[n]=0;}
+  for(let n=0;n<free.length;n++)if(free[n])for(const s of spots)if(gap(g,n,s)<(s.radius+CLEAR)**2){free[n]=0;break;}
   return {...g,free};
 }
 /** Whether someone may walk from one room into another: `from` keeps its fewest, `to` stays within

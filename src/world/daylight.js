@@ -47,6 +47,16 @@ export const clockText=hour=>{
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 };
 
+/**
+ * The sun only turns with the hour while the camera is within this many metres of the origin, which
+ * takes in the whole town. The engine snaps sun-shadow texels to a grid through the world origin,
+ * so any turn shifts a place's shadow edges by its distance from the origin times the angle: in
+ * the rooms (400 m to 10 km out) and 云海 (4 km) that was a texel or more every frame, and every
+ * shadow edge there flickered. There the sun holds its angle until you are back in town, or the
+ * clock is set.
+ */
+export const SUN_TURNS_WITHIN=200;
+
 export class Daylight {
   constructor(app,sun,camera){
     this.app=app;this.sun=sun;this.camera=camera;
@@ -54,9 +64,10 @@ export class Daylight {
   }
   /** Register a material that should glow after dark (lanterns, street lights, room lamps). */
   addLamp(material,peak=1){this.lamps.push({material,peak,last:-1});return material;}
-  advance(dt){if(!this.paused)this.hour=(this.hour+dt*(24/(MINUTES_PER_DAY*60)))%24;this.apply();}
+  advance(dt){if(!this.paused)this.hour=(this.hour+dt*(24/(MINUTES_PER_DAY*60)))%24;this.apply(this.camera.getPosition().length()<SUN_TURNS_WITHIN);}
   setHour(hour){this.hour=((hour%24)+24)%24;this.apply();}
-  apply(){
+  /** `turn`: also move the sun to this hour's angle (see SUN_TURNS_WITHIN). */
+  apply(turn=true){
     const state=skyAt(this.hour);
     this.state=state;
     this.app.scene.ambientLight=state.ambient;
@@ -65,7 +76,7 @@ export class Daylight {
     this.sun.light.intensity=state.intensity;
     // The sun swings east to west and dips below the horizon at night.
     const dayProgress=(this.hour-6)/12;
-    this.sun.setEulerAngles(Math.max(8,Math.sin(Math.PI*Math.min(1,Math.max(0,dayProgress)))*62+8),-140+dayProgress*160,0);
+    if(turn)this.sun.setEulerAngles(Math.max(8,Math.sin(Math.PI*Math.min(1,Math.max(0,dayProgress)))*62+8),-140+dayProgress*160,0);
     // emissiveIntensity is a shader uniform: it needs an update() to take effect, so only
     // push a change when the value has actually moved.
     for(const lamp of this.lamps){

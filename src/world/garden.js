@@ -1,6 +1,7 @@
 import * as pc from 'playcanvas';
 import garden from '../content/garden.json' with {type:'json'};
-import {gardenMarks,shoreline,isDisc,inAny,balustrade,pavilionColumns,watersideColumns,LANTERN_ARM} from '../core/garden.js';
+import {gardenMarks,shoreline,isDisc,inShape,inAny,balustrade,pavilionColumns,watersideColumns,LANTERN_ARM} from '../core/garden.js';
+import {waterOf} from './water.js';
 
 /**
  * 莲池公园 — Lotus Pond Park, south of the square through the moon gate. Everything here is built
@@ -17,16 +18,21 @@ const C={paving:'#d8cdb2',plaster:'#efe9dc',coping:'#6d7471',ridge:'#565c5a',ver
 const DEG=180/Math.PI;
 
 export function buildGarden(models,parent,lamps){
-  const {box,cylinder,ball,shape,label,lantern,tiledRoof,stoneBridge,rockery,walkway,waterMaterial}=models;
+  const {box,cylinder,ball,shape,label,lantern,tiledRoof,stoneBridge,rockery,walkway}=models;
   const root=new pc.Entity('garden');parent.addChild(root);
   const W=garden.water,level=W.level;
 
-  // One water material for the pond, the stream and the fall (and the town's canal). Opaque, so
-  // the overlapping pieces of the pond's outline read as one sheet.
-  const water=waterMaterial();
-  const wet=e=>{e.render.meshInstances[0].material=water;e.render.castShadows=false;return e;};
-  const sheet=(s,y,thick)=>wet(isDisc(s)?cylinder(root,[s.x,y,s.z],[s.r*2,thick,s.r*2],'#79aaa8')
-    :box(root,[(s.x0+s.x1)/2,y,(s.z0+s.z1)/2],[s.x1-s.x0,thick,s.z1-s.z0],'#79aaa8'));
+  // The water (src/world/water.js): the pond drifts, each stretch of the stream runs its own way
+  // (its `flow`) from the fall to the pond, and the fall pours. Opaque, so the overlapping pieces
+  // of the pond's outline read as one sheet; the stream lies a hair above the pond where they meet.
+  const app=pc.AppBase.getApplication(),water=waterOf(app),pond=water.surface({flow:[.03,.05],tile:3.4,ripple:.13});
+  const streams=new Map(),stream=flow=>{
+    if(!streams.has(String(flow)))streams.set(String(flow),water.surface({flow,tile:2.6,ripple:.2}));
+    return streams.get(String(flow));
+  };
+  const wet=(e,material)=>{e.render.meshInstances[0].material=material;e.render.castShadows=false;return e;};
+  const sheet=(s,y,thick,material)=>wet(isDisc(s)?cylinder(root,[s.x,y,s.z],[s.r*2,thick,s.r*2],'#79aaa8')
+    :box(root,[(s.x0+s.x1)/2,y,(s.z0+s.z1)/2],[s.x1-s.x0,thick,s.z1-s.z0],'#79aaa8'),material);
   // A pivot turned about y, so a part can be laid out along its own x axis.
   const pivot=(x,y,z,yaw)=>{const e=new pc.Entity('pivot');e.setLocalPosition(x,y,z);e.setLocalEulerAngles(0,yaw,0);root.addChild(e);return e;};
 
@@ -34,10 +40,15 @@ export function buildGarden(models,parent,lamps){
   for(const s of garden.paths)box(root,[(s.x0+s.x1)/2,.03,(s.z0+s.z1)/2],[s.x1-s.x0,.06,s.z1-s.z0],C.paving);
 
   // The pond and the stream, edged with stones except where a bridge or the stream meets them.
-  for(const s of garden.pond)sheet(s,level,.04);
-  for(const s of garden.stream)sheet(s,level,.04);
-  sheet(garden.streamMouth,level,.04);   // where the stream runs into the pond
-  const ws=garden.waterside;
+  for(const s of garden.pond)sheet(s,level,.04,pond);
+  for(const s of garden.stream)sheet(s,level+.005,.04,stream(s.flow));
+  sheet(garden.streamMouth,level+.005,.04,stream(garden.streamMouth.flow));   // where the stream runs into the pond
+  const ws=garden.waterside,is=garden.island;
+  // A thrown thing floats on the water and it laps at the bank; the island, the bridges and the
+  // waterside pavilion stand in it, dry.
+  const dry=(x,z)=>inShape(is,x,z)||(x>ws.x0&&x<ws.x1&&z>ws.z0&&z<ws.z1)
+    ||garden.bridges.some(b=>Math.abs(x-b.x)<b.width/2&&z>b.steps[0][0]&&z<b.steps.at(-1)[1]);
+  water.body('town',[...garden.pond,...garden.stream,garden.streamMouth],level+.02,dry);
   const landing=(x,z)=>garden.bridges.some(b=>Math.abs(x-b.x)<b.width/2+.3&&z>b.steps[0][0]-.3&&z<b.steps.at(-1)[1]+.3)
     ||(x>ws.x0-.3&&x<ws.x1+.3&&z>ws.z0-.3&&z<ws.z1+.3);
   const skip=garden.shoreStonesSkip;
@@ -53,9 +64,8 @@ export function buildGarden(models,parent,lamps){
   for(const k of garden.koi)shape(root,'sphere',[k.x,level+.03,k.z],[.5,.08,.22],k.color,[0,k.rot,0]);
 
   // The island: a stone drum with a low balustrade, open where the two bridges land.
-  const is=garden.island;
   cylinder(root,[is.x,is.top/2,is.z],[is.r*2,is.top,is.r*2],C.stone).lookName='stone';
-  cylinder(root,[is.x,is.top-.05,is.z],[is.r*2+.2,.1,is.r*2+.2],C.stoneDark).lookName='railing';
+  cylinder(root,[is.x,is.top-.06,is.z],[is.r*2+.2,.1,is.r*2+.2],C.stoneDark).lookName='railing';
   // Every other collision post is drawn, plus each arc's end post beside a bridge rail.
   const all=balustrade(is),half=all.length/2;
   for(const arc of [all.slice(0,half),all.slice(half)]){
@@ -91,7 +101,7 @@ export function buildGarden(models,parent,lamps){
   // 荷风水榭: a waterside pavilion on the east bank, its floor reaching out over the pond, with a
   // low railing on the three sides over the water and its plaque facing the covered walkway.
   const wy=ws.floorTop,wx=(ws.x0+ws.x1)/2,wz=(ws.z0+ws.z1)/2,wW=ws.x1-ws.x0,wD=ws.z1-ws.z0;
-  const pier=box(root,[wx,(wy-.4)/2,wz],[wW,wy+.4,wD],C.stoneDark);pier.lookName='waterside';
+  const pier=box(root,[wx,(wy-.4)/2-.01,wz],[wW,wy+.4,wD],C.stoneDark);pier.lookName='waterside';
   box(root,[wx,wy-.04,wz],[wW+.1,.08,wD+.1],C.timber).lookName='waterside';
   box(root,[ws.x1+.3,wy/4,wz],[.6,wy/2,2.4],C.stone).lookName='waterside';          // the step up from the bank
   for(const c of watersideColumns(ws))cylinder(root,[c.x,wy+ws.height/2,c.z],[.24,ws.height,.24],C.timberDark).lookName='pillar';
@@ -100,7 +110,10 @@ export function buildGarden(models,parent,lamps){
     box(rail,[x,wy+.62,z],[w,.1,d],C.timber);box(rail,[x,wy+.2,z],[w,.08,d],C.timber);
   }
   tiledRoof(root,wx,wz,wW-.2,wD-.2,wy+ws.height,C.coping,4);
-  const plaque=label(root,ws.plaque,[ws.x1+.02,wy+ws.height-.3,wz],1.7,.44,'#3d4f47','#e8c46a');
+  // The plaque hangs from a tie beam a little inside the east face: on the face itself it sat up
+  // behind the covered walkway's roof, and from under that roof you could not see it.
+  box(root,[ws.x1-.8,wy+ws.height-.07,wz],[.14,.14,wD],C.timberDark).lookName='waterside';
+  const plaque=label(root,ws.plaque,[ws.x1-.8,wy+ws.height-.36,wz],1.7,.44,'#3d4f47','#e8c46a');
   plaque.setLocalEulerAngles(0,90,0);
   walkway(root,garden.walkway,lamps);
 
@@ -110,7 +123,7 @@ export function buildGarden(models,parent,lamps){
     ball(root,[r.x,r.h*.45,r.z],[r.r*2,r.h,r.r*1.8],C.rock);
     ball(root,[r.x+r.r*.35,r.h*.2,r.z-r.r*.4],[r.r,r.h*.5,r.r],C.rockLight);
   }
-  wet(box(root,[wf.x,wf.top/2,wf.z],[1.1,wf.top,.14],'#79aaa8'));
+  wet(box(root,[wf.x,wf.top/2,wf.z],[1.1,wf.top,.14],'#79aaa8'),water.surface({flow:[0,1.4],tile:1.6,fall:true}));
   ball(root,[wf.x,level+.1,wf.z-.35],[1.5,.35,.9],C.foam);
 
   // The mill house and its wheel, which turns in the stream on an axle from the wall.
@@ -131,8 +144,35 @@ export function buildGarden(models,parent,lamps){
   }
   for(let i=0;i<4;i++)for(const z of [-T/2+.05,T/2-.05])box(wheelRoot,[0,0,z],[R*2,.08,.08],C.timberDark,[0,0,i*45]);
   cylinder(wheelRoot,[0,0,0],[.3,T+.1,.3],C.timberDark,[90,0,0]);
-  const app=pc.AppBase.getApplication?.();
-  app?.on('update',dt=>{if(root.enabled)wheelRoot.rotateLocal(0,0,wheel.spin*Math.min(dt,.05));});
+
+  // Now and then a koi leaps out of the open water, and rings spread where it leaves and lands. One
+  // fish, carried along its arc by a pivot (heading) and a body (pitch); hidden between leaps.
+  const koi=new pc.Entity('koi-leap');koi.noBatch=true;koi.enabled=false;root.addChild(koi);
+  const fish=new pc.Entity('koi');koi.addChild(fish);
+  shape(fish,'sphere',[0,0,0],[.5,.16,.22],garden.koi[0].color);
+  shape(fish,'cone',[-.3,0,0],[.14,.22,.2],garden.koi[0].color,[0,0,-90]);
+  const LEAP={time:.8,high:.55,reach:.9},leap={on:false,wait:4,t:0,x:0,z:0,dx:0,dz:0};
+  const open=(x,z)=>inAny(garden.pond,x,z,1)&&!dry(x,z)&&!inShape(is,x,z,-1.2)&&!garden.lotus.some(l=>Math.hypot(x-l.x,z-l.z)<1);
+  app.on('update',dt=>{
+    if(!root.enabled)return;
+    dt=Math.min(dt,.05);
+    wheelRoot.rotateLocal(0,0,wheel.spin*dt);
+    if(water.place!=='town')return;   // only where someone could see it
+    if(!leap.on){
+      if((leap.wait-=dt)>0)return;
+      const p=garden.pond[0],a=Math.random()*Math.PI*2;
+      leap.x=p.x0+Math.random()*(p.x1-p.x0);leap.z=p.z0+Math.random()*(p.z1-p.z0);
+      leap.dx=Math.cos(a)*LEAP.reach;leap.dz=Math.sin(a)*LEAP.reach;
+      if(!open(leap.x,leap.z)||!open(leap.x+leap.dx,leap.z+leap.dz)){leap.wait=.5;return;}
+      leap.on=true;leap.t=0;leap.wait=4+Math.random()*6;
+      koi.setLocalEulerAngles(0,-a*DEG,0);koi.enabled=true;water.ripple(leap.x,leap.z,.8);
+    }
+    const k=Math.min(1,(leap.t+=dt)/LEAP.time);
+    koi.setLocalPosition(leap.x+leap.dx*k,level+4*LEAP.high*k*(1-k),leap.z+leap.dz*k);
+    fish.setLocalEulerAngles(0,0,Math.atan2(4*LEAP.high*(1-2*k),LEAP.reach)*DEG);
+    if(k<1)return;
+    leap.on=false;koi.enabled=false;water.ripple(leap.x+leap.dx,leap.z+leap.dz,1);
+  });
 
   // Planting: sculpted pines with cloud-pruned pads, flowering trees, and the court's rockeries.
   for(const t of garden.pines){

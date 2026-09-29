@@ -356,6 +356,76 @@
       "pinyin": "huānyíng láidào Yúnhǎi",
       "en": "Welcome to Yunhai"
     },
+    "我爱云海": {
+      "id": "love-yunhai",
+      "pinyin": "wǒ ài Yúnhǎi",
+      "en": "I love Yunhai"
+    },
+    "云海中心": {
+      "id": "yunhai-centre",
+      "pinyin": "Yúnhǎi Zhōngxīn",
+      "en": "Yunhai Centre"
+    },
+    "好好学习": {
+      "id": "study-hard",
+      "pinyin": "hǎohǎo xuéxí",
+      "en": "Study hard"
+    },
+    "天天向上": {
+      "id": "make-progress",
+      "pinyin": "tiāntiān xiàngshàng",
+      "en": "Make progress every day"
+    },
+    "万家灯火": {
+      "id": "lights-homes",
+      "pinyin": "wàn jiā dēnghuǒ",
+      "en": "Lights in ten thousand homes"
+    },
+    "一路平安": {
+      "id": "safe-journey",
+      "pinyin": "yílù píng'ān",
+      "en": "Have a safe journey"
+    },
+    "你好": {
+      "id": "hello",
+      "pinyin": "nǐ hǎo",
+      "en": "Hello"
+    },
+    "晚安": {
+      "id": "good-night",
+      "pinyin": "wǎn'ān",
+      "en": "Good night"
+    },
+    "学中文": {
+      "id": "learn-chinese",
+      "pinyin": "xué Zhōngwén",
+      "en": "Learn Chinese"
+    },
+    "城市之光": {
+      "id": "city-light",
+      "pinyin": "chéngshì zhī guāng",
+      "en": "Light of the city"
+    },
+    "海风大厦": {
+      "id": "sea-breeze-tower",
+      "pinyin": "Hǎifēng Dàshà",
+      "en": "Sea Breeze Tower"
+    },
+    "云海湾": {
+      "id": "yunhai-bay",
+      "pinyin": "Yúnhǎi Wān",
+      "en": "Yunhai Bay"
+    },
+    "滨海步道": {
+      "id": "seaside-promenade",
+      "pinyin": "bīnhǎi bùdào",
+      "en": "Seaside promenade"
+    },
+    "无人机表演": {
+      "id": "drone-show",
+      "pinyin": "wúrénjī biǎoyǎn",
+      "en": "Drone show"
+    },
     "五金 · 家居 · 灯具": {
       "id": "hardware-banner",
       "pinyin": "wǔjīn · jiājū · dēngjù",
@@ -550,6 +620,41 @@
       "id": "buy-second-hand",
       "pinyin": "jiùwù huíshōu",
       "en": "We buy second-hand goods"
+    },
+    "山城步道": {
+      "id": "hill-trail",
+      "pinyin": "Shānchéng bùdào",
+      "en": "Mountain City Trail"
+    },
+    "观景台": {
+      "id": "viewpoint",
+      "pinyin": "guānjǐngtái",
+      "en": "Viewing platform"
+    },
+    "小心台阶": {
+      "id": "mind-the-steps",
+      "pinyin": "xiǎoxīn táijiē",
+      "en": "Mind the steps"
+    },
+    "山城老火锅": {
+      "id": "hotpot",
+      "pinyin": "Shānchéng Lǎo Huǒguō",
+      "en": "Mountain City Old Hotpot"
+    },
+    "蘸料台": {
+      "id": "hotpot-sauce",
+      "pinyin": "zhànliàotái",
+      "en": "Sauce station"
+    },
+    "福": {
+      "id": "good-fortune",
+      "pinyin": "fú",
+      "en": "Good fortune"
+    },
+    "加油": {
+      "id": "keep-going",
+      "pinyin": "jiāyóu",
+      "en": "Keep going!"
     }
   }
 }

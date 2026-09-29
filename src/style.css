@@ -762,3 +762,19 @@ body.riding .controls,body.riding #crosshair,body.riding #interact,body.riding #
 .setting-row select{padding:7px 9px;background:#f2efdf;border:1px solid #ccd2b9;border-radius:7px;color:#58694f;font-size:12px}
 /* Admin mode badge (?admin on the dev server). */
 body.admin::after{content:'ADMIN';position:fixed;left:8px;bottom:8px;z-index:50;padding:2px 7px;border-radius:6px;background:#b8463a;color:#fff;font:600 11px/1.4 system-ui,sans-serif;letter-spacing:1px;pointer-events:none}
+/* 山城老火锅: the hotpot menu (src/ui/hotpot.js). Tabs, choices and steppers reuse the shared styles. */
+.hotpot-tabs{margin:14px 0 6px}
+.hotpot-choices{display:flex;flex-direction:column;gap:6px}
+.hotpot-choices .choice{display:flex;align-items:baseline;gap:8px;text-align:left}
+.hotpot-choices .choice span{margin-left:auto}
+.hotpot-menu,.hotpot-bill ul{list-style:none;margin:0;padding:0}
+.hotpot-menu li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e7e2cd}
+.hotpot-menu .grow{flex:1;min-width:0}
+.hotpot-menu b{font-family:'Noto Serif SC',serif;font-size:14px;font-weight:500}
+.hotpot-menu small,.hotpot-choices small,.hotpot-bill small{color:#909883;font-size:10px}
+.hotpot-price{font-size:12px;white-space:nowrap}
+.hotpot-bill{margin:14px 0;padding:10px 12px;background:#f6f1e0;border-radius:10px;font-size:12px}
+.hotpot-bill li{display:flex;justify-content:space-between;padding:3px 0}
+.hotpot-bill h3{margin-top:10px;font-size:13px}
+.hotpot-total{display:flex;align-items:baseline;gap:6px;border-top:1px solid #d8d2b8;margin-top:6px;padding-top:6px}
+.hotpot-total span{margin-left:auto;font-weight:600}

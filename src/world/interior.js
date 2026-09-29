@@ -203,7 +203,7 @@ export function buildRoom(models,parent,data,index,id){
       // Flush with the wall, and thick enough to take in the back wall's low trim strip.
       const face=onWall(root,wall,(a0+a1)/2,w,d,0);
       box(face,[0,WAINSCOT/2,.035],[a1-a0,WAINSCOT,.07],decor.wainscot).lookName='wall';
-      box(face,[0,WAINSCOT,.045],[a1-a0,.06,.09],data.trim).lookName='wall';
+      box(face,[0,WAINSCOT,.045],[a1-a0+.01,.06,.09],data.trim).lookName='wall';
     }
     for(const piece of decor.pieces??[])if(wallFits(piece,blocked,data))lamps.push(...wallPiece(models,onWall(root,piece.wall,piece.at,w,d),piece));
   }
@@ -214,16 +214,21 @@ export function buildRoom(models,parent,data,index,id){
     desk.setLocalPosition(d0.x,0,d0.z);desk.setLocalEulerAngles(0,d0.rot??0,0);root.addChild(desk);
     box(desk,[0,.74,0],[1.8,.08,.8],'#b08b60');
     box(desk,[-.62,.5,0],[.44,.4,.68],'#a97d55');
-    box(desk,[-.62,.5,.35],[.36,.24,.04],'#e0c69c');
+    box(desk,[-.62,.5,.352],[.36,.24,.04],'#e0c69c');
     for(const x of [-.82,.82])for(const z of [-.33,.33])box(desk,[x,.37,z],[.08,.74,.08],'#8a6c49');
     box(desk,[.1,.88,-.3],[1.0,.03,.62],'#f4ecd8').lookName='notebook';
-    box(desk,[.1,.9,-.3],[.03,.04,.62],'#c9a97a').lookName='notebook';
+    box(desk,[.1,.9,-.3],[.03,.04,.63],'#c9a97a').lookName='notebook';
     cylinder(desk,[.72,.96,-.24],[.16,.36,.16],'#9db08f').lookName='pen';
     for(const [dx,c] of [[-.04,'#c47f6b'],[.03,'#7f9ab0'],[.09,'#d9b072']])cylinder(desk,[.72+dx,1.16,-.24],[.03,.32,.03],c).lookName='pen';
     box(desk,[-.2,.82,.1],[.42,.06,.3],'#e6d9bd').lookName='paper';
     label(desk,'生词本',[.1,1.02,-.44],.86,.24,'#f2e7c8','#5f7f5f');
   }
-  if(data.lectern){
+  // A counter drawn as a piece of its own (`look`, a fitting kind: the word hall's 书案), or a plain one.
+  if(data.lectern?.look){
+    const made=models.fitting(root,data.lectern.look);
+    made.entity.setLocalPosition(data.lectern.x,0,data.lectern.z);
+    if(made.material)lamps.push(made.material);
+  } else if(data.lectern){
     const {x,z}=data.lectern;
     box(root,[x,.45,z],[1.9,.9,.75],'#8d6f52');
     box(root,[x,.94,z],[2.2,.12,.95],'#c9a97a');
@@ -324,8 +329,8 @@ function wallPiece({box,cylinder,shape,glow,latticeWindow},e,piece){
     const g=named('painting');
     box(g,[0,y,.02],[1.2,.9,.04],tint??'#6f5236');
     box(g,[0,y,.042],[1.06,.76,.01],'#dfe7e0');
-    shape(g,'cone',[-.2,y-.1,.047],[.62,.44,.004],'#8aa391');
-    shape(g,'cone',[.22,y-.14,.049],[.52,.34,.004],'#5f7d6c');
+    shape(g,'cone',[-.2,y-.1,.049],[.62,.44,.004],'#8aa391');
+    shape(g,'cone',[.22,y-.14,.051],[.52,.34,.004],'#5f7d6c');
     box(g,[0,y-.29,.05],[1.06,.18,.004],'#a9bd8f');
     cylinder(g,[.34,y+.2,.047],[.1,.004,.1],'#e3a869',[90,0,0]);
   } else if(kind==='shelf'){

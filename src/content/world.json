@@ -461,21 +461,21 @@
     {
       "id": "bank-branch",
       "details": [
-        "lions",
-        "gold-sign"
+        "lions"
       ],
       "x": -18,
       "z": -6,
-      "width": 5,
+      "width": 6,
       "depth": 5,
-      "height": 4.6,
-      "color": "#e8e4d4",
+      "height": 5.9,
+      "color": "#d9d0bd",
+      "trim": "#efe9dc",
       "roof": "#6d7d8c",
       "sign": "青禾银行",
-      "rotation": 180,
+      "rotation": 0,
       "object": "bank",
       "district": "square",
-      "style": "tiled"
+      "style": "bank"
     },
     {
       "id": "resale",
@@ -591,7 +591,7 @@
     {
       "kind": "streetlight",
       "x": -14.3,
-      "z": -3.3,
+      "z": -2.9,
       "rot": 0,
       "district": "square"
     },
@@ -681,20 +681,6 @@
     },
     {
       "kind": "streetlight",
-      "x": 38,
-      "z": -3.6,
-      "rot": 0,
-      "district": "market"
-    },
-    {
-      "kind": "streetlight",
-      "x": 38,
-      "z": 3.6,
-      "rot": 180,
-      "district": "market"
-    },
-    {
-      "kind": "streetlight",
       "x": 42,
       "z": -3.6,
       "rot": 0,
@@ -717,20 +703,6 @@
     {
       "kind": "streetlight",
       "x": 46,
-      "z": 3.6,
-      "rot": 180,
-      "district": "market"
-    },
-    {
-      "kind": "streetlight",
-      "x": 50,
-      "z": -3.6,
-      "rot": 0,
-      "district": "market"
-    },
-    {
-      "kind": "streetlight",
-      "x": 50,
       "z": 3.6,
       "rot": 180,
       "district": "market"
@@ -839,14 +811,6 @@
       "z": -7.4,
       "rot": -10,
       "district": "market"
-    },
-    {
-      "kind": "awning",
-      "x": 28,
-      "z": -5.4,
-      "rot": 0,
-      "district": "market",
-      "tint": "#5f8b93"
     },
     {
       "kind": "cafetable",
@@ -1055,14 +1019,6 @@
       "district": "market"
     },
     {
-      "kind": "awning",
-      "x": 58,
-      "z": -4.4,
-      "rot": 0,
-      "tint": "#8a7f9c",
-      "district": "market"
-    },
-    {
       "kind": "bicycle",
       "x": 52,
       "z": -2.6,
@@ -1140,8 +1096,8 @@
       15.3
     ],
     [
-      10.3,
-      2.8
+      8.8,
+      -1.8
     ],
     [
       17.8,
@@ -1667,17 +1623,6 @@
       "kind": "veranda",
       "district": "square",
       "building": "guesthouse",
-      "columns": [
-        -2.25,
-        -1.1,
-        1.1,
-        2.25
-      ]
-    },
-    {
-      "kind": "veranda",
-      "district": "square",
-      "building": "bank-branch",
       "columns": [
         -2.25,
         -1.1,

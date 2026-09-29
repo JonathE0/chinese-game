@@ -1,0 +1,20 @@
+{
+  "note": "People walking around 云海 (src/world/crowd.js). `count` people in `colors` walk between spots on the flat ground inside `areas` ([x0, z0, x1, z1], city-local metres from the master layout: downtown and the promenade), wherever the collision registry leaves room, joined to the metro spawn. They stop, sit on anything the city marks as a bench (`seatHeight`), and look out over the bay from anywhere north of `bay.z`, facing `bay.yaw`. Ground the city marks as `keepOff` (a road) is left alone except where it is also marked `crossAt`. Looking at one names them (objects.json `pedestrian`); E has them say `lines[n]`, voiced as its audio id in its speaker's cast voice by scripts/generate-voice.py.",
+  "count": 32,
+  "areas": [[-28, -34, 28, 34], [-40, -48, 70, -34]],
+  "seatHeight": 0.5,
+  "bay": {"z": -45.5, "yaw": 180},
+  "keepOff": "road",
+  "crossAt": "crossing",
+  "colors": ["#4a5a6b", "#b0654f", "#6f8fb0", "#c9855f", "#5f7d6a", "#8a6fa3", "#d0a24f", "#3f4f5f"],
+  "lines": [
+    {"speaker": "friend-b", "audio": "crowd-1", "zh": "今天天气真好！", "pinyin": "Jīntiān tiānqì zhēn hǎo!", "en": "Lovely weather today!"},
+    {"speaker": "student", "audio": "crowd-2", "zh": "晚上一起去看无人机表演吧！", "pinyin": "Wǎnshang yìqǐ qù kàn wúrénjī biǎoyǎn ba!", "en": "Let's go and watch the drone show tonight!"},
+    {"speaker": "friend-a", "audio": "crowd-3", "zh": "我去山上吃火锅。", "pinyin": "Wǒ qù shān shàng chī huǒguō.", "en": "I'm going up the hill for hotpot."},
+    {"speaker": "narrator", "audio": "crowd-4", "zh": "地铁站在那边。", "pinyin": "Dìtiězhàn zài nàbiān.", "en": "The metro station's over there."},
+    {"speaker": "friend-b", "audio": "crowd-5", "zh": "云海的夜景真漂亮。", "pinyin": "Yúnhǎi de yèjǐng zhēn piàoliang.", "en": "Yunhai looks beautiful at night."},
+    {"speaker": "friend-a", "audio": "crowd-6", "zh": "不好意思，借过一下。", "pinyin": "Bù hǎoyìsi, jièguò yíxià.", "en": "Excuse me, coming through."},
+    {"speaker": "narrator", "audio": "crowd-7", "zh": "我要去上班了。", "pinyin": "Wǒ yào qù shàngbān le.", "en": "I'm off to work."},
+    {"speaker": "student", "audio": "crowd-8", "zh": "你也是来旅游的吗？", "pinyin": "Nǐ yě shì lái lǚyóu de ma?", "en": "Are you here on holiday too?"}
+  ]
+}

@@ -1,5 +1,6 @@
 import * as pc from 'playcanvas';
 import {bridgeRails,shoreline,walkwayLayout,walkwayMarks,latticeWindows,latticeWallMarks,verandaLayout,verandaMarks,canalMarks} from '../core/garden.js';
+import {waterOf} from './water.js';
 export function createModels(app) {
   const cache=new Map();
   function material(hex) {
@@ -162,15 +163,17 @@ export function createModels(app) {
   function building(parent,data) {
     const root=new pc.Entity(data.id);root.setLocalPosition(data.x,0,data.z);root.setLocalEulerAngles(0,data.rotation||0,0);parent.addChild(root);
     const w=data.width,d=data.depth,h=data.height,style=data.style??'tiled';
-    box(root,[0,h/2,0],[w,h,d],data.color);
-    if(style!=='tiled'||data.storeys===2)tag(box(root,[0,.2,0],[w+.2,.4,d+.2],'#c7b798'),'stone');   // tiled fronts have a plinth
+    // The bank draws its own body round a recessed entrance, and its own stone base.
+    if(style!=='bank')box(root,[0,h/2,0],[w,h,d],data.color);
+    if((style!=='tiled'&&style!=='bank')||data.storeys===2)tag(box(root,[0,.2,0],[w+.2,.4,d+.2],'#c7b798'),'stone');   // tiled fronts have a plinth
     // Extra named parts (a balcony, a chimney) and lit windows are handed back on the entity, in
     // world coordinates, for the town to register and for the daylight to dim.
     const face=(data.rotation??0)===180?-1:1;
     root.marks=[];root.lamps=[];
     root.addMark=(lx,lz,hw,hd,y0,y1,name,solid=false,round=false)=>root.marks.push({x:data.x+face*lx,z:data.z+face*lz,
       ...(round?{radius:hw}:{hw,hd}),y0,y1,name,solid});
-    if(style==='modern')modernFront(root,data,w,d,h);
+    if(style==='bank')bankFront(root,data,w,d,h);
+    else if(style==='modern')modernFront(root,data,w,d,h);
     else if(style==='shophouse')shophouseFront(root,data,w,d,h);
     else if(data.storeys===2)houseFront(root,data,w,d,h);
     else tiledFront(root,data,w,d,h);
@@ -234,7 +237,7 @@ export function createModels(app) {
   function houseFront(root,data,w,d,h) {
     const f=d/2,floor=3.05;
     for(const x of [-w/2+.2,w/2-.2])tag(box(root,[x,h/2,f+.025],[.23,h,.2],'#8e6952'),'pillar');
-    box(root,[0,floor,f+.03],[w,.18,.15],'#9c7558');
+    box(root,[0,floor,f+.03],[w+.01,.18,.15],'#9c7558');
     // Ground floor: the door and a window either side.
     box(root,[0,1.15,f+.1],[1.15,2.1,.16],'#6c7661');
     for(const x of [-.28,.28])box(root,[x,1.2,f+.22],[.045,1.9,.03],'#cdb486');
@@ -243,7 +246,7 @@ export function createModels(app) {
     // First floor: a glazed balcony door between two windows, and the balcony across the front.
     latticeWindow(root,0,4.1,f+.06,1.1,1.85);
     for(const x of [-2.25,2.25])latticeWindow(root,x,4.25,f+.06,1.3,1.3);
-    box(root,[0,h-.55,f+.04],[w,.16,.14],'#9c7558');
+    box(root,[0,h-.55,f+.04],[w+.01,.16,.14],'#9c7558');
     for(let x=-w/2+.7;x<w/2-.5;x+=.9)box(root,[x,h-.3,f+.06],[.12,.34,.16],'#8e6952');
     const bw=w-.6,reach=1.1,rail='#9a4f42';
     box(root,[0,floor,f+reach/2],[bw,.16,reach],'#9c7558');
@@ -252,7 +255,7 @@ export function createModels(app) {
     box(root,[0,floor+.2,f+reach-.05],[bw,.08,.08],rail);
     for(const side of [-1,1]){
       box(root,[side*(bw/2-.05),floor+.9,f+reach/2],[.1,.1,reach],rail);
-      box(root,[side*(bw/2-.05),floor+.45,f+reach-.05],[.1,.9,.1],rail);
+      box(root,[side*(bw/2-.05),floor+.45,f+reach-.05],[.104,.9,.104],rail);
     }
     box(root,[0,floor+.55,f+reach-.05],[bw-.2,.62,.03],'#b5705f');   // railing infill, one panel
     for(const x of [-2.4,2.4])cylinder(root,[x,floor+.3,f+.45],[.36,.34,.36],'#b0654f');
@@ -279,28 +282,68 @@ export function createModels(app) {
    * door; the study gets a window onto a bookshelf.
    */
   function buildWing(root,data,wing) {
-    const {x,z,width:w,depth:d,height:h}=wing,f=z+d/2,outer=x+Math.sign(x)*w/2;
-    box(root,[x,h/2,z],[w,h,d],wing.color??data.color);
+    const {x,z,width:w,depth:d,height:h}=wing,f=z+d/2,outer=x+Math.sign(x)*w/2,wall=wing.color??data.color;
+    // The kitchen window looks into a shallow lit room, so its front wall is built round the opening
+    // and the room sits in the depth D behind it; any other wing is one solid block.
+    const win=wing.object==='kitchen'?{x,y:1.6,w:2,h:1.1,D:.9}:null;
+    if(win){
+      const x0=x-w/2,x1=x+w/2,wx0=win.x-win.w/2,wx1=win.x+win.w/2,y0=win.y-win.h/2,y1=win.y+win.h/2,zf=f-win.D/2;
+      box(root,[x,h/2,z-win.D/2],[w,h,d-win.D],wall);
+      box(root,[(x0+wx0)/2,h/2,zf],[wx0-x0,h,win.D],wall);
+      box(root,[(wx1+x1)/2,h/2,zf],[x1-wx1,h,win.D],wall);
+      box(root,[win.x,y0/2,zf],[win.w,y0,win.D],wall);
+      box(root,[win.x,(y1+h)/2,zf],[win.w,h-y1,win.D],wall);
+    } else box(root,[x,h/2,z],[w,h,d],wall);
     tag(box(root,[x,.2,z],[w+.2,.4,d+.2],'#c7b798'),'stone');
-    for(const px of [x-w/2+.15,x+w/2-.15])tag(box(root,[px,h/2,f+.025],[.2,h,.18],'#8e6952'),'pillar');
-    box(root,[x,h-.3,f+.03],[w,.14,.12],'#9c7558');
+    for(const px of [x-w/2+.15,x+w/2-.15])tag(box(root,[px,h/2-.01,f+.025],[.2,h-.02,.18],'#8e6952'),'pillar');   // just under the eave line
+    box(root,[x,h-.3,f+.03],[w+.01,.14,.12],'#9c7558');
     tiledRoof(root,x,z,w,d,h,wing.roof??data.roof,3,-Math.sign(x));
     if(wing.object==='kitchen'){
-      // The side door, with its name board over it.
-      const dx=x-Math.sign(x)*.62;
-      tag(box(root,[dx,1.05,f+.08],[.9,2.0,.12],'#7a5f45'),'door');
-      box(root,[dx+Math.sign(x)*.28,1.05,f+.16],[.06,.06,.05],'#d8c07e');
-      if(wing.sign){box(root,[dx,2.47,f+.1],[1.08,.5,.08],'#7d6349');label(root,wing.sign,[dx,2.47,f+.16],.92,.38,'#a4564a','#f2e2c6');}
-      root.addMark(dx,f+.3,.45,.16,0,2.1,'door');
-      // A window lit from inside: the stove, a pot on the flame and a ladle on the wall.
-      const wx=x+Math.sign(x)*.72,wy=1.55,lit=glow('#f2c27a');
-      const pane=tag(box(root,[wx,wy,f+.04],[1.0,1.0,.06],'#f2c27a'),'window');pane.render.meshInstances[0].material=lit;root.lamps.push(lit);
-      tag(box(root,[wx,wy-.34,f+.08],[.92,.3,.04],'#5d5048'),'stove');
-      tag(box(root,[wx-.12,wy-.14,f+.09],[.16,.08,.03],'#e0803c'),'stove');
-      tag(cylinder(root,[wx-.12,wy+.04,f+.1],[.4,.26,.04],'#3f4644'),'pot');
-      box(root,[wx-.12,wy+.2,f+.1],[.44,.05,.04],'#59605e');
-      tag(box(root,[wx,wy,f+.02],[1.2,1.2,.05],'#8e6952'),'window');   // frame, behind the pane
-      root.addMark(wx,f+.42,.55,.06,wy-.55,wy+.55,'window');
+      // No door on the front: the kitchen is reached from inside the house, through its west wall.
+      // A wide window instead, looking into a slice of the kitchen lit from inside: a tiled back
+      // wall, the counter with the stove and a wok on the flame, pans hanging from a rail, a shelf of
+      // jars, a stack of bowls and a lamp. It sits D deep behind the glass, so it shifts against the
+      // frame as you walk by. The name board hangs over the middle.
+      const {x:wx,y:wy,w:ww,h:wh,D}=win,back=f-D,lit=glow('#f2c27a'),tiles=glow('#efe0bf');
+      // The daylight sets every lamp's intensity, so the tiles' soft glow is in their emissive colour.
+      tiles.emissive=new pc.Color(.937*.18,.878*.18,.749*.18);tiles.update();root.lamps.push(lit,tiles);
+      if(wing.sign){box(root,[wx,2.62,f+.1],[1.08,.5,.08],'#7d6349');label(root,wing.sign,[wx,2.62,f+.16],.92,.38,'#a4564a','#f2e2c6');}
+      const tiled=box(root,[wx,wy,back+.01],[ww,wh,.02],'#efe0bf');tiled.render.meshInstances[0].material=tiles;
+      tiled.render.receiveShadows=false;   // lit from inside: the wing's own shadow must not grey it
+      for(let k=1;k<4;k++)box(root,[wx,wy-wh/2+k*wh/4,back+.025],[ww,.012,.01],'#d9c6a1');   // tile joints
+      // Seen through the glass: one group, the kitchen, rather than a name for each piece.
+      const room=group(root,'kitchen'),counter=room,pans=room,jars=room,bowls=room,lamp=room;
+      box(counter,[wx,wy-wh/2+.055,back+.21],[ww-.02,.09,.4],'#8e6952');                      // worktop, clear of the tiles and reveals
+      box(counter,[wx-.55,wy-wh/2+.14,back+.2],[.5,.08,.3],'#3f4644');                      // stove
+      box(counter,[wx-.55,wy-wh/2+.19,back+.2],[.18,.03,.12],'#e0803c').render.meshInstances[0].material=lit;
+      cylinder(counter,[wx-.55,wy-wh/2+.26,back+.2],[.38,.12,.38],'#3f4644');
+      box(pans,[wx,wy+wh/2-.16,back+.12],[ww-.2,.025,.025],'#59605e');                     // rail
+      for(const [k,r,c] of [[-.75,.22,'#3f4644'],[-.45,.28,'#b0654f'],[-.15,.18,'#3f4644'],[.14,.24,'#b0654f']]){
+        box(pans,[wx+k,wy+wh/2-.24,back+.12],[.025,.14,.02],'#59605e');
+        cylinder(pans,[wx+k,wy+wh/2-.31-r/2,back+.1],[r,.025,r],c,[90,0,0]);
+      }
+      box(room,[wx+.6,wy-.12,back+.1],[.5,.03,.18],'#7d6349');                              // shelf
+      for(const [k,c] of [[.44,'#c98568'],[.58,'#e8dcc4'],[.72,'#7f9a76']])cylinder(jars,[wx+k,wy-.03,back+.1],[.09,.15,.09],c);
+      for(let k=0;k<3;k++)cylinder(bowls,[wx+.15,wy-wh/2+.12+k*.035,back+.22],[.18-k*.01,.035,.18-k*.01],'#e8dcc4');
+      box(lamp,[wx-.1,wy+wh/2-.08,f-.35],[.012,.16,.012],'#3b3a35');
+      cylinder(lamp,[wx-.1,wy+wh/2-.18,f-.35],[.2,.08,.2],'#59605e');
+      ball(lamp,[wx-.1,wy+wh/2-.24,f-.35],[.1,.1,.1],'#f2c27a').render.meshInstances[0].material=lit;
+      // A short café curtain across the top, the glass, and the timber frame round the opening.
+      box(root,[wx,wy+wh/2-.1,f-.1],[ww-.04,.18,.02],'#b8453a');
+      const glass=new pc.StandardMaterial();
+      glass.diffuse=new pc.Color().fromString('#cfe0dc');glass.opacity=.18;glass.blendType=pc.BLEND_NORMAL;
+      glass.gloss=.9;glass.useMetalness=true;glass.metalness=.3;glass.depthWrite=false;glass.update();
+      const pane=tag(box(root,[wx,wy,f-.04],[ww+.02,wh+.02,.02],'#cfe0dc'),'window');   // its edges run into the reveals
+      pane.render.meshInstances[0].material=glass;pane.render.castShadows=false;
+      const frame=group(root,'window');
+      for(const s of [-1,1]){
+        box(frame,[wx+s*(ww/2+.05),wy,f+.04],[.104,wh+.2,.08],'#8e6952');   // on the wall face, not in it
+        box(frame,[wx,wy+s*(wh/2+.05),f+.04],[ww+.2,.1,.08],'#8e6952');
+        box(frame,[wx+s*ww/4,wy,f-.02],[.03,wh,.03],'#d9c6a1');
+      }
+      box(frame,[wx,wy,f],[.08,wh,.06],'#8e6952');box(frame,[wx,wy+.12,f-.02],[ww,.04,.03],'#d9c6a1');
+      box(frame,[wx,wy-wh/2-.08,f+.08],[ww+.3,.06,.18],'#9c7558');                            // sill
+      root.addMark(wx,f+.42,1.05,.06,wy-.55,wy+.55,'window');
       // Garlic and dried chillies hang on the outer wall, by the front corner.
       for(const [i,oz] of [[0,f-.45],[1,f-.95]]){
         const ox=outer+Math.sign(x)*.1,string=group(root,i===0?'chilli':'garlic');
@@ -320,7 +363,7 @@ export function createModels(app) {
       // A window onto a full bookshelf.
       const wx=x,wy=1.6;
       tag(box(root,[wx,wy,f+.04],[1.3,1.2,.06],'#3f4c47'),'window');
-      tag(box(root,[wx,wy,f+.06],[1.16,1.08,.02],'#7a5a40'),'shelf');
+      tag(box(root,[wx,wy,f+.063],[1.16,1.08,.02],'#7a5a40'),'shelf');
       const colours=['#a4564a','#5f7a72','#d8c07e','#6d7d8c','#c98568','#e8dcc4','#7f9a76'];
       for(const [row,sy] of [[0,wy-.36],[1,wy],[2,wy+.36]]){
         tag(box(root,[wx,sy-.14,f+.08],[1.1,.04,.03],'#5d4432'),'shelf');
@@ -357,7 +400,7 @@ export function createModels(app) {
     const f=d/2;
     tag(box(root,[0,.22,0],[w+.5,.45,d+.3],'#a39d8f'),'stone');   // stone plinth
     for(const x of [-w/2+.2,w/2-.2])tag(box(root,[x,h/2,f+.025],[.23,h,.2],'#8e6952'),'pillar');
-    for(const y of [1,h-1])tag(box(root,[0,y,f+.03],[w,.16,.15],'#9c7558'),'beam');
+    for(const y of [1,h-1])tag(box(root,[0,y,f+.03],[w+.01,.16,.15],'#9c7558'),'beam');
     for(const x of [-w*.3,w*.3])latticeWindow(root,x,1.85,f+.06,1.3,1.5);
     box(root,[0,1.15,f+.1],[1.15,2.1,.16],'#6c7661');
     for(const x of [-.28,.28])box(root,[x,1.2,f+.22],[.045,1.9,.03],'#cdb486');
@@ -418,19 +461,19 @@ export function createModels(app) {
     glass.opacity=.55;glass.blendType=pc.BLEND_NORMAL;glass.gloss=.92;
     glass.useMetalness=true;glass.metalness=.35;glass.update();
     const win=group(root,'window');
-    const pane=box(win,[0,1.55,f+.06],[w-.5,2.9,.08],'#b8d2d6');
+    const pane=box(win,[0,1.55,f+.055],[w-.5,2.9,.08],'#b8d2d6');
     pane.render.meshInstances[0].material=glass;
     for(let i=-2;i<=2;i++)box(win,[i*(w-.6)/5,1.55,f+.11],[.09,2.95,.06],'#8f9694');   // mullions
     for(const x of [-(w-.4)/2,(w-.4)/2])box(win,[x,1.55,f+.11],[.14,2.95,.12],'#6f7775');   // frame sides
     box(win,[0,2.45,f+.12],[w-.5,.07,.06],'#8f9694');           // transom
     box(root,[0,.08,f+.16],[w-.4,.16,.5],'#9aa3a0');
-    box(root,[0,3.06,f+.1],[w+.04,.14,.14],'#8f9694');
+    box(root,[0,3.06,f+.1],[w+.04,.14,.15],'#8f9694');
     box(root,[0,1.15,f+.14],[1.25,2.2,.06],'#5f6a6c');          // sliding door
     box(root,[0,1.15,f+.17],[.05,2.2,.04],'#c9d3d6');
     // A canopy over the entrance, hung from the wall on two ties, high enough to clear an awning.
     const canopy=group(root,'awning');
     box(canopy,[0,2.97,f+.52],[2.3,.1,1.0],'#8f9694');
-    box(canopy,[0,2.97,f+1.02],[2.3,.2,.06],'#c9d3d6');
+    box(canopy,[0,2.97,f+1.02],[2.31,.2,.06],'#c9d3d6');
     for(const x of [-1,1])box(canopy,[x,3.25,f+.5],[.05,.05,1.12],'#6f7775',[26.6,0,0]);
     box(root,[0,h*.72,f+.05],[w+.06,h*.5,.1],data.color);       // upper cladding
     for(let i=0;i<4;i++)box(root,[0,h*.55+i*.42,f+.11],[w-.2,.05,.03],'#9aa3a0');
@@ -443,6 +486,111 @@ export function createModels(app) {
     box(roof,[0,h+.28,0],[w+.5,.5,d+.5],data.roof);               // parapet
     box(roof,[0,h+.56,0],[w+.1,.12,d+.1],'#8f9694');
     for(const x of [-w*.25,w*.25])box(roof,[x,h+.8,-d*.2],[.5,.5,.5],'#9aa3a0');   // roof plant
+  }
+  /**
+   * A Republic-era stone bank, after the banks on Shanghai's Bund: a rusticated granite base, an
+   * entrance recessed behind two columns standing between two solid piers, steps up to a bronze
+   * door under a fanlight, the name in gold on a dark frieze, a pediment carrying a clock, and tall
+   * arched windows between pilasters down both sides. Everything stays inside the footprint.
+   */
+  function bankFront(root,data,w,d,h) {
+    const f=d/2,L=1.3,P=.9,open=w/2-P,back=f-L,sill=.6,top=4.45;
+    const stone=data.color,dark='#a39d8f',trim=data.trim??'#efe9dc',gold='#d4ac4a',bronze='#5b4a3a',glass='#5f7a72',ink='#3b3a35';
+    // The body behind the entrance, the attic over it, the two piers either side, the granite base.
+    box(root,[0,h/2,-L/2],[w,h,d-L],stone);
+    tag(box(root,[0,(top+h)/2,f-L/2],[2*open,h-top,L],stone),'wall');
+    const base=group(root,'stone');
+    box(base,[0,sill/2,-L/2],[w+.16,sill,d-L+.16],dark);
+    for(const s of [-1,1]){
+      const px=s*(w/2-P/2);
+      tag(box(root,[px,h/2,f-L/2],[P,h,L],stone),'wall');
+      box(base,[px,sill/2,f-L/2],[P+.16,sill,L+.16],dark);
+      // Rusticated courses: shadow lines across the pier's face, and along the side's ground storey.
+      for(let y=sill+.5;y<top;y+=.5)box(root,[px,y,f+.01],[P,.05,.02],dark);
+      for(const y of [1.1,1.6])box(root,[s*(w/2+.01),y,0],[.02,.05,d],dark);
+      box(root,[s*(w/2+.03),1.72,0],[.06,.12,d+.02],trim);                          // string course
+    }
+    // Two granite steps up into the entrance; the third is its floor.
+    for(const [i,rise] of [[0,.2],[1,.4]])box(base,[0,rise/2,f-.15-i*.3],[2*open,rise,.3],dark);
+    box(base,[0,sill/2,back+(L-.6)/2],[2*open,sill,L-.6],dark);
+    // The columns: a moulded base, a plain shaft, and a capital with a scroll either side.
+    for(const s of [-1,1]){
+      const x=s*(open-.95),z=f-.4,col=group(root,'pillar');
+      box(base,[x,(sill+.02)/2,z],[.72,sill+.02,.72],dark);                           // pedestal, over the steps
+      box(col,[x,sill+.07,z],[.64,.14,.64],trim);
+      cylinder(col,[x,sill+.2,z],[.58,.12,.58],trim);
+      cylinder(col,[x,(sill+.26+top-.26)/2,z],[.46,top-sill-.52,.46],trim);
+      cylinder(col,[x,top-.19,z],[.56,.14,.56],trim);
+      box(col,[x,top-.06,z],[.68,.12,.68],trim);
+      for(const k of [-1,1])cylinder(col,[x+k*.27,top-.2,z],[.16,.56,.16],trim,[90,0,0]);
+    }
+    // At the back of the entrance: a bronze double door under a fanlight, a tall window either side.
+    const door=group(root,'door');
+    // A closed sign hangs on the door itself, back in the entrance, from the door's header: high
+    // enough to read over the door point out on the pavement.
+    root.closedSignAt={z:back+.2,y:.45};
+    root.addMark(0,back+.1,.8,.1,sill,sill+2.8,'door');
+    box(door,[0,sill+1.25,back+.06],[1.4,2.5,.1],bronze);
+    box(door,[0,sill+1.25,back+.11],[.03,2.46,.02],gold);
+    for(const k of [-.12,.12])cylinder(door,[k,sill+1.2,back+.13],[.1,.03,.1],gold,[90,0,0]);
+    for(const k of [-1,1])box(door,[k*.8,sill+1.4,back+.09],[.2,2.8,.16],trim);
+    box(door,[0,sill+2.85,back+.1],[1.8,.3,.18],trim);
+    const fan=group(root,'window');
+    cylinder(fan,[0,sill+2.85,back+.02],[1.5,.04,1.5],gold,[90,0,0]);
+    cylinder(fan,[0,sill+2.85,back+.04],[1.32,.04,1.32],glass,[90,0,0]);
+    box(fan,[0,sill+3.55,back+.11],[.24,.34,.16],trim);                               // keystone
+    for(const s of [-1,1]){
+      const x=s*(open-.35),win=group(root,'window');
+      box(win,[x,sill+1.6,back+.02],[.62,2.2,.06],trim);
+      box(win,[x,sill+1.6,back+.05],[.48,2.06,.04],glass);
+      box(win,[x,sill+1.6,back+.08],[.04,2.06,.02],trim);
+    }
+    // A bronze lantern on each pier, lit after dark.
+    const lit=glow('#f3d58c');root.lamps.push(lit);
+    for(const s of [-1,1]){
+      const x=s*(w/2-P/2),lamp=group(root,'lamp');
+      box(lamp,[x,2.95,f+.1],[.08,.08,.22],bronze);
+      box(lamp,[x,2.95,f+.3],[.28,.42,.24],bronze);
+      box(lamp,[x,2.95,f+.3],[.2,.32,.3],'#f3d58c').render.meshInstances[0].material=lit;
+      cylinder(lamp,[x,3.22,f+.3],[.34,.08,.34],bronze);
+    }
+    // The entablature: architrave, the dark frieze with the name in gold, dentils, a cornice.
+    const cornice=group(root,'wall');
+    box(cornice,[0,top+.13,f-.15],[w+.06,.34,.5],trim);   // its underside just below the attic's
+    box(cornice,[0,top+.525,f-.15],[w+.06,.45,.5],'#3d4749');
+    label(root,data.sign,[0,top+.525,f+.14],3.2,.4,'#3d4749',gold);
+    for(const y of [top+.3,top+.75])box(cornice,[0,y,f+.11],[3.5,.035,.03],gold);
+    root.addMark(0,f+.02,1.75,.05,top+.3,top+.75,'sign');
+    for(let x=-w/2+.1;x<w/2;x+=.3)box(cornice,[x,top+.8,f+.1],[.12,.1,.08],trim);
+    box(cornice,[0,top+.95,0],[w+.5,.2,d+.5],trim);
+    box(cornice,[0,h+.06,-L/2],[w+.12,.12,d-L+.12],trim);                                // coping
+    for(const s of [-1,1]){box(cornice,[s*(w/2-P/2),h+.06,f-L/2],[P+.12,.12,L+.12],trim);
+      cylinder(cornice,[s*(w/2-P/2),h+.27,f-.45],[.3,.3,.3],trim);ball(cornice,[s*(w/2-P/2),h+.52,f-.45],[.26,.3,.26],trim);}
+    // The pediment: a triangle from a squashed diamond, raking cornices, and the clock in it.
+    const R=2.35,peak=1,base0=top+1.05,tymp=new pc.Entity('pediment');
+    tymp.setLocalPosition(0,base0,f-.12);tymp.setLocalScale(1,peak/R,1);cornice.addChild(tymp);
+    box(tymp,[0,0,0],[R*Math.SQRT2,R*Math.SQRT2,.3],stone,[0,0,45]);
+    const rake=Math.atan2(peak,R)*180/Math.PI;
+    for(const s of [-1,1])box(cornice,[s*R/2,base0+peak/2+.07,f-.08],[Math.hypot(R,peak)+.25,.14,.42],trim,[0,0,-s*rake]);
+    const clock=group(root,'clock'),cy=base0+.36;
+    cylinder(clock,[0,cy,f+.05],[.66,.06,.66],gold,[90,0,0]);
+    cylinder(clock,[0,cy,f+.08],[.56,.04,.56],trim,[90,0,0]);
+    for(let i=0;i<12;i++){const a=i*Math.PI/6;box(clock,[Math.sin(a)*.22,cy+Math.cos(a)*.22,f+.105],[.03,i%3?.04:.08,.01],ink,[0,0,-i*30]);}
+    // Ten past ten.
+    for(const [deg,len] of [[-60,.14],[60,.22]]){const a=deg*Math.PI/180;box(clock,[Math.sin(a)*len/2,cy+Math.cos(a)*len/2,f+.11],[.03,len,.01],ink,[0,0,-deg]);}
+    // Down each side, three tall arched windows between pilasters, over the rusticated base.
+    for(const s of [-1,1]){
+      for(const z of [-1.55,0,1.55]){
+        const x=s*(w/2+.03),win=group(root,'window');
+        box(win,[x,2.6,z],[.06,1.8,.86],trim);
+        box(win,[x+s*.02,2.6,z],[.04,1.66,.7],glass);
+        cylinder(win,[x,3.5,z],[.86,.06,.86],trim,[0,0,90]);
+        cylinder(win,[x+s*.02,3.5,z],[.7,.04,.7],glass,[0,0,90]);
+        box(win,[x+s*.05,2.6,z],[.02,1.66,.04],trim);
+        box(win,[x+s*.04,1.78,z],[.1,.08,1.0],trim);                                  // sill
+      }
+      for(const z of [-2.35,-.78,.78,2.35])tag(box(root,[s*(w/2+.04),(1.78+top)/2,z],[.08,top-1.78,.3],trim),'pillar');
+    }
   }
   /** A shelf in front of the window either side of the door, and what the shop sets out on it. */
   function windowDisplay(root,data,w,d,name,put) {
@@ -461,15 +609,24 @@ export function createModels(app) {
    * player can point at through addMark. Anything standing out on the pavement is solid.
    */
   const DETAILS={
-    // Two stone lions guard the door, each with a ball under one paw.
+    // Two stone lions guard the door, sitting up on their plinths, each with a ball under the
+    // paw on the doorway side.
     'lions'(root,data,w,d) {
-      const z=d/2+.5;
+      const z=d/2+.5,stone='#bdb7a9',deep='#a39d8f',ink='#3b3a35';
       for(const x of [-1.35,1.35]){
-        box(root,[x,.25,z],[.62,.5,.62],'#a39d8f');
-        box(root,[x,.78,z-.06],[.44,.56,.5],'#bdb7a9');
-        box(root,[x,1.22,z+.08],[.46,.42,.4],'#bdb7a9');
-        ball(root,[x-Math.sign(x)*.12,.62,z+.24],[.2,.2,.2],'#bdb7a9');
-        root.addMark(x,z,.31,.31,0,1.45,'lion',true);
+        const lion=group(root,'lion'),inner=-Math.sign(x);
+        box(lion,[x,.21,z],[.62,.42,.62],deep);
+        box(lion,[x,.45,z],[.68,.06,.68],stone);
+        box(lion,[x,.66,z-.12],[.5,.36,.4],stone);                                   // haunches
+        box(lion,[x,.9,z],[.42,.5,.3],stone,[-10,0,0]);                             // chest
+        for(const k of [-.13,.13])box(lion,[x+k,.7,z+.17],[.12,.42,.12],stone);     // forelegs
+        ball(lion,[x+inner*.13,.6,z+.25],[.19,.19,.19],deep);                        // the ball
+        ball(lion,[x,1.2,z+.02],[.6,.54,.5],deep);                                   // curled mane
+        box(lion,[x,1.18,z+.22],[.34,.3,.14],stone);                                 // face
+        box(lion,[x,1.1,z+.31],[.18,.11,.1],stone);                                  // muzzle
+        for(const k of [-.08,.08])box(lion,[x+k,1.25,z+.295],[.06,.04,.02],ink);    // eyes
+        for(const k of [-.17,.17])box(lion,[x+k,1.44,z+.02],[.1,.1,.08],deep);      // ears
+        root.addMark(x,z,.31,.31,0,1.5,'lion',true);
       }
     },
     // A gold frame round the name board (the tiled board: centred at h-.55, .67 high).
@@ -877,14 +1034,14 @@ export function createModels(app) {
       const HB=[-.44,.58],HT=[-.53,.93];                 // head tube, bottom and top
       for(const [x] of [F,R]){
         cylinder(e,[x,.36,0],[.74,.07,.74],'#33383a',[90,0,0]);          // tyre
-        cylinder(e,[x,.36,0],[.58,.075,.58],'#c9c6ba',[90,0,0]);         // rim
+        cylinder(e,[x,.36,0],[.58,.08,.58],'#c9c6ba',[90,0,0]);         // rim
         for(let i=0;i<7;i++)box(e,[x,.36,0],[.024,.55,.024],'#b6b3a6',[0,0,i*180/7]);
         cylinder(e,[x,.36,0],[.13,.1,.13],'#6b6f6c',[90,0,0]);           // hub
       }
       tube(e,HT,ST,.055,frame);                                          // top tube
       tube(e,HB,BB,.06,frame);                                           // down tube
       tube(e,BB,ST,.055,frame);                                          // seat tube
-      tube(e,HB,HT,.07,frame);                                           // head tube
+      tube(e,HB,HT,.074,frame);                                           // head tube
       for(const z of [-.05,.05]){
         tube(e,HB,F,.04,steel,z);                                        // fork legs
         tube(e,BB,R,.04,frame,z);                                        // chain stays
@@ -913,7 +1070,7 @@ export function createModels(app) {
       box(e,[0,.34,0],[1.44,.48,.92],tint??'#cfc6ad');
       for(const z of [-.47,.47])box(e,[0,.34,z],[1.1,.26,.03],'#b3aa90');
       box(e,[0,.62,0],[1.54,.1,1.02],'#ddd5bd');
-      box(e,[0,.64,0],[1.3,.06,.8],'#8a7458');
+      box(e,[0,.645,0],[1.3,.06,.8],'#8a7458');
       for(let i=0;i<5;i++)ball(e,[-.52+i*.26,.74,(i%2-.5)*.3],[.36,.22,.34],i%2?'#7f9a66':'#6c8a58');
       const flowers=group(e,'flower');
       for(let i=0;i<5;i++)ball(flowers,[-.5+i*.25,.84,(i%2-.5)*-.26],[.2,.18,.2],['#e5ba77','#d38e84','#eab54d'][i%3]);
@@ -961,11 +1118,6 @@ export function createModels(app) {
       ball(e,[0,.74,0],[.22,.18,.22],'#9d947f');
       return {entity:e,half:[.14,.14],top:.8};
     }
-    if(kind==='awning') {
-      box(e,[0,2.6,.55],[3.6,.14,1.4],tint??'#b8765f',[-14,0,0]);
-      for(const x of [-1.6,1.6])cylinder(e,[x,1.35,1.1],[.09,2.7,.09],'#7d7563');
-      return {entity:e,half:[1.85,1.2],top:2.9,soft:true};
-    }
     // A night-market handcart: the stall and the vehicle are the same object, so a vendor can
     // simply push their shop through the streets and park it.
     if(kind==='foodcart') {
@@ -1008,8 +1160,14 @@ export function createModels(app) {
       return {entity:e,half:[1.15,.65],top:2.6,material:lit};
     }
     if(kind==='sign') {
-      cylinder(e,[0,1.1,0],[.14,2.2,.14],'#7d7563');
-      box(e,[0,2.1,0],[1.5,.9,.12],tint??'#e6d3a4');
+      // A notice board on two posts under a little tiled hood, with notices pinned to its face.
+      for(const x of [-.7,.7])cylinder(e,[x,1.12,0],[.1,2.24,.1],'#6d5a45');   // tops inside the hood
+      box(e,[0,1.7,0],[1.5,.95,.08],'#8e6952');
+      box(e,[0,1.7,.045],[1.34,.8,.02],tint??'#e6d3a4');
+      for(const [x,y,w,h,c] of [[-.4,1.84,.36,.44,'#e8dcc4'],[.04,1.78,.32,.36,'#f2e2c6'],[.42,1.86,.3,.4,'#e8dcc4'],[-.12,1.47,.5,.22,'#c8453a'],[.4,1.5,.26,.26,'#e8dcc4']])
+        box(e,[x,y,.06],[w,h,.01],c);
+      box(e,[0,2.26,0],[1.6,.08,.42],'#5d7360');
+      box(e,[0,2.34,0],[1.3,.08,.26],'#5d7360');
       return {entity:e,half:[.75,.16],top:2.6};
     }
     box(e,[0,.4,0],[.8,.8,.8],tint??'#b0a98f');
@@ -1049,12 +1207,7 @@ export function createModels(app) {
     // A pond: sunken water, a stone rim, lilies, a rockery and a couple of fish.
     box(e,[0,-.08,0],[w-.6,.3,d-.6],'#5c7f80');
     const water=tag(box(e,[0,.06,0],[w-.7,.06,d-.7],'#6f9ea0'),'water');
-    const surface=new pc.StandardMaterial();
-    surface.diffuse=new pc.Color().fromString('#79aaa8');
-    surface.emissive=new pc.Color().fromString('#3f6668');
-    surface.emissiveIntensity=.35;surface.gloss=.85;surface.useMetalness=true;surface.metalness=.15;
-    surface.opacity=.88;surface.blendType=pc.BLEND_NORMAL;surface.update();
-    water.render.meshInstances[0].material=surface;
+    water.render.meshInstances[0].material=waterMaterial();water.render.castShadows=false;
     // Each rim stone is tagged on its own: one box round the ring would swallow the water inside it.
     for(let i=0;i<Math.round((w+d)*1.4);i++){
       const angle=i/Math.round((w+d)*1.4)*Math.PI*2;
@@ -1139,7 +1292,7 @@ export function createModels(app) {
       box(e,[0,2.14,0],[1.7,.1,.78],'#9db0ad');
       for(let i=0;i<3;i++)box(e,[0,.6+i*.55,.3],[1.3,.06,.5],'#e2ebe8');
       const milk=group(e,'milk');
-      for(let i=0;i<4;i++)box(milk,[-.5+i*.34,.78,.28],[.22,.3,.24],i%2?'#e6e2d4':'#dfe8ea');
+      for(let i=0;i<4;i++)box(milk,[-.5+i*.34,.78,.285],[.22,.3,.24],i%2?'#e6e2d4':'#dfe8ea');
       return {entity:e,half:[.8,.38],top:2.2,name:'fridge'};
     }
     if(kind==='coffeebar') {
@@ -1289,12 +1442,70 @@ export function createModels(app) {
       box(e,[0,1.94,.06],[.9,.12,.02],'#7f9a86');
       return {entity:e,half:[.75,.08],top:2.1,name:'poster',face};
     }
+    // The word hall's 书案: a long dark rosewood 翘头案 with upturned ends, a carved apron and carved
+    // end panels on runner feet. On it, rice paper written in ink under two paperweights, an inkstone
+    // and a brush pot full of brushes. A pair of standing palace lanterns flanks it, 2.1 m to either
+    // side and a little behind, where town.js puts their hitboxes.
+    if(kind==='writingdesk') {
+      const wood='#4a2216',dark='#321509';
+      const desk=group(e,'writing-desk');
+      box(desk,[0,.86,0],[2.24,.07,.76],wood);                                        // the top
+      for(const s of [-1,1]){
+        box(desk,[s*1.16,.915,0],[.14,.05,.76],wood,[0,0,s*22]);                       // an upturned end (翘头)
+        box(desk,[s*1.215,.955,0],[.05,.05,.78],dark);                                 // and its curled lip
+        for(const z of [-.29,.29])box(desk,[s*.94,.41,z],[.08,.82,.07],wood,[0,0,-s*3]);   // legs, splayed a little
+        box(desk,[s*.965,.04,0],[.12,.08,.72],dark);                                   // a runner foot (托子)
+        box(desk,[s*.945,.44,0],[.03,.62,.5],dark).render.meshInstances[0].material=fretwork(.5,.62,[0,.04,.15],dark,wood);   // carved end panel
+        for(const z of [-.36,.36])box(desk,[s*.8,.74,z],[.16,.16,.03],dark,[0,0,45]);   // spandrels under the apron
+      }
+      for(const z of [-.37,.37])box(desk,[0,.785,z],[1.8,.08,.025],dark).render.meshInstances[0].material=fretwork(1.8,.08,null,dark,wood);   // carved apron
+      // Rice paper with columns of brush strokes, read top to bottom and right to left, and a red seal.
+      const canvas=document.createElement('canvas');canvas.width=320;canvas.height=200;
+      const c=canvas.getContext('2d');c.fillStyle='#f5efdc';c.fillRect(0,0,320,200);
+      c.strokeStyle='#2a2622';c.lineCap='round';
+      const strokes=[[-10,0,10,-1],[0,-11,1,11],[-2,-4,-11,10],[1,-2,11,10],[-9,-7,8,-8],[-8,8,9,7]];
+      for(let col=0;col<6;col++)for(let row=0;row<5;row++)for(let k=0;k<3+(col*7+row*3)%3;k++){
+        const [x0,y0,x1,y1]=strokes[(col*11+row*7+k*(1+(col*3+row)%5))%6],x=282-col*46,y=24+row*34;
+        c.lineWidth=2.5+(col+row+k)%3;c.beginPath();c.moveTo(x+x0,y+y0);c.lineTo(x+x1,y+y1);c.stroke();
+      }
+      c.fillStyle='#b8322a';c.fillRect(24,150,26,26);
+      const tex=new pc.Texture(app.graphicsDevice,{width:320,height:200,mipmaps:true});tex.setSource(canvas);
+      const ink=new pc.StandardMaterial();ink.diffuseMap=tex;ink.useMetalness=true;ink.metalness=0;ink.gloss=.1;ink.update();
+      box(group(e,'rice-paper'),[0,.898,.04],[1.0,.006,.62],'#f5efdc').render.meshInstances[0].material=ink;
+      const weights=group(e,'paperweight');
+      for(const z of [-.23,.31])box(weights,[0,.91,z],[.86,.022,.04],'#2d2a27');
+      const stone=group(e,'inkstone');
+      box(stone,[.8,.915,.05],[.22,.04,.3],'#34393b');
+      box(stone,[.8,.936,-.04],[.16,.004,.1],'#15181a');                              // its ink well
+      const pot=group(e,'brush-pot');
+      cylinder(pot,[-.82,1.0,-.12],[.17,.2,.17],'#e8e4d8');
+      cylinder(pot,[-.82,1.02,-.12],[.176,.05,.176],'#3d5f8a');                       // a blue band
+      const brushes=group(e,'brush');
+      for(const [dx,dz,tilt] of [[-.03,-.03,-8],[.03,-.02,7],[-.02,.03,-4],[.03,.03,10]]){
+        cylinder(brushes,[-.82+dx,1.2,-.12+dz],[.02,.36,.02],'#c9a36a',[tilt,0,tilt]);
+        shape(brushes,'cone',[-.82+dx*2.4,1.41,-.12+dz*2.4],[.035,.09,.035],'#2a2622',[tilt,0,tilt]);   // the pointed hair tip
+      }
+      // Palace lanterns (宫灯) on their stands: a hexagonal silk body on a post, lit after dark.
+      const lit=glow('#f3d9a0');
+      for(const s of [-1,1]){
+        const g=group(e,'lantern'),x=s*2.1,z=-.35;
+        for(const r of [0,90])box(g,[x,.03,z],[.56,.06,.08],dark,[0,r,0]);          // crossed feet
+        box(g,[x,.82,z],[.06,1.52,.06],wood);                                         // the post
+        cylinder(g,[x,1.6,z],[.34,.05,.34],dark);                                     // the base plate
+        cylinder(g,[x,1.88,z],[.4,.5,.4],'#f3d9a0').render.meshInstances[0].material=lit;
+        for(let i=0;i<6;i++){const a=i/6*Math.PI*2;box(g,[x+Math.cos(a)*.2,1.88,z+Math.sin(a)*.2],[.035,.54,.035],dark);}   // six ribs
+        cylinder(g,[x,2.16,z],[.5,.06,.5],dark);                                      // the cap
+        cylinder(g,[x,2.24,z],[.1,.1,.1],'#c9a13b');                                  // a gilt finial
+        for(let i=0;i<3;i++){const a=i/3*Math.PI*2+.5;cylinder(g,[x+Math.cos(a)*.22,1.47,z+Math.sin(a)*.22],[.035,.22,.035],'#b8322a');}   // red tassels
+      }
+      return {entity:e,half:[1.15,.4],top:1.1,name:'writing-desk',material:lit};
+    }
     if(kind==='bookcase') {
       box(e,[0,1.25,0],[2.0,2.5,.42],tint??'#9c7a54');
       box(e,[0,1.25,.05],[1.84,2.34,.36],'#e6d8b8');
       const spines=['#8fa98d','#c47f6b','#d9b072','#7f9ab0','#9db08f','#b58fa4'];
       for(let row=0;row<5;row++){
-        box(e,[0,.34+row*.5,.06],[1.84,.07,.36],'#b08a60');
+        box(e,[0,.34+row*.5,.06],[1.83,.07,.36],'#b08a60');
         const books=group(e,'book');
         for(let i=0;i<9;i++)box(books,[-.8+i*.2,.53+row*.5,.1],[.13,.31,.28],spines[(row*4+i)%6]);
       }
@@ -1307,7 +1518,7 @@ export function createModels(app) {
       box(e,[0,.5,0],[1.5,.05,.7],'#a97d55');
       const book=group(e,'book');
       box(book,[-.4,.79,.05],[.62,.03,.44],'#f4ecd8');
-      box(book,[-.4,.81,.05],[.03,.04,.44],'#c9a97a');
+      box(book,[-.4,.81,.05],[.03,.04,.45],'#c9a97a');
       tag(cylinder(e,[.5,.86,-.2],[.15,.2,.15],'#9db08f'),'pen');
       tag(box(e,[.62,.8,.2],[.34,.06,.24],'#d9c9a8'),'notebook');
       return {entity:e,half:[.85,.45],top:.82,name:'desk'};
@@ -1317,7 +1528,7 @@ export function createModels(app) {
       for(const y of [1.06,2.54])cylinder(e,[0,y,0],[.05,.86,.05],'#8d6b4d',[0,0,90]);
       const ink=group(e,'calligraphy');
       for(let i=0;i<4;i++)box(ink,[0,2.24-i*.3,.03],[.22,.2,.02],'#5f7160');
-      box(ink,[0,1.2,.03],[.2,.2,.02],'#a4564a');
+      box(ink,[0,1.2,.032],[.2,.2,.02],'#a4564a');
       return {entity:e,half:[.35,.04],top:2.6,name:'paper'};
     }
     if(kind==='plantpot') {
@@ -1339,7 +1550,7 @@ export function createModels(app) {
       return {entity:e,half:[1.2,.44],top:1.4,name:'counter'};
     }
     if(kind==='basketstack') {
-      for(let i=0;i<5;i++)box(e,[0,.14+i*.16,0],[.62,.18,.46],i%2?'#c9584f':'#d97a5f');
+      for(let i=0;i<5;i++)box(e,[0,.14+i*.16,0],[.62+i%2*.01,.18,.46+i%2*.01],i%2?'#c9584f':'#d97a5f');
       return {entity:e,half:[.32,.24],top:.95,name:'basket'};
     }
     if(kind==='mannequin') {
@@ -1378,8 +1589,8 @@ export function createModels(app) {
     if(kind==='bedshow') {
       box(e,[0,.09,0],[2.6,.18,1.9],tint??'#c9b89a');
       box(e,[0,.44,0],[2.1,.34,1.4],'#a2764f');
-      box(e,[0,.66,.06],[2.0,.14,1.28],'#efe3c4');
-      tag(box(e,[0,.7,-.42],[2.0,.2,.46],'#fdf6e2'),'pillow');
+      box(e,[0,.66,.055],[2.0,.14,1.28],'#efe3c4');
+      tag(box(e,[0,.7,-.42],[1.98,.2,.46],'#fdf6e2'),'pillow');
       tag(box(e,[0,.72,.34],[1.98,.12,.62],'#a8bfa5'),'quilt');
       box(e,[-1.02,.82,0],[.12,.75,1.4],'#8f6a48');
       return {entity:e,half:[1.3,.95],top:.85,name:'bed'};
@@ -1575,7 +1786,7 @@ export function createModels(app) {
       for(const x of [-.97,.97])box(e,[x,1.0,0],[.06,2.0,.56],'#8a8271');
       const parcels=group(e,'parcel');
       for(let i=0;i<3;i++){
-        box(e,[0,.3+i*.7,0],[1.96,.05,.56],'#b9b3a0');
+        box(e,[0,.3+i*.7,0],[1.96,.05,.55],'#b9b3a0');
         for(let j=0;j<4;j++){const s=.26+((i+j)%3)*.08;box(parcels,[-.68+j*.45,.33+i*.7+s/2,.02],[.36,s,.38],['#c9a77a','#b88f5e','#d8bf95'][(i+j)%3]);}
       }
       if(text)label(e,text,[0,2.18,.05],1.0,.3,'#f4ead2','#36594f');
@@ -1687,6 +1898,52 @@ export function createModels(app) {
     }
     // ---- A counter for each trade. The customer stands in front (+z); the shop assistant works
     // behind it (-z), where the till and tools of the trade face them.
+    // The restaurant's service counter: dark wood faced with red lacquered lattice, a stone top with
+    // the till, stacks of bowls and plates, a pot of tea with cups, and the menu on a little stand.
+    if(kind==='servicecounter') {
+      box(e,[0,.47,0],[2.6,.94,.8],'#4a2a1c');
+      for(const x of [-.87,0,.87])box(e,[x,.49,.405],[.78,.7,.02],'#a33a2c').render.meshInstances[0].material=fretwork(.78,.7,null,'#a33a2c','#8a2c20');
+      box(e,[0,.97,0],[2.7,.06,.86],'#d8cbb0');
+      const till=group(e,'till');
+      box(till,[.85,1.12,-.18],[.42,.24,.3],'#5f6a6c');
+      box(till,[.85,1.29,-.22],[.34,.1,.22],'#8fc0c4',[22,0,0]);
+      const bowls=group(e,'bowl'),plates=group(e,'plate');
+      for(const x of [-1.05,-.8])for(let i=0;i<4;i++)cylinder(bowls,[x,1.03+i*.055,.08],[.22,.05,.22],i%2?'#efe7d6':'#e4ecf0');
+      for(let i=0;i<5;i++)cylinder(plates,[-.4,1.01+i*.022,.1],[.34,.018,.34],'#f3eee2');
+      const pot=group(e,'teapot'),cups=group(e,'cup');
+      cylinder(pot,[.1,1.09,.1],[.22,.18,.22],'#6f4a3a');
+      cylinder(pot,[.1,1.2,.1],[.12,.04,.12],'#5a3a2c');
+      box(pot,[.23,1.1,.1],[.12,.04,.04],'#6f4a3a',[0,0,25]);
+      for(const x of [.32,.44])cylinder(cups,[x,1.04,.2],[.09,.07,.09],'#efe7d2');
+      const menu=group(e,'menu');
+      box(menu,[.45,1.16,-.12],[.3,.34,.02],'#f2e6c8',[-12,0,0]);
+      box(menu,[.45,1.3,-.1],[.3,.06,.025],'#a33a2c',[-12,0,0]);
+      return {entity:e,half:[1.35,.43],top:1.4,name:'counter'};
+    }
+    // 老周's buying counter in the second-hand shop: an old counter of mismatched planks, a glass case
+    // of curios at one end, a pair of scales, a ledger and a stack of boxes waiting to be sorted.
+    if(kind==='resalecounter') {
+      box(e,[0,.46,0],[2.4,.92,.78],'#8a6a4a');
+      for(let i=0;i<5;i++)box(e,[-.96+i*.48,.46,.395],[.44,.84,.02],['#9a7853','#7f6143','#a4845c','#86684a','#94734f'][i]);
+      box(e,[0,.95,0],[2.5,.06,.84],'#6f5236');
+      box(e,[-.7,1.0,.05],[.9,.04,.6],'#b59168');
+      ball(group(e,'vase'),[-.95,1.13,.05],[.16,.22,.16],'#5a7fae');
+      cylinder(group(e,'clock'),[-.65,1.14,.05],[.2,.04,.2],'#c9a13b',[90,0,0]);
+      cylinder(group(e,'cup'),[-.4,1.07,.1],[.1,.09,.1],'#efe7d2');
+      glassOver(box(e,[-.7,1.15,.05],[.92,.3,.62],'#dceaea'));
+      const scales=group(e,'scales');
+      box(scales,[.25,1.0,.05],[.3,.04,.18],'#6b5842');
+      box(scales,[.25,1.16,.05],[.03,.3,.03],'#8a7350');
+      box(scales,[.25,1.3,.05],[.54,.02,.02],'#8a7350');
+      for(const x of [.02,.48]){box(scales,[x,1.22,.05],[.01,.16,.01],'#8a7350');cylinder(scales,[x,1.14,.05],[.18,.015,.18],'#b89a5a');}
+      const ledger=group(e,'notebook');
+      box(ledger,[.68,.99,.2],[.32,.02,.24],'#a4564a');
+      box(ledger,[.68,1.005,.2],[.3,.01,.22],'#f2ead6');
+      const boxes=group(e,'box');
+      box(boxes,[1.0,1.1,-.12],[.34,.24,.3],'#b8905e');
+      box(boxes,[1.02,1.32,-.14],[.28,.2,.26],'#c9a36f');
+      return {entity:e,half:[1.25,.42],top:1.45,name:'counter'};
+    }
     // A bakery counter: a glass case of bread and tarts in front, a wooden work top behind.
     if(kind==='bakerycounter') {
       box(e,[0,.45,0],[2.6,.9,.8],tint??'#b08a60');
@@ -1822,7 +2079,7 @@ export function createModels(app) {
     // tins of screws and nails, and the till.
     if(kind==='tradecounter') {
       box(e,[0,.5,0],[3,1,.85],tint??'#54776e');
-      box(e,[0,.08,.41],[3,.16,.04],'#3c4747');                       // kick plate
+      box(e,[0,.08,.41],[2.98,.16,.04],'#3c4747');                       // kick plate
       box(e,[0,1.04,0],[3.1,.08,.95],'#a1b1ae');
       const drawers=group(e,'box');
       box(drawers,[-1.05,1.33,-.2],[.8,.5,.4],'#82918c');
@@ -1855,14 +2112,11 @@ export function createModels(app) {
   // uses), so every piece batches into the draw calls that are already there.
   const GC={plaster:'#efe9dc',coping:'#6d7471',ridge:'#565c5a',timber:'#8a6a4c',timberDark:'#6e533b',
     stone:'#c9c0a8',stoneDark:'#a9a08a',rock:'#9d968a',rockLight:'#b0a899',pad:'#7f9e6a',lotus:'#e3a1b8'};
-  /** One opaque water material for every pond, stream and canal, so they share a draw call. */
+  /** Still water (src/world/water.js), one material for every pond without a flow of its own, so
+   *  they share a draw call; the park, the canal, the fountain and the bay make their own. */
   let waterMat=null;
   function waterMaterial() {
-    if(waterMat)return waterMat;
-    waterMat=new pc.StandardMaterial();
-    waterMat.diffuse=new pc.Color().fromString('#79aaa8');waterMat.emissive=new pc.Color().fromString('#3f6668');
-    waterMat.emissiveIntensity=.35;waterMat.gloss=.85;waterMat.useMetalness=true;waterMat.metalness=.15;waterMat.update();
-    return waterMat;
+    return waterMat??=waterOf(app).surface({flow:[.02,.03],tile:2.2,ripple:.14});
   }
   /** Every scenery lantern shares one lit material; the first builder to hang one hands it to `lamps`. */
   let sceneryLit=null;
@@ -1881,7 +2135,7 @@ export function createModels(app) {
   /** A bridge along z: stepped slabs, a pier under an arched crest, and hand-rails that follow the steps. */
   function stoneBridge(parent,b,color=GC.stone,railColor=GC.stoneDark) {
     const g=group(parent,'bridge');
-    for(const [z0,z1,y] of b.steps)box(g,[b.x,y-.14,(z0+z1)/2],[b.width,.28,z1-z0],color);
+    for(const [z0,z1,y] of b.steps)box(g,[b.x,y-.137,(z0+z1)/2],[b.width+.01,.28,z1-z0],color);
     const crest=b.steps.reduce((a,s)=>s[2]>a[2]?s:a);
     if(!b.flat)box(g,[b.x,crest[2]/2,(crest[0]+crest[1])/2],[b.width-.5,crest[2]-.2,.5],GC.stoneDark);
     for(const r of bridgeRails(b)){
@@ -1987,8 +2241,8 @@ export function createModels(app) {
     box(eaves,[mid,H+.1+drop/2,L.f+reach/2],[span+1.1,.14,slope],b.roof,[tilt,0,0]);
     const ribs=Math.max(3,Math.round(span/.9));
     for(let i=0;i<ribs;i++)box(eaves,[mid-span/2-.35+(i+.5)*(span+.7)/ribs,H+.19+drop/2,L.f+reach/2],[.1,.08,slope],shade(b.roof,.72),[tilt,0,0]);
-    box(eaves,[mid,H+.62,L.f+.1],[span+1.1,.14,.22],shade(b.roof,.72));
-    box(eaves,[mid,H+.1,L.f+reach],[span+1.1,.12,.08],GC.timberDark);
+    box(eaves,[mid,H+.62,L.f+.1],[span+1.11,.14,.22],shade(b.roof,.72));
+    box(eaves,[mid,H+.1,L.f+reach],[span+1.12,.12,.08],GC.timberDark);
     for(const side of [-1,1])box(eaves,[mid+side*(span/2+.6),H+.2,L.f+reach-.1],[.5,.1,.28],b.roof,[0,0,side*26]);
     return {entity:e,marks:verandaMarks(v,b)};
   }
@@ -1997,10 +2251,14 @@ export function createModels(app) {
   function waterEdge(parent,c) {
     const e=new pc.Entity('canal');parent.addChild(e);
     const level=c.water.level,DEG=180/Math.PI;
+    // The water runs down the canal, along z (src/world/water.js); a thrown thing floats on it,
+    // except where a bridge crosses.
+    const water=waterOf(app),surface=water.surface({flow:[0,.3],tile:2.8,ripple:.15});
     for(const s of c.channel){
       const sheet=tag(box(e,[(s.x0+s.x1)/2,level,(s.z0+s.z1)/2],[s.x1-s.x0,.04,s.z1-s.z0],'#79aaa8'),'water');
-      sheet.render.meshInstances[0].material=waterMaterial();sheet.render.castShadows=false;
+      sheet.render.meshInstances[0].material=surface;sheet.render.castShadows=false;
     }
+    water.body('town',c.channel,level+.02,(x,z)=>c.bridges.some(b=>Math.abs(z-b.z)<b.width/2&&x>b.steps[0][0]&&x<b.steps.at(-1)[1]));
     const landing=(x,z)=>c.bridges.some(b=>Math.abs(z-b.z)<b.width/2+.3&&x>b.steps[0][0]-.3&&x<b.steps.at(-1)[1]+.3);
     shoreline(c.channel,1.3,landing).forEach((p,i)=>
       tag(shape(e,'sphere',[p.x,.12,p.z],[1.0,.3,.7],i%2?GC.stone:GC.stoneDark,[0,-p.angle*DEG,0]),'stone'));

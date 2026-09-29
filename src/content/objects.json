@@ -113,7 +113,7 @@
       "zh": "台阶",
       "pinyin": "tái jiē",
       "en": "steps",
-      "hsk": 5
+      "hsk": 4
     },
     "stone": {
       "zh": "石头",
@@ -451,6 +451,12 @@
       "en": "person",
       "hsk": 1
     },
+    "pedestrian": {
+      "zh": "行人",
+      "pinyin": "xíng rén",
+      "en": "pedestrian",
+      "hsk": 2
+    },
     "pond": {
       "zh": "池塘",
       "pinyin": "chí táng",
@@ -522,6 +528,24 @@
       "pinyin": "fú wù yuán",
       "en": "waiter",
       "hsk": 3
+    },
+    "hotpot": {
+      "zh": "火锅",
+      "pinyin": "huǒguō",
+      "en": "hotpot",
+      "hsk": null
+    },
+    "noodle-chef": {
+      "zh": "扯面师傅",
+      "pinyin": "chěmiàn shīfu",
+      "en": "noodle-pulling chef",
+      "hsk": null
+    },
+    "noodle-show": {
+      "zh": "扯面表演",
+      "pinyin": "chěmiàn biǎoyǎn",
+      "en": "noodle-pulling show",
+      "hsk": null
     },
     "clerk": {
       "zh": "营业员",
@@ -684,6 +708,12 @@
       "pinyin": "bānmǎxiàn",
       "en": "zebra crossing",
       "hsk": null
+    },
+    "road": {
+      "zh": "马路",
+      "pinyin": "mǎlù",
+      "en": "road",
+      "hsk": 1
     },
     "screen": {
       "zh": "大屏幕",
@@ -1170,6 +1200,60 @@
       "pinyin": "yóukè",
       "en": "tourist",
       "hsk": 2
+    },
+    "mountain": {
+      "zh": "山",
+      "pinyin": "shān",
+      "en": "mountain",
+      "hsk": 1
+    },
+    "drone": {
+      "zh": "无人机",
+      "pinyin": "wúrénjī",
+      "en": "drone",
+      "hsk": null
+    },
+    "boat": {
+      "zh": "船",
+      "pinyin": "chuán",
+      "en": "boat",
+      "hsk": 2
+    },
+    "writing-desk": {
+      "zh": "书案",
+      "pinyin": "shū'àn",
+      "en": "writing desk",
+      "hsk": null
+    },
+    "brush-pot": {
+      "zh": "笔筒",
+      "pinyin": "bǐtǒng",
+      "en": "brush pot",
+      "hsk": null
+    },
+    "brush": {
+      "zh": "毛笔",
+      "pinyin": "máobǐ",
+      "en": "writing brush",
+      "hsk": 5
+    },
+    "inkstone": {
+      "zh": "砚台",
+      "pinyin": "yàntai",
+      "en": "inkstone",
+      "hsk": null
+    },
+    "paperweight": {
+      "zh": "镇纸",
+      "pinyin": "zhènzhǐ",
+      "en": "paperweight",
+      "hsk": null
+    },
+    "rice-paper": {
+      "zh": "宣纸",
+      "pinyin": "xuānzhǐ",
+      "en": "rice paper",
+      "hsk": null
     }
   }
 }

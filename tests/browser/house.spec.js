@@ -148,13 +148,13 @@ test('upstairs furniture, in a slot or placed by hand, is still upstairs after a
   expect(errors).toEqual([]);
 });
 
-test('an existing save with a bed in the living room loads with the bed where it was',async({page})=>{
+test('an existing save with a bed in the living room loads, with the bed moved back against the wall of its slot',async({page})=>{
   const bed={uid:'bed-old',item:'wooden-bed',kind:'bed',color:'#b98b5f',footprint:[2.1,1.4],x:2.9,z:-2.6,rot:0,slot:'bed'};
   await seed(page,{inventory:{'wooden-bed':1},home:[bed]});
   await start(page);
-  expect(await propsIn(page,'home')).toEqual([{uid:'bed-old',kind:'bed',x:2.9,z:-2.6}]);
-  expect(await page.evaluate(()=>window.__qinghe.profile.home)).toEqual([bed]);
-  await stand(page,'home',2.9,-1.4,0);
+  expect(await propsIn(page,'home')).toEqual([{uid:'bed-old',kind:'bed',x:2.9,z:-3.75}]);
+  expect(await page.evaluate(()=>window.__qinghe.profile.home)).toEqual([{...bed,z:-3.75}]);
+  await stand(page,'home',2.9,-2.4,0);
   await expect(page.locator('#interact span')).toHaveText('睡觉 · 选时间');
 });
 

@@ -61,6 +61,8 @@ import {festivalFrame} from './world/festivals.js';
 import {openFestival} from './ui/festivals.js';
 import {openPostcard} from './ui/postcard.js';
 import {friends,pinned,noteVisit} from './core/friends.js';
+import {openHotpot,settleHotpot} from './ui/hotpot.js';
+import {openCrowd} from './ui/crowd.js';
 
 const loaded=loadProfile(localStorage);
 // holdSync keeps the folder copy untouched until the start-up check below has compared it.
@@ -133,6 +135,8 @@ function interact(id){
  if(id==='listen')return openHsk(ctx,{mode:'listening'});
  if(id.startsWith('shop:'))return openShop(ctx,id.slice(5));
  if(id.startsWith('fest:'))return openFestival(ctx,id.slice(5));
+ if(id.startsWith('hotpot:'))return openHotpot(ctx,id.slice(7));
+ if(id.startsWith('crowd:'))return openCrowd(ctx,id.slice(6));
  if(id==='panel:bank')return openBank(ctx);
  if(id==='panel:resale')return openResale(ctx);
  if(id==='panel:library')return openLibrary(ctx);
@@ -375,7 +379,16 @@ try{
  }});
  ctx.town.equip(outfit(ctx.profile));
  ctx.town.onNotice=message=>ctx.ui.notice(message);
+ // A loudspeaker line out in the world (the drone show): shown, and played without cutting into a conversation.
+ // Under an open panel or a voice already speaking it starts ducked, as the ambient lane would be.
+ ctx.town.onAnnounce=line=>{
+  ctx.ui.notice(`${line.zh} / ${line.en}`);ctx.voice.play(line.audio,{ambient:true});
+  const speaking=ctx.voice.foreground&&!ctx.voice.foreground.paused&&!ctx.voice.foreground.ended;
+  if(ctx.ui.panelId||speaking)ctx.voice.duck(true);
+ };
  ctx.town.sensitivity=ctx.profile.settings.sensitivity??0.12;
+ // 水面倒影 (the bay's mirror, src/world/bay.js): the player's choice, else on with a mouse and off on touch.
+ ctx.town.reflections=typeof ctx.profile.settings.reflections==='boolean'?ctx.profile.settings.reflections:!matchMedia('(pointer: coarse)').matches;
  // Losing pointer lock without noticing is what makes the view feel stuck; say so plainly.
  ctx.town.onLockChange=locked=>{document.body.classList.toggle('unlocked',!locked);};
  document.body.classList.add('unlocked');
@@ -410,7 +423,7 @@ refreshShops();
 if(ctx.town)for(const site of builtSites(ctx.profile))ctx.town.revealSite(site.id);
 // A postcard 陈叔叔 has received stays pinned up on his shop.
 if(ctx.town)for(const [npc,person] of Object.entries(friends.people))if(person.pin&&pinned(ctx.profile,npc))ctx.town.pinPostcard(person.pin);
-document.querySelector('#start-button').onclick=()=>{started=true;document.querySelector('#arrival').hidden=true;document.body.classList.add('playing');ctx.town.setPaused(false);ctx.music.start();if(loaded.warning||loaded.notice)ctx.ui.notice([loaded.warning,loaded.notice].filter(Boolean).join(' '));
+document.querySelector('#start-button').onclick=()=>{started=true;document.querySelector('#arrival').hidden=true;document.body.classList.add('playing');ctx.town.setPaused(false);ctx.music.start();settleHotpot(ctx);if(loaded.warning||loaded.notice)ctx.ui.notice([loaded.warning,loaded.notice].filter(Boolean).join(' '));
  // A brand-new traveller is walked through the basics; a save already mid-way picks up where it was.
  ctx.tutorial.started=true;
  if(shouldAutoStart(ctx.profile))ctx.tutorial.start();else ctx.tutorial.sync();

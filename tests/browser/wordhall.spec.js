@@ -63,7 +63,7 @@ test('the complex names its parts, stays in budget, and is photographed from the
     const parts=t.wordhall.root.children[0].getPosition();
     return {meshes:t.wordhall.root.find(e=>!!e.render).length,rises,parts:[parts.x,parts.z].map(v=>Math.round(v*1000)/1000+0),
       paifang:look([0,1.6,-6],[4,2,-10.5]),lion:look([0,1.6,-11],[3.1,1.5,-12.9]),step:look([0,1.6,-11],[0,.2,-14.3]),
-      pillar:look([0,2.8,-15.8],[1.25,3,-17]),plaque:look([0,1.6,-12],[0,9.6,-17.9]),roof:look([0,1.6,6],[0,13,-22])};
+      pillar:look([0,2.8,-15.8],[1.25,3,-17]),plaque:look([0,1.6,-12],[0,5.45,-18.4]),roof:look([0,1.6,6],[0,13,-22])};
   });
   console.log('word hall meshes',result.meshes);
   expect(result.meshes).toBeLessThan(520);

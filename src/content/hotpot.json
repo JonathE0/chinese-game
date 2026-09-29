@@ -1,0 +1,61 @@
+{
+  "note": "山城老火锅, the hotpot terrace on the hill in 云海 (src/world/hotpot.js, src/ui/hotpot.js, src/core/hotpot.js). Waiter lines are clips hotpot-<key> in the hotpot-waiter voice, the noodle chef's are hotpot-chef-<key> in the hotpot-chef voice. The menu items are catalog.json rows with shop 'hotpot'. Layout is in city-local metres (x east, z south); the deck floor is at y 14.",
+  "speakers": {"waiter": "hotpot-waiter", "chef": "hotpot-chef"},
+  "lines": {
+    "greet": {"zh": "欢迎光临！几位？", "pinyin": "Huānyíng guānglín! Jǐ wèi?", "en": "Welcome! How many of you?"},
+    "seat": {"zh": "这边请，这是菜单。", "pinyin": "Zhèbiān qǐng, zhè shì càidān.", "en": "This way, please. Here's the menu."},
+    "broth": {"zh": "要什么锅底？", "pinyin": "Yào shénme guōdǐ?", "en": "Which broth would you like?"},
+    "spice": {"zh": "要什么辣度？", "pinyin": "Yào shénme làdù?", "en": "How spicy would you like it?"},
+    "more": {"zh": "还要别的吗？", "pinyin": "Hái yào bié de ma?", "en": "Anything else?"},
+    "served": {"zh": "菜来了，请慢用！", "pinyin": "Cài lái le, qǐng màn yòng!", "en": "Here's your food. Enjoy!"},
+    "dips": {"zh": "蘸料台在那边，可以自己调。", "pinyin": "Zhànliàotái zài nàbiān, kěyǐ zìjǐ tiáo.", "en": "The sauce station's over there; you can mix your own."},
+    "bill": {"zh": "好的，这是您的账单。", "pinyin": "Hǎo de, zhè shì nín de zhàngdān.", "en": "Sure, here's your bill."},
+    "short": {"zh": "钱好像不够，要不要少点一些？", "pinyin": "Qián hǎoxiàng bú gòu, yào bu yào shǎo diǎn yìxiē?", "en": "It looks like that's not enough money. Would you like to order a bit less?"},
+    "bye": {"zh": "慢走，欢迎下次再来！", "pinyin": "Màn zǒu, huānyíng xià cì zài lái!", "en": "Take care, and come again!"}
+  },
+  "chef": {
+    "start": {"zh": "扯面来喽！", "pinyin": "Chěmiàn lái lou!", "en": "Here come the pulled noodles!"},
+    "done": {"zh": "面好了，请慢用！", "pinyin": "Miàn hǎo le, qǐng màn yòng!", "en": "Your noodles are ready. Enjoy!"}
+  },
+  "replies": {
+    "party": {"zh": "一位。", "pinyin": "Yí wèi.", "en": "Just one."},
+    "bill": {"zh": "服务员，买单！", "pinyin": "Fúwùyuán, mǎi dān!", "en": "Waiter, the bill please!"}
+  },
+  "ui": {
+    "broth": {"zh": "锅底", "pinyin": "guōdǐ", "en": "Broth"},
+    "spice": {"zh": "辣度", "pinyin": "làdù", "en": "Spice level"},
+    "order": {"zh": "点菜", "pinyin": "diǎn cài", "en": "Order"},
+    "place": {"zh": "下单", "pinyin": "xià dān", "en": "Place the order"},
+    "pay": {"zh": "买单", "pinyin": "mǎi dān", "en": "Pay the bill"},
+    "ordered": {"zh": "已点", "pinyin": "yǐ diǎn", "en": "Ordered"},
+    "total": {"zh": "合计", "pinyin": "héjì", "en": "Total"}
+  },
+  "spice": [
+    {"key": "none", "zh": "不辣", "pinyin": "bú là", "en": "Not spicy"},
+    {"key": "mild", "zh": "微辣", "pinyin": "wēi là", "en": "Mild"},
+    {"key": "medium", "zh": "中辣", "pinyin": "zhōng là", "en": "Medium"},
+    {"key": "hot", "zh": "特辣", "pinyin": "tè là", "en": "Extra hot"}
+  ],
+  "categories": [
+    {"id": "broth", "zh": "锅底", "pinyin": "guōdǐ", "en": "Broth", "items": ["hotpot-broth-beef-tallow", "hotpot-broth-clear", "hotpot-broth-yuanyang", "hotpot-broth-tomato", "hotpot-broth-mushroom"]},
+    {"id": "meat", "zh": "荤菜", "pinyin": "hūncài", "en": "Meat", "pot": true, "items": ["hotpot-feiniu", "hotpot-nen-niurou", "hotpot-yangroujuan", "hotpot-maodu", "hotpot-yachang", "hotpot-huanghou", "hotpot-echang", "hotpot-wucanrou", "hotpot-xiahua", "hotpot-niurouwan", "hotpot-yuwan", "hotpot-yaxue", "hotpot-surou"]},
+    {"id": "veg", "zh": "素菜", "pinyin": "sùcài", "en": "Vegetables", "pot": true, "items": ["hotpot-tudoupian", "hotpot-oupian", "hotpot-donggua", "hotpot-wosun", "hotpot-shengcai", "hotpot-wawacai", "hotpot-douya", "hotpot-tonghao", "hotpot-haidai", "hotpot-yumi"]},
+    {"id": "tofu", "zh": "豆制品和菌菇", "pinyin": "dòuzhìpǐn hé jūngū", "en": "Tofu & mushrooms", "pot": true, "items": ["hotpot-doufu", "hotpot-dongdoufu", "hotpot-fuzhu", "hotpot-doupi", "hotpot-jinzhengu", "hotpot-xianggu", "hotpot-pinggu"]},
+    {"id": "staple", "zh": "主食", "pinyin": "zhǔshí", "en": "Staples", "pot": true, "items": ["hotpot-hongshufen", "hotpot-kuanfen", "hotpot-chemian", "hotpot-niangao", "hotpot-mifan"]},
+    {"id": "dip", "zh": "蘸料", "pinyin": "zhànliào", "en": "Dips", "items": ["hotpot-xiangyoudie", "hotpot-majiang", "hotpot-suanni", "hotpot-xiangcai", "hotpot-conghua", "hotpot-xiaomila"]},
+    {"id": "drink", "zh": "饮品和甜品", "pinyin": "yǐnpǐn hé tiánpǐn", "en": "Drinks & desserts", "items": ["hotpot-suanmeitang", "hotpot-dounai", "hotpot-bingfen", "hotpot-hongtang-ciba", "hotpot-xigua"]}
+  ],
+  "stayOnTable": ["hotpot-mifan"],
+  "noodles": "hotpot-chemian",
+  "layout": {
+    "deck": {"x0": -84, "x1": -60, "z0": -46, "z1": -30, "y": 14},
+    "tables": [[-78, -42.2], [-72, -42.2], [-66, -42.2], [-78, -37.4], [-72, -37.4], [-66, -37.4]],
+    "kitchen": {"x": -75, "z": -31.6, "w": 12, "d": 2.8, "h": 3.2},
+    "counter": {"x": -73, "z": -33.6},
+    "waiter": [-70.2, -33.8],
+    "chef": [-62.4, -32.6],
+    "chefBoard": {"x": -64.6, "z": -32.6},
+    "sauce": {"x": -82.6, "z": -38.5},
+    "gate": {"x": -60.6, "z": -38}
+  }
+}

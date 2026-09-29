@@ -43,3 +43,12 @@ test('assistant lines are complete and cast to an existing voice',()=>{
   for(const key of ['browse','bye'])assert.ok(assistants.ui[key]?.zh&&assistants.ui[key]?.en,`ui ${key}`);
   assert.deepEqual(assistants.postcard,['post-office'],'only the post office offers postcard writing');
 });
+
+test('the restaurant and the second-hand shop have counters of their own too, and no shop keeps the generic lectern',()=>{
+  for(const [id,kind,action] of [['restaurant','servicecounter','shop:restaurant'],['resale','resalecounter','panel:resale']]){
+    assert.equal(rooms[id].lectern,undefined,`${id} still has the generic counter`);
+    const counter=rooms[id].fittings.find(f=>f.kind===kind);
+    assert.equal(counter?.action,action,`${id} counter`);
+  }
+  assert.deepEqual(Object.keys(rooms).filter(id=>rooms[id].lectern),['hall']);
+});

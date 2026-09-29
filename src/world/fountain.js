@@ -1,11 +1,13 @@
 import * as pc from 'playcanvas';
+import {waterOf} from './water.js';
 
 /**
  * The fountain in the middle of 青禾广场: a carved stone basin with a two-tier centrepiece. Water
  * brims over each bowl in a falling sheet, four spouts on the rim arc jets into the pool, and the
  * pool ripples with splash rings where the jets land. The stone is static and batches with the
- * square; the water is off the batch and animated cheaply, by scrolling textures and a handful of
- * moving meshes rather than particles.
+ * square; the water is off the batch and animated cheaply: the pool and bowls are the town's shared
+ * water (src/world/water.js), the sheets and jets scroll textures, and a handful of meshes move,
+ * rather than particles.
  */
 export const FOUNTAIN={x:0,z:1.8};
 /** Its hitbox: one solid drum round the basin, as tall as the centrepiece, so there is no jumping
@@ -84,15 +86,11 @@ export function buildFountain(m,app,parent,active=()=>true) {
     const e=shape(water,type,pos,scale,'#79aaa8',rot);
     e.render.meshInstances[0].material=material;e.render.castShadows=false;return e;
   };
-  const ripple=pixels(app,128,(u,v)=>{
-    const n=Math.sin(TAU*(2*u+.5*Math.sin(TAU*v)))+Math.sin(TAU*(3*v+.4*Math.sin(TAU*2*u)));
-    const t=(n+2)/4,crest=Math.max(0,(t-.8)/.2);
-    return [95+100*t+60*crest,154+70*t+31*crest,152+62*t+41*crest,255].map(Math.round);
-  });
-  const pool=new pc.StandardMaterial();
-  pool.diffuseMap=ripple;pool.emissiveMap=ripple;pool.emissive=new pc.Color(.3,.4,.4);
-  pool.diffuseMapTiling=new pc.Vec2(3,3);pool.emissiveMapTiling=new pc.Vec2(2,2);
-  pool.useMetalness=true;pool.metalness=.1;pool.gloss=.85;pool.update();
+  // The pool and the bowls: the shared water, stirring, where a thrown thing floats (the highest
+  // water under it: a bowl over the pool) and rings spread as you walk round the rim.
+  const shared=waterOf(app),pool=shared.surface({flow:[.05,.035],tile:1.4,ripple:.2});
+  for(const [r,level] of [[1.86,.565],[.93,1.565],[.54,2.335]])
+    shared.body('town',[{x:FOUNTAIN.x,z:FOUNTAIN.z,r}],level);
   const streak=pixels(app,64,(u,v)=>{
     const col=.5+.5*Math.sin(TAU*3*u+1.3*Math.sin(TAU*7*u)),band=.75+.25*Math.sin(TAU*2*v+TAU*u);
     return [228,242,240,Math.round(255*(.08+.42*col**2)*band)];
@@ -138,7 +136,6 @@ export function buildFountain(m,app,parent,active=()=>true) {
   app.on('update',dt=>{
     if(!active())return;   // only while you are out in the town
     t+=Math.min(dt,.05);
-    pool.diffuseMapOffset.set(t*.02,t*.013);pool.emissiveMapOffset.set(-t*.017,t*.021);pool.update();
     flow.diffuseMapOffset.set(0,t*.9);flow.opacityMapOffset.set(0,t*.9);flow.update();
     for(const ring of rings){
       const p=(t/1.1+ring.phase)%1,s=.14+p*.5;

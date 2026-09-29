@@ -114,8 +114,24 @@ def collect_lines():
     for key, line in assistants["lines"].items():
         add("assistant-" + key, line["zh"], assistants["speaker"], "dialogue")
 
+    # 山城老火锅: the waiter's lines (hotpot-<key>) and the noodle chef's (hotpot-chef-<key>).
+    hotpot = read_json(CONTENT / "hotpot.json")
+    for key, line in hotpot["lines"].items():
+        add("hotpot-" + key, line["zh"], hotpot["speakers"]["waiter"], "dialogue")
+    for key, line in hotpot["chef"].items():
+        add("hotpot-chef-" + key, line["zh"], hotpot["speakers"]["chef"], "dialogue")
+
     # People in the word hall (hall-<key>), each line in its own speaker's voice.
     for line in read_json(CONTENT / "hall-visitors.json")["lines"].values():
+        add(line["audio"], line["zh"], line["speaker"], "dialogue")
+
+    # The drone show over the bay: its start and end announcements (drones-<key>).
+    drones = read_json(CONTENT / "drones.json")
+    for line in drones["lines"].values():
+        add(line["audio"], line["zh"], drones["speaker"], "dialogue")
+
+    # People walking around Yunhai (crowd-<n>), each line in its own speaker's voice.
+    for line in read_json(CONTENT / "crowd.json")["lines"]:
         add(line["audio"], line["zh"], line["speaker"], "dialogue")
 
     # The 易混词 deck: its two prompts, and members without an HSK clip (homophones share one).

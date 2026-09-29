@@ -95,7 +95,7 @@ for(const b of world.buildings){
   require(districtIds.has(b.district),`building ${b.id} is in unknown district ${b.district}`);
   require(!b.object||objectIds.includes(b.object),`building ${b.id} names unknown object ${b.object}`);
   require([0,180].includes(b.rotation??0),`building ${b.id} may only face 0 or 180`);
-  require(['tiled','shophouse','modern'].includes(b.style??'tiled'),`building ${b.id} has an unknown style`);
+  require(['tiled','shophouse','modern','bank'].includes(b.style??'tiled'),`building ${b.id} has an unknown style`);
   require(b.label===undefined||(typeof b.label==='string'&&b.label.trim().length>0),`building ${b.id} has an empty map label`);
 }
 for(const prop of world.props??[])require(districtIds.has(prop.district),'prop in unknown district '+prop.kind);
@@ -283,10 +283,24 @@ for(const [npc,person] of Object.entries(friendsData.people)){
 const assistantsData=await read('assistants.json');
 featureClips.push(...Object.keys(assistantsData.lines).map(k=>'assistant-'+k));
 require(!!voices.cast[assistantsData.speaker],'No voice cast for shop assistant speaker '+assistantsData.speaker);
+// 山城老火锅: the waiter's hotpot-<key> and the noodle chef's hotpot-chef-<key>; every menu id is a hotpot catalog row.
+const hotpotData=await read('hotpot.json');
+featureClips.push(...Object.keys(hotpotData.lines).map(k=>'hotpot-'+k),...Object.keys(hotpotData.chef).map(k=>'hotpot-chef-'+k));
+for(const who of Object.values(hotpotData.speakers))require(!!voices.cast[who],'No voice cast for hotpot speaker '+who);
+for(const id of hotpotData.categories.flatMap(c=>c.items))require(catalog.some(i=>i.id===id&&i.shop==='hotpot'),`hotpot menu: ${id} is not a hotpot catalog row`);
 // People in the word hall speak their own clips (hall-<key>), each in their speaker's cast voice.
 for(const [key,line] of Object.entries((await read('hall-visitors.json')).lines)){
   featureClips.push(line.audio);
   require(!!voices.cast[line.speaker],`word hall line ${key}: no voice cast for ${line.speaker}`);
+}
+// The drone show announces its start and end (drones-<key>) over the bay.
+const dronesData=await read('drones.json');
+for(const line of Object.values(dronesData.lines))featureClips.push(line.audio);
+require(!!voices.cast[dronesData.speaker],'No voice cast for the drone show speaker '+dronesData.speaker);
+// People walking around 云海 speak crowd-<n>, each line in its speaker's cast voice.
+for(const line of (await read('crowd.json')).lines){
+  featureClips.push(line.audio);
+  require(!!voices.cast[line.speaker],`crowd line ${line.audio}: no voice cast for ${line.speaker}`);
 }
 const lessonAudioSources=lessons.flatMap(l=>[...l.nodes,...Object.values(l.extraLines??{})]);
 const needed=[...words,...ambient,...lessonAudioSources,...catalog].map(x=>x.audio).filter(Boolean)

@@ -42,3 +42,20 @@ export function arrivalStep(prev,inside,warps) {
   const jumped=!prev||prev.warps!==warps;
   return {warps,outside:!inside,arrived:!jumped&&inside&&prev.outside};
 }
+
+/**
+ * Whether a body of half-width `edge` standing at local (x,z) is on 云海's ground: `walk` is
+ * city.json's list of rectangles [x0, x1, z0, z1] (downtown, the promenade, the hill side). All
+ * four corners of the body's square have to land on some rectangle, so where two rectangles meet
+ * there is no seam to get stuck on, while every outer edge still holds `edge` metres in.
+ */
+export function onCityGround(walk,x,z,edge) {
+  const on=(px,pz)=>walk.some(([x0,x1,z0,z1])=>px>=x0&&px<=x1&&pz>=z0&&pz<=z1);
+  return on(x-edge,z-edge)&&on(x+edge,z-edge)&&on(x-edge,z+edge)&&on(x+edge,z+edge);
+}
+
+/** The middle of the promenade's lit path at local `x`: a slow wave either side of the plaza. */
+export function promenadeZ(promenade,x) {
+  const {z,swing,wave}=promenade.path;
+  return z+swing*Math.sin(2*Math.PI*(x-promenade.plaza.x)/wave);
+}

@@ -12,7 +12,7 @@ export const SAVE_KEY='little-mandarin-town.v1';
  * to the save format adds one step here; loading runs whatever steps a save still needs, and saving
  * always writes SAVE_VERSION.
  */
-const UPGRADES=[upstairs,bedSpot,nightstandSpot];
+const UPGRADES=[upstairs,bedSpot,nightstandSpot,tidySlots,bedToWall];
 export const SAVE_VERSION=UPGRADES.length+1;
 /** `notes` collects what an upgrade had to tell the player (loadProfile turns it into `notice`). */
 export function upgradeSave(p,steps=UPGRADES,notes=[]) {
@@ -80,54 +80,53 @@ function upstairs(p,notes) {
   return {...p,home:kept};
 }
 /**
- * Version 3: the upstairs bed slot moved from the back wall (2.8, -3.6, facing the room) to the
- * middle of the east wall, facing the landing. A bed still standing exactly in the old spot goes
- * to the new one, unless something else already stands there; a bed moved by hand stays put.
- */
-function bedSpot(p) {
-  if (!Array.isArray(p.home)) return p;
-  const slot=rooms.home.slots['up-bed'],up=rooms.home.upper.y;
-  const half=r=>{const [fw,fd]=Array.isArray(r.footprint)?r.footprint:[0,0];return ((r.rot??0)/90)%2?[fd/2,fw/2]:[fw/2,fd/2];};
-  const upstairs=r=>plain(r)&&(r.room??'home')==='home'&&r.y===up;
-  const old=r=>upstairs(r)&&r.kind==='bed'&&r.x===2.8&&r.z===-3.6&&(r.rot??0)===0;
-  return {...p,home:p.home.map(r=>{
-    if (!old(r)) return r;
-    const to={...r,x:slot.x,z:slot.z,rot:slot.rot};
-    const clash=other=>other!==r&&upstairs(other)&&other.kind!=='rug'&&!other.on
-      &&Math.abs(other.x-to.x)<half(other)[0]+half(to)[0]&&Math.abs(other.z-to.z)<half(other)[1]+half(to)[1];
-    return p.home.some(clash)?r:to;
-  })};
-}
-/**
- * Version 4: the upstairs nightstand slot moved from the back wall (1.3, -4.05, facing the room) to
- * beside the head of the bed on the east wall, turned to face the landing. A nightstand still standing
- * exactly in the old spot goes to the new one, unless something else already stands there; whatever
+ * Slots that moved. A piece still standing exactly in a slot's old spot (`from`: slot id to its old
+ * x, z and turn) goes to the slot's new one, unless something else already stands there; whatever
  * stands on it keeps its place on the top, turned with it. One moved by hand stays put.
  */
-function nightstandSpot(p) {
-  if (!Array.isArray(p.home)) return p;
-  const slot=rooms.home.slots['up-nightstand'],up=rooms.home.upper.y;
-  const half=r=>{const [fw,fd]=Array.isArray(r.footprint)?r.footprint:[0,0];return ((r.rot??0)/90)%2?[fd/2,fw/2]:[fw/2,fd/2];};
-  const upstairs=r=>plain(r)&&(r.room??'home')==='home'&&r.y===up;
-  const old=r=>upstairs(r)&&r.kind==='nightstand'&&r.x===1.3&&r.z===-4.05&&(r.rot??0)===0;
-  const moves=new Map();
-  for (const r of p.home) {
-    if (!old(r)) continue;
-    const to={...r,x:slot.x,z:slot.z,rot:slot.rot};
-    const clash=other=>other!==r&&other.on!==r.uid&&upstairs(other)&&other.kind!=='rug'&&!other.on
-      &&Math.abs(other.x-to.x)<half(other)[0]+half(to)[0]&&Math.abs(other.z-to.z)<half(other)[1]+half(to)[1];
-    if (!p.home.some(clash)) moves.set(r.uid,{from:r,to});
-  }
-  // A piece on the top turns about the nightstand's middle by as much as the nightstand turned.
-  const turn=(dx,dz,deg)=>{const a=deg*Math.PI/180,round=v=>Math.round(v*1000)/1000;return [round(dx*Math.cos(a)+dz*Math.sin(a)),round(dz*Math.cos(a)-dx*Math.sin(a))];};
-  return {...p,home:p.home.map(r=>{
-    if (moves.has(r.uid)) return moves.get(r.uid).to;
-    const base=plain(r)&&r.on&&moves.get(r.on);
-    if (!base) return r;
-    const [dx,dz]=turn(r.x-base.from.x,r.z-base.from.z,base.to.rot-(base.from.rot??0));
-    return {...r,x:base.to.x+dx,z:base.to.z+dz};
-  })};
+function slotsMoved(from) {
+  return p=>{
+    if (!Array.isArray(p.home)) return p;
+    const half=r=>{const [fw,fd]=Array.isArray(r.footprint)?r.footprint:[0,0];return ((r.rot??0)/90)%2?[fd/2,fw/2]:[fw/2,fd/2];};
+    const moves=new Map();
+    for (const [id,old] of Object.entries(from)) {
+      const slot=rooms.home.slots[id],floor=r=>plain(r)&&(r.room??'home')==='home'&&(r.y??0)===(slot.y??0);
+      for (const r of p.home) {
+        if (!floor(r)||r.on||!slot.accepts.includes(r.kind)||r.x!==old.x||r.z!==old.z||(r.rot??0)!==old.rot) continue;
+        const to={...r,x:slot.x,z:slot.z,rot:slot.rot??0};
+        const clash=other=>other!==r&&other.on!==r.uid&&floor(other)&&other.kind!=='rug'&&!other.on
+          &&Math.abs(other.x-to.x)<half(other)[0]+half(to)[0]&&Math.abs(other.z-to.z)<half(other)[1]+half(to)[1];
+        if (!p.home.some(clash)) moves.set(r.uid,{from:r,to});
+      }
+    }
+    // A piece on the top turns about its base's middle by as much as the base turned.
+    const turn=(dx,dz,deg)=>{const a=deg*Math.PI/180,round=v=>Math.round(v*1000)/1000;return [round(dx*Math.cos(a)+dz*Math.sin(a)),round(dz*Math.cos(a)-dx*Math.sin(a))];};
+    return {...p,home:p.home.map(r=>{
+      if (moves.has(r.uid)) return moves.get(r.uid).to;
+      const base=plain(r)&&r.on&&moves.get(r.on);
+      if (!base) return r;
+      const deg=base.to.rot-(base.from.rot??0),[dx,dz]=turn(r.x-base.from.x,r.z-base.from.z,deg);
+      // It turns with its base too, kept to the turns a save allows (0, 90, 180, 270).
+      return {...r,x:base.to.x+dx,z:base.to.z+dz,...(deg%360?{rot:(((r.rot??0)+deg)%360+360)%360}:{})};
+    })};
+  };
 }
+/** Version 3: the upstairs bed slot moved from the back wall to the middle of the east wall, facing the landing. */
+function bedSpot(p) { return slotsMoved({'up-bed':{x:2.8,z:-3.6,rot:0}})(p); }
+/** Version 4: the upstairs nightstand slot moved from the back wall to beside the head of the bed. */
+function nightstandSpot(p) { return slotsMoved({'up-nightstand':{x:1.3,z:-4.05,rot:0}})(p); }
+/**
+ * Version 5: the living room's wardrobe turned round to face the room, the plant moved out of the
+ * kitchen doorway, the chair left behind by the old desk went to the low table, and the upstairs
+ * wardrobe went back against the west wall.
+ */
+function tidySlots(p) { return slotsMoved({wardrobe:{x:4.2,z:.9,rot:90},plant:{x:4.1,z:3.1,rot:0},chair:{x:-2.5,z:-1.2,rot:-90},
+  'up-wardrobe':{x:-2,z:-2.9,rot:90}})(p); }
+/**
+ * Version 6: the living-room bed went back against the wall. (The desk lamp's floor spot went at the
+ * same time; that needs no step, since decodeProfile keeps a piece whose slot is gone as a loose one.)
+ */
+function bedToWall(p) { return slotsMoved({bed:{x:2.9,z:-2.6,rot:0}})(p); }
 export function freshProfile() {
   return {version:SAVE_VERSION,wallet:0,inventory:{},equipped:{},claims:{},words:{},completed:[],phrases:[],saved:[],home:[],discovered:[],read:[],clock:15,dayIndex:0,vendors:{},settings:{pinyin:'known',toneColors:false,english:true,dialogueVolume:0.9,ambientVolume:0.35,musicVolume:0.5,sensitivity:0.12,hud:{quests:true,names:true,controls:'en'}},playerName:'旅人'};
 }
@@ -213,6 +212,8 @@ export function decodeProfile(raw,repairs=[],notes=[]) {
   const saved=list('saved',validSaved,2000);
   const home=list('home',validFurnishing,200);
   const vendors=map('vendors',record=>plain(record)&&number(record.rapport,0,1000),10000);
+  // An open bill at the hotpot terrace (src/core/hotpot.js): item id → count, a few dozen lines at most.
+  const hotpot=map('hotpot',count=>whole(count,1,999),64);
   if (!Number.isFinite(p.clock)||p.clock<0||p.clock>=24) p.clock=15;   // saves from before the day/night cycle
   if (typeof p.playerName!=='string'||p.playerName.length>32) { fix('playerName'); p.playerName=freshProfile().playerName; }
   // Saves before clothing had slots stored a single item id, or null.
@@ -253,7 +254,7 @@ export function decodeProfile(raw,repairs=[],notes=[]) {
   }
   // Key bindings came later still: absent is fine, and only sound changes from the default are kept.
   if (s.keys!==undefined) { const keys=sanitiseKeys(s.keys); if (!plain(s.keys)||Object.keys(s.keys).length!==Object.keys(keys).length||Object.entries(keys).some(([action,code])=>s.keys[action]!==code)) fix('settings'); if (Object.keys(keys).length) s.keys=keys; else delete s.keys; }
-  return {version:SAVE_VERSION,...(dailyPractice?{dailyPractice}:{}),...(cooking?{cooking}:{}),...(metro?{metro}:{}),...(tutorial?{tutorial}:{}),...(learning?{learning}:{}),wallet:p.wallet,inventory,equipped,claims,words,completed,phrases,discovered,read,clock:p.clock,dayIndex:p.dayIndex,vendors,saved:normaliseBank(saved),...(stats?{stats}:{}),...(debt?{debt}:{}),...(daily?{daily}:{}),...(savings?{savings}:{}),...(permitPlans.length?{permitPlans}:{}),...(builds?{builds:Object.fromEntries(Object.entries(builds).map(([id,record])=>[id,{given:record.given,done:record.done}]))}:{}),home:home.map(r=>({uid:r.uid,item:r.item,kind:r.kind,color:r.color,footprint:[r.footprint[0],r.footprint[1]],x:r.x,z:r.z,rot:r.rot,...(r.room?{room:r.room}:{}),...(r.y?{y:r.y}:{}),...(r.slot?{slot:r.slot}:{}),...(r.on?{on:r.on}:{})})),settings:s,playerName:p.playerName};
+  return {version:SAVE_VERSION,...(dailyPractice?{dailyPractice}:{}),...(cooking?{cooking}:{}),...(metro?{metro}:{}),...(tutorial?{tutorial}:{}),...(learning?{learning}:{}),wallet:p.wallet,inventory,equipped,claims,words,completed,phrases,discovered,read,clock:p.clock,dayIndex:p.dayIndex,vendors,saved:normaliseBank(saved),...(stats?{stats}:{}),...(debt?{debt}:{}),...(daily?{daily}:{}),...(savings?{savings}:{}),...(permitPlans.length?{permitPlans}:{}),...(Object.keys(hotpot).length?{hotpot}:{}),...(builds?{builds:Object.fromEntries(Object.entries(builds).map(([id,record])=>[id,{given:record.given,done:record.done}]))}:{}),home:home.map(r=>({uid:r.uid,item:r.item,kind:r.kind,color:r.color,footprint:[r.footprint[0],r.footprint[1]],x:r.x,z:r.z,rot:r.rot,...(r.room?{room:r.room}:{}),...(r.y?{y:r.y}:{}),...(r.slot&&Object.hasOwn(rooms[r.room??'home']?.slots??{},r.slot)?{slot:r.slot}:{}),...(r.on?{on:r.on}:{})})),settings:s,playerName:p.playerName};
 }
 const REPAIRED="存档有一部分读不了，已经修好了，原来的存档另存了一份。 / Part of your save couldn't be read. It has been repaired, and a copy of the original was kept.";
 const UNREADABLE='存档暂时无法读取。 / Saved progress could not be read. A fresh session is open, and a copy of the original was kept.';

@@ -105,3 +105,50 @@ test('inside, the house matches the outside: a study through the west wall and a
   // The way back lands beside the door it came through.
   assert.ok(Math.abs(study.returnSpawn[1]-doors.study.z)<.5&&study.returnSpawn[0]<-3);
 });
+
+import catalog from '../src/content/catalog.json' with {type:'json'};
+
+test('furniture in the home slots stands clear of the doors, backs onto a wall, and a chair has a table',()=>{
+  const home=rooms.home,[w,d]=home.size;
+  const items=Array.isArray(catalog)?catalog:catalog.items;
+  // The biggest footprint any accepted piece has, turned the way the slot turns it.
+  const half=slot=>{
+    const [fw,fd]=items.filter(i=>slot.accepts.includes(i.kind)&&i.footprint).reduce(([a,b],i)=>[Math.max(a,i.footprint[0]),Math.max(b,i.footprint[1])],[0,0]);
+    return ((slot.rot??0)/90)%2?[fd/2,fw/2]:[fw/2,fd/2];
+  };
+  // Ways in and out, with the 1.2 m in front of each kept clear: [x0,z0,x1,z1,floor].
+  const doors=[[-.85,d/2-1.2,.85,d/2,0]];
+  for(const a of home.annexes){
+    const x=a.wall==='east'?w/2:-w/2,into=a.wall==='east'?-1.2:1.2;
+    doors.push([Math.min(x,x+into),a.z-.63,Math.max(x,x+into),a.z+.63,0]);
+  }
+  for(const pane of home.frontWindows)if(pane.door)doors.push([pane.x-.6,d/2-1.2,pane.x+.6,d/2,pane.y??0]);
+  const ONE_SIDED=new Set(['wardrobe','shelf','dresser','nightstand','bed','chair']);
+  const slots=Object.entries(home.slots).filter(([,s])=>!s.accepts.includes('certificate'));
+  for(const [id,slot] of slots){
+    const [hw,hd]=half(slot),y=slot.y??0;
+    for(const [x0,z0,x1,z1,floor] of doors)
+      if(floor===y&&!slot.accepts.includes('rug'))assert.ok(!(slot.x+hw>x0&&slot.x-hw<x1&&slot.z+hd>z0&&slot.z-hd<z1),`${id} stands in front of a door`);
+    // And clear of what Town.freeSpot keeps free round the way out and each door, so placing a piece
+    // by hand on its slot's spot is allowed too.
+    if(!y&&!slot.accepts.includes('rug')){
+      assert.ok(!(Math.abs(slot.x-home.exit[0])<hw+.8&&Math.abs(slot.z-home.exit[1])<hd+1.1),`${id} is in the way out`);
+      for(const a of home.annexes){
+        const ax=a.wall==='east'?w/2-.035:-w/2+.035;
+        assert.ok(!(Math.abs(slot.x-ax)<hw+1&&Math.abs(slot.z-a.z)<hd+.85),`${id} is in the ${a.room} doorway`);
+      }
+    }
+    if(slot.accepts.some(k=>ONE_SIDED.has(k))){
+      const r=(slot.rot??0)*Math.PI/180,fx=Math.round(Math.sin(r)),fz=Math.round(Math.cos(r));
+      const [gap,wx,wz]=[[slot.x-hw+w/2,-1,0],[w/2-slot.x-hw,1,0],[slot.z-hd+d/2,0,-1],[d/2-slot.z-hd,0,1]].sort((a,b)=>a[0]-b[0])[0];
+      if(gap<.6)assert.ok(fx*wx+fz*wz<0,`${id} turns its ${fx*wx+fz*wz>0?'back':'side'} to the room`);
+    }
+  }
+  // A chair faces a table, not a wall or a door: the table stands within 1.5 m in front of it.
+  for(const [id,slot] of slots.filter(([,s])=>s.accepts.includes('chair'))){
+    const r=(slot.rot??0)*Math.PI/180;
+    const table=slots.find(([,s])=>s.accepts.includes('table')&&(s.y??0)===(slot.y??0)
+      &&Math.hypot(s.x-slot.x,s.z-slot.z)<1.5&&(s.x-slot.x)*Math.sin(r)+(s.z-slot.z)*Math.cos(r)>.3);
+    assert.ok(table,`${id} faces no table`);
+  }
+});

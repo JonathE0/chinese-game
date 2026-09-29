@@ -87,13 +87,20 @@ export class Registry {
     const hits=[];
     for(const list of [this.boxes,this.looks])for(const b of list){
       if(!b.name||b.place!==place||(b.entity&&!b.entity.enabled)||contains(b,origin))continue;
-      let span=b.radius?hitCylinder(origin,dir,b,maxDistance):hitBox(origin,dir,b,maxDistance);
-      if(span&&b.refine)span=b.refine(origin,dir,maxDistance);
+      const limit=b.reach??maxDistance;   // `reach`: something far off and big, like the drone show over the bay
+      let span=b.radius?hitCylinder(origin,dir,b,limit):hitBox(origin,dir,b,limit);
+      if(span&&b.refine)span=b.refine(origin,dir,limit);
       if(span)hits.push({box:b,near:span[0],far:span[1],size:volume(b)});
     }
     hits.sort((a,b)=>a.near-b.near);
     let best=hits[0];
     for(const hit of hits)if(hit.near<best.far&&hit.size<best.size)best=hit;
+    // Seen past arm's length only through its `reach`: anything solid nearer along the ray, at
+    // any distance, stands in the way (a tower between you and the drones over the bay).
+    if(best&&best.near>maxDistance)for(const b of this.boxes){
+      if(!b.solid||!b.name||b.place!==place||(b.entity&&!b.entity.enabled)||contains(b,origin))continue;
+      if(b.radius?hitCylinder(origin,dir,b,best.near):hitBox(origin,dir,b,best.near))return null;
+    }
     return best?{box:best.box,distance:best.near}:null;
   }
 }

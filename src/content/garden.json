@@ -1,5 +1,5 @@
 {
-  "note": "莲池公园 · Lotus Pond Park, south of the square through the moon gate (district 'garden' in world.json). World coordinates: x east, z south. src/world/garden.js builds the scenery from this file, src/core/garden.js derives the collision marks, src/ui/garden-map.js draws the minimap. Rects are {x0,x1,z0,z1}; discs are {x,z,r}. Bridge steps are [z0, z1, top].",
+  "note": "莲池公园 · Lotus Pond Park, south of the square through the moon gate (district 'garden' in world.json). World coordinates: x east, z south. src/world/garden.js builds the scenery from this file, src/core/garden.js derives the collision marks, src/ui/garden-map.js draws the minimap. Rects are {x0,x1,z0,z1}; discs are {x,z,r}. Bridge steps are [z0, z1, top]. A stretch of the stream's flow is [x, z] in metres a second, from the waterfall to the pond.",
   "water": {"top": 0.6, "bottom": -0.5, "level": 0.08, "fence": 2.6, "fenceSpacing": 0.45},
   "guards": {"bridgeRail": 1.6, "climbable": 3.5},
   "pond": [
@@ -10,10 +10,10 @@
     {"x": -8.5, "z": 38.5, "r": 2.8}
   ],
   "stream": [
-    {"x0": -17.4, "x1": -11.5, "z0": 38.6, "z1": 40.2},
-    {"x0": -17.4, "x1": -15.4, "z0": 40.2, "z1": 46.2}
+    {"x0": -17.4, "x1": -11.5, "z0": 38.6, "z1": 40.2, "flow": [0.5, 0]},
+    {"x0": -17.4, "x1": -15.4, "z0": 40.2, "z1": 46.2, "flow": [0, -0.5]}
   ],
-  "streamMouth": {"x0": -11.8, "x1": -10.9, "z0": 38.6, "z1": 40.2},
+  "streamMouth": {"x0": -11.8, "x1": -10.9, "z0": 38.6, "z1": 40.2, "flow": [0.5, 0]},
   "shoreStonesSkip": {
     "pond": [{"x0": -12.5, "x1": -10.6, "z0": 38.2, "z1": 40.6}],
     "stream": [{"x0": -12, "x1": -11, "z0": 38, "z1": 41}, {"x0": -18, "x1": -15, "z0": 45.8, "z1": 47},

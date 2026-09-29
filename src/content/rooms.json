@@ -57,7 +57,7 @@
       "bed": {
         "zh": "床位",
         "x": 2.9,
-        "z": -2.6,
+        "z": -3.75,
         "rot": 0,
         "accepts": [
           "bed"
@@ -85,7 +85,7 @@
         "zh": "衣柜",
         "x": 4.2,
         "z": 0.9,
-        "rot": 90,
+        "rot": -90,
         "accepts": [
           "wardrobe"
         ]
@@ -101,9 +101,9 @@
       },
       "chair": {
         "zh": "椅子",
-        "x": -2.5,
-        "z": -1.2,
-        "rot": -90,
+        "x": -0.75,
+        "z": 0.6,
+        "rot": 90,
         "accepts": [
           "chair"
         ]
@@ -128,8 +128,8 @@
       },
       "plant": {
         "zh": "绿植",
-        "x": 4.1,
-        "z": 3.1,
+        "x": 4,
+        "z": 4.1,
         "rot": 0,
         "accepts": [
           "plant"
@@ -142,15 +142,6 @@
         "rot": 0,
         "accepts": [
           "lamp"
-        ]
-      },
-      "desklamp": {
-        "zh": "台灯",
-        "x": -3.6,
-        "z": -2.4,
-        "rot": 0,
-        "accepts": [
-          "desklamp"
         ]
       },
       "ceiling": {
@@ -184,7 +175,7 @@
       },
       "up-wardrobe": {
         "zh": "衣柜",
-        "x": -2,
+        "x": -4.6,
         "z": -2.9,
         "y": 2.9,
         "rot": 90,
@@ -338,7 +329,8 @@
     "lectern": {
       "x": 0,
       "z": -4.4,
-      "label": "查词 · HSK"
+      "label": "查词 · HSK",
+      "look": "writingdesk"
     },
     "fittings": [
       {
@@ -966,7 +958,7 @@
       },
       {
         "kind": "wallsign",
-        "x": 3.6,
+        "x": -3.6,
         "z": 4,
         "rot": 180,
         "sign": "营业时间"
@@ -1170,14 +1162,17 @@
       -4,
       4
     ],
-    "lectern": {
-      "x": 0,
-      "z": -2.9,
-      "label": "点菜 · 服务台",
-      "shop": "restaurant"
-    },
     "stock": "restaurant",
     "fittings": [
+      {
+        "kind": "servicecounter",
+        "x": 0,
+        "z": -2.9,
+        "rot": 0,
+        "approach": 1.6,
+        "action": "shop:restaurant",
+        "label": "点菜 · 服务台"
+      },
       {
         "kind": "diningtable",
         "x": -3.4,
@@ -1549,18 +1544,21 @@
       -3,
       3
     ],
-    "lectern": {
-      "x": 0,
-      "z": -1.7,
-      "label": "卖旧东西 · 老周收货",
-      "panel": "resale"
-    },
     "opens": {
       "flag": "purchase:first",
       "zh": "买过东西以后再来",
       "en": "Opens once you have bought something in town."
     },
     "fittings": [
+      {
+        "kind": "resalecounter",
+        "x": 0,
+        "z": -1.7,
+        "rot": 0,
+        "approach": 1.6,
+        "action": "panel:resale",
+        "label": "卖旧东西 · 老周收货"
+      },
       {
         "kind": "cratewall",
         "x": -3.4,
@@ -1632,7 +1630,7 @@
     "building": "bank-branch",
     "door": {
       "x": -18,
-      "z": -8.8
+      "z": -3.4
     },
     "enterLabel": "进银行",
     "size": [
@@ -2444,7 +2442,7 @@
       0,
       3.6
     ],
-    "height": 3.4,
+    "height": 4.2,
     "floor": "#cfc6b0",
     "wall": "#f2efe2",
     "trim": "#7f9a76",
@@ -2570,8 +2568,8 @@
         0.5
       ],
       [
-        0,
-        -2.2
+        -2.5,
+        -1.4
       ]
     ],
     "fittings": [
@@ -2820,7 +2818,7 @@
       -0.3
     ],
     "returnWall": "east",
-    "height": 3.1,
+    "height": 3.6,
     "floor": "#c2a077",
     "wall": "#f0e4c8",
     "trim": "#a8825d",
@@ -2831,7 +2829,7 @@
     "returnSpawn": [
       -3.9,
       -1.7,
-      90
+      -90
     ],
     "frontWindows": [
       {
@@ -2890,14 +2888,16 @@
       8
     ],
     "spawn": [
-      0,
-      1.2
+      -2.4,
+      2.2,
+      -90
     ],
     "exit": [
-      0,
-      3.7
+      -3.7,
+      2.2
     ],
-    "height": 3.3,
+    "returnWall": "west",
+    "height": 3.8,
     "floor": "#d9cbb3",
     "wall": "#f2ead8",
     "trim": "#719485",
@@ -2912,7 +2912,7 @@
     "returnSpawn": [
       3.5,
       2.5,
-      -90
+      90
     ],
     "fittings": [
       {
@@ -2924,12 +2924,12 @@
       },
       {
         "kind": "diningtable",
-        "x": -2,
+        "x": 2,
         "z": 0.2
       },
       {
         "kind": "diningchair",
-        "x": -2,
+        "x": 2,
         "z": 1.4,
         "rot": 180
       }
@@ -3744,7 +3744,7 @@
       },
       {
         "kind": "poster",
-        "x": 1.5,
+        "x": 3,
         "z": -3.9,
         "y": 2.9,
         "rot": 0,

@@ -1,0 +1,59 @@
+{
+  "note": "The drone light show over 云海湾 (src/world/drones.js). It starts at each hour in `times` (game clock; `end` is the key of the line that closes that show) and runs on real seconds: `launch` on the barge with the lights on, `rise` to the first formation, then `hold` and `move` for each one, and `land` back at the barge. A game hour is 60 real seconds, so a show (about 150 s) ends well before the next one. Text formations rasterise `text` (a signs.json entry: looking at it names the phrase); a text with `wrap` breaks into lines of at most that many characters; shape formations draw `main` and `accent` strokes in a 200 x 120 design space (y down; `line` is straight, `curve` is smoothed) and are named by `look` (an objects.json key). The `accent` drones take the second colour: the blue wisps under the boat, the lotus leaf.",
+  "count": 400,
+  "accent": 80,
+  "radius": 0.45,
+  "times": [{"at": 20, "end": "end-first"}, {"at": 23, "end": "end"}],
+  "centre": [15, 50, -100],
+  "size": [120, 44],
+  "pad": {"centre": [15, 1.2, -118], "spacing": 2.4},
+  "launch": 3,
+  "rise": 7,
+  "hold": 12.5,
+  "move": 4.5,
+  "land": 7,
+  "speaker": "narrator",
+  "lines": {
+    "start": {"zh": "无人机表演马上开始！", "pinyin": "Wúrénjī biǎoyǎn mǎshàng kāishǐ!", "en": "The drone show is about to start!", "audio": "drones-start"},
+    "end-first": {"zh": "第一场表演结束了，晚上十一点还有一场！", "pinyin": "Dì-yī chǎng biǎoyǎn jiéshù le, wǎnshang shíyī diǎn hái yǒu yì chǎng!", "en": "The first show is over. There's another one at eleven tonight!", "audio": "drones-end-first"},
+    "end": {"zh": "今天的表演结束了，谢谢大家！", "pinyin": "Jīntiān de biǎoyǎn jiéshù le, xièxie dàjiā!", "en": "That's the end of today's show. Thank you, everyone!", "audio": "drones-end"}
+  },
+  "formations": [
+    {"text": "你好", "colors": ["#ffb347", "#ff6a3d"]},
+    {"text": "欢迎来到云海", "wrap": 4, "colors": ["#4fc3ff", "#ffffff"]},
+    {"look": "boat", "colors": ["#ff4a1c", "#2f8cff"],
+      "main": [
+        {"curve": [[8, 68], [20, 82], [44, 94], [100, 96], [156, 94], [180, 82], [192, 68]]},
+        {"line": [[14, 78], [186, 78]]},
+        {"line": [[52, 78], [52, 58]]}, {"line": [[76, 78], [76, 58]]}, {"line": [[124, 78], [124, 58]]}, {"line": [[148, 78], [148, 58]]},
+        {"curve": [[34, 50], [44, 58], [100, 57], [156, 58], [166, 50]]},
+        {"line": [[46, 57], [70, 44], [130, 44], [154, 57]]},
+        {"line": [[80, 44], [80, 32]]}, {"line": [[120, 44], [120, 32]]},
+        {"curve": [[56, 26], [66, 33], [100, 32], [134, 33], [144, 26]]},
+        {"line": [[66, 32], [84, 20], [116, 20], [134, 32]]},
+        {"line": [[100, 20], [100, 10]]}
+      ],
+      "accent": [
+        {"curve": [[4, 104], [26, 98], [48, 106], [72, 98], [96, 106], [120, 98], [144, 106], [168, 98], [196, 104]]},
+        {"curve": [[22, 115], [44, 110], [66, 116], [88, 110], [112, 116], [134, 110], [156, 116], [178, 111]]},
+        {"curve": [[6, 44], [12, 30], [26, 26], [34, 34], [26, 40]]},
+        {"curve": [[194, 40], [188, 26], [174, 22], [166, 30], [174, 36]]}
+      ]},
+    {"text": "福", "colors": ["#ff2a2a", "#ffcc33"]},
+    {"look": "lotus", "colors": ["#ff6fae", "#3fd67a"],
+      "main": [
+        {"curve": [[100, 14], [114, 38], [112, 64], [100, 80], [88, 64], [86, 38], [100, 14]]},
+        {"curve": [[98, 80], [80, 70], [66, 48], [64, 28], [80, 42], [94, 62], [98, 80]]},
+        {"curve": [[102, 80], [120, 70], [134, 48], [136, 28], [120, 42], [106, 62], [102, 80]]},
+        {"curve": [[96, 82], [70, 80], [46, 66], [32, 48], [56, 54], [80, 66], [96, 82]]},
+        {"curve": [[104, 82], [130, 80], [154, 66], [168, 48], [144, 54], [120, 66], [104, 82]]}
+      ],
+      "accent": [
+        {"curve": [[18, 96], [50, 86], [100, 84], [150, 86], [182, 96], [150, 106], [100, 110], [50, 106], [18, 96]]},
+        {"line": [[100, 82], [100, 96]]}
+      ]},
+    {"text": "学中文", "colors": ["#7fd4ff", "#ff7a3d"]},
+    {"text": "加油", "colors": ["#ff8a1c", "#ffd84a"]},
+    {"text": "晚安", "colors": ["#b58cff", "#ffffff"]}
+  ]
+}
