@@ -1,9 +1,12 @@
 import {readFile,readdir,access} from 'node:fs/promises';
+import {validateRoots} from '../src/core/roots-content.js';
+import roots from '../src/content/roots.json' with {type:'json'};
 import {evaluateNode} from '../src/core/conversation.js';
 const read=async name=>JSON.parse(await readFile(new URL('../src/content/'+name,import.meta.url),'utf8'));
 const lessonFiles=(await readdir(new URL('../src/content/lessons/',import.meta.url))).filter(f=>f.endsWith('.json')).sort();
 const [words,npcs,world,catalog,ambient,lessons,curriculum,voices,objects,rooms,hsk,manifest]=await Promise.all([read('vocabulary.json'),read('npcs.json'),read('world.json'),read('catalog.json'),read('ambient.json'),Promise.all(lessonFiles.map(f=>read('lessons/'+f))),read('curriculum.json'),read('voices.json'),read('objects.json'),read('rooms.json'),read('hsk.json'),readFile(new URL('../public/audio/manifest.json',import.meta.url),'utf8').then(JSON.parse)]);
-const errors=[],warnings=[];
+const errors=validateRoots(roots),warnings=[];
+for(const line of [...roots.skills.flatMap(s=>s.variants),...roots.bankLesson.nodes])if(!manifest.clips[line.audio])errors.push('Missing Roots voice '+line.audio);
 const require=(ok,message)=>{if(!ok)errors.push(message);};
 function ids(list,label){const set=new Set();for(const item of list){require(typeof item.id==='string'&&/^[a-z0-9-]+$/.test(item.id),label+': invalid id');require(!set.has(item.id),label+': duplicate '+item.id);set.add(item.id);}return set;}
 function language(list,label){for(const line of list)for(const k of ['zh','pinyin','en'])require(typeof line[k]==='string'&&line[k].trim().length>0,`${label}:${line.id} missing ${k}`);}
@@ -316,7 +319,7 @@ for(const line of (await read('crowd.json')).lines){
 }
 const lessonAudioSources=lessons.flatMap(l=>[...l.nodes,...Object.values(l.extraLines??{})]);
 const needed=[...words,...ambient,...lessonAudioSources,...catalog].map(x=>x.audio).filter(Boolean)
-  .concat(objectIds.map(id=>'obj-'+id),[...signIds].map(id=>'sign-'+id),featureClips);
+  .concat(roots.skills.flatMap(s=>s.variants.map(v=>v.audio)),roots.bankLesson.nodes.map(v=>v.audio),['roots-caretaker-greeting','roots-caretaker-memory'],objectIds.map(id=>'obj-'+id),[...signIds].map(id=>'sign-'+id),featureClips);
 const missing=[],unreviewed=[];
 for(const id of needed){
   const clip=manifest.clips[id];

@@ -1,3 +1,4 @@
+import {mountRootsBank} from './roots-bank.js';
 import catalog from '../content/catalog.json' with {type:'json'};
 import {escapeHtml as esc} from '../core/language.js';
 import {icon,itemArt} from './art.js';
@@ -33,6 +34,7 @@ function chrome(ctx,body,tab,inner){
     <div id="bank-confirm"></div>
     <p class="microcopy">这里的「学习币」是游戏里的货币，不是真钱，也不涉及任何真实的金融服务。<br>
       Coins are the in-game currency. Nothing here is real money or real financial advice.</p>`;
+  mountRootsBank(ctx,body,()=>openBank(ctx,tab));
   body.querySelectorAll('[data-tab]').forEach(button=>button.onclick=()=>render(ctx,body,button.dataset.tab));
 }
 

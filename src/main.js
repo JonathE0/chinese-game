@@ -1,4 +1,7 @@
 import './style.css';
+import {showRootsOpening,openRootsCaretaker,refreshRootsWorld,openRootsWelcome} from './ui/roots.js';
+import {applyRootsEvent} from './core/roots.js';
+import {installBusinesses} from './services/businesses.js';
 import {Town} from './world/town.js';
 import {Shell,pinyinText,pinyinWith} from './ui/shell.js';
 import {VoicePlayer} from './services/audio.js';
@@ -126,6 +129,7 @@ function interact(id){
  // Saying hello to someone is a tutorial step; the id is who, without any city:/staff: prefix.
  const person=['lin','mei','chen','friend-a','friend-b'].includes(id)?id:/^(city|staff):/.test(id)?id.replace(/^(city|staff):/,''):null;
  if(person)ctx.tutorial.event('talk',{id:person});
+ if(id==='zhou')return openRootsCaretaker(ctx);
  if(id==='lin'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,'lin',()=>openDialogue(ctx,npcs.find(n=>n.id==='lin').lesson));}
  if(id==='mei'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,ctx.profile.completed.includes('practice:first')?'mei':'mei-first',()=>openPractice(ctx));}
  if(id==='chen'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,'chen',()=>openShop(ctx,'chen'));}
@@ -222,6 +226,7 @@ function showGate(id){
  ctx.ui.update();
 }
 function enterPlace(id){
+ if(id==='home'){applyRootsEvent(ctx.profile,{type:'house'});ctx.save();}
  if(id==='town')ctx.town.leaveRoom();
  else{
   // A room you need a ticket for (the cinema's screening room) takes one at the door.
@@ -404,6 +409,8 @@ try{
  document.body.classList.add('unlocked');
  installTouch(ctx.town);
  installCamera(ctx);
+ installBusinesses(ctx,()=>cloudSync(ctx,{asked:true}));
+ if(import.meta.env.DEV&&ADMIN)import('./services/test-businesses.js').then(({installTestBusinesses})=>installTestBusinesses(ctx));
  installPlacement(ctx);
  ctx.town.daylight.setHour(ctx.profile.clock??15);
  // Place the day stalls at the real saved hour, before the first frame — not the constructor's
@@ -428,7 +435,7 @@ loadWords().then(list=>{
  }
  refreshGates();
 }).catch(()=>ctx.ui.notice('HSK 词表暂时无法载入，区域暂不开放。 / Word list unavailable; districts stay closed.'));
-const saveProfileAndGates=ctx.save;ctx.save=()=>{saveProfileAndGates();refreshGates();refreshShops();};
+const saveProfileAndGates=ctx.save;ctx.save=()=>{saveProfileAndGates();refreshGates();refreshShops();refreshRootsWorld(ctx);};
 refreshShops();
 // Anything already built is standing when the town loads.
 if(ctx.town)for(const site of builtSites(ctx.profile))ctx.town.revealSite(site.id);
@@ -436,8 +443,10 @@ if(ctx.town)for(const site of builtSites(ctx.profile))ctx.town.revealSite(site.i
 if(ctx.town)for(const [npc,person] of Object.entries(friends.people))if(person.pin&&pinned(ctx.profile,npc))ctx.town.pinPostcard(person.pin);
 document.querySelector('#start-button').onclick=()=>{started=true;document.querySelector('#arrival').hidden=true;document.body.classList.add('playing');ctx.town.setPaused(false);ctx.music.start();settleHotpot(ctx);if(loaded.warning||loaded.notice)ctx.ui.notice([loaded.warning,loaded.notice].filter(Boolean).join(' '));
  // A brand-new traveller is walked through the basics; a save already mid-way picks up where it was.
+ const welcome=!ctx.profile.roots?.started&&shouldAutoStart(ctx.profile);
+ showRootsOpening(ctx);
  ctx.tutorial.started=true;
- if(shouldAutoStart(ctx.profile))ctx.tutorial.start();else ctx.tutorial.sync();
+ if(welcome)openRootsWelcome(ctx,()=>ctx.tutorial.start());else if(shouldAutoStart(ctx.profile))ctx.tutorial.start();else ctx.tutorial.sync();
  // A connected folder with more progress than this browser's save is offered before anything overwrites it.
  // The cloud is checked after that, against whichever save the player kept.
  if(!ADMIN)offerFolderRestore(ctx).then(offered=>{if(!offered){ctx.holdSync=false;cloudSync(ctx);}},()=>{ctx.holdSync=false;cloudSync(ctx);});

@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {evaluateNode} from '../src/core/conversation.js';
+const node={intent:'variants',accepted:['我要两个苹果'],choices:['我要两个苹果。'],answerRules:{templates:['{request}{quantity}{item}{ending}','{quantity}{item}{ending}'],slots:{request:['我要','我想买','我想要','给我','请给我','麻烦给我','我买','帮我拿','请帮我拿'],quantity:['两个','两颗','2个','二个'],item:['苹果'],ending:['','吧','谢谢','谢谢您','好吗']}}};
+test('natural requests satisfy required item and quantity',()=>{for(const text of ['我要两个苹果。','我想买两个苹果','给我两个苹果吧','麻烦给我两个苹果','两个苹果，谢谢','请给我2个苹果','帮我拿两个苹果好吗'])assert.equal(evaluateNode(node,text).ok,true,text);});
+test('keywords cannot bypass polarity, quantity or intention',()=>{for(const text of ['我不要两个苹果','我要三个苹果','苹果','香蕉','两个苹果还是香蕉','没有两个苹果','不想买两个苹果','','<script>','我要两个苹果但不要苹果'])assert.equal(evaluateNode(node,text).ok,false,text);});
+test('option nodes use the same templates while retaining values',()=>{const n={intent:'option',options:[{...node,value:'apple',choice:'我要两个苹果。'}]};assert.equal(evaluateNode(n,'麻烦给我两个苹果').value,'apple');});
+test('ambiguous options do not choose a destination arbitrarily',()=>{assert.equal(evaluateNode({intent:'option',options:[{value:'a',accepted:['那里']},{value:'b',accepted:['那里']}]},'那里').ok,false);});

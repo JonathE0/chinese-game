@@ -1,5 +1,47 @@
 [
- {"id":"lin","zh":"林阿姨","pinyin":"Lín āyí","en":"Auntie Lin","role":"茶铺","roleEn":"Meet someone new","kind":"dialogue","lesson":"introductions","color":"#c77b60","voice":"lin"},
- {"id":"mei","zh":"小美","pinyin":"Xiǎoměi","en":"Xiaomei","role":"练习角","roleEn":"Learn four everyday words","kind":"practice","color":"#83996f","voice":"mei"},
- {"id":"chen","zh":"陈叔叔","pinyin":"Chén shūshu","en":"Uncle Chen","role":"小商店","roleEn":"Browse & bargain","kind":"shop","color":"#608da0","voice":"chen"}
+  {
+    "id": "lin",
+    "zh": "林阿姨",
+    "pinyin": "Lín āyí",
+    "en": "Auntie Lin",
+    "role": "茶铺",
+    "roleEn": "Meet someone new",
+    "kind": "dialogue",
+    "lesson": "introductions",
+    "color": "#c77b60",
+    "voice": "lin"
+  },
+  {
+    "id": "mei",
+    "zh": "小美",
+    "pinyin": "Xiǎoměi",
+    "en": "Xiaomei",
+    "role": "练习角",
+    "roleEn": "Learn four everyday words",
+    "kind": "practice",
+    "color": "#83996f",
+    "voice": "mei"
+  },
+  {
+    "id": "chen",
+    "zh": "陈叔叔",
+    "pinyin": "Chén shūshu",
+    "en": "Uncle Chen",
+    "role": "小商店",
+    "roleEn": "Browse & bargain",
+    "kind": "shop",
+    "color": "#608da0",
+    "voice": "chen"
+  },
+  {
+    "id": "zhou",
+    "zh": "周叔叔",
+    "pinyin": "Zhōu shūshu",
+    "en": "Uncle Zhou",
+    "role": "水果摊",
+    "roleEn": "Grandfather’s old fruit stand",
+    "kind": "story",
+    "color": "#83996f",
+    "voice": "chen"
+  }
 ]

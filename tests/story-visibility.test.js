@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {Registry} from '../src/world/registry.js';
+test('cart movement envelope does not hide the view through its empty canopy',()=>{const r=new Registry();const b=r.add({x:0,z:2,hw:2,hd:1,y0:0,y1:3,name:{en:'cart'}});b.group='stall:test';r.addLook({x:0,z:2,hw:2,hd:1,y0:0,y1:1,name:{en:'counter'}}).group='stall:test';assert.equal(r.visiblePoint('town',{x:0,y:1.6,z:5},{x:0,y:1.6,z:-5},0),true);});
+test('solid walls and actual cart counters still block story photographs',()=>{const r=new Registry();r.add({x:0,z:2,hw:2,hd:1,y0:0,y1:3,name:{en:'wall'}});assert.equal(r.visiblePoint('town',{x:0,y:1.6,z:5},{x:0,y:1.6,z:-5},0),false);});

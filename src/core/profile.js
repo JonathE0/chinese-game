@@ -1,3 +1,4 @@
+import {normalizeRoots} from './roots.js';
 import {normaliseBank} from './bank.js';
 import {normalizeCooking} from './cooking.js';
 import {normalizeMetro} from './metro.js';
@@ -13,7 +14,7 @@ export const SAVE_KEY='little-mandarin-town.v1';
  * to the save format adds one step here; loading runs whatever steps a save still needs, and saving
  * always writes SAVE_VERSION.
  */
-const UPGRADES=[upstairs,bedSpot,nightstandSpot,tidySlots,bedToWall];
+const UPGRADES=[upstairs,bedSpot,nightstandSpot,tidySlots,bedToWall,p=>({...p,roots:normalizeRoots(p.roots)})];
 export const SAVE_VERSION=UPGRADES.length+1;
 /** `notes` collects what an upgrade had to tell the player (loadProfile turns it into `notice`). */
 export function upgradeSave(p,steps=UPGRADES,notes=[]) {
@@ -257,7 +258,7 @@ export function decodeProfile(raw,repairs=[],notes=[]) {
   if (s.keys!==undefined) { const keys=sanitiseKeys(s.keys); if (!plain(s.keys)||Object.keys(s.keys).length!==Object.keys(keys).length||Object.entries(keys).some(([action,code])=>s.keys[action]!==code)) fix('settings'); if (Object.keys(keys).length) s.keys=keys; else delete s.keys; }
   // 画质 (src/core/quality.js) too: absent is 自动, and anything unknown goes back to it.
   if (s.quality!==undefined&&!QUALITY.includes(s.quality)) { fix('settings'); delete s.quality; }
-  return {version:SAVE_VERSION,...(dailyPractice?{dailyPractice}:{}),...(cooking?{cooking}:{}),...(metro?{metro}:{}),...(tutorial?{tutorial}:{}),...(learning?{learning}:{}),wallet:p.wallet,inventory,equipped,claims,words,completed,phrases,discovered,read,clock:p.clock,dayIndex:p.dayIndex,vendors,saved:normaliseBank(saved),...(stats?{stats}:{}),...(debt?{debt}:{}),...(daily?{daily}:{}),...(savings?{savings}:{}),...(permitPlans.length?{permitPlans}:{}),...(Object.keys(hotpot).length?{hotpot}:{}),...(builds?{builds:Object.fromEntries(Object.entries(builds).map(([id,record])=>[id,{given:record.given,done:record.done}]))}:{}),home:home.map(r=>({uid:r.uid,item:r.item,kind:r.kind,color:r.color,footprint:[r.footprint[0],r.footprint[1]],x:r.x,z:r.z,rot:r.rot,...(r.room?{room:r.room}:{}),...(r.y?{y:r.y}:{}),...(r.slot&&Object.hasOwn(rooms[r.room??'home']?.slots??{},r.slot)?{slot:r.slot}:{}),...(r.on?{on:r.on}:{})})),settings:s,playerName:p.playerName};
+  return {version:SAVE_VERSION,roots:normalizeRoots(p.roots),...(plain(p.businesses)?{businesses:p.businesses}:{}),...(typeof p.businessRevision==='string'?{businessRevision:p.businessRevision}:{}),...(dailyPractice?{dailyPractice}:{}),...(cooking?{cooking}:{}),...(metro?{metro}:{}),...(tutorial?{tutorial}:{}),...(learning?{learning}:{}),wallet:p.wallet,inventory,equipped,claims,words,completed,phrases,discovered,read,clock:p.clock,dayIndex:p.dayIndex,vendors,saved:normaliseBank(saved),...(stats?{stats}:{}),...(debt?{debt}:{}),...(daily?{daily}:{}),...(savings?{savings}:{}),...(permitPlans.length?{permitPlans}:{}),...(Object.keys(hotpot).length?{hotpot}:{}),...(builds?{builds:Object.fromEntries(Object.entries(builds).map(([id,record])=>[id,{given:record.given,done:record.done}]))}:{}),home:home.map(r=>({uid:r.uid,item:r.item,kind:r.kind,color:r.color,footprint:[r.footprint[0],r.footprint[1]],x:r.x,z:r.z,rot:r.rot,...(r.room?{room:r.room}:{}),...(r.y?{y:r.y}:{}),...(r.slot&&Object.hasOwn(rooms[r.room??'home']?.slots??{},r.slot)?{slot:r.slot}:{}),...(r.on?{on:r.on}:{})})),settings:s,playerName:p.playerName};
 }
 const REPAIRED="存档有一部分读不了，已经修好了，原来的存档另存了一份。 / Part of your save couldn't be read. It has been repaired, and a copy of the original was kept.";
 const UNREADABLE='存档暂时无法读取。 / Saved progress could not be read. A fresh session is open, and a copy of the original was kept.';

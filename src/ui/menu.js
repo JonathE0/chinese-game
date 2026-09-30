@@ -12,7 +12,7 @@ const ORDER_BONUS=3;
 
 /** The phrasings a waiter would accept for "I'll have the dumplings". */
 const patterns=zh=>['我要'+zh,'我想要'+zh,'我要一份'+zh,'来一份'+zh,'来一个'+zh,'来一碗'+zh,'我要一个'+zh,'我要一碗'+zh,'给我'+zh,'我点'+zh,zh];
-const accepts=(text,zh)=>patterns(zh).some(form=>normalize(form)===normalize(text));
+const accepts=(text,zh)=>patterns(zh).flatMap(form=>[form,form+'谢谢',form+'谢谢您','请'+form]).some(form=>normalize(form)===normalize(text));
 
 const GREETING={
   tablet:{zh:'请在这里点菜。',pinyin:'Qǐng zài zhèlǐ diǎn cài.',en:'Please order here.',
@@ -66,9 +66,7 @@ function order(ctx,body,dish,from){
     body.querySelector('#menu-back').onclick=()=>list(ctx,body,from);
     body.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>submit(b.dataset.say));
     body.querySelector('#order-form').onsubmit=e=>{e.preventDefault();submit(body.querySelector('#order-text').value);};
-    body.querySelector('#order-mic').onclick=()=>ctx.speech.start({
-      onTranscript:t=>body.querySelector('#order-text').value=t,
-      onStatus:t=>body.querySelector('#order-status').textContent=t});
+    body.querySelector('#order-mic').onclick=()=>{const input=body.querySelector('#order-text'),status=body.querySelector('#order-status');ctx.speech.start({onTranscript:t=>{if(input.isConnected)input.value=t;},onStatus:t=>{if(status.isConnected)status.textContent=t;}});};
     body.querySelector('#order-skip').onclick=()=>settle(false);
   };
 

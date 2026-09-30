@@ -21,3 +21,6 @@ skills-lock.json
 
 # Vite dependency cache, one per checkout
 .vite/
+
+# Disposable local database binaries and test clusters
+.superpowers/**/dbtest/

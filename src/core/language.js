@@ -10,7 +10,25 @@ export function matchAnswer(text,node) {
     const valid = /^[\p{Script=Han}a-z·]{1,16}$/u.test(name) && !forbidden.test(name) && (match || name.length <= 6 || /^[a-z]{1,16}$/.test(name));
     return {ok:!!valid,value:name};
   }
-  return {ok:(node.accepted ?? []).some(x=>normalize(x)===value),value};
+  return {ok:(node.accepted ?? []).some(x=>normalize(x)===value)||matchRules(value,node.answerRules),value};
+}
+
+// Full-template matching keeps keywords from accepting contradictory replies.
+export function matchRules(value,rules) {
+  if(!rules||!Array.isArray(rules.templates)||!rules.slots)return false;
+  const escape=s=>s.replace(/[.*+?^\u0024{}()|[\]\\]/g,'\\$&');
+  return rules.templates.slice(0,40).some(template=>{
+    if(typeof template!=='string'||template.length>150)return false;
+    let pattern='';
+    for(const part of template.split(/(\{[a-zA-Z]+\})/g)){
+      if(/^\{[a-zA-Z]+\}$/.test(part)){
+        const values=rules.slots[part.slice(1,-1)];
+        if(!Array.isArray(values)||!values.length||values.length>80||values.some(v=>typeof v!=='string'||v.length>100))return false;
+        pattern+='(?:'+values.map(v=>escape(normalize(v))).join('|')+')';
+      }else pattern+=escape(normalize(part));
+    }
+    return new RegExp('^'+pattern+'$','u').test(value);
+  });
 }
 
 function chineseNumber(s) {

@@ -28,8 +28,8 @@ function hostOf(lesson) {
  * repeatable: `onFinish(state)` runs every time the player finishes it, reward or not, carrying
  * whatever `option` nodes captured along the way (for example `{destination:'一号书店'}`).
  */
-export function openDialogue(ctx,lessonId,{onFinish}={}) {
-  const lesson=LESSONS[lessonId];
+export function openDialogue(ctx,lessonId,{onFinish,lessonData,onAttempt,reward=true,englishSupport=false}={}) {
+  const lesson=lessonData??LESSONS[lessonId];
   if (!lesson) return;
   const {npc,info}=hostOf(lesson);
   const subtitle=npc ? `${npc.role} · ${npc.zh}` : `${info.zh} · ${info.en}`;
@@ -40,21 +40,32 @@ export function openDialogue(ctx,lessonId,{onFinish}={}) {
     const portraitStyle=npc ? '' : ` style="background:${esc(info.color)};color:#fff5da"`;
     const badge=npc?.role ? `<span>${esc(npc.role.slice(0,1))}</span>` : '';
     const name=node.speaker==='narrator' ? '你的第一句话' : esc(info.zh??'');
-    const nextLabel=index===lesson.nodes.length-1 ? '完成对话' : '继续';
+    const nextLabel=englishSupport?(index===lesson.nodes.length-1?'Finish practice':'Continue'):(index===lesson.nodes.length-1?'完成对话':'继续');
     const answerArea=node.intent==='none'
       ? `<button class="primary" id="next-line">${nextLabel} ${icon('arrow',17)}</button>`
       : `<form id="answer-form"><label for="answer">你说</label><div class="answer-row"><input id="answer" name="answer" autocomplete="off" maxlength="100" placeholder="输入中文…" aria-label="你的回答"><button type="button" id="microphone" class="mic-button" aria-label="麦克风回答">${icon('mic')}</button><button type="submit" class="primary compact" aria-label="提交回答">${icon('arrow')}</button></div></form><p id="speech-status" class="microcopy" aria-live="polite">${ctx.speech.supported?'语音识别可能使用浏览器的在线服务。文字可修改后提交。':'此浏览器语音不可用，可打字或选择回答。'}</p><details class="answer-options"><summary>需要一个例子？</summary><div>${choicesFor(node).map(c=>`<button class="choice" data-answer="${esc(c)}">${esc(c)}</button>`).join('')}</div><p class="microcopy">选择例句算作辅助练习。</p></details><div id="answer-feedback" aria-live="polite"></div>`;
     body.innerHTML=`<div class="dialogue-top"><div class="portrait"${portraitStyle}>${esc((info.zh??'').slice(0,1))}${badge}</div><div><b>${name}</b><small>${node.register==='casual'?'日常口语':esc(lesson.title)}</small></div><span class="step-label">${index+1} / ${lesson.nodes.length}</span></div><div class="step-track">${lesson.nodes.map((_,i)=>`<i class="${i<=index?'active':''}"></i>`).join('')}</div>${languageLine(node,ctx.profile.settings,{className:'dialogue-line'})}<div class="audio-row"><button class="subtle" id="replay">${icon('sound',16)} 重听</button><button class="subtle" id="slow">慢速</button><small class="audio-source">${ctx.voice.sourceLabel(node.audio)}</small></div>${answerArea}`;
+    if(englishSupport){
+      const prompt=document.createElement('p');prompt.className='roots-english';prompt.textContent=node.en;body.querySelector('.dialogue-line').before(prompt);
+      const field=body.querySelector('label[for="answer"]');if(field)field.textContent='Your reply in Mandarin';
+      const input=body.querySelector('#answer');if(input)input.placeholder='Type a Mandarin reply…';
+      const examples=body.querySelector('.answer-options summary');if(examples)examples.textContent='Need an example?';
+      const note=body.querySelector('.answer-options .microcopy');if(note)note.textContent='Using an example is supported practice. Try another question independently afterwards.';
+      const status=body.querySelector('#speech-status');if(status)status.textContent=ctx.speech.supported?'Type or use the microphone. You can edit the transcript before submitting.':'Microphone unavailable here. Type a reply or choose an example.';
+      body.querySelector('#replay').textContent='Listen again';body.querySelector('#slow').textContent='Listen slowly';
+    }
     body.querySelector('#replay').onclick=()=>ctx.voice.play(node.audio);body.querySelector('#slow').onclick=()=>ctx.voice.play(node.audio,{slow:true});
     if (node.speaker!=='narrator'&&ctx.voice.available(node.audio)) ctx.voice.play(node.audio);
     if (node.intent==='none') { body.querySelector('#next-line').onclick=()=>advance(); return; }
-    body.querySelector('#microphone').onclick=()=>ctx.speech.start({onTranscript:t=>body.querySelector('#answer').value=t,onStatus:t=>body.querySelector('#speech-status').textContent=t});
+    const input=body.querySelector('#answer'),status=body.querySelector('#speech-status');
+    body.querySelector('#microphone').onclick=()=>ctx.speech.start({onTranscript:t=>{if(input.isConnected)input.value=t;},onStatus:t=>{if(status.isConnected)status.textContent=t;}});
     body.querySelector('details').addEventListener('toggle',e=>{if(e.target.open){supported=true;ctx.hinted=true;}});
     body.querySelectorAll('[data-answer]').forEach(b=>b.onclick=()=>{body.querySelector('#answer').value=b.dataset.answer;supported=true;submit();});
     body.querySelector('#answer-form').onsubmit=e=>{e.preventDefault();if(e.isComposing)return;submit();};
     function submit() {
       const result=evaluateNode(node,body.querySelector('#answer').value);const feedback=body.querySelector('#answer-feedback');
-      if (!result.ok) { feedback.className='feedback gentle';feedback.textContent='我还没明白。换个说法，或看看例子？';const help=document.createElement('p');help.className='microcopy';help.textContent='This prototype recognizes curated answers. An unrecognized response is not necessarily incorrect Chinese.';feedback.append(help);if(node.hint&&ctx.profile.settings.english){const hint=document.createElement('p');hint.className='usage';hint.textContent=node.hint;feedback.append(hint);ctx.hinted=true;}return; }
+      onAttempt?.({node,result,assisted:ctx.hinted});
+      if (!result.ok) {ctx.hinted=true;supported=true;feedback.className='feedback gentle';feedback.replaceChildren();const message=document.createElement('p');message.textContent='我还没明白。你可以这样说：';feedback.append(message);for(const example of choicesFor(node).slice(0,3)){const p=document.createElement('p');p.textContent=example;feedback.append(p);}if(ctx.profile.settings.english){const p=document.createElement('p');p.textContent='Try one of these examples. Other valid Chinese may not yet be recognised.';feedback.append(p);}return; }
       ctx.speech.stop();supported ||=ctx.hinted;if(node.intent==='name')ctx.profile.playerName=result.value;
       state=applyState(state,node,result);
       body.querySelector('#answer-form').hidden=true;body.querySelector('.answer-options').hidden=true;feedback.className='feedback success';feedback.innerHTML=`<b>${node.intent==='name'?`很高兴认识你，${esc(result.value)}！`:'听懂了！'}</b><button id="next-line" class="primary">${nextLabel} ${icon('arrow',17)}</button>`;
@@ -65,7 +76,8 @@ export function openDialogue(ctx,lessonId,{onFinish}={}) {
   function finish() {
     // Pays and remembers the lesson now, and arms onFinish to run once when this panel closes —
     // by its button, Esc or × alike. Closing any earlier screen runs nothing.
-    const {amount}=finishConversation(ctx.profile,lesson.id,supported?balance.supportedLessonCoins:balance.lessonCoins,{hook:ctx.ui.closeHook,state,onFinish});
+    const {amount}=reward?finishConversation(ctx.profile,lesson.id,supported?balance.supportedLessonCoins:balance.lessonCoins,{hook:ctx.ui.closeHook,state,onFinish}):{amount:0};
+    if(!reward)ctx.ui.closeHook.arm(()=>onFinish?.(state));
     ctx.save();
     // Auntie Lin's first conversation keeps its own hand-written send-off; every other lesson
     // does not have bespoke flavor text, so it falls back to its own authored title and English
@@ -73,6 +85,7 @@ export function openDialogue(ctx,lessonId,{onFinish}={}) {
     const headline=lesson.id==='introductions' ? '认识新朋友了！' : esc(lesson.title);
     const send=lesson.id==='introductions' ? '一句你好，让旅程更近了一点。' : esc(lesson.en);
     body.innerHTML=`<div class="completion"><div class="completion-seal">好</div><div class="eyebrow">A LITTLE CONNECTION</div><h3>${headline}</h3><p>${send}</p><div class="reward">${icon('coin')} +${amount} 学习币</div><p class="microcopy">${amount?'奖励已存入你的钱包。':'你已经领取过这段对话的奖励。练习仍然有价值。'}</p><button class="primary" id="back-town">回到小镇 ${icon('arrow')}</button></div>`;
+    if(englishSupport){body.querySelector('#back-town').textContent='Continue exploring';body.querySelector('.completion .microcopy').textContent='Practice saved. Independent answers build mastery; help is always available.';}
     body.querySelector('#back-town').onclick=()=>ctx.ui.close();
   }
   render();

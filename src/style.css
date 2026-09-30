@@ -807,3 +807,9 @@ body.camera-up #nameplate{display:none}
 .album-stamp{align-self:flex-start;font-size:9px;color:#b9483a;border:1px solid #b9483a;border-radius:4px;padding:0 4px}
 .album-delete{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;background:#1f2b25b3;color:#fff;cursor:pointer}
 .album-delete:focus-visible{outline:2px solid #fffbee}
+
+/* Roots keeps the existing modal and HUD layout. */
+.roots-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}.roots-photo{background:#f6eedb;padding:14px;border:1px solid #b7a78c;border-radius:8px}.roots-photo img{width:100%;aspect-ratio:3/2;object-fit:cover}.roots-goal{padding:12px;background:#e4eadb;border-radius:8px}#roots-opening{border-left:3px solid #83996f;padding-left:16px}
+
+/* English-first arrival guidance; Mandarin expands with practice. */
+.roots-english{font-size:15px;line-height:1.65;color:#334c42}.roots-mandarin{margin:8px 0 16px;font-size:13px}.roots-mandarin summary{cursor:pointer;color:#526e60}#roots-photo-guide{padding:14px 18px;background:#e8eee2;border-radius:10px;margin-bottom:20px}#roots-photo-guide h3{margin-top:0}#roots-photo-guide li{margin-bottom:10px;line-height:1.5}#roots-photo-guide ol{padding-left:20px}.roots-goal small{display:block;margin-top:6px}

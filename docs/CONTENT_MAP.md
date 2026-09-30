@@ -123,6 +123,7 @@ Prices in 学习币; `~` marks a negotiable price. An item sold in several shops
 | lin | 林阿姨 | Auntie Lin | 茶铺 | introductions | -4.8,-9.4 | lin |
 | mei | 小美 | Xiaomei | 练习角 |  | -2.9,-6.4 | mei |
 | chen | 陈叔叔 | Uncle Chen | 小商店 |  | 4.8,-9.4 | chen |
+| zhou | 周叔叔 | Uncle Zhou | 水果摊 |  | -5,1.5 | chen |
 
 ## Missions (`quests.json`, in order)
 
