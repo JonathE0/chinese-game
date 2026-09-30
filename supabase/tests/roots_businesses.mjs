@@ -1,0 +1,31 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';import {pathToFileURL} from 'node:url';
+const modulePath=process.env.PGLITE_MODULE??'.superpowers/sdd/2026-09-28-roots-chapter-one/dbtest/node_modules/@electric-sql/pglite/dist/index.js';
+const {PGlite}=await import(pathToFileURL(fs.realpathSync(modulePath)));const db=new PGlite();
+await db.exec("create role anon; create role authenticated; create schema auth; create table auth.users(id uuid primary key); create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$; grant usage on schema auth to authenticated; grant execute on function auth.uid() to authenticated;");
+await db.exec(fs.readFileSync('supabase/migrations/20260924000000_cloud_saves.sql','utf8'));
+const migration='supabase/migrations/20260928000000_roots_businesses.sql';if(fs.existsSync(migration))await db.exec(fs.readFileSync(migration,'utf8'));
+const uid='00000000-0000-4000-8000-000000000001',other='00000000-0000-4000-8000-000000000002';
+await db.exec("insert into auth.users values ('"+uid+"'),('"+other+"');");
+const profile={version:7,wallet:200,roots:{met:true,photos:['roots-fruit'],mastery:{'roots-greeting':['greet-a','greet-b'],'roots-fruit-request':['fruit-a','fruit-b'],'roots-quantity':['quantity-a','quantity-b']},bankMastered:true}};
+await db.query('insert into public.saves(user_id,data,version) values($1,$2,7)',[uid,profile]);
+await db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);
+const unthrottle=()=>db.exec("reset role;update public.save_writes set at=now()-interval '1 minute';set role authenticated;");
+const seen=async()=>String((await db.query('select updated_at::text as at from public.saves')).rows[0].at);
+const call=async(action,id,revision)=>{return (await db.query('select public.roots_business_command($1,$2,$3,$4) as result',['fruit-stand',action,id,revision??await seen()])).rows[0].result;};
+try{
+ await unthrottle();const activation=await call('activate','10000000-0000-4000-8000-000000000001');assert.equal(activation.status,'settled');assert.equal(activation.profile.wallet,180);
+ await db.exec("reset role;update public.roots_businesses set settled_at=now()-interval '12 hours';");await unthrottle();const id='10000000-0000-4000-8000-000000000002';const collect=await call('collect',id);assert.equal(collect.amount,15);assert.equal(collect.profile.wallet,195);
+ const duplicate=await call('collect',id);assert.equal(duplicate.profile.wallet,195);
+ await assert.rejects(call('automate',id),/request.*reused/i);
+ await db.exec("reset role;update public.roots_businesses set settled_at=now()-interval '4 days';");await unthrottle();const capped=await call('collect','10000000-0000-4000-8000-000000000003');assert.equal(capped.amount,90);
+ await unthrottle();const auto=await call('automate','10000000-0000-4000-8000-000000000004');assert.equal(auto.profile.businesses['fruit-stand'].automatic,true);
+ await db.exec("reset role;update public.roots_businesses set settled_at=now()-interval '8 days';");await unthrottle();assert.equal((await call('collect','10000000-0000-4000-8000-000000000005')).amount,210);
+ await assert.rejects(db.exec("update public.roots_businesses set automatic=false"),/permission denied/i);
+ await assert.rejects(db.exec("update public.saves set data=jsonb_set(data,'{businesses}','{}')"),/server-owned/i);
+ await unthrottle();assert.equal((await call('collect','10000000-0000-4000-8000-000000000006','2000-01-01')).status,'conflict');
+ await unthrottle();await db.exec("update public.saves set data=jsonb_set(data,'{wallet}',to_jsonb((data->>'wallet')::int-10))");assert.equal((await call('collect','10000000-0000-4000-8000-000000000005')).status,'conflict','retry must not absorb later purchases');
+ await unthrottle();const old=(await db.query('select data from public.saves')).rows[0].data;await db.exec('delete from public.saves');await unthrottle();await db.query('insert into public.saves(user_id,data,version) values($1,$2,7)',[uid,old]);assert.equal((await db.query('select data from public.saves')).rows[0].data.businesses['fruit-stand'].automatic,true);assert.equal((await call('activate','10000000-0000-4000-8000-000000000009')).status,'already-active');
+ await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[other]);await db.exec('set role authenticated');assert.equal((await db.query('select * from public.roots_businesses')).rows.length,0);
+ await db.exec('reset role;set role anon');await assert.rejects(db.query("select public.roots_business_command('fruit-stand','collect','10000000-0000-4000-8000-000000000007',null)"),/permission denied/i);
+ console.log('PASS: activation, partial days, caps, duplicate claims, upgrade, stale saves, ownership and permissions.');
+}finally{await db.close();}

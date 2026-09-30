@@ -1,3 +1,7 @@
+import roots from '../content/roots.json' with {type:'json'};
+import {qualifiesMemory,commitCapture} from '../core/story-photo.js';
+import {captureStore} from '../services/photos.js';
+import {saveProfile} from '../core/profile.js';
 import {CHECKINS,spotFor,checkIn} from '../core/checkins.js';
 import {isKey} from '../core/keys.js';
 import {isTyping} from '../core/input.js';
@@ -43,6 +47,12 @@ export function installCamera(ctx){
   const flash=document.createElement('div');flash.className='camera-flash';
   document.body.append(finder,flash);
   const label=finder.querySelector('.vf-name');
+  const memory=()=>roots.memories.find(m=>m.id===ctx.storyMemory);
+  const qualifies=()=>{const m=memory();if(!m)return false;const origin=town.camera.getPosition(),target=origin.clone().set(m.x,1.5,m.z),delta=target.clone().sub(origin),distance=delta.length(),screen=cam.worldToScreen(target);return qualifiesMemory(m,{place:town.place,distance,inView:delta.dot(town.camera.forward)>0&&screen.x>=0&&screen.x<=town.app.graphicsDevice.width&&screen.y>=0&&screen.y<=town.app.graphicsDevice.height,occluded:!town.registry.visiblePoint(town.place,origin,target,m.id==='roots-home'?5:2)});};
+  const persistence={read:()=>ctx.profile,write:next=>{saveProfile(localStorage,next);ctx.profile=next;ctx.save();}};
+  const publish=async r=>{if(!r.memoryId){await savePhoto({...r,id:r.time});await captureStore.delete(r.id);}};
+  let recovering=null;
+  const recover=()=>recovering??=(async()=>{for(const r of await captureStore.all())if(r.profileId===ctx.profile.roots?.id){const done=await commitCapture(r,captureStore,persistence);await publish(done);}})().finally(()=>{recovering=null;});
   let up=false,base=cam.fov,view=null,where=null,sensitivity=town.sensitivity,seen=null,shown;
 
   const blocked=()=>town.paused||!!town.ghost||!!town.toys.held||!!town.sleeping;
@@ -69,6 +79,7 @@ export function installCamera(ctx){
     if(Math.abs(cam.fov-zoomed(base))>.01){base=cam.fov;cam.fov=zoomed(base);}   // a view switch reset it
     seen=town.registry.look(town.place,town.camera.getPosition(),town.camera.forward,reach);
     const name=seen?.box.name??null;
+    if(ctx.storyMemory){label.textContent=(qualifies()?'Ready to capture — press Enter · '+roots.ui.ready:'Find the place and keep the landmark in view · '+roots.ui.notReady)+' · Film: '+(ctx.profile.inventory.film??0);return;}
     if(name===shown)return;
     shown=name;
     const pinyin=name&&pinyinHtml(name.pinyin,name.zh);
@@ -93,21 +104,19 @@ export function installCamera(ctx){
   const shoot=async()=>{
     if(!up||busy)return;
     busy=true;
-    const name=seen?.box.name??null;
-    const spot=spotFor({place:town.place,name,owner:seen?.box.owner??null,distance:seen?.distance??Infinity,hour:town.daylight.hour});
-    flash.classList.remove('on');void flash.offsetWidth;flash.classList.add('on');
-    shutterSound(ctx.music);
-    if(spot&&checkIn(ctx.profile,spot)){
-      ctx.save();ctx.music?.cue('reward');
-      ctx.ui.notice(`${success.zh} ${spot.line.zh} +${reward} 学习币 / ${success.en} ${spot.line.en}`);
-      say(ctx.voice,[success.audio,spot.line.audio]);
-    }
     try{
-      const src=await capture();
-      const dropped=await savePhoto({id:Date.now(),time:Date.now(),place:placeName(),
-        name:name&&{zh:name.zh,pinyin:name.pinyin??'',en:name.en??''},spot:spot?.id??null,src});
-      if(dropped)ctx.ui.notice(`${ui.full.zh} / ${ui.full.en}`);
-    }catch{ctx.ui.notice(`${ui.failed.zh} / ${ui.failed.en}`);}
+      await recover();const m=memory();if(ctx.storyMemory&&!qualifies()){ctx.ui.notice('Move closer and keep the landmark in view. No film was used.');return;}
+      const profileId=ctx.profile.roots.id;const existing=m?(await captureStore.all()).some(r=>r.profileId===profileId&&r.memoryId===m.id&&r.done):false;const cost=m&&ctx.profile.roots.photos.includes(m.id)&&!existing?0:1;
+      if((ctx.profile.inventory.film??0)<cost){ctx.ui.notice('胶卷用完了。请在相册中购买。 / Buy film in your story album.');return;}
+      const name=seen?.box.name??null,spot=spotFor({place:town.place,name,owner:seen?.box.owner??null,distance:seen?.distance??Infinity,hour:town.daylight.hour});
+      const src=await capture();if(ctx.profile.roots.id!==profileId)throw Error("Profile changed");if(m&&!qualifies()){ctx.ui.notice(roots.ui.notReady);return;}
+      const record={id:crypto.randomUUID(),profileId:ctx.profile.roots.id,memoryId:m?.id,src,cost,time:Date.now(),place:placeName(),name:name&&{zh:name.zh,pinyin:name.pinyin??'',en:name.en??''},spot:spot?.id??null};
+      await commitCapture(record,captureStore,persistence);
+      flash.classList.remove('on');void flash.offsetWidth;flash.classList.add('on');shutterSound(ctx.music);
+      await publish(record);
+      if(spot&&checkIn(ctx.profile,spot)){ctx.save();ctx.music?.cue('reward');ctx.ui.notice(success.zh+' '+spot.line.zh+' +'+reward+' 学习币');say(ctx.voice,[success.audio,spot.line.audio]);}
+      if(m){ctx.ui.notice('回忆已记录。 / Memory captured.');ctx.save();}
+    }catch{ctx.ui.notice(ui.failed.zh+' / '+ui.failed.en);}finally{busy=false;}
     busy=false;
   };
 

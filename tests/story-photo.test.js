@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {qualifiesMemory,commitCapture} from '../src/core/story-photo.js';import {freshProfile} from '../src/core/profile.js';import {applyRootsEvent} from '../src/core/roots.js';
+test('framing may vary but place, visibility and distance matter',()=>{const m={place:'town',radius:14},s={place:'town',distance:10,inView:true,occluded:false};assert.equal(qualifiesMemory(m,s),true);for(const change of [{place:'city'},{distance:15},{inView:false},{occluded:true}])assert.equal(qualifiesMemory(m,{...s,...change}),false);});
+test('capture charges once and recovers after final storage failure',async()=>{let p=freshProfile();applyRootsEvent(p,{type:'begin'});const records=new Map();let fail=true;const store={put:async r=>{if(r.done&&fail)throw Error('disk');records.set(r.id,structuredClone(r));},get:async id=>records.get(id)};const persistence={read:()=>p,write:n=>{p=n;}};const shot={id:'capture-a',memoryId:'roots-fruit',src:'image',cost:1};await assert.rejects(commitCapture(shot,store,persistence));assert.equal(p.inventory.film,5);fail=false;await commitCapture(shot,store,persistence);assert.equal(p.inventory.film,5);assert.deepEqual(p.roots.photos,['roots-fruit']);assert.equal(records.get('capture-a').done,true);});
+test('image write failure never charges film',async()=>{let p=freshProfile();applyRootsEvent(p,{type:'begin'});await assert.rejects(commitCapture({id:'a',src:'image',cost:1},{get:async()=>null,put:async()=>{throw Error('full');}},{read:()=>p,write:n=>{p=n;}}));assert.equal(p.inventory.film,6);});
+
+test('capture cannot charge a different profile after image storage awaits',async()=>{let p=freshProfile();applyRootsEvent(p,{type:'begin'});const original=p.roots.id;const other=freshProfile();applyRootsEvent(other,{type:'begin'});await assert.rejects(commitCapture({id:'switch',profileId:original,cost:1,src:'image'},{get:async()=>null,put:async()=>{p=other;}},{read:()=>p,write:n=>{p=n;}}));assert.equal(other.inventory.film,6);});
+
+test('failed profile write leaves an unpaid image pending and recovery charges only once',async()=>{
+ let p=freshProfile();applyRootsEvent(p,{type:'begin'});const records=new Map();let fail=true;
+ const store={get:async id=>records.get(id),put:async r=>records.set(r.id,structuredClone(r))};
+ const persistence={read:()=>p,write:async next=>{if(fail)throw Error('profile quota');p=next;}};
+ const shot={id:'profile-write-failure',profileId:p.roots.id,memoryId:'roots-fruit',src:'retained image',cost:1};
+ await assert.rejects(commitCapture(shot,store,persistence),/profile quota/);assert.equal(p.inventory.film,6);assert.deepEqual(p.roots.photos,[]);assert.equal(records.get(shot.id).done,false);
+ fail=false;await commitCapture(shot,store,persistence);await commitCapture(shot,store,persistence);assert.equal(p.inventory.film,5);assert.deepEqual(p.roots.photos,['roots-fruit']);assert.equal(records.get(shot.id).src,'retained image');assert.equal(records.get(shot.id).done,true);
+});

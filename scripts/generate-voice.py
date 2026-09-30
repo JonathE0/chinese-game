@@ -50,6 +50,14 @@ def collect_lines():
         seen.add(audio_id)
         lines.append({"id": audio_id, "text": text, "speaker": speaker, "kind": kind})
 
+    roots = read_json(CONTENT / "roots.json")
+    for skill in roots["skills"]:
+        for v in skill["variants"]:
+            add(v["audio"], v["zh"], "chen", "dialogue")
+    for node in roots.get("bankLesson", {}).get("nodes", []):
+        add(node["audio"], node["zh"], "chen", "dialogue")
+    for key in ["greeting", "memory"]:
+        add("roots-caretaker-" + key, roots["caretaker"][key]["zh"], "chen", "dialogue")
     for lesson in sorted((CONTENT / "lessons").glob("*.json")):
         data = read_json(lesson)
         for node in data["nodes"]:

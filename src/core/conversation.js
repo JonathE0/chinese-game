@@ -12,7 +12,8 @@ export function evaluateNode(node,text='') {
   if (node.intent==='none') return {ok:true};
   if (node.intent==='option') {
     const value=normalize(text);
-    const match=(node.options??[]).find(o=>(o.accepted??[]).some(a=>normalize(a)===value));
+    const matches=(node.options??[]).filter(o=>matchAnswer(text,o).ok);
+    const match=matches.length===1?matches[0]:null;
     return match ? {ok:true,value:match.value,choice:match.choice} : {ok:false};
   }
   return matchAnswer(text,node);

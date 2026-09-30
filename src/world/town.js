@@ -541,7 +541,7 @@ export class Town {
    * look-only box round its meshes. A tagged child gets its own, smaller box, which wins the look.
    * `skip` holds entities (and everything under them) that are registered some other way.
    */
-  registerLooks(place,root,{owner=null,skip=null}={}) {
+  registerLooks(place,root,{owner=null,skip=null,group=null}={}) {
     // A part of a building or a gate carries the same `group` as that structure's marks.
     const groups=new Map([...this.buildings??[]].map(([id,entity])=>[entity,id]));
     const walk=(e,group)=>{
@@ -552,7 +552,7 @@ export class Town {
       if(box&&group)box.group=group;
       for(const child of e.children)walk(child,group);
     };
-    walk(root,null);
+    walk(root,group);
   }
   addLookBox(place,entity,name,owner=null) {
     const bounds=meshBounds(entity);
@@ -574,7 +574,7 @@ export class Town {
       this.movingKey=key;
       this.registry.clearLooks(place,'moving');
       for(const market of [this.market,this.dayMarket])for(const pitch of market.pitches)
-        if(pitch.cart)this.registerLooks(place,pitch.cart,{owner:'moving'});
+        if(pitch.cart)this.registerLooks(place,pitch.cart,{owner:'moving',group:'stall:'+pitch.id});
       return;
     }
     this.movingKey=null;

@@ -1,0 +1,715 @@
+{
+  "opening": {
+    "zh": "爷爷去世后，给你留下了一本旧相册、一封信和一把钥匙。你来到青禾，想看看他曾经生活的地方。",
+    "pinyin": "Yéye qùshì hòu, gěi nǐ liúxià le yì běn jiù xiàngcè, yì fēng xìn hé yì bǎ yàoshi. Nǐ láidào Qīnghé, xiǎng kànkan tā céngjīng shēnghuó de dìfang.",
+    "en": "After your grandfather passed away, he left you an old album, a letter and a key. You have come to Qinghe to discover the places where he lived."
+  },
+  "letter": {
+    "zh": "如果你有机会，就去青禾看看。那里有我年轻时的回忆。慢慢走，别着急。",
+    "pinyin": "Rúguǒ nǐ yǒu jīhuì, jiù qù Qīnghé kànkan. Nàli yǒu wǒ niánqīng shí de huíyì. Mànman zǒu, bié zháojí.",
+    "en": "If you have the chance, visit Qinghe. There are memories of my younger days there. Take your time."
+  },
+  "film": {
+    "starter": 6,
+    "pack": 5,
+    "price": 10
+  },
+  "memories": [
+    {
+      "id": "roots-fruit",
+      "zh": "水果摊",
+      "pinyin": "Shuǐguǒ tān",
+      "en": "The fruit stand",
+      "clue": {
+        "zh": "爷爷的旧照片里，水果摆在广场西边的木桌上。",
+        "pinyin": "Yéye de jiù zhàopiàn lǐ, shuǐguǒ bǎi zài guǎngchǎng xībian de mùzhuō shàng.",
+        "en": "In Grandfather’s old photograph, fruit sits on a wooden table west of the square."
+      },
+      "place": "town",
+      "x": -6.4,
+      "z": 0,
+      "radius": 14,
+      "subject": "fruitstand",
+      "image": "/images/roots/fruit.png"
+    },
+    {
+      "id": "roots-square",
+      "zh": "广场上的朋友",
+      "pinyin": "Guǎngchǎng shàng de péngyou",
+      "en": "Friends in the square",
+      "clue": {
+        "zh": "这是爷爷熟悉的广场。喷泉还在吗？",
+        "pinyin": "Zhè shì yéye shúxī de guǎngchǎng. Pēnquán hái zài ma?",
+        "en": "This is the square Grandfather knew. Is the fountain still there?"
+      },
+      "place": "town",
+      "x": 0,
+      "z": 0,
+      "radius": 18,
+      "subject": "fountain",
+      "image": "/images/roots/square.png"
+    },
+    {
+      "id": "roots-home",
+      "zh": "旧家的门",
+      "pinyin": "Jiù jiā de mén",
+      "en": "The old front door",
+      "clue": {
+        "zh": "信上的地址指向广场东南边的小屋。",
+        "pinyin": "Xìn shàng de dìzhǐ zhǐxiàng guǎngchǎng dōngnánbian de xiǎowū.",
+        "en": "The address points to the house southeast of the square."
+      },
+      "place": "town",
+      "x": 11,
+      "z": 14,
+      "radius": 15,
+      "subject": "home",
+      "image": "/images/roots/home.png"
+    },
+    {
+      "id": "roots-next",
+      "zh": "另一张合影",
+      "pinyin": "Lìng yì zhāng héyǐng",
+      "en": "Another photograph",
+      "clue": {
+        "zh": "水果摊的伙伴把这张合影送给你。下一段故事，留到以后慢慢寻找。",
+        "pinyin": "Shuǐguǒ tān de huǒbàn bǎ zhè zhāng héyǐng sònggěi nǐ. Xià yí duàn gùshi, liú dào yǐhòu mànman xúnzhǎo.",
+        "en": "Your partner gives you this group photograph. Its next story will unfold in a later chapter."
+      },
+      "keepsake": true,
+      "image": "/images/roots/next.png"
+    }
+  ],
+  "skills": [
+    {
+      "id": "roots-greeting",
+      "variants": [
+        {
+          "id": "greet-a",
+          "zh": "有客人来了，你怎么打招呼？",
+          "pinyin": "Yǒu kèrén lái le, nǐ zěnme dǎ zhāohu?",
+          "en": "A customer arrives. Greet them.",
+          "intent": "variants",
+          "accepted": [
+            "您好",
+            "你好",
+            "欢迎光临"
+          ],
+          "choices": [
+            "您好",
+            "你好",
+            "欢迎光临"
+          ],
+          "answerRules": {
+            "templates": [
+              "{greeting}{ending}"
+            ],
+            "slots": {
+              "greeting": [
+                "你好",
+                "您好",
+                "欢迎光临",
+                "早上好",
+                "下午好",
+                "晚上好",
+                "你们好",
+                "大家好"
+              ],
+              "ending": [
+                "",
+                "呀",
+                "啊",
+                "欢迎光临",
+                "请看看"
+              ]
+            }
+          },
+          "audio": "roots-greet-a",
+          "speaker": "chen"
+        },
+        {
+          "id": "greet-b",
+          "zh": "早上好！",
+          "pinyin": "Zǎoshang hǎo!",
+          "en": "Good morning!",
+          "intent": "variants",
+          "accepted": [
+            "早上好",
+            "早",
+            "您好",
+            "你好",
+            "早安"
+          ],
+          "choices": [
+            "早上好",
+            "早",
+            "您好"
+          ],
+          "answerRules": {
+            "templates": [
+              "{greeting}{ending}"
+            ],
+            "slots": {
+              "greeting": [
+                "早",
+                "早上好",
+                "早安",
+                "你好",
+                "您好"
+              ],
+              "ending": [
+                "",
+                "啊",
+                "呀",
+                "欢迎光临"
+              ]
+            }
+          },
+          "audio": "roots-greet-b",
+          "speaker": "chen"
+        },
+        {
+          "id": "greet-c",
+          "zh": "下午有客人来买水果。请打个招呼。",
+          "pinyin": "Xiàwǔ yǒu kèrén lái mǎi shuǐguǒ. Qǐng dǎ ge zhāohu.",
+          "en": "Greet an afternoon customer.",
+          "intent": "variants",
+          "accepted": [
+            "下午好",
+            "你好",
+            "您好",
+            "欢迎光临"
+          ],
+          "choices": [
+            "下午好",
+            "你好",
+            "您好"
+          ],
+          "audio": "roots-greet-c",
+          "speaker": "chen",
+          "answerRules": {
+            "templates": [
+              "{greeting}{ending}"
+            ],
+            "slots": {
+              "greeting": [
+                "下午好",
+                "你好",
+                "您好",
+                "你们好",
+                "大家好",
+                "欢迎光临"
+              ],
+              "ending": [
+                "",
+                "呀",
+                "啊",
+                "欢迎光临",
+                "请看看"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "roots-fruit-request",
+      "variants": [
+        {
+          "id": "fruit-a",
+          "zh": "你想买什么水果？请买苹果。",
+          "pinyin": "Nǐ xiǎng mǎi shénme shuǐguǒ? Qǐng mǎi píngguǒ.",
+          "en": "Ask to buy apples.",
+          "intent": "variants",
+          "accepted": [
+            "我要苹果",
+            "我想买苹果",
+            "苹果谢谢"
+          ],
+          "choices": [
+            "我要苹果",
+            "我想买苹果",
+            "苹果谢谢"
+          ],
+          "answerRules": {
+            "templates": [
+              "{request}{item}{ending}",
+              "{item}{ending}"
+            ],
+            "slots": {
+              "request": [
+                "我要",
+                "我想买",
+                "我想要",
+                "给我",
+                "请给我",
+                "麻烦给我",
+                "我买",
+                "帮我拿",
+                "请帮我拿"
+              ],
+              "item": [
+                "苹果"
+              ],
+              "ending": [
+                "",
+                "吧",
+                "谢谢",
+                "谢谢您",
+                "好吗"
+              ]
+            }
+          },
+          "audio": "roots-fruit-a",
+          "speaker": "chen"
+        },
+        {
+          "id": "fruit-b",
+          "zh": "今天有香蕉。你想买什么？",
+          "pinyin": "Jīntiān yǒu xiāngjiāo. Nǐ xiǎng mǎi shénme?",
+          "en": "Ask to buy bananas.",
+          "intent": "variants",
+          "accepted": [
+            "我要香蕉",
+            "我想买香蕉",
+            "香蕉谢谢"
+          ],
+          "choices": [
+            "我要香蕉",
+            "我想买香蕉",
+            "香蕉谢谢"
+          ],
+          "answerRules": {
+            "templates": [
+              "{request}{item}{ending}",
+              "{item}{ending}"
+            ],
+            "slots": {
+              "request": [
+                "我要",
+                "我想买",
+                "我想要",
+                "给我",
+                "请给我",
+                "麻烦给我",
+                "我买",
+                "帮我拿",
+                "请帮我拿"
+              ],
+              "item": [
+                "香蕉"
+              ],
+              "ending": [
+                "",
+                "吧",
+                "谢谢",
+                "谢谢您",
+                "好吗"
+              ]
+            }
+          },
+          "audio": "roots-fruit-b",
+          "speaker": "chen"
+        },
+        {
+          "id": "fruit-c",
+          "zh": "你想买橘子，怎么说？",
+          "pinyin": "Nǐ xiǎng mǎi júzi, zěnme shuō?",
+          "en": "Ask for oranges.",
+          "intent": "variants",
+          "accepted": [
+            "我要橘子",
+            "我想买橘子",
+            "橘子谢谢"
+          ],
+          "choices": [
+            "我要橘子",
+            "我想买橘子",
+            "橘子谢谢"
+          ],
+          "answerRules": {
+            "templates": [
+              "{request}{item}{ending}",
+              "{item}{ending}"
+            ],
+            "slots": {
+              "request": [
+                "我要",
+                "我想买",
+                "我想要",
+                "给我",
+                "请给我",
+                "麻烦给我",
+                "我买",
+                "帮我拿",
+                "请帮我拿"
+              ],
+              "item": [
+                "橘子"
+              ],
+              "ending": [
+                "",
+                "吧",
+                "谢谢",
+                "谢谢您",
+                "好吗"
+              ]
+            }
+          },
+          "audio": "roots-fruit-c",
+          "speaker": "chen"
+        }
+      ]
+    },
+    {
+      "id": "roots-quantity",
+      "variants": [
+        {
+          "id": "quantity-a",
+          "zh": "请买两个苹果。你怎么说？",
+          "pinyin": "Qǐng mǎi liǎng ge píngguǒ. Nǐ zěnme shuō?",
+          "en": "Ask to buy two apples.",
+          "intent": "variants",
+          "accepted": [
+            "我要两个苹果",
+            "麻烦给我两个苹果",
+            "两个苹果谢谢"
+          ],
+          "choices": [
+            "我要两个苹果",
+            "麻烦给我两个苹果",
+            "两个苹果谢谢"
+          ],
+          "answerRules": {
+            "templates": [
+              "{request}{quantity}{item}{ending}",
+              "{quantity}{item}{ending}"
+            ],
+            "slots": {
+              "request": [
+                "我要",
+                "我想买",
+                "我想要",
+                "给我",
+                "请给我",
+                "麻烦给我",
+                "我买",
+                "帮我拿",
+                "请帮我拿"
+              ],
+              "item": [
+                "苹果"
+              ],
+              "ending": [
+                "",
+                "吧",
+                "谢谢",
+                "谢谢您",
+                "好吗"
+              ],
+              "quantity": [
+                "两个",
+                "二个",
+                "2个",
+                "两颗",
+                "2颗"
+              ]
+            }
+          },
+          "audio": "roots-quantity-a",
+          "speaker": "chen"
+        },
+        {
+          "id": "quantity-b",
+          "zh": "请买三个橘子。",
+          "pinyin": "Qǐng mǎi sān ge júzi.",
+          "en": "Ask to buy three oranges.",
+          "intent": "variants",
+          "accepted": [
+            "我要三个橘子",
+            "给我三个橘子",
+            "三个橘子谢谢"
+          ],
+          "choices": [
+            "我要三个橘子",
+            "给我三个橘子",
+            "三个橘子谢谢"
+          ],
+          "answerRules": {
+            "templates": [
+              "{request}{quantity}{item}{ending}",
+              "{quantity}{item}{ending}"
+            ],
+            "slots": {
+              "request": [
+                "我要",
+                "我想买",
+                "我想要",
+                "给我",
+                "请给我",
+                "麻烦给我",
+                "我买",
+                "帮我拿",
+                "请帮我拿"
+              ],
+              "item": [
+                "橘子"
+              ],
+              "ending": [
+                "",
+                "吧",
+                "谢谢",
+                "谢谢您",
+                "好吗"
+              ],
+              "quantity": [
+                "三个",
+                "3个"
+              ]
+            }
+          },
+          "audio": "roots-quantity-b",
+          "speaker": "chen"
+        },
+        {
+          "id": "quantity-c",
+          "zh": "请买一根香蕉。",
+          "pinyin": "Qǐng mǎi yì gēn xiāngjiāo.",
+          "en": "Ask to buy one banana.",
+          "intent": "variants",
+          "accepted": [
+            "我要一根香蕉",
+            "麻烦给我一根香蕉",
+            "一根香蕉谢谢"
+          ],
+          "choices": [
+            "我要一根香蕉",
+            "麻烦给我一根香蕉",
+            "一根香蕉谢谢"
+          ],
+          "answerRules": {
+            "templates": [
+              "{request}{quantity}{item}{ending}",
+              "{quantity}{item}{ending}"
+            ],
+            "slots": {
+              "request": [
+                "我要",
+                "我想买",
+                "我想要",
+                "给我",
+                "请给我",
+                "麻烦给我",
+                "我买",
+                "帮我拿",
+                "请帮我拿"
+              ],
+              "item": [
+                "香蕉"
+              ],
+              "ending": [
+                "",
+                "吧",
+                "谢谢",
+                "谢谢您",
+                "好吗"
+              ],
+              "quantity": [
+                "一根",
+                "1根",
+                "一个",
+                "1个"
+              ]
+            }
+          },
+          "audio": "roots-quantity-c",
+          "speaker": "chen"
+        }
+      ]
+    }
+  ],
+  "lessons": {},
+  "ui": {
+    "title": "爷爷的相册",
+    "practice": "练习中文",
+    "photo": "重拍这张照片",
+    "help": "需要帮助？",
+    "begin": "打开相册",
+    "back": "回到小镇",
+    "show": "给他看照片",
+    "collect": "领取收入",
+    "automate": "自动存款",
+    "open": "一起重新开张",
+    "film": "购买胶卷",
+    "journal": "写下今天的回忆",
+    "unrecognized": "我还没明白。你可以这样说：",
+    "success": "听懂了！",
+    "independent": "换个问题，再自己试试。",
+    "online": "联网并登录后可以领取收入。",
+    "pending": "开张条件已完成。联网后确认合作，才开始计算收入。",
+    "ready": "这张照片可以记录这段回忆。",
+    "notReady": "请靠近目标，让它出现在画面里。"
+  },
+  "caretaker": {
+    "zh": "周叔叔",
+    "pinyin": "Zhōu shūshu",
+    "en": "Uncle Zhou",
+    "x": -5,
+    "z": 1.5,
+    "greeting": {
+      "zh": "你好！想买点水果吗？",
+      "pinyin": "Nǐ hǎo! Xiǎng mǎi diǎn shuǐguǒ ma?",
+      "en": "Hello! Would you like some fruit?"
+    },
+    "memory": {
+      "zh": "这张照片真熟悉！当年我和你爷爷一起开了这个水果摊。他总会多放一个橘子，送给老邻居。",
+      "pinyin": "Zhè zhāng zhàopiàn zhēn shúxī! Dāngnián wǒ hé nǐ yéye yìqǐ kāi le zhège shuǐguǒ tān. Tā zǒng huì duō fàng yí ge júzi, sòng gěi lǎo línjū.",
+      "en": "I know this photograph! Your grandfather and I opened this fruit stand together. He always slipped in an extra orange for an old neighbour."
+    }
+  },
+  "bankLesson": {
+    "id": "roots-bank",
+    "title": "自动存款",
+    "en": "Arrange automatic bank deposits",
+    "host": {
+      "zh": "银行职员",
+      "en": "Bank clerk"
+    },
+    "nodes": [
+      {
+        "id": "bank-deposit",
+        "zh": "你想把收入存到哪里？",
+        "pinyin": "Nǐ xiǎng bǎ shōurù cún dào nǎli?",
+        "en": "Where would you like to deposit the income?",
+        "intent": "variants",
+        "speaker": "chen",
+        "accepted": [
+          "银行",
+          "存到银行",
+          "我想存到银行",
+          "请存到银行",
+          "存进银行",
+          "银行账户",
+          "我的银行账户"
+        ],
+        "choices": [
+          "请存到银行。",
+          "我的银行账户。"
+        ],
+        "audio": "roots-bank-deposit",
+        "answerRules": {
+          "templates": [
+            "{request}{destination}{ending}",
+            "{destination}{ending}"
+          ],
+          "slots": {
+            "request": [
+              "存到",
+              "请存到",
+              "我想存到",
+              "存进",
+              "把收入存到",
+              "请把收入存到",
+              "帮我把收入存到",
+              "麻烦帮我把收入存到"
+            ],
+            "destination": [
+              "银行",
+              "银行账户",
+              "我的银行账户"
+            ],
+            "ending": [
+              "",
+              "谢谢",
+              "谢谢您",
+              "好吗"
+            ]
+          }
+        }
+      },
+      {
+        "id": "bank-auto",
+        "zh": "你想自己来领取，还是自动存款？",
+        "pinyin": "Nǐ xiǎng zìjǐ lái lǐngqǔ, háishi zìdòng cúnkuǎn?",
+        "en": "Would you like to collect it yourself, or use automatic deposits?",
+        "intent": "variants",
+        "speaker": "chen",
+        "accepted": [
+          "自动存款",
+          "我要自动存款",
+          "我想自动存款",
+          "请自动存款",
+          "自动存款谢谢",
+          "自动转账",
+          "请自动转账"
+        ],
+        "choices": [
+          "我要自动存款。",
+          "请自动转账。"
+        ],
+        "audio": "roots-bank-auto",
+        "answerRules": {
+          "templates": [
+            "{request}{service}{ending}",
+            "{service}{ending}"
+          ],
+          "slots": {
+            "request": [
+              "我要",
+              "我想",
+              "请",
+              "开通",
+              "请开通",
+              "我想开通",
+              "帮我开通",
+              "麻烦帮我开通"
+            ],
+            "service": [
+              "自动存款",
+              "自动转账"
+            ],
+            "ending": [
+              "",
+              "谢谢",
+              "谢谢您",
+              "好吗"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "onboarding": {
+    "ui": {
+      "title": "Grandfather’s album",
+      "practice": "Practise Mandarin",
+      "photo": "Recreate this photo",
+      "show": "Show him the old photo",
+      "collect": "Collect earnings",
+      "automate": "Arrange automatic deposits",
+      "open": "Reopen the fruit stand",
+      "film": "Buy film",
+      "journal": "Write a journal entry",
+      "personal": "Take a personal photo"
+    },
+    "welcome": "You are visiting Qinghe for the first time. You do not need to understand Mandarin yet. Find the places in his old photographs, meet the people who knew him, and learn a little at a time.",
+    "firstStep": "Start with the fruit table on the west side of the square. Walk up to Uncle Zhou and interact with him, then choose “Show him the old photo”. The fountain and house photos are optional discoveries. Open your journal from the top bar and choose “Grandfather’s album” whenever you need it.",
+    "photoTitle": "How the photographs work",
+    "photoSteps": [
+      "Find the place shown in an old photo. Each card below gives you a location clue.",
+      "At that location, choose “Recreate this photo” to open your camera.",
+      "Wait for “Ready to capture”, then press Enter or the shutter button. You do not need exact framing."
+    ],
+    "filmGuide": "6 shots to start · 1 per successful photo. Invalid views cost nothing. Buy 5 more for 10 coins. Old and new photos stay side by side.",
+    "practiceGuide": "Try a short Mandarin reply. The question is explained in English. You can type or use the microphone, edit what it hears, then submit. Open the examples if you need a model answer; using one is practice, and you can try independently afterwards.",
+    "journalEntry": "Grandfather, today I found another piece of your life in Qinghe.",
+    "objectives": {
+      "album": "Open Grandfather’s album.",
+      "meet": "Find Uncle Zhou beside the fruit table west of the square. Show him the old photo.",
+      "photo": "Recreate the fruit-stand photo. A clear view of the table is enough.",
+      "practice": "Practise greetings, asking for fruit, and quantities with Uncle Zhou.",
+      "open": "Talk to Uncle Zhou about reopening the fruit stand. You will need 20 coins.",
+      "collect": "Your stand is open. Return to Uncle Zhou to collect earnings, or visit Qinghe Bank to arrange automatic deposits."
+    }
+  }
+}

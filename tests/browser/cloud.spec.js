@@ -11,6 +11,7 @@ test('without Supabase settings there is no cloud save and nothing reaches Supab
   await expect(page.getByRole('button',{name:'开始旅行'})).toBeVisible();
   await expect(page.locator('#arrival .arrival-cloud, #arrival .arrival-signed')).toHaveCount(0);
   await page.getByRole('button',{name:'开始旅行'}).click();
+  if(await page.locator('#roots-welcome-close').isVisible())await page.locator('#roots-welcome-close').click();
   await page.locator('#settings-button').click();
   await expect(page.locator('#folder-sync')).toBeAttached();
   await expect(page.locator('#panel')).not.toContainText('云端存档');

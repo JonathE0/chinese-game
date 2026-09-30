@@ -83,6 +83,16 @@ export class Registry {
    * smaller shape is entered before the ray leaves the winner: the sink inside the kitchen
    * fitting, the cup on the table.
    */
+  visiblePoint(place,origin,target,allowance=2){
+    const dx=target.x-origin.x,dy=target.y-origin.y,dz=target.z-origin.z,length=Math.hypot(dx,dy,dz);if(length<.01)return true;
+    const dir={x:dx/length,y:dy/length,z:dz/length},limit=Math.max(0,length-allowance);
+    const intersects=b=>b.place===place&&(!b.entity||b.entity.enabled)&&!contains(b,origin)&&(b.refine?b.refine(origin,dir,limit):(b.radius?hitCylinder(origin,dir,b,limit):hitBox(origin,dir,b,limit)));
+    return !this.boxes.some(b=>{
+      if(!b.solid)return false;
+      const parts=b.group?.startsWith('stall:')?this.looks.filter(part=>part.group===b.group):[];
+      return parts.length?parts.some(intersects):intersects(b);
+    });
+  }
   look(place,origin,dir,maxDistance=11){
     const hits=[],length=Math.hypot(dir.x,dir.y,dir.z);
     for(const list of [this.boxes,this.looks])for(const b of list){

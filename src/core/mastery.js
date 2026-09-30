@@ -1,0 +1,2 @@
+export function recordAttempt(state,{skillId,variantId,ok,assisted},skills){const skill=skills.find(s=>s.id===skillId);if(!ok||assisted||!skill?.variants.some(v=>v.id===variantId))return state;return {...state,[skillId]:[...new Set([...(state[skillId]??[]),variantId])]};}
+export function mastered(state,skillId,skills){const skill=skills.find(s=>s.id===skillId);return !!skill&&new Set((state[skillId]??[]).filter(id=>skill.variants.some(v=>v.id===id))).size>=2;}

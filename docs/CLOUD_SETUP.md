@@ -154,3 +154,37 @@ expected. Playwright starts its own dev server with the three values blanked, so
   their next upload creates the row again). Your Google account and the progress on this device are
   not touched. Signing in again uploads this device's save again.
 - **退出登录** signs out this device only.
+
+## Roots chapter income (not deployed by this change)
+
+Apply supabase/migrations/20260928000000_roots_businesses.sql after the existing cloud-saves migration in a separate test project first. Do not paste a service-role key into the browser or chat. Deploy the matching client after the migration has been validated. Existing cloud saves remain supported.
+
+The database owns activation, real elapsed time, remainder, caps, upgrade payments and idempotent request receipts. No client clock, elapsed duration or payout is accepted. Manual income caps at 72 hours; automatic income at 168 hours. Ordinary local learning rewards and purchases remain client-authored; this is not a wholly cheat-proof economy.
+
+Retrying a receipt after another save has changed returns a conflict. The existing backup/choice screen preserves both copies. If a business exists, choosing local progress explicitly keeps the cloud wallet/business records alongside local learning and inventory. The dialog explains this choice. Deleting a cloud save does not delete its business ledger or receipts; recreated saves receive the canonical business snapshot.
+
+Local SQL verification uses real PostgreSQL via PGlite:
+
+    npm install --prefix .superpowers/sdd/2026-09-28-roots-chapter-one/dbtest @electric-sql/pglite
+    node supabase/tests/roots_businesses.mjs
+
+The package is test tooling in a scratch directory, not a game dependency. PGLITE_MODULE may point to another installed index.js. This validates roles, RPCs, constraints, receipts and recovery, but is a single database connection. Before public release, also run simultaneous requests from two authenticated sessions against an isolated Supabase project.
+
+Development ?admin has a visibly labelled local test ledger for chapter playthroughs. It never contacts the production income service and is excluded from production builds. Its local time is for preview only. Ordinary guest play has no fabricated offline payout.
+
+Rollback: disable execution of roots_business_command for authenticated users and ship the previous client. Retain roots_businesses and roots_receipts; do not drop earned records. Keep the save guard enabled. Restore service only after the matching client/migration are ready.
+
+### Real multi-connection proof on Windows
+
+A portable PostgreSQL 17 test runner is now available. It creates a fresh localhost-only cluster, uses separate connections with authenticated roles, applies both real migrations, and stops the server in its cleanup handler. It waits until both sessions are blocked on the same save row before releasing them, so the concurrency tests do not depend on lucky timing. Only disposable fixture accounts are used; hosted accounts and production data are never contacted.
+
+    npm install --prefix .superpowers/sdd/2026-09-28-roots-chapter-one/dbtest @embedded-postgres/windows-x64@17.10.0-beta.17 pg@8.23.0 --ignore-scripts --no-audit --no-fund
+    node supabase/tests/roots_concurrency.mjs
+
+The test tools and clusters are excluded from Git and are not game dependencies. ROOTS_DB_TOOLS may point to an alternative tool directory. The runner is Windows-specific. Package provenance: [embedded-postgres](https://github.com/leinelissen/embedded-postgres).
+
+Verified: identical and competing receipts, collection versus upgrade, autosave versus payout, insufficient funds, invalid actions, fractional remainders, and complete rollback after the save throttle rejects a payout. PGlite remains useful for the fast single-connection permission suite. Hosted Supabase authentication and deployed RPC connectivity still need a smoke test before public release.
+
+### First-chapter voice review
+
+Run node scripts/roots-voice-review.js, then open /docs/roots-voice-review.html on the development server. It gathers the 13 chapter clips with their exact text, pinyin and English meanings, and highlights pronunciation risks using the existing voice-audit helper. Playback does not mark anything reviewed. The page is outside public/ and is not included in the normal production build.

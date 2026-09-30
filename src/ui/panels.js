@@ -1,3 +1,5 @@
+import {keepLocalBusinessProgress} from '../core/business-sync.js';
+import {openRootsAlbum} from './roots.js';
 import catalog from '../content/catalog.json' with {type:'json'};
 import {KEY_ACTIONS,KEY_UI,keyLabel,rebind} from '../core/keys.js';
 import ambient from '../content/ambient.json' with {type:'json'};
@@ -25,7 +27,7 @@ export function download(name,data){const url=URL.createObjectURL(new Blob([JSON
 export function openJournal(ctx){
  const body=ctx.ui.open('journal','旅行手册','你的中文，慢慢生长');
  const tasks=todaysTasks(ctx.profile,ctx.profile.dayIndex??0);
- body.innerHTML=`<h3 class="section-title">今天的小事 <small>TODAY'S ERRANDS</small></h3>
+ body.innerHTML=`<button class="primary wide" id="journal-roots">Grandfather’s album · 爷爷的相册</button><h3 class="section-title">今天的小事 <small>TODAY'S ERRANDS</small></h3>
  <p class="microcopy">三件小事，每天换。做完了回到这里领学习币。<br>Three errands a day, refreshed every in-game day. Collect the coins here.</p>
  <div class="daily-list">${tasks.map(task=>`
    <article class="daily-row ${task.done?'done':''} ${task.claimed?'claimed':''}">
@@ -56,6 +58,7 @@ export function openJournal(ctx){
   if(!ctx.profile.completed.includes('daily:first'))ctx.profile.completed.push('daily:first');
   ctx.music?.cue('reward');ctx.save();ctx.ui.notice(`+${result.reward} 学习币。 / Errand done.`);openJournal(ctx);
  });
+ body.querySelector('#journal-roots').onclick=()=>openRootsAlbum(ctx);
  body.querySelector('#journal-practice').onclick=()=>openWordBank(ctx);
  body.querySelector('#journal-collection').onclick=()=>openCollection(ctx);
  renderAlbum(ctx,body.querySelector('#journal-album'));
@@ -185,7 +188,7 @@ export function cloudSoon(ctx,ms=10000){if(ctx.cloud)cloudTimer??=setTimeout(()=
 /** Checks or uploads the cloud save when signed in. `asked`: the player pressed 立即同步. */
 export async function cloudSync(ctx,{asked=false}={}){
  const c=ctx.cloud;
- if(!c||ctx.readOnly)return;
+ if(!c||ctx.readOnly||ctx.businessPending)return;
  if(c.busy)return cloudSoon(ctx);
  c.busy=true;
  try{
@@ -203,6 +206,7 @@ export async function cloudSync(ctx,{asked=false}={}){
   // The offer waits for the player to be free rather than cutting into a conversation or a shop.
   else if(ctx.ui.panelId&&!asked){c.seen=undefined;cloudSoon(ctx,30000);}   // 'offer' or 'choose'
   else if(r.action==='offer'||r.action==='choose')offerCloudRestore(ctx,r);
+  return r.action;
  }finally{c.busy=false;}
 }
 /** Like offerFolderRestore: nothing is uploaded until the player answers. 'choose' (the cloud
@@ -216,12 +220,13 @@ function offerCloudRestore(ctx,{action,profile:p,raw}){
  body.innerHTML=action==='choose'
   ?`<p>云端存档在另一台设备上更新过。要用哪一个？<br><small>The cloud save was updated on another device. Which one do you want to use?</small></p><p class="microcopy">云端：${stats(p)}<br>本机：${stats(ctx.profile)}</p><div class="button-row"><button class="primary" data-pick="cloud">用云端的 <small>Use the cloud one</small></button><button class="secondary" data-pick="local">用这台设备的 <small>Use this device's</small></button></div>`
   :`<p>云端有进度更多的存档，要恢复吗？<br><small>The cloud holds a save with more progress. Restore it?</small></p><p class="microcopy">${stats(p)}</p><div class="button-row"><button class="primary" data-pick="cloud">恢复 <small>Restore</small></button><button class="secondary" data-pick="local">不用了 <small>No thanks</small></button></div>`;
+ if(p.businessRevision)body.insertAdjacentHTML('beforeend','<p class="microcopy">保留本机进度时，钱包与生意记录使用云端版本。两个存档都会保留备份。<br>Keeping local progress retains the cloud wallet and business records. Both saves are backed up.</p>');
  body.querySelectorAll('[data-pick]').forEach(button=>button.onclick=async()=>{
   answered=true;body.querySelectorAll('[data-pick]').forEach(b=>b.disabled=true);
   const pick=button.dataset.pick;
   if(!await keepLoser(c,pick,{cloudRaw:raw,localRaw:JSON.stringify(ctx.profile)},keepCopy)){c.failed=true;c.seen=undefined;ctx.ui.close();return;}
   if(pick==='cloud')replaceProfile(ctx,p);   // saved at once, so it goes up at the next upload
-  else{ctx.ui.close();cloudSync(ctx);}
+  else{ctx.profile=keepLocalBusinessProgress(ctx.profile,p);ctx.save();ctx.ui.close();cloudSync(ctx);}
  });
 }
 /**

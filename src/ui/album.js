@@ -28,7 +28,7 @@ function photos(change=null){
   });
 }
 /** Adds a photo; resolves to how many old ones were dropped to stay within the cap. */
-export const savePhoto=photo=>photos(list=>addPhoto(list,photo)).then(r=>r.dropped.length);
+export const savePhoto=photo=>photos(list=>addPhoto(list.filter(p=>p.id!==photo.id),photo)).then(r=>r.dropped.length);
 const deletePhoto=id=>photos(list=>({list:list.filter(p=>p.id!==id)}));
 
 const JPEG=/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;

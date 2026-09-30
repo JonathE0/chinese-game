@@ -1,0 +1,11 @@
+{
+  "fruit-stand": {
+    "zh": "水果摊",
+    "en": "Fruit stand",
+    "activation": 20,
+    "daily": 30,
+    "manualHours": 72,
+    "automation": 90,
+    "automaticHours": 168
+  }
+}

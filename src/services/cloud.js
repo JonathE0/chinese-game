@@ -59,10 +59,13 @@ export async function readSave(){return ok(await (await saves()).select('data,ve
  */
 export async function writeSave(profile,seen){
   const table=await saves(),row={data:profile,version:profile.version},id=await me();
-  const rows=ok(seen===null?await table.insert({user_id:id,...row}).select('updated_at')
+  const rows=ok(seen===null?await table.insert({user_id:id,...row}).select('updated_at,data')
     :await table.update(row).eq('user_id',id).eq('updated_at',seen).select('updated_at'));
+  if(seen===null&&rows[0]?.data){delete profile.businesses;delete profile.businessRevision;if(rows[0].data.businesses)profile.businesses=rows[0].data.businesses;if(rows[0].data.businessRevision)profile.businessRevision=rows[0].data.businessRevision;}
   return rows[0]?.updated_at??null;
 }
 export async function deleteSave(){ok(await (await saves()).delete().eq('user_id',await me()));}
 /** The shape core/cloudsync.js expects. */
 export const cloudApi={read:readSave,write:writeSave};
+export async function businessRpc(action,request,seen){return ok(await (await sb()).rpc('roots_business_command',{p_business:'fruit-stand',p_action:action,p_request:request,p_seen:seen}));}
+export async function businessStatus(){return ok(await (await sb()).rpc('roots_business_status'));}

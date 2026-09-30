@@ -1,0 +1,2 @@
+import {test,expect} from '@playwright/test';
+test('all first-chapter review clips decode and have a usable duration',async({page})=>{await page.goto('/docs/roots-voice-review.html');await expect(page.locator('audio')).toHaveCount(13);await expect.poll(()=>page.locator('audio').evaluateAll(items=>items.filter(a=>Number.isFinite(a.duration)&&a.duration>0&&!a.error).length)).toBe(13);await expect(page.locator('.status')).toHaveText(Array(13).fill('Awaiting human listening review'));});
