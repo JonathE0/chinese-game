@@ -26,6 +26,11 @@
       "pinyin": "Qīnghé chāoshì",
       "en": "Qinghe supermarket"
     },
+    "青禾田园": {
+      "id": "fields-sign",
+      "pinyin": "Qīnghé Tiányuán",
+      "en": "Qinghe Countryside"
+    },
     "青禾灯具": {
       "id": "room-lights",
       "pinyin": "Qīnghé dēngjù",
@@ -236,6 +241,141 @@
       "pinyin": "qiántái",
       "en": "Reception"
     },
+    "海景公寓": {
+      "id": "residences",
+      "pinyin": "Hǎijǐng Gōngyù",
+      "en": "Harbour View Residences"
+    },
+    "大堂": {
+      "id": "residences-lobby",
+      "pinyin": "dàtáng",
+      "en": "Lobby"
+    },
+    "房租": {
+      "id": "residences-rent",
+      "pinyin": "fángzū",
+      "en": "Rent"
+    },
+    "物业": {
+      "id": "residences-office",
+      "pinyin": "wùyè",
+      "en": "Management office"
+    },
+    "信箱": {
+      "id": "residences-mailboxes",
+      "pinyin": "xìnxiāng",
+      "en": "Mailboxes"
+    },
+    "单间": {
+      "id": "residences-studio",
+      "pinyin": "dānjiān",
+      "en": "Studio"
+    },
+    "一室一厅": {
+      "id": "residences-one-bed",
+      "pinyin": "yí shì yì tīng",
+      "en": "One-bedroom flat"
+    },
+    "海景房": {
+      "id": "residences-harbour-view",
+      "pinyin": "hǎijǐng fáng",
+      "en": "Harbour-view flat"
+    },
+    "顶层公寓": {
+      "id": "residences-penthouse",
+      "pinyin": "dǐngcéng gōngyù",
+      "en": "Penthouse"
+    },
+    "客厅": {
+      "id": "room-living",
+      "pinyin": "kètīng",
+      "en": "Living room"
+    },
+    "浴室": {
+      "id": "room-bathroom",
+      "pinyin": "yùshì",
+      "en": "Bathroom"
+    },
+    "阳台": {
+      "id": "room-balcony",
+      "pinyin": "yángtái",
+      "en": "Balcony"
+    },
+    "露台": {
+      "id": "room-terrace",
+      "pinyin": "lùtái",
+      "en": "Terrace"
+    },
+    "健身房": {
+      "id": "residences-gym",
+      "pinyin": "jiànshēnfáng",
+      "en": "Gym"
+    },
+    "游泳池": {
+      "id": "residences-pool",
+      "pinyin": "yóuyǒngchí",
+      "en": "Pool"
+    },
+    "空中花园": {
+      "id": "residences-garden",
+      "pinyin": "kōngzhōng huāyuán",
+      "en": "Sky garden"
+    },
+    "屋顶餐厅": {
+      "id": "residences-restaurant",
+      "pinyin": "wūdǐng cāntīng",
+      "en": "Rooftop restaurant"
+    },
+    "咖啡厅": {
+      "id": "residences-cafe",
+      "pinyin": "kāfēitīng",
+      "en": "Café"
+    },
+    "洗衣房": {
+      "id": "residences-laundry",
+      "pinyin": "xǐyīfáng",
+      "en": "Laundry"
+    },
+    "五楼": {
+      "id": "floor-5",
+      "pinyin": "wǔ lóu",
+      "en": "Floor 5"
+    },
+    "八楼": {
+      "id": "floor-8",
+      "pinyin": "bā lóu",
+      "en": "Floor 8"
+    },
+    "十五楼": {
+      "id": "floor-15",
+      "pinyin": "shíwǔ lóu",
+      "en": "Floor 15"
+    },
+    "十六楼": {
+      "id": "floor-16",
+      "pinyin": "shíliù lóu",
+      "en": "Floor 16"
+    },
+    "十八楼": {
+      "id": "floor-18",
+      "pinyin": "shíbā lóu",
+      "en": "Floor 18"
+    },
+    "二十二楼": {
+      "id": "floor-22",
+      "pinyin": "èrshí'èr lóu",
+      "en": "Floor 22"
+    },
+    "二十八楼": {
+      "id": "floor-28",
+      "pinyin": "èrshíbā lóu",
+      "en": "Floor 28"
+    },
+    "顶楼": {
+      "id": "floor-top",
+      "pinyin": "dǐnglóu",
+      "en": "Top floor"
+    },
     "客房": {
       "id": "guest-rooms",
       "pinyin": "kèfáng",
@@ -336,6 +476,11 @@
       "pinyin": "Qīnghé Zhàn",
       "en": "Qinghe Station"
     },
+    "青禾地铁站": {
+      "id": "metro-qinghe-metro",
+      "pinyin": "Qīnghé dìtiězhàn",
+      "en": "Qinghe Metro"
+    },
     "A出入口": {
       "id": "metro-entrance-a",
       "pinyin": "A chūrùkǒu",
@@ -395,6 +540,51 @@
       "id": "welcome-yunhai",
       "pinyin": "huānyíng láidào Yúnhǎi",
       "en": "Welcome to Yunhai"
+    },
+    "站前广场": {
+      "id": "city-station-square",
+      "pinyin": "zhànqián guǎngchǎng",
+      "en": "Station Square"
+    },
+    "美食街": {
+      "id": "city-food-street",
+      "pinyin": "měishí jiē",
+      "en": "Food Street"
+    },
+    "文化中心": {
+      "id": "city-cultural-centre",
+      "pinyin": "wénhuà zhōngxīn",
+      "en": "Cultural Centre"
+    },
+    "城市公园": {
+      "id": "city-park",
+      "pinyin": "chéngshì gōngyuán",
+      "en": "City Park"
+    },
+    "中心广场": {
+      "id": "city-central-square",
+      "pinyin": "zhōngxīn guǎngchǎng",
+      "en": "Central Square"
+    },
+    "商务区": {
+      "id": "city-business-district",
+      "pinyin": "shāngwù qū",
+      "en": "Business District"
+    },
+    "面包店": {
+      "id": "city-bakery",
+      "pinyin": "miànbāodiàn",
+      "en": "Bakery"
+    },
+    "小吃": {
+      "id": "city-snacks",
+      "pinyin": "xiǎochī",
+      "en": "Snacks"
+    },
+    "咖啡店": {
+      "id": "city-coffee",
+      "pinyin": "kāfēidiàn",
+      "en": "Café"
     },
     "我爱云海": {
       "id": "love-yunhai",
@@ -520,6 +710,181 @@
       "id": "metro-platform",
       "pinyin": "dìtiě zhàntái",
       "en": "Metro platform"
+    },
+    "云海市中心站": {
+      "id": "metro-yunhai-station",
+      "pinyin": "Yúnhǎi Shì Zhōngxīn Zhàn",
+      "en": "Yunhai City Centre Station"
+    },
+    "1号线": {
+      "id": "metro-line1",
+      "pinyin": "yī hào xiàn",
+      "en": "Line 1"
+    },
+    "2号线": {
+      "id": "metro-line2",
+      "pinyin": "èr hào xiàn",
+      "en": "Line 2"
+    },
+    "3号线": {
+      "id": "metro-line3",
+      "pinyin": "sān hào xiàn",
+      "en": "Line 3"
+    },
+    "建设中": {
+      "id": "metro-under-construction",
+      "pinyin": "jiànshè zhōng",
+      "en": "Under construction"
+    },
+    "即将开通": {
+      "id": "metro-opening-soon",
+      "pinyin": "jíjiāng kāitōng",
+      "en": "Opening soon"
+    },
+    "进站": {
+      "id": "metro-entrance",
+      "pinyin": "jìn zhàn",
+      "en": "Entrance"
+    },
+    "出站": {
+      "id": "metro-way-out",
+      "pinyin": "chū zhàn",
+      "en": "Way out"
+    },
+    "A出口": {
+      "id": "metro-exit-a",
+      "pinyin": "A chūkǒu",
+      "en": "Exit A"
+    },
+    "B出口": {
+      "id": "metro-exit-b",
+      "pinyin": "B chūkǒu",
+      "en": "Exit B"
+    },
+    "C出口": {
+      "id": "metro-exit-c",
+      "pinyin": "C chūkǒu",
+      "en": "Exit C"
+    },
+    "D出口": {
+      "id": "metro-exit-d",
+      "pinyin": "D chūkǒu",
+      "en": "Exit D"
+    },
+    "刷卡进站": {
+      "id": "metro-tap-in",
+      "pinyin": "shuā kǎ jìn zhàn",
+      "en": "Tap card to enter"
+    },
+    "刷卡出站": {
+      "id": "metro-tap-out",
+      "pinyin": "shuā kǎ chū zhàn",
+      "en": "Tap card to exit"
+    },
+    "充值": {
+      "id": "metro-top-up",
+      "pinyin": "chōngzhí",
+      "en": "Top up"
+    },
+    "交通卡": {
+      "id": "metro-card",
+      "pinyin": "jiāotōngkǎ",
+      "en": "Transit card"
+    },
+    "余额": {
+      "id": "metro-balance",
+      "pinyin": "yú'é",
+      "en": "Balance"
+    },
+    "余额不足": {
+      "id": "metro-short",
+      "pinyin": "yú'é bùzú",
+      "en": "Insufficient balance"
+    },
+    "闸机": {
+      "id": "metro-gates",
+      "pinyin": "zhájī",
+      "en": "Gates"
+    },
+    "屏蔽门": {
+      "id": "metro-psd",
+      "pinyin": "píngbìmén",
+      "en": "Platform doors"
+    },
+    "列车": {
+      "id": "metro-train",
+      "pinyin": "lièchē",
+      "en": "Train"
+    },
+    "站厅": {
+      "id": "metro-concourse",
+      "pinyin": "zhàntīng",
+      "en": "Concourse"
+    },
+    "站台": {
+      "id": "metro-platform-level",
+      "pinyin": "zhàntái",
+      "en": "Platform"
+    },
+    "楼梯": {
+      "id": "metro-stairs",
+      "pinyin": "lóutī",
+      "en": "Stairs"
+    },
+    "扶梯": {
+      "id": "metro-escalator",
+      "pinyin": "fútī",
+      "en": "Escalator"
+    },
+    "往云海市中心": {
+      "id": "metro-to-yunhai",
+      "pinyin": "wǎng Yúnhǎi Shì Zhōngxīn",
+      "en": "To Yunhai City Centre"
+    },
+    "往青禾": {
+      "id": "metro-to-qinghe",
+      "pinyin": "wǎng Qīnghé",
+      "en": "To Qinghe"
+    },
+    "下一班": {
+      "id": "metro-next",
+      "pinyin": "xià yì bān",
+      "en": "Next train"
+    },
+    "即将到站": {
+      "id": "metro-soon",
+      "pinyin": "jíjiāng dào zhàn",
+      "en": "Arriving soon"
+    },
+    "列车进站": {
+      "id": "metro-arriving",
+      "pinyin": "lièchē jìn zhàn",
+      "en": "Train arriving"
+    },
+    "小心站台间隙": {
+      "id": "metro-gap",
+      "pinyin": "xiǎoxīn zhàntái jiànxì",
+      "en": "Mind the gap"
+    },
+    "请站在黄线以内": {
+      "id": "metro-yellow-line",
+      "pinyin": "qǐng zhàn zài huángxiàn yǐnèi",
+      "en": "Stay behind the yellow line"
+    },
+    "换乘": {
+      "id": "metro-transfer",
+      "pinyin": "huànchéng",
+      "en": "Transfer"
+    },
+    "候车区": {
+      "id": "metro-waiting",
+      "pinyin": "hòuchē qū",
+      "en": "Waiting area"
+    },
+    "服务中心": {
+      "id": "metro-service",
+      "pinyin": "fúwù zhōngxīn",
+      "en": "Service centre"
     },
     "新年快乐": {
       "id": "festival-new-year",

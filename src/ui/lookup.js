@@ -3,6 +3,7 @@ import {pinyinHtml} from './shell.js';
 import {TranslationService,MAX_TRANSLATION_LENGTH} from '../services/translation.js';
 import {icon} from './art.js';
 import {addWord,hasWord} from '../core/bank.js';
+import {simplified} from '../services/script.js';
 import './lookup.css';
 
 const hasHan=text=>/[㐀-䶿一-鿿]/.test(text);
@@ -104,7 +105,7 @@ export function installLookup(ctx,translations=new TranslationService()){
     if(popup.contains(selection.anchorNode))return;
     const rect=selection.getRangeAt(0).getBoundingClientRect();
     if(!rect.width&&!rect.height)return close();
-    render(text,rect);
+    render(simplified(text),rect);   // 繁體字 on screen: the dictionary and meanings are simplified
   };
   const scheduleConsider=()=>{
     if(considerTimer!==null)clearTimeout(considerTimer);

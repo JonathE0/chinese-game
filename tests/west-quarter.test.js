@@ -59,9 +59,9 @@ test('everything riverside moved by x -40, z +42, and nothing was left behind',(
   assert.equal(world.trees.filter(([,z])=>z<-19).length,0,'no tree left in the old riverside');
   assert.equal(world.trees.filter(([x,z])=>inside(r,x,z)).length,7);
   // Named landmarks, so a prop left on its old spot cannot hide inside the bounds.
-  assert.deepEqual([building('restaurant').x,building('restaurant').z],[-51,1]);
-  assert.deepEqual([building('bank').x,building('bank').z],[-29,1]);
-  assert.deepEqual([building('pharmacy').x,building('pharmacy').z],[-40,-7]);
+  assert.deepEqual([building('restaurant').x,building('restaurant').z],[-52.1,-0.7]);
+  assert.deepEqual([building('bank').x,building('bank').z],[-29.5,1.75]);
+  assert.deepEqual([building('pharmacy').x,building('pharmacy').z],[-40,-8.3]);
   // The old pond gave way to the lotus canal (Task S), between the restaurant and the post office.
   const [c]=world.scenery.find(d=>d.kind==='waterEdge'&&d.district==='riverside').channel;
   assert.ok(c.x0>building('restaurant').x+4&&c.x1<building('bank').x-4,'canal between the two');
@@ -69,11 +69,11 @@ test('everything riverside moved by x -40, z +42, and nothing was left behind',(
 
 test('the restaurant door and its mission moved with the building',()=>{
   const restaurant=building('restaurant');
-  assert.deepEqual(rooms.restaurant.door,{x:-51,z:4.1});
+  assert.deepEqual(rooms.restaurant.door,{x:-52.1,z:4.1});
   assert.equal(rooms.restaurant.door.x,restaurant.x);
   assert.equal(rooms.restaurant.door.z,restaurant.z+restaurant.depth/2+.1,'door on the front');
   const mission=quests.quests.find(q=>q.where?.district==='riverside');
-  assert.deepEqual([mission.where.x,mission.where.z],[-51,4.1]);
+  assert.deepEqual([mission.where.x,mission.where.z],[-52.1,4.1]);
 });
 
 // The quarter as a walled Suzhou garden (Task S): a lotus canal down the middle between the
@@ -229,8 +229,8 @@ test('no post, low lantern, prop, tree or passer-by stands in a walking line of 
   // Each walkway's floor between its rows of posts, and the ways between the walkways and the doors.
   const lines=[...walkways.map(L=>{const h=L.width/2-.3;return L.ax?[L.a0,L.a1,L.c-h,L.c+h]:[L.c-h,L.c+h,L.a0,L.a1];}),
     [-34.6,-22,-3.9,-2.4],    // in from the gate, along the post office's south side
-    [-51,-45.8,4.4,6.4],      // from the west walkway to the restaurant door
-    [-34.3,-29,4.4,6.4]];     // from the east walkway to the post office door
+    [-52.1,-45.8,4.4,6.4],    // from the west walkway to the restaurant door
+    [-34.3,-29.5,5.9,7.6]];   // from the east walkway to the post office door
   const R=district('riverside'),things=[
     ...world.props.filter(p=>p.district==='riverside').map(p=>({what:p.kind,...propBox(p)})),
     ...world.people.filter(p=>p.district==='riverside').map(p=>({what:'passer-by',x:p.x,z:p.z,r:.3})),

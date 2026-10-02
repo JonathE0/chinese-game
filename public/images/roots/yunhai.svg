@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-label="Grandfather by the sea in Yunhai">
+  <!-- Placeholder art for the Roots album: Grandfather at the Yunhai sea wall, drawn as an old sepia print. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9dcc0"/><stop offset="1" stop-color="#d9c49c"/></linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a99573"/><stop offset="1" stop-color="#7c6a4f"/></linearGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#sky)"/>
+  <circle cx="500" cy="120" r="34" fill="#f3e8cf"/>
+  <path d="M0 250 L60 238 L110 244 L170 226 L230 240 L300 232 L360 244 L420 236 L480 246 L560 234 L640 242 V270 H0Z" fill="#b5a07c"/>
+  <rect y="262" width="640" height="118" fill="url(#sea)"/>
+  <path d="M0 300 q40 -8 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 M0 336 q40 -8 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0" fill="none" stroke="#cdb991" stroke-width="3" opacity=".6"/>
+  <rect y="380" width="640" height="100" fill="#8d7a5c"/>
+  <path d="M0 372 H640 M0 392 H640" stroke="#5f5140" stroke-width="6"/>
+  <path d="M40 372 V430 M140 372 V430 M240 372 V430 M340 372 V430 M440 372 V430 M540 372 V430" stroke="#5f5140" stroke-width="5"/>
+  <g fill="#4e4234">
+    <circle cx="300" cy="248" r="20"/>
+    <path d="M276 272 h48 l10 110 h-68Z"/>
+    <path d="M280 382 h16 v70 h-16Z M304 382 h16 v70 h-16Z"/>
+    <path d="M276 276 l-26 70 l12 4 l26 -62Z M324 276 l20 66 l-12 4 l-18 -58Z"/>
+    <path d="M280 232 q20 -18 40 0 v6 h-40Z" fill="#3c3228"/>
+  </g>
+  <rect x="8" y="8" width="624" height="464" fill="none" stroke="#f6efdc" stroke-width="16"/>
+</svg>

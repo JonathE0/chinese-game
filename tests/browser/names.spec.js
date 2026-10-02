@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 import {readFileSync} from 'node:fs';
 
 // Every item with its own look has a name, and every sign reads its exact text.
@@ -12,7 +13,7 @@ async function start(page){
     settings:{pinyin:true,english:true,dialogueVolume:0.9,ambientVolume:0.35,musicVolume:0},playerName:'旅人',
   })]);
   await page.goto('/');
-  await page.getByRole('button',{name:'开始旅行'}).click();
+  await startGame(page);
   await page.waitForFunction(()=>!!window.__qinghe?.town);
   await page.waitForTimeout(300);
 }
@@ -114,9 +115,10 @@ test('the park pavilion reads 亭子 from the path, and a room ceiling reads 天
 test('the welcome board reads its exact text, and F saves the phrase without naming an object',async({page})=>{
   await start(page);
   await page.mouse.click(700,500);
-  await page.evaluate(()=>window.__qinghe.town.warp(0,7,180));
+  // The board hangs under the park gate's plaque (garden.json gate, z 64.8): look up at it from inside.
+  await page.evaluate(()=>window.__qinghe.town.warp(0,58.8,180));
   await page.waitForTimeout(120);
-  await page.evaluate(()=>{window.__qinghe.town.pitch=9;});
+  await page.evaluate(()=>{window.__qinghe.town.pitch=15;});
   await expect.poll(()=>plate(page),{timeout:6000}).toContain('欢迎来到青禾');
   await page.keyboard.press('f');
   await expect.poll(()=>plate(page),{timeout:4000}).toContain('已记住');

@@ -27,32 +27,62 @@ export function makeGrid(blocked,[x0,z0,x1,z1],cell=CELL,seed=null){
   const g={x0,z0,cell,nx,nz,free};
   for(let n=0;n<free.length;n++){const c=centre(g,n);free[n]=blocked(c.x,c.z)?0:1;}
   if(seed){
-    const start=nearestFree(g,seed),joined=start<0?[]:flood(g,start).queue;
-    free.fill(0);for(const n of joined)free[n]=1;
+    const start=nearestFree(g,seed),{queue,length}=start<0?{length:0}:flood(g,start);
+    free.fill(0);for(let q=0;q<length;q++)free[queue[q]]=1;
   }
   return g;
 }
 export function centre(g,n){return {x:g.x0+(n%g.nx+.5)*g.cell,z:g.z0+(Math.floor(n/g.nx)+.5)*g.cell};}
+/** The cell a point lies in, or -1 off the grid. */
+function cellAt(g,p){
+  const i=Math.floor((p.x-g.x0)/g.cell),k=Math.floor((p.z-g.z0)/g.cell);
+  return i>=0&&k>=0&&i<g.nx&&k<g.nz?k*g.nx+i:-1;
+}
 function nearestFree(g,p){
+  const own=cellAt(g,p);if(own>=0&&g.free[own])return own;   // no cell's centre is nearer than its own
   let best=-1,bestD=Infinity;
+  if(own>=0){
+    // Ring by ring outwards: a ring r cells out is at least r-½ cells away, so once the best found is
+    // nearer than the next ring can be, it is the nearest.
+    const i=own%g.nx,k=(own-i)/g.nx;
+    const look=(a,b)=>{const n=b*g.nx+a;if(g.free[n]){const d=gap(g,n,p);if(d<bestD){bestD=d;best=n;}}};
+    for(let r=1;r<Math.max(g.nx,g.nz);r++){
+      for(let b=Math.max(0,k-r);b<=Math.min(g.nz-1,k+r);b++){
+        if(b===k-r||b===k+r){for(let a=Math.max(0,i-r);a<=Math.min(g.nx-1,i+r);a++)look(a,b);continue;}
+        if(i-r>=0)look(i-r,b);
+        if(i+r<g.nx)look(i+r,b);
+      }
+      if(bestD<((r+.5)*g.cell)**2)return best;
+    }
+    return best;
+  }
   for(let n=0;n<g.free.length;n++)if(g.free[n]){const d=gap(g,n,p);if(d<bestD){bestD=d;best=n;}}
   return best;
 }
 /** Squared distance from a cell's centre to a point, without making the centre. */
 function gap(g,n,p){const dx=g.x0+(n%g.nx+.5)*g.cell-p.x,dz=g.z0+(Math.floor(n/g.nx)+.5)*g.cell-p.z;return dx*dx+dz*dz;}
-/** Breadth first over free cells, eight ways round, never cutting the corner of a blocked cell. */
-function flood(g,start){
-  const prev=new Int32Array(g.free.length).fill(-1),queue=[start];prev[start]=start;
-  for(let q=0;q<queue.length;q++){
+// The search's working arrays, kept from one search to the next (云海's grid is about 107k cells).
+let PREV=new Int32Array(0),QUEUE=new Int32Array(0);
+/**
+ * Breadth first over free cells, eight ways round, never cutting the corner of a blocked cell; it
+ * stops once it reaches `goal`. The arrays it hands back are the next search's too.
+ */
+function flood(g,start,goal=-1){
+  const size=g.free.length;
+  if(PREV.length<size){PREV=new Int32Array(size);QUEUE=new Int32Array(size);}
+  const prev=PREV,queue=QUEUE;prev.fill(-1,0,size);
+  queue[0]=start;prev[start]=start;let length=1;
+  for(let q=0;q<length&&start!==goal;q++){
     const n=queue[q],i=n%g.nx,k=(n-i)/g.nx;
-    for(const [di,dk] of STEPS){
-      const a=i+di,b=k+dk,m=b*g.nx+a;
+    for(let s=0;s<8;s++){
+      const di=STEPS[s][0],dk=STEPS[s][1],a=i+di,b=k+dk,m=b*g.nx+a;
       if(a<0||b<0||a>=g.nx||b>=g.nz||!g.free[m]||prev[m]>=0)continue;
       if(di&&dk&&!(g.free[k*g.nx+a]&&g.free[b*g.nx+i]))continue;
-      prev[m]=n;queue.push(m);
+      prev[m]=n;queue[length++]=m;
+      if(m===goal)return {prev,queue,length};
     }
   }
-  return {prev,queue};
+  return {prev,queue,length};
 }
 /**
  * Waypoints from `from` to the reachable cell nearest `to` (to `to` itself when it can be reached).
@@ -61,9 +91,11 @@ function flood(g,start){
  */
 export function findPath(g,from,to,clear){
   const start=nearestFree(g,from);if(start<0)return [];
-  const {prev,queue}=flood(g,start);
+  // No cell is nearer `to` than the one it lies in: once the search gets there it can stop.
+  const own=cellAt(g,to),goal=own>=0&&g.free[own]?own:-1,{prev,queue,length}=flood(g,start,goal);
   let best=start,bestD=Infinity;
-  for(const n of queue){const d=gap(g,n,to);if(d<bestD){bestD=d;best=n;}}
+  if(goal>=0&&prev[goal]>=0)best=goal;
+  else for(let q=0;q<length;q++){const d=gap(g,queue[q],to);if(d<bestD){bestD=d;best=queue[q];}}
   const points=[];for(let n=best;n!==start;n=prev[n])points.unshift(centre(g,n));
   points.unshift(from,centre(g,start));
   const out=[];
@@ -77,7 +109,12 @@ export function findPath(g,from,to,clear){
 export function without(g,spots){
   if(!spots.length)return g;
   const free=g.free.slice();
-  for(let n=0;n<free.length;n++)if(free[n])for(const s of spots)if(gap(g,n,s)<(s.radius+CLEAR)**2){free[n]=0;break;}
+  // Each spot looks only at the cells in its own square, not the whole grid.
+  for(const s of spots){
+    const r=s.radius+CLEAR,[i0,k0]=[s.x-r-g.x0,s.z-r-g.z0].map(v=>Math.max(0,Math.floor(v/g.cell)));
+    const i1=Math.min(g.nx-1,Math.floor((s.x+r-g.x0)/g.cell)),k1=Math.min(g.nz-1,Math.floor((s.z+r-g.z0)/g.cell));
+    for(let k=k0;k<=k1;k++)for(let i=i0;i<=i1;i++){const n=k*g.nx+i;if(gap(g,n,s)<r*r)free[n]=0;}
+  }
   return {...g,free};
 }
 /** Whether someone may walk from one room into another: `from` keeps its fewest, `to` stays within
@@ -231,10 +268,9 @@ export class Visitors {
     const seat=this.rooms.get(p.place).fittings[p.seat];
     if(player.place===p.place&&player.seat===p.seat){p.seat=null;p.mode='idle';p.wait=1;return;}
     p.standAt={x:p.x,z:p.z};
-    this.put(p,seat.x,seat.z,seat.seat-this.seatDrop);
+    this.put(p,seat.x,seat.z,seat.seat-(p.seatDrop??this.seatDrop));   // each body sinks to its own hips
     p.entity.setLocalEulerAngles(0,seat.rot??0,0);
-    p.legs.forEach(leg=>leg.setLocalEulerAngles(78,0,0));
-    p.arms.forEach((arm,i)=>arm.setLocalEulerAngles(14,0,i?-5:5));
+    p.sit(seat.seat,{front:seat.front});   // thighs level, feet on the floor, hands on the knees (src/world/people.js)
     p.mode='sit';p.wait=rand(10,25);
   }
   /** Up off the seat where they sat down from, or the nearest free spot if someone stands there now. */
@@ -249,8 +285,7 @@ export class Visitors {
         .filter(c=>clear(c.x,c.z)).sort((a,b)=>Math.hypot(a.x-spot.x,a.z-spot.z)-Math.hypot(b.x-spot.x,b.z-spot.z))[0]??spot;
     }
     this.put(p,spot.x,spot.z);
-    p.legs.forEach(leg=>leg.setLocalEulerAngles(0,0,0));
-    p.arms.forEach(arm=>arm.setLocalEulerAngles(0,0,0));
+    p.stand();
     p.seat=null;p.mode='idle';p.wait=rand(.5,2);
   }
   /** At the door: step into the other room from its doorway once nobody is standing there. */

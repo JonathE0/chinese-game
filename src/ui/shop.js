@@ -14,6 +14,7 @@ import market from '../content/market.json' with {type:'json'};
 import rooms from '../content/rooms.json' with {type:'json'};
 import assistants from '../content/assistants.json' with {type:'json'};
 import mall from '../content/mall.json' with {type:'json'};
+import {mountCatch} from './fields.js';
 
 /** A shop can share stock with another: the square carries the basics the market also sells. */
 export const shopsOf=item=>[].concat(item.shop??'chen');
@@ -78,6 +79,7 @@ export function openShop(ctx,shopId='chen'){
   openShop(ctx,shopId);                       // redraw so the badge and the basket agree
  });
  drawCartBar(ctx,body,shopId);
+ mountCatch(ctx,shopId,body,()=>openShop(ctx,shopId));   // fish from 王爷爷's pier, bought where food is sold
 }
 
 /** One basket per shop visit. It is deliberately not saved: a shop you walked out of is finished. */

@@ -1,5 +1,6 @@
 import * as pc from 'playcanvas';
 import {detail} from '../core/quality.js';
+import {zh as shown,scripted} from '../services/script.js';
 
 /**
  * 云海's LED façades (task C-city): light running along bands and up the corners of the towers,
@@ -87,22 +88,26 @@ export function createLeds(models,{origin=0,hour=()=>21}={}){
     const c=document.createElement('canvas');
     c.width=vertical?cell:cell*chars.length;c.height=Math.round(cell*(rows+(sub?.55:0)));
     const g=c.getContext('2d');
-    g.fillStyle='#05070b';g.fillRect(0,0,c.width,c.height);
-    g.fillStyle='#141a24';                                   // the dots of the LED matrix
-    for(let y=4;y<c.height;y+=8)for(let x=4;x<c.width;x+=8)g.fillRect(x-1.5,y-1.5,3,3);
-    g.textAlign='center';g.textBaseline='middle';
-    g.font=`900 ${cell*.8}px "Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif`;
-    g.fillStyle=color;g.shadowColor=color;
-    for(const blur of [cell*.16,0]){                         // a halo, then the characters sharp on top
-      g.shadowBlur=blur;
-      chars.forEach((ch,i)=>g.fillText(ch,vertical?cell/2:cell*(i+.5),vertical?cell*(i+.53):cell*.53));
-    }
-    if(sub){
-      g.shadowBlur=0;g.fillStyle='#eef3ff';
-      g.font=`700 ${cell*.36}px "Microsoft YaHei","PingFang SC",sans-serif`;
-      g.fillText(sub,c.width/2,cell*(rows+.26));
-    }
+    const draw=()=>{
+      g.fillStyle='#05070b';g.fillRect(0,0,c.width,c.height);
+      g.fillStyle='#141a24';                                   // the dots of the LED matrix
+      for(let y=4;y<c.height;y+=8)for(let x=4;x<c.width;x+=8)g.fillRect(x-1.5,y-1.5,3,3);
+      g.textAlign='center';g.textBaseline='middle';
+      g.font=`900 ${cell*.8}px "Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif`;
+      g.fillStyle=color;g.shadowColor=color;
+      for(const blur of [cell*.16,0]){                         // a halo, then the characters sharp on top
+        g.shadowBlur=blur;
+        [...shown(zh)].slice(0,chars.length).forEach((ch,i)=>g.fillText(ch,vertical?cell/2:cell*(i+.5),vertical?cell*(i+.53):cell*.53));
+      }
+      if(sub){
+        g.shadowBlur=0;g.fillStyle='#eef3ff';
+        g.font=`700 ${cell*.36}px "Microsoft YaHei","PingFang SC",sans-serif`;
+        g.fillText(shown(sub),c.width/2,cell*(rows+.26));
+      }
+    };
+    draw();
     const map=texture(c),material=lamp('#5a5a5a','#ffffff',map,map);
+    scripted(()=>{draw();map.upload();});   // 繁體字, live (the city is built once and kept)
     textSets.set(key,material);
     return material;
   }
@@ -203,13 +208,17 @@ export function createLeds(models,{origin=0,hour=()=>21}={}){
     const m=cached(screens,[zh,w,h,vertical,pitch,seed].join('|'),()=>{
       const k=64,c=document.createElement('canvas');c.width=Math.round(w*k/4)*4;c.height=Math.round(h*k/4)*4;
       const g=c.getContext('2d'),chars=[...zh];
-      g.fillStyle='#000';g.fillRect(0,0,c.width,c.height);
       const size=vertical?Math.min(c.width*ink,c.height*ink/chars.length):Math.min(c.height*ink,c.width*.9/chars.length);
-      g.font=`900 ${size}px "Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif`;
-      g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';
-      chars.forEach((ch,i)=>g.fillText(ch,vertical?c.width/2:c.width/2+(i-(chars.length-1)/2)*size,
-        vertical?c.height/2+(i-(chars.length-1)/2)*size:c.height/2+size*.04));
+      const draw=()=>{
+        g.fillStyle='#000';g.fillRect(0,0,c.width,c.height);
+        g.font=`900 ${size}px "Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif`;
+        g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';
+        [...shown(zh)].forEach((ch,i)=>g.fillText(ch,vertical?c.width/2:c.width/2+(i-(chars.length-1)/2)*size,
+          vertical?c.height/2+(i-(chars.length-1)/2)*size:c.height/2+size*.04));
+      };
+      draw();
       const map=texture(c);map.addressU=map.addressV=pc.ADDRESS_CLAMP_TO_EDGE;
+      scripted(()=>{draw();map.upload();});   // 繁體字, live
       const mat=custom(2,'#14171d','#ffffff',{emissivePS:MEDIA},{map,gloss:.8});
       mat.setParameter('media_grid',new Float32Array([Math.round(w/pitch),Math.round(h/pitch),seed,0]));
       return mat;
@@ -242,7 +251,7 @@ export function createLeds(models,{origin=0,hour=()=>21}={}){
         g.font=`700 ${size}px "Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif`;
         g.textAlign='center';g.textBaseline='middle';
         const x0=(W+pic-chars.length*size)/2+size/2;
-        chars.forEach((ch,i)=>tube(g=>g.strokeText(ch,x0+i*size,H*.53),Math.max(2,size*.045)));
+        [...shown(zh)].forEach((ch,i)=>tube(g=>g.strokeText(ch,x0+i*size,H*.53),Math.max(2,size*.045)));
         // 海风面馆: a bowl of noodles with steam rising, in tubes, before the name.
         if(bowl)tube(g=>{
           const cx=H*.55+pic*.2,cy=H*.6,rr=H*.24;
@@ -251,8 +260,11 @@ export function createLeds(models,{origin=0,hour=()=>21}={}){
             g.bezierCurveTo(cx+dx*rr+rr*.25,cy-rr*.8,cx+dx*rr-rr*.25,cy-rr*1.05,cx+dx*rr,cy-rr*1.4);g.stroke();}
         },Math.max(2,size*.045));
       };
-      draw(c.getContext('2d'),true);draw(day.getContext('2d'),false);
-      const mat=custom(6,'#ffffff','#ffffff',{emissivePS:NEON},{map:texture(c),dayMap:texture(day),gloss:.6});
+      const paint=()=>{draw(c.getContext('2d'),true);draw(day.getContext('2d'),false);};
+      paint();
+      const map=texture(c),dayMap=texture(day);
+      scripted(()=>{paint();map.upload();dayMap.upload();});   // 繁體字, live
+      const mat=custom(6,'#ffffff','#ffffff',{emissivePS:NEON},{map,dayMap,gloss:.6});
       mat.setParameter('neon_style',new Float32Array([seed,0,0,0]));
       return mat;
     });

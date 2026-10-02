@@ -26,3 +26,13 @@ Metro/station implementation and rental implementation remain separate. No new m
 
 ## Copies
 These same handover documents and three images are copied to Game-development and Game so Claude can find them from either usual folder. Game-development is the handover's working source of truth for future edits; copies will not automatically stay in sync. Originals also remain in the roots-chapter-release Codex checkout. Files are local and uncommitted at handover.
+
+## Claude update (2026-10-02)
+Claude finished the transit plan (all ten "Next work" items of `2026-09-30-transit-checkpoint.md`)
+and then built waves 4–6 at the player's request in this folder: stations and the 3D ride, the
+Yunhai station district, the apartment tower, the metro unlock story, cameras, traditional
+characters, the Jiangnan restyle of the whole town and its interiors, new characters, the
+countryside quests and a performance pass. The full record is "What shipped" in
+`superpowers/plans/2026-09-30-development-wave-4.md`; specs are in `superpowers/specs/2026-10-01-*`.
+Nothing is committed, merged or deployed. `development` is still at 133faca with this work
+uncommitted on top of main's content; `refs/snapshots/transit-start` holds the state Codex left.

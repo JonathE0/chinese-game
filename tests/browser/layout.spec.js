@@ -33,6 +33,12 @@ function overlapsIn(place){
       if(node.enabled===false)return;
       for(const mesh of node.render?.meshInstances??[]){
         const {center:c,halfExtents:h}=mesh.aabb;
+        // A trumpet column of 云海站 is one mesh flaring from a slim stem to a 4.2 m crown under the
+        // canopy (src/world/city.js station, its profile): compared in bands, not as one wide drum.
+        if(node.name==='shaft'&&node.parent?.name==='column'){
+          for(const [y0,y1,r] of [[0,6,.8],[6,10,2],[10,c.y+h.y,h.x]])parts.push({x:c.x,z:c.z,hw:r,hd:r,y0,y1,round:true});
+          continue;
+        }
         parts.push({x:c.x,z:c.z,hw:h.x,hd:h.z,y0:c.y-h.y,y1:c.y+h.y,round:node.render.type!=='box'});
       }
       for(const child of node.children)visit(child);

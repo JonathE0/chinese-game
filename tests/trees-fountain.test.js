@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import * as pc from 'playcanvas';
 import {FOUNTAIN,FOUNTAIN_MARK,FOUNTAIN_LOOKS,fountainLevel,jetArc} from '../src/world/fountain.js';
 import {createModels} from '../src/world/models.js';
+import {PINE_TIERS} from '../src/world/jiangnan-nature.js';
 import {GRAVITY,JUMP} from '../src/core/movement.js';
 
 // Trees in four kinds and the square's flowing fountain
@@ -55,9 +56,11 @@ function models(){
 }
 const meshes=(m,kind)=>{const root=new pc.Entity();m.tree(root,0,0,1,kind);const out=[];root.forEach(e=>{if(e.render)out.push(e.render);});return out;};
 
-test('a pine is a conifer: stacked cones, no round leaf balls, and it is named 松树',()=>{
+test('a pine is a conifer: tiers of flat pads, no round leaf balls, and it is named 松树',()=>{
+  // Drawn in the Jiangnan look (task W5-nature): its pads follow PINE_TIERS, merged into a canopy mesh.
   const m=models(),parts=meshes(m,'pine');
-  assert.ok(parts.filter(r=>r.type==='cone').length>=3,'at least three cone tiers');
+  assert.ok(PINE_TIERS.length>=3,'at least three tiers of pads');
+  assert.ok(parts.some(r=>r.entity.name==='canopy'),'a canopy');
   assert.equal(parts.filter(r=>r.type==='sphere').length,0,'no leaf balls');
   assert.equal(m.tree(new pc.Entity(),0,0,1,'pine').lookName,'pine');
 });

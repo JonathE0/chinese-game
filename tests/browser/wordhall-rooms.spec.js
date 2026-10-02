@@ -37,8 +37,8 @@ test('every room off the hall is reachable from it and leads back to it',async({
   const doors=[
     ['reading','进阅览室 · 看书',-6.8,0,90],
     ['studyroom','进自习室 · 复习',6.8,0,-90],
-    ['listening','进听力室 · 练听力',-4,-4.6,0],
-    ['courtyard','去庭院 · 坐一坐',4,-4.6,0],
+    ['listening','进听力室 · 练听力',-6,-4.6,0],
+    ['courtyard','去庭院 · 坐一坐',6,-4.6,0],
   ];
   for(const [room,label,x,z,yaw] of doors){
     await stand(page,'hall',x,z,yaw);

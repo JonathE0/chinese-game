@@ -67,9 +67,9 @@
     },
     {
       "id": "answer",
-      "zh": "一号书店啊？就在光明电影院对面，星光百货旁边。",
-      "pinyin": "Yī hào shūdiàn a? Jiù zài Guāngmíng diànyǐngyuàn duìmiàn, Xīngguāng bǎihuò pángbiān.",
-      "en": "No. 1 Bookstore? It's right opposite the Guangming Cinema, next to Starlight department store.",
+      "zh": "一号书店啊？就在光明电影院对面，便利店旁边。",
+      "pinyin": "Yī hào shūdiàn a? Jiù zài Guāngmíng diànyǐngyuàn duìmiàn, biànlìdiàn pángbiān.",
+      "en": "No. 1 Bookstore? It's right opposite the Guangming Cinema, next to the convenience store.",
       "note": "对面 (duìmiàn) is opposite or across from; 旁边 (pángbiān) is next to.",
       "speaker": "student",
       "intent": "variants",

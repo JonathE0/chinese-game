@@ -29,7 +29,7 @@ async function helpers(page){
       walk(t.root);return out;
     };
     window.__readSign=(s,x,z)=>{
-      const eye={x,y:reg.groundAt('town',x,z,3)+1.62,z},dx=s.x-x,dy=s.y-eye.y,dz=s.z-z,l=Math.hypot(dx,dy,dz);
+      const eye={x,y:reg.groundAt('town',x,z,1.3)+1.62,z},dx=s.x-x,dy=s.y-eye.y,dz=s.z-z,l=Math.hypot(dx,dy,dz);
       const hit=reg.look('town',eye,{x:dx/l,y:dy/l,z:dz/l},20),name=hit?.box.name;
       if(!name)return '-';
       if(name.zh===s.text)return true;
@@ -48,7 +48,9 @@ test('every sign in town reads from the ground in front of it',async({page})=>{
       for(const side of [1,-1])for(const a of [-25,0,25])for(const d of [3,4.5,6,7.5,9]){
         const r=a*Math.PI/180,nx=s.nx*side,nz=s.nz*side;
         const x=s.x+(nx*Math.cos(r)-nz*Math.sin(r))*d,z=s.z+(nx*Math.sin(r)+nz*Math.cos(r))*d;
-        if(!t.canMove(x,z)||!t.inAnyDistrict(x,z))continue;
+        // Standing on whatever walkable ground is there, a bridge deck included: 青禾药店 faces the
+        // canal, and its fenced walkway is shallower than the nearest of these spots.
+        if(!t.canMove(x,z,t.registry.groundAt('town',x,z,1.3))||!t.inAnyDistrict(x,z))continue;
         const got=window.__readSign(s,x,z);
         if(got===true)read++;else seen[got]=(seen[got]??0)+1;
       }
@@ -67,7 +69,7 @@ test('the signs that used to hide read from where you would stand to see them',a
     ['词语馆',0,-8],['词语馆',0,-12.5],                                  // from the square, through the paifang
     ['荷风水榭',14.2,33.8],['荷风水榭',14.9,33],                        // from under the covered walkway
     ['旧物铺',6,1.5],['旧物铺',6,0],                                      // the hanging sign, from the plaza
-    ['麦香面包',39,0],['生活馆',39,0],['青禾书馆',48.5,0],['服装店',49,0],['青禾灯具',58,0],['青禾超市',28,0],
+    ['麦香面包',40.4,0],['生活馆',40.1,0],['青禾书馆',53.4,0],['服装店',52,0],['青禾灯具',65.9,0],['青禾超市',28,0],
     ['商业街',16,0],['商业街',24,0],['河边文化街',-16,-1.5],
   ];
   const missed=await page.evaluate(spots=>{

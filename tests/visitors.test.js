@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {Registry} from '../src/world/registry.js';
 import {walkClear} from '../src/world/navigation.js';
-import {makeGrid,findPath,mayGo,Visitors} from '../src/world/visitors.js';
+import {makeGrid,findPath,without,mayGo,Visitors} from '../src/world/visitors.js';
 
 const json=path=>JSON.parse(readFileSync(new URL('../'+path,import.meta.url),'utf8'));
 
@@ -68,7 +68,7 @@ test('the word hall visitors are all named, voiced and start within the room lim
 test('someone getting up from a seat does not stand up inside the tourist',()=>{
   const registry=new Registry();
   const node=()=>({setLocalPosition(){},setLocalEulerAngles(){},getLocalScale:()=>({x:1,y:1,z:1,clone(){return this;}}),reparent(){}});
-  const models={person:()=>({entity:node(),legs:[node(),node()],arms:[node(),node()],eyes:[]})};
+  const models={person:()=>({entity:node(),legs:[node(),node()],arms:[node(),node()],eyes:[],seatDrop:.52,sit(){},stand(){}})};
   const data={size:[12,10],spawn:[0,3],annexes:[]};
   const rooms=new Map([['hall',{data,root:node(),fittings:[],offsetX:0}]]);
   let player={place:'hall',x:2,z:1,seat:undefined};
@@ -78,4 +78,17 @@ test('someone getting up from a seat does not stand up inside the tourist',()=>{
   visitors.standUp(p);
   assert.ok(Math.hypot(p.x-player.x,p.z-player.z)>=.9,`stood at ${p.x},${p.z}`);
   for(const o of visitors.here('hall'))if(o!==p)assert.ok(Math.hypot(p.x-o.x,p.z-o.z)>=.8,'clear of the others');
+});
+
+test('a short walk on a city-sized grid searches only round it, not the whole grid',()=>{
+  // 云海's crowd grid is about 107k cells (src/world/crowd.js); a plan used to flood all of them.
+  const grid=makeGrid(()=>false,[0,0,150,180],.5);
+  assert.ok(grid.free.length>100000);
+  const plan=()=>findPath(without(grid,[{x:76,z:90,radius:.5},{x:73,z:91,radius:1}]),{x:75,z:90},{x:78,z:92},()=>true);
+  plan();
+  const t0=performance.now();for(let i=0;i<50;i++)plan();
+  const ms=(performance.now()-t0)/50;
+  assert.ok(ms<.5,`${ms.toFixed(2)} ms a plan`);
+  const end=plan().at(-1);
+  assert.ok(Math.hypot(end.x-78,end.z-92)<.4,'still ends at the goal');
 });

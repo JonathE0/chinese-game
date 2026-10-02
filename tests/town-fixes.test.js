@@ -104,20 +104,19 @@ test('the guesthouse door opens north onto the open lane that runs east into the
   for(const one of standing())assert.ok(!approach(one),`${one.kind??one.id} at ${one.x},${one.z}`);
 });
 
-test('云海\'s poles and lamps stand clear of every walking line: pavements, crossing landings, the road and the lit path',async()=>{
+test('云海\'s lamps stand clear of every walking line: pavements, the boulevard\'s walks, the square, 美食街, the park\'s paths and the lit path',async()=>{
   const {promenadeZ}=await import('../src/core/city.js');
   // A pole's hitbox reaches 0.3 m round it (a promenade lamp's 0.2 m). The pavements run from the
-  // line of lamps and planters (x ±8.35) to the colonnades at ±11.2; a crossing's landings are the
-  // pavement at either end of it, from the kerb out to that line of lamps and planters.
-  const {road:[x0,x1,z0,z1],bays}=city.street,p=city.promenade;
-  const lines=[[-11.2,-8.35,-34,34],[8.35,11.2,-34,34],[x0,x1,z0,z1],...bays];
-  for(const c of city.props.filter(one=>one.kind==='citycrossing'))
-    lines.push([x1,5.6,c.z-2.2,c.z+2.2],[-5.6,x0,c.z-2.2,c.z+2.2]);
+  // line of lamps and planters (x ±8.35) to the colonnades at ±11.2; the boulevard's walks run either
+  // side of its pools, inside its trees; the park's paths are laid into its lawn (city.json `pattern`).
+  const p=city.promenade;
+  const lines=[[-11.2,-8.35,-34,23],[8.35,11.2,-34,23],[-3.9,-1.6,-30,23],[1.6,3.9,-30,23],[-2,2,23,38],[-96,-26,43,45],[-96,-26,49,51],
+    ...city.pattern.filter(one=>Array.isArray(one)&&one[2]>=62).map(([x0,x1,z0,z1])=>[x0,x1,z0,z1])];
   const inside=(one,r,[ax,bx,az,bz])=>one.x+r>ax&&one.x-r<bx&&one.z+r>az&&one.z-r<bz;
-  for(const one of city.props.filter(one=>['citylamp','trafficlight','promenadelamp'].includes(one.kind))){
+  for(const one of city.props.filter(one=>['citylamp','promenadelamp'].includes(one.kind))){
     const r=one.kind==='promenadelamp'?.2:.3;
     for(const line of lines)assert.ok(!inside(one,r,line),`${one.kind} at ${one.x},${one.z} stands in [${line}]`);
-    if(one.kind==='promenadelamp')
+    if(one.kind==='promenadelamp'&&one.z<p.z[1])
       assert.ok(Math.abs(one.z-promenadeZ(p,one.x))>p.path.width/2+r,`${one.kind} at ${one.x},${one.z} stands on the lit path`);
   }
 });

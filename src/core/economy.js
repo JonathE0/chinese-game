@@ -1,4 +1,4 @@
-import {parseOffer} from './language.js';
+import {parseOffer,folded} from './language.js';
 import {floorFor,wasPolite} from './vendor.js';
 export function grant(p,key,amount) {
   if(p.claims[key] || !Number.isSafeInteger(amount)||amount<0) return 0;
@@ -16,7 +16,7 @@ export function pay(p,amount) {
  */
 export function negotiate(item,current,round,text,vendor=null,roll=Math.random) {
   if(!item.negotiable) return {quote:current,round,message:'明码标价，不讲价。',en:'This item has a fixed price.',pinyin:'Míngmǎ biāojià, bù jiǎngjià.'};
-  const offer=parseOffer(text),discount=/便宜|少一点/.test(text);
+  const offer=parseOffer(text),discount=/便宜|少一点/.test(folded(text));
   if(offer===null && !discount) return {quote:current,round,message:'您想出多少？请说一个价格。',en:'What would you offer? Please give one price.',pinyin:'Nín xiǎng chū duōshao? Qǐng shuō yí ge jiàgé.'};
   const floor=floorFor(item,vendor),maxRounds=vendor?vendor.rounds:3,give=vendor?vendor.give:3;
   const polite=wasPolite(text);

@@ -2,9 +2,10 @@ import * as pc from 'playcanvas';
 import rooms from '../content/rooms.json' with {type:'json'};
 import mall from '../content/mall.json' with {type:'json'};
 import floors from '../content/floors.json' with {type:'json'};
-import {CITY_OFFSET} from './city.js';
+import {CITY,CITY_OFFSET} from './city.js';
 import {floorMaterial} from './paving.js';
 import {detail} from '../core/quality.js';
+import {zh,scripted} from '../services/script.js';
 
 /**
  * 星光百货 (task Y-mall, docs/superpowers/plans/2026-09-27-development-wave-3.md; data in
@@ -510,30 +511,38 @@ function fitOut(town,room){
 function directoryMaterial(){
   const c=document.createElement('canvas');c.width=512;c.height=1000;
   const g=c.getContext('2d');
-  g.fillStyle='#1f252c';g.fillRect(0,0,512,1000);
-  g.fillStyle='#b8955a';g.fillRect(0,0,512,150);
-  g.textAlign='center';g.textBaseline='middle';
-  g.fillStyle='#fdf8ec';g.font='bold 76px "Microsoft YaHei","PingFang SC",sans-serif';g.fillText(mall.signs.directory,256,78);
-  mall.directory.forEach(([floor,shops],i)=>{
-    const y=190+i*200;
-    g.fillStyle='#2e363f';g.fillRect(24,y,464,176);
-    g.fillStyle='#f3cf73';g.font='bold 60px "Microsoft YaHei","PingFang SC",sans-serif';g.fillText(floor,256,y+50);
-    g.fillStyle='#e8ecef';g.font='34px "Microsoft YaHei","PingFang SC",sans-serif';
-    const parts=shops.split(' · '),rows=[parts.slice(0,2).join(' · '),parts.slice(2).join(' · ')].filter(Boolean);
-    rows.forEach((row,k)=>g.fillText(row,256,y+112+k*44));
-  });
-  return screen(canvasTexture(c),.45);
+  const draw=()=>{
+    g.fillStyle='#1f252c';g.fillRect(0,0,512,1000);
+    g.fillStyle='#b8955a';g.fillRect(0,0,512,150);
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#fdf8ec';g.font='bold 76px "Microsoft YaHei","PingFang SC",sans-serif';g.fillText(zh(mall.signs.directory),256,78);
+    mall.directory.forEach(([floor,shops],i)=>{
+      const y=190+i*200;
+      g.fillStyle='#2e363f';g.fillRect(24,y,464,176);
+      g.fillStyle='#f3cf73';g.font='bold 60px "Microsoft YaHei","PingFang SC",sans-serif';g.fillText(zh(floor),256,y+50);
+      g.fillStyle='#e8ecef';g.font='34px "Microsoft YaHei","PingFang SC",sans-serif';
+      const parts=shops.split(' · '),rows=[parts.slice(0,2).join(' · '),parts.slice(2).join(' · ')].filter(Boolean);
+      rows.forEach((row,k)=>g.fillText(zh(row),256,y+112+k*44));
+    });
+  };
+  draw();
+  const map=canvasTexture(c);scripted(()=>{draw();map.upload();});   // 繁體字, live
+  return screen(map,.45);
 }
-/** Characters one above the other, gold on dark: a sign hung down a pier. */
+/** Characters one above the other, gold on dark: a sign hung down a pier. Its texture, redrawn live for 繁體字. */
 function stacked(text){
   const chars=[...text],c=document.createElement('canvas');c.width=256;c.height=256*chars.length;
   const g=c.getContext('2d');
-  g.fillStyle='#1a1d24';g.fillRect(0,0,c.width,c.height);
-  g.strokeStyle='#f3cf73';g.lineWidth=8;g.strokeRect(14,14,c.width-28,c.height-28);
-  g.fillStyle='#f3cf73';g.font='bold 180px "Microsoft YaHei","PingFang SC",sans-serif';g.textAlign='center';g.textBaseline='middle';
-  g.shadowColor='#f3cf73';g.shadowBlur=18;
-  chars.forEach((ch,i)=>g.fillText(ch,128,128+i*256+6));
-  return c;
+  const draw=()=>{
+    g.shadowBlur=0;g.fillStyle='#1a1d24';g.fillRect(0,0,c.width,c.height);
+    g.strokeStyle='#f3cf73';g.lineWidth=8;g.strokeRect(14,14,c.width-28,c.height-28);
+    g.fillStyle='#f3cf73';g.font='bold 180px "Microsoft YaHei","PingFang SC",sans-serif';g.textAlign='center';g.textBaseline='middle';
+    g.shadowColor='#f3cf73';g.shadowBlur=18;
+    [...zh(text)].slice(0,chars.length).forEach((ch,i)=>g.fillText(ch,128,128+i*256+6));
+  };
+  draw();
+  const map=canvasTexture(c);scripted(()=>{draw();map.upload();});
+  return map;
 }
 /** A strip of night sky with a slow aurora through it, repeating across. */
 function starfield(w,h,seed){
@@ -557,15 +566,20 @@ function starfield(w,h,seed){
 
 function buildFront(town,root){
   const m=town.m,{box,cylinder}=m,lod=detail(),high=lod==='high',low=lod==='low';
-  const {x0,x1,z0,z1,height:H}=mall.exterior,top=mall.roof,sign=signMaker(m);
-  const g=new pc.Entity('mall-building');g.lookName='tower';root.addChild(g);
+  // Drawn in its own frame with its front on +x (x runs front to back, z along the front), stood
+  // where city.json's entry for it stands and turned the way that faces. Its body is at least as
+  // tall as the four floors inside it.
+  const T=CITY.towers.find(t=>t.drawnBy==='mall'),{height:H,glass:span}=mall.exterior,top=Math.max(mall.roof,rooms.mall.height),sign=signMaker(m);
+  const x1=T.d/2,x0=-x1,z1=T.w/2,z0=-z1,yaw=(T.rot??0)-90;
+  const g=new pc.Entity('mall-building');g.lookName='tower';g.setLocalPosition(T.x,0,T.z);g.setLocalEulerAngles(0,yaw,0);root.addChild(g);
   const paint=(e,material)=>{e.render.meshInstances[0].material=material;return e;};
   const lamp=(hex,glowHex=hex,peak=1)=>{
     const mt=new pc.StandardMaterial();mt.diffuse=new pc.Color().fromString(hex);mt.emissive=new pc.Color().fromString(glowHex);
     mt.emissiveIntensity=0;mt.useMetalness=true;mt.metalness=0;mt.gloss=.4;mt.update();town.daylight.addLamp(mt,peak);return mt;
   };
-  const clad='#e8e3d9',frame='#343b45',glass=seeThrough('#bcd6e2',.3),bodyFront=x1-.7,[ga,gb]=[-3.2,3.2];
-  town.mark('city',CITY_OFFSET+(x0+x1)/2,(z0+z1)/2,(x1-x0)/2+.05,(z1-z0)/2+(high?.2:.05),0,H,'tower');
+  const clad='#e8e3d9',frame='#343b45',glass=seeThrough('#bcd6e2',.3),bodyFront=x1-.7,[ga,gb]=[-span/2,span/2];
+  const turned=Math.abs(Math.round(Math.sin(yaw*Math.PI/180)))===1,deep=(x1-x0)/2+.05,wide=(z1-z0)/2+(high?.2:.05);
+  town.mark('city',CITY_OFFSET+T.x,T.z,turned?wide:deep,turned?deep:wide,0,H,'tower').group=T.id;   // one building with its wings (city.js)
   // The body, and dark piers either side of a glass front that rises above the roof.
   box(g,[(x0+bodyFront)/2,top/2,(z0+z1)/2],[bodyFront-x0,top,z1-z0],clad);
   for(const [a,b] of [[z0,ga],[gb,z1]])box(g,[(bodyFront+x1-.05)/2,top/2,(a+b)/2],[x1-.05-bodyFront,top,b-a],frame);
@@ -613,7 +627,7 @@ function buildFront(town,root){
   const lit=name.render.meshInstances[0].material;lit.emissive.set(1,1,1);
   name.lookReach=120;
   // The name again, down the south pier, and the store's star on top of the glass.
-  const upright=screen(canvasTexture(stacked(mall.signs.name)),.15);
+  const upright=screen(stacked(mall.signs.name),.15);
   const down=paint(box(g,[x1+.06,11.6,(gb+z1)/2],[1.7,7.2,.08],'#1a1d24',[0,90,0]),upright);
   down.signText=mall.signs.name;down.lookReach=120;down.render.castShadows=false;
   const emblem=new pc.Entity('mall-star');emblem.lookName='sign';g.addChild(emblem);emblem.setLocalPosition(x1-.35,H+3.4,0);

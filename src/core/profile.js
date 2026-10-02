@@ -2,7 +2,7 @@ import {normalizeRoots} from './roots.js';
 import {normaliseBank} from './bank.js';
 import {normalizeCooking} from './cooking.js';
 import {normalizeRental} from './rental.js';
-import {normalizeMetro} from './metro.js';
+import {normalizeMetro,upgradeMetro} from './metro.js';
 import {normalizeTutorial} from './tutorial.js';
 import {normalizeDailyPractice} from './daily-practice.js';
 import {normalizeLearning} from './learning.js';
@@ -15,7 +15,7 @@ export const SAVE_KEY='little-mandarin-town.v1';
  * to the save format adds one step here; loading runs whatever steps a save still needs, and saving
  * always writes SAVE_VERSION.
  */
-const UPGRADES=[upstairs,bedSpot,nightstandSpot,tidySlots,bedToWall,p=>({...p,roots:normalizeRoots(p.roots)})];
+const UPGRADES=[upstairs,bedSpot,nightstandSpot,tidySlots,bedToWall,p=>({...p,roots:normalizeRoots(p.roots)}),transitCard];
 export const SAVE_VERSION=UPGRADES.length+1;
 /** `notes` collects what an upgrade had to tell the player (loadProfile turns it into `notice`). */
 export function upgradeSave(p,steps=UPGRADES,notes=[]) {
@@ -130,6 +130,12 @@ function tidySlots(p) { return slotsMoved({wardrobe:{x:4.2,z:.9,rot:90},plant:{x
  * same time; that needs no step, since decodeProfile keeps a piece whose slot is gone as a loose one.)
  */
 function bedToWall(p) { return slotsMoved({bed:{x:2.9,z:-2.6,rot:0}})(p); }
+/**
+ * Version 8: metro tickets became a transit card. Unused single tickets turn into card credit at what
+ * they cost, and a week's pass keeps its expiry. A build from before the card refuses a version 8 save
+ * (isNewerSave) rather than loading it without the card and dropping the money on it.
+ */
+function transitCard(p) { return p.metro===undefined?p:{...p,metro:upgradeMetro(p.metro)}; }
 export function freshProfile() {
   return {version:SAVE_VERSION,wallet:0,inventory:{},equipped:{},claims:{},words:{},completed:[],phrases:[],saved:[],home:[],discovered:[],read:[],clock:15,dayIndex:0,vendors:{},settings:{pinyin:'known',toneColors:false,english:true,dialogueVolume:0.9,ambientVolume:0.35,musicVolume:0.5,sensitivity:0.12,hud:{quests:true,names:true,controls:'en'}},playerName:'旅人'};
 }
@@ -240,10 +246,12 @@ export function decodeProfile(raw,repairs=[],notes=[]) {
       &&Object.entries(d.counts).every(([key,value])=>safeKey(key)&&whole(value,0,99999))&&Array.isArray(d.claimed)&&d.claimed.length<=64&&d.claimed.every(safeKey),
     d=>({day:d.day,counts:d.counts,claimed:d.claimed}));
   const cooking=normal('cooking',normalizeCooking);
-  const metro=normal('metro',normalizeMetro);
+  const metro=normal('metro',m=>normalizeMetro(m,()=>fix('metro')));   // a bad field goes alone; the card keeps its money
   const tutorial=normal('tutorial',normalizeTutorial);
   const dailyPractice=normal('dailyPractice',normalizeDailyPractice);
   const learning=normal('learning',normalizeLearning);
+  // A lease on a flat in 海景公寓 (src/core/rental.js): a bad one is repaired like any other field, noted and dropped.
+  const rental=optional('rental',v=>!!normalizeRental(v),normalizeRental);
   const defaults=freshProfile().settings;
   let s=p.settings;
   if (!plain(s)) { fix('settings'); s={...defaults}; }
@@ -259,7 +267,15 @@ export function decodeProfile(raw,repairs=[],notes=[]) {
   if (s.keys!==undefined) { const keys=sanitiseKeys(s.keys); if (!plain(s.keys)||Object.keys(s.keys).length!==Object.keys(keys).length||Object.entries(keys).some(([action,code])=>s.keys[action]!==code)) fix('settings'); if (Object.keys(keys).length) s.keys=keys; else delete s.keys; }
   // 画质 (src/core/quality.js) too: absent is 自动, and anything unknown goes back to it.
   if (s.quality!==undefined&&!QUALITY.includes(s.quality)) { fix('settings'); delete s.quality; }
-  return {version:SAVE_VERSION,...(normalizeRental(p.rental)?{rental:normalizeRental(p.rental)}:{}),roots:normalizeRoots(p.roots),...(plain(p.businesses)?{businesses:p.businesses}:{}),...(typeof p.businessRevision==='string'?{businessRevision:p.businessRevision}:{}),...(dailyPractice?{dailyPractice}:{}),...(cooking?{cooking}:{}),...(metro?{metro}:{}),...(tutorial?{tutorial}:{}),...(learning?{learning}:{}),wallet:p.wallet,inventory,equipped,claims,words,completed,phrases,discovered,read,clock:p.clock,dayIndex:p.dayIndex,vendors,saved:normaliseBank(saved),...(stats?{stats}:{}),...(debt?{debt}:{}),...(daily?{daily}:{}),...(savings?{savings}:{}),...(permitPlans.length?{permitPlans}:{}),...(Object.keys(hotpot).length?{hotpot}:{}),...(builds?{builds:Object.fromEntries(Object.entries(builds).map(([id,record])=>[id,{given:record.given,done:record.done}]))}:{}),home:home.map(r=>({uid:r.uid,item:r.item,kind:r.kind,color:r.color,footprint:[r.footprint[0],r.footprint[1]],x:r.x,z:r.z,rot:r.rot,...(r.room?{room:r.room}:{}),...(r.y?{y:r.y}:{}),...(r.slot&&Object.hasOwn(rooms[r.room??'home']?.slots??{},r.slot)?{slot:r.slot}:{}),...(r.on?{on:r.on}:{})})),settings:s,playerName:p.playerName};
+  // 汉字 (src/services/script.js): absent is 简体字, and anything unknown goes back to it.
+  if (s.script!==undefined&&!['simplified','traditional'].includes(s.script)) { fix('settings'); delete s.script; }
+  // 鼠标 (drag to look, or lock the pointer) and the tips switch: absent is the default (drag, tips on).
+  if (s.mouse!==undefined&&!['drag','lock'].includes(s.mouse)) { fix('settings'); delete s.mouse; }
+  if (s.tips!==undefined&&typeof s.tips!=='boolean') { fix('settings'); delete s.tips; }
+  // What the HUD shows (src/ui/shell.js) and whether the journal's word list is open (panels.js): absent is fine.
+  if (s.hud!==undefined&&!plain(s.hud)) { fix('settings'); s.hud={...defaults.hud}; }
+  if (s.hud?.words!==undefined&&typeof s.hud.words!=='boolean') { fix('settings'); delete s.hud.words; }
+  return {version:SAVE_VERSION,...(rental?{rental}:{}),roots:normalizeRoots(p.roots),...(plain(p.businesses)?{businesses:p.businesses}:{}),...(typeof p.businessRevision==='string'?{businessRevision:p.businessRevision}:{}),...(dailyPractice?{dailyPractice}:{}),...(cooking?{cooking}:{}),...(metro?{metro}:{}),...(tutorial?{tutorial}:{}),...(learning?{learning}:{}),wallet:p.wallet,inventory,equipped,claims,words,completed,phrases,discovered,read,clock:p.clock,dayIndex:p.dayIndex,vendors,saved:normaliseBank(saved),...(stats?{stats}:{}),...(debt?{debt}:{}),...(daily?{daily}:{}),...(savings?{savings}:{}),...(permitPlans.length?{permitPlans}:{}),...(Object.keys(hotpot).length?{hotpot}:{}),...(builds?{builds:Object.fromEntries(Object.entries(builds).map(([id,record])=>[id,{given:record.given,done:record.done}]))}:{}),home:home.map(r=>({uid:r.uid,item:r.item,kind:r.kind,color:r.color,footprint:[r.footprint[0],r.footprint[1]],x:r.x,z:r.z,rot:r.rot,...(r.room?{room:r.room}:{}),...(r.y?{y:r.y}:{}),...(r.slot&&Object.hasOwn(rooms[r.room??'home']?.slots??{},r.slot)?{slot:r.slot}:{}),...(r.on?{on:r.on}:{})})),settings:s,playerName:p.playerName};
 }
 const REPAIRED="存档有一部分读不了，已经修好了，原来的存档另存了一份。 / Part of your save couldn't be read. It has been repaired, and a copy of the original was kept.";
 const UNREADABLE='存档暂时无法读取。 / Saved progress could not be read. A fresh session is open, and a copy of the original was kept.';

@@ -2,6 +2,7 @@ import {readFile,readdir,access} from 'node:fs/promises';
 import {validateRoots} from '../src/core/roots-content.js';
 import roots from '../src/content/roots.json' with {type:'json'};
 import {evaluateNode} from '../src/core/conversation.js';
+import {sayNumber} from '../src/core/order.js';
 const read=async name=>JSON.parse(await readFile(new URL('../src/content/'+name,import.meta.url),'utf8'));
 const lessonFiles=(await readdir(new URL('../src/content/lessons/',import.meta.url))).filter(f=>f.endsWith('.json')).sort();
 const [words,npcs,world,catalog,ambient,lessons,curriculum,voices,objects,rooms,hsk,manifest]=await Promise.all([read('vocabulary.json'),read('npcs.json'),read('world.json'),read('catalog.json'),read('ambient.json'),Promise.all(lessonFiles.map(f=>read('lessons/'+f))),read('curriculum.json'),read('voices.json'),read('objects.json'),read('rooms.json'),read('hsk.json'),readFile(new URL('../public/audio/manifest.json',import.meta.url),'utf8').then(JSON.parse)]);
@@ -16,8 +17,12 @@ for(const actor of world.npcs){require(npcIds.has(actor.id),'Unknown placed NPC 
 for(const npc of npcs)if(npc.lesson)require(lessons.some(l=>l.id===npc.lesson),'Missing lesson '+npc.lesson);
 // Every conversation: node ids only need to be unique within their own lesson (two different
 // lessons may each have a node called "where"), every node and extra line needs zh/pinyin/en, an
-// audio id and a speaker in the voice cast, and each intent's own shape has to hold up.
-for(const l of lessons){
+// audio id and a speaker in the voice cast, and each intent's own shape has to hold up. The rental
+// desk's practice lives in rental.json but is checked like any other lesson.
+const rental=await read('rental.json');
+// The metro unlock's two chats (src/content/unlock.json) are checked the same way.
+const unlockData=await read('unlock.json');
+for(const l of [...lessons,rental.lesson,unlockData.linLesson,unlockData.checkLesson]){
   ids(l.nodes,'lesson '+l.id+' nodes');
   const extraLines=Object.entries(l.extraLines??{}).map(([key,line])=>({...line,id:key}));
   const allLines=[...l.nodes,...extraLines];
@@ -85,7 +90,9 @@ for(const d of world.districts){
   require(Array.isArray(d.bounds?.x)&&Array.isArray(d.bounds?.z),'district missing bounds '+d.id);
   if(d.gate){
     require(['x','z'].includes(d.gate.axis),'district gate needs an axis '+d.id);
-    require(['paifang','moon'].includes(d.gate.style??'paifang'),'district gate has an unknown style '+d.id);
+    // 'town': the park's town gate (src/world/garden.js), which the countryside is entered through.
+    require(['paifang','moon','town'].includes(d.gate.style??'paifang'),'district gate has an unknown style '+d.id);
+    require(d.gate.from===undefined||districtIds.has(d.gate.from),'district gate opens from an unknown district '+d.id);
     // A gate with no requirement is always open (the park); one with a requirement must be valid.
     if(d.gate.requires!==undefined){
       require(Number.isInteger(d.gate.requires?.level)&&Number.isInteger(d.gate.requires?.words),'district gate needs a valid requirement '+d.id);
@@ -98,7 +105,8 @@ for(const b of world.buildings){
   require(districtIds.has(b.district),`building ${b.id} is in unknown district ${b.district}`);
   require(!b.object||objectIds.includes(b.object),`building ${b.id} names unknown object ${b.object}`);
   require([0,180].includes(b.rotation??0),`building ${b.id} may only face 0 or 180`);
-  require(['tiled','shophouse','modern','bank'].includes(b.style??'tiled'),`building ${b.id} has an unknown style`);
+  require(b.bespoke||['bank','jiangnan'].includes(b.style),`building ${b.id} has an unknown style (bank or jiangnan)`);
+  require(b.paving===undefined||(Array.isArray(b.paving)&&b.paving.length===4&&b.paving.every(m=>typeof m==='number'&&m>=0)),`building ${b.id} paving must be four margins in metres`);
   require(b.label===undefined||(typeof b.label==='string'&&b.label.trim().length>0),`building ${b.id} has an empty map label`);
 }
 for(const prop of world.props??[])require(districtIds.has(prop.district),'prop in unknown district '+prop.kind);
@@ -176,7 +184,8 @@ for(const [id,room] of Object.entries(rooms)){
         hw:(turned?item.footprint[1]:item.footprint[0])/2*.86,hd:(turned?item.footprint[0]:item.footprint[1])/2*.86});
   }
   // Two floors share one plan: the stairwell is taken on both, and only pieces on one floor can meet.
-  if(room.upper){
+  // (A metro station's two levels have no stairwell: src/world/metro-station.js builds its own.)
+  if(room.upper?.well){
     const [x0,z0,x1,z1]=room.upper.well;
     for(const floor of [0,room.upper.y])placed.push({name:'the stairwell',floor,x:(x0+x1)/2,z:(z0+z1)/2,hw:(x1-x0)/2,hd:(z1-z0)/2});
   }
@@ -246,7 +255,13 @@ for(const [id,room] of Object.entries(rooms)){
   if(room.returnPlace){
     require(!!rooms[room.returnPlace]||room.returnPlace==='city',`room ${id} returns to unknown room ${room.returnPlace}`);
     require(room.returnPlace==='city'||rooms[room.returnPlace]?.annexes?.some(a=>a.room===id),`room ${id} returns to ${room.returnPlace}, which has no way back in`);
-    require(Array.isArray(room.returnSpawn)&&room.returnSpawn.length===3,`room ${id} needs a returnSpawn of [x,z,yaw]`);
+    // A hall with several exits (the metro station in 云海) comes out at each exit's own spot instead.
+    if(room.exits){
+      const outside=(await read('city.json')).metroStation?.exits??[];
+      for(const exit of room.exits)require(['front','back','west','east'].includes(exit.wall)&&Number.isFinite(exit.at)&&outside.some(e=>e.id===exit.id&&Array.isArray(e.spawn)&&e.spawn.length===3),
+        `room ${id}: exit ${exit.id} needs a wall, a place along it and a city.json metroStation exit with a spawn [x,z,yaw]`);
+    }
+    else require(Array.isArray(room.returnSpawn)&&room.returnSpawn.length===3,`room ${id} needs a returnSpawn of [x,z,yaw]`);
   }
   const [w,d]=room.size,onWall={};
   for(const annex of room.annexes??[]){
@@ -317,7 +332,52 @@ for(const line of (await read('crowd.json')).lines){
   featureClips.push(line.audio);
   require(!!voices.cast[line.speaker],`crowd line ${line.audio}: no voice cast for ${line.speaker}`);
 }
-const lessonAudioSources=lessons.flatMap(l=>[...l.nodes,...Object.values(l.extraLines??{})]);
+// The metro unlock (src/core/unlock.js): its town missions are real quests, the card a catalog item,
+// the photo a Roots memory; the attendant's lines, the hints and the album note are voiced.
+for(const id of unlockData.townQuests)if(!quests.quests.some(q=>q.id===id))warnings.push(`unlock: town quest ${id} is not in quests.json yet, so it is not counted`);
+require(catalog.some(i=>i.id===unlockData.card&&i.sellable===false),'unlock: the card must be a catalog item that cannot be sold');
+require(roots.memories.some(m=>m.id===unlockData.photo),'unlock: the photo must be a Roots memory');
+for(const line of [...unlockData.locked,...unlockData.hints,unlockData.photoNote]){
+  featureClips.push(line.audio);
+  require(!!voices.cast[line.speaker],`unlock line ${line.audio}: no voice cast for ${line.speaker}`);
+}
+language([...unlockData.locked,...unlockData.hints,unlockData.photoNote,unlockData.questLocked,unlockData.linCalls],'unlock');
+// 海景公寓 (src/core/rental.js): whole-coin rent for whole in-game days and a reminder shorter than
+// the term; flats one a tier, each dearer than the last, decoratable, with a bed and a lift stop;
+// amenities opened by a tier that exists; the lift's floors named as they are said (二 not 两, the top
+// one 顶楼) with what it says there; every line voiced by someone in the cast; the practice's price line
+// the studio's price (review finding 6); and a practice where every node has a modeled answer and
+// alternatives, and every answer template names only slots it defines.
+for(const key of ['days','warningDays'])require(Number.isSafeInteger(rental[key])&&rental[key]>0,`rental: ${key} must be a positive whole number`);
+require(rental.warningDays<rental.days,'rental: the reminder must start before the lease ends');
+require(!!rooms[rental.lobby]&&!!rooms[rental.lift],'rental: its lobby and lift car must be rooms in rooms.json');
+const rentalStops=new Map(rental.stops.map(s=>[s.room,s])),rentalTop=Math.max(...rental.stops.map(s=>s.floor));
+rental.units.forEach((u,i)=>{
+  require(u.tier===i+1&&Number.isSafeInteger(u.price)&&u.price>(rental.units[i-1]?.price??0),`rental: ${u.id} must be tier ${i+1} and dearer than the tier below`);
+  require(rooms[u.id]?.decoratable===true&&rooms[u.id].fittings?.some(f=>f.action==='sleep'),`rental: ${u.id} must be a decoratable room with a bed`);
+  require(rentalStops.has(u.id),`rental: ${u.id} has no lift stop`);
+  language([{...u,id:u.id}],'rental unit');
+});
+for(const a of rental.amenities)require(!!rooms[a.id]&&rentalStops.has(a.id)&&rental.units.some(u=>u.tier===a.tier),`rental: amenity ${a.id} needs a room, a lift stop and a tier that exists`);
+for(const stop of rental.stops){
+  require(!!rooms[stop.room]&&stop.room!==rental.lift&&Number.isSafeInteger(stop.floor)&&stop.floor>0,`rental: bad lift stop ${stop.room}`);
+  require(stop.zh===(stop.floor===rentalTop?'顶楼':(stop.floor===2?'二':sayNumber(stop.floor))+'楼'),`rental: floor ${stop.floor} is not called ${stop.zh}`);
+  require(stop.arrive?.zh===stop.zh+'到了。'&&!!stop.arrive.pinyin&&!!stop.arrive.en,`rental: floor ${stop.floor}'s arrival line`);
+  featureClips.push('rental-lift-floor-'+stop.floor);
+}
+for(const [key,l] of Object.entries(rental.lines)){
+  language([{...l,id:key}],'rental line');
+  require(!!voices.cast[rental.speakers[key.split('-')[0]]],`rental line ${key}: no voice cast for its speaker`);
+  featureClips.push('rental-'+key);
+}
+for(const [id,spec] of Object.entries(rental.rooms))require(!!rooms[id]&&(spec.glass??[]).length>0,`rental: ${id} needs a room and window glass`);
+require(rental.lesson.nodes.find(n=>n.id==='key')?.zh.startsWith(sayNumber(rental.units[0].price)+'块'),'rental: the practice must quote the studio\'s price');
+for(const node of rental.lesson.nodes){
+  require(Array.isArray(node.accepted)&&node.accepted.length>0&&typeof node.model==='string'&&node.model.trim(),`rental lesson ${node.id}: needs accepted replies and a model`);
+  for(const template of node.answerRules?.templates??[])for(const [,slot] of template.matchAll(/\{([a-zA-Z]+)\}/g))
+    require(Array.isArray(node.answerRules.slots?.[slot])&&node.answerRules.slots[slot].length>0,`rental lesson ${node.id}: template slot {${slot}} is not defined`);
+}
+const lessonAudioSources=[...lessons,rental.lesson,unlockData.linLesson,unlockData.checkLesson].flatMap(l=>[...l.nodes,...Object.values(l.extraLines??{})]);
 const needed=[...words,...ambient,...lessonAudioSources,...catalog].map(x=>x.audio).filter(Boolean)
   .concat(roots.skills.flatMap(s=>s.variants.map(v=>v.audio)),roots.bankLesson.nodes.map(v=>v.audio),['roots-caretaker-greeting','roots-caretaker-memory'],objectIds.map(id=>'obj-'+id),[...signIds].map(id=>'sign-'+id),featureClips);
 const missing=[],unreviewed=[];

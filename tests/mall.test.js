@@ -188,11 +188,17 @@ test('the buy guide finds what 星光百货 sells there, by metro',()=>{
   }
 });
 
-test('the 星光百货 entry in city.json is the block the mall draws, its door a body clear of the front',()=>{
-  const t=city.towers.find(one=>one.sign==='星光百货'),e=mall.exterior,door=city.doors.find(d=>d.room==='mall');
+test('the 星光百货 entry in city.json is the block the mall draws: its four floors inside it, its door a body clear of its front',()=>{
+  const t=city.towers.find(one=>one.sign==='星光百货'),door=city.doors.find(d=>d.room==='mall');
   assert.equal(t.drawnBy,'mall');
-  // Turned a quarter, its depth runs along x.
-  assert.equal(Math.abs(t.rot),90);
-  assert.deepEqual([t.x-t.d/2,t.x+t.d/2,t.z-t.w/2,t.z+t.w/2].map(v=>+v.toFixed(3)),[e.x0,e.x1,e.z0,e.z1]);
-  assert.ok(door.x-e.x1>.3+.34,'a hitbox margin and a body clear of the front');
+  // Its front is the entry's local +z turned by `rot` (on 美食街, facing north); the door stands out in front of it.
+  const r=(t.rot??0)*Math.PI/180,ahead=(door.x-t.x)*Math.sin(r)+(door.z-t.z)*Math.cos(r),along=(door.x-t.x)*Math.cos(r)-(door.z-t.z)*Math.sin(r);
+  assert.ok(ahead-t.d/2>.3+.34&&ahead-t.d/2<1.5,`the door is ${(ahead-t.d/2).toFixed(2)} m out from the front`);
+  assert.ok(Math.abs(along)<t.w/2-2,'the door is on the front, not round the corner');
+  // The room-fit rule: the floors inside fit the block, and the glass front stands taller than them.
+  assert.ok(room.size[0]<=t.w-.4&&room.size[1]<=t.d-.4&&room.height<=t.h,'36 x 36 floors in a 37 x 37 block');
+  assert.ok(mall.exterior.height>room.height);
+  // The hardware store behind its door on the ground floor has a wing of its own beside the block.
+  const wing=t.wings.find(w=>w.id==='hardware');
+  assert.ok(wing&&rooms.hardware.size[0]<=wing.d-.4&&rooms.hardware.size[1]<=wing.w-.4&&rooms.hardware.height<=wing.h);
 });

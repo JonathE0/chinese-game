@@ -33,3 +33,28 @@ test('the outdoor town stays inside its draw-call and mesh budget',async({page})
  }
  expect(errors).toEqual([]);
 });
+
+// 中 is where 自动 starts (src/core/quality.js, task W6-perf), so it has its own budget, taken down the
+// river street, where it was 297 draw calls: lamps of one colour share one material, and each
+// container's stock, gate door, closed sign and building site is a small static batch of its own, a
+// few draw calls rather than one a piece (seen from there, 37 lamps, 27 pieces of fruit and 54 parts).
+test('on 中 the river street stays inside 260 draw calls: lamps share a material, stock and gates batch',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+ await page.waitForFunction(()=>!!window.__qinghe?.town);
+ const seen=await page.evaluate(async()=>{
+  const t=window.__qinghe.town,q=await import('/src/core/quality.js');q.setQuality('medium');t.applyQuality();
+  t.daylight.paused=true;t.daylight.setHour(15);t.warp(-36,4,-90);t.pitch=-4;
+  for(let i=0;i<20;i++)await new Promise(r=>requestAnimationFrame(r));
+  const calls=[];for(let i=0;i<20;i++){await new Promise(r=>requestAnimationFrame(r));calls.push(t.app.stats.drawCalls.total);}
+  const heads=t.root.find(e=>e.lookName==='lamp'&&e.parent?.name==='prop-streetlight');
+  const batched=e=>e.findComponents('render').every(r=>r.batchGroupId>=0);
+  return {calls:calls.sort((a,b)=>a-b)[10],lampMaterials:new Set(heads.map(h=>h.render.meshInstances[0].material)).size,lamps:heads.length,
+   stock:t.containers.every(c=>c.slots.every(s=>batched(s.entity))),gates:[...t.gates.values()].filter(g=>g.door).every(g=>batched(g.door))};
+ });
+ console.log('中 down the river street',JSON.stringify(seen));
+ expect(seen.lamps).toBeGreaterThan(5);
+ expect(seen).toMatchObject({lampMaterials:1,stock:true,gates:true});
+ expect(seen.calls).toBeLessThanOrEqual(260);
+ expect(errors).toEqual([]);
+});

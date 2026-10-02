@@ -3,14 +3,13 @@ import stories from '../content/stories.json' with {type:'json'};
 import ambient from '../content/ambient.json' with {type:'json'};
 import introductions from '../content/lessons/introductions.json' with {type:'json'};
 import cityDirections from '../content/lessons/city-directions.json' with {type:'json'};
-import cityTaxi from '../content/lessons/city-taxi.json' with {type:'json'};
 import cityNoodles from '../content/lessons/city-noodles.json' with {type:'json'};
 
 export const MAX_TRANSLATION_LENGTH=500;
 const key=text=>text.replace(/\s+/g,'');
 // Every lesson the conversation engine can open, not just Auntie Lin's — a highlighted line from
 // a stranger in Yunhai deserves the same translate-on-tap as one from the town square.
-const LESSONS=[introductions,cityDirections,cityTaxi,cityNoodles];
+const LESSONS=[introductions,cityDirections,cityNoodles];
 
 function authoredEntries(){
   const lessonLines=LESSONS.flatMap(l=>[...l.nodes,...Object.values(l.extraLines??{})]);

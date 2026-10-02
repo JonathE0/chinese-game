@@ -11,6 +11,7 @@
     {"id": "view", "key": "KeyV", "zh": "视角", "pinyin": "shìjiǎo", "en": "Switch view"},
     {"id": "labels", "key": "KeyH", "zh": "隐藏名字", "pinyin": "yǐncáng míngzi", "en": "Hide labels"},
     {"id": "camera", "key": "KeyC", "zh": "相机", "pinyin": "xiàngjī", "en": "Camera"},
+    {"id": "switchCamera", "key": "KeyB", "zh": "爷爷的相机 · 我的相机", "pinyin": "yéye de xiàngjī · wǒ de xiàngjī", "en": "Switch camera"},
     {"id": "drop", "key": "KeyG", "zh": "放下", "pinyin": "fàngxià", "en": "Put down"},
     {"id": "rotate", "key": "KeyR", "zh": "转向", "pinyin": "zhuǎnxiàng", "en": "Rotate"},
     {"id": "cancel", "key": "KeyX", "zh": "取消放置", "pinyin": "qǔxiāo fàngzhì", "en": "Cancel placing"},

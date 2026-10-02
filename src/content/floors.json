@@ -53,6 +53,17 @@
     "clothes-shop": "whitewash-planks",
     "hardware": "concrete-tiles",
     "metro-platform": "station-terrazzo",
-    "mall": "marble-tiles"
+    "mall": "marble-tiles",
+    "riverside-lobby": "marble-tiles",
+    "harbour-lift": "grey-terrazzo",
+    "harbour-cafe": "oak-herringbone",
+    "harbour-laundry": "light-vinyl",
+    "harbour-gym": "concrete-tiles",
+    "harbour-one-bed": "ash-planks",
+    "harbour-garden": "flagstones",
+    "harbour-pool": "marble-tiles",
+    "harbour-view": "pale-herringbone",
+    "harbour-penthouse": "walnut-herringbone",
+    "harbour-restaurant": "walnut-herringbone"
   }
 }

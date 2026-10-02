@@ -6,7 +6,8 @@ import * as pc from 'playcanvas';
  * wide staircase, and on it the main hall (red columns, lattice doors, a double-eaved golden
  * roof, the 词语馆 plaque over the door) between two single-eaved side halls — reading
  * room west, study room east. Built from the `practice-house` entry in world.json: its footprint
- * is the main hall's, its `wings` are the side halls, `sign` and `paifang` the two plaques.
+ * is the main hall's (its `porch` the colonnade before the walls), its `wings` the side halls and the
+ * listening room and courtyard behind, `sign` and `paifang` the two plaques.
  * Returns the collision and name marks for the town registry, all sharing the building's group.
  */
 const C={terrace:'#e6e1d6',terraceLip:'#d6d0c2',base:'#b9b09a',stone:'#c9c0a8',lion:'#bdb7a9',
@@ -25,10 +26,14 @@ export function buildWordHall(models,parent,b,lamps){
   const mark=(x,z,hw,hd,y0,y1,name=null,solid=true)=>marks.push({x,z,hw,hd,y0,y1,name,solid,group});
   const disc=(x,z,radius,y0,y1,name)=>marks.push({x,z,radius,y0,y1,name,solid:true,group});
 
-  // The main hall's footprint: columns along the front, walls set back behind them.
-  const X=b.x,front=b.z+b.depth/2,back=b.z-b.depth/2,W=b.width;
-  const colZ=front-.5,wallZ=front-2,H1=TOP+5.4;          // eave of the lower roof
-  const T0=front+1.1,T1=back-.2,TX=W/2+4.5;              // the terrace: z T0..T1, x ±TX
+  // The main hall's footprint: columns along the front, walls set back behind them by the `porch`.
+  // Side wings stand beside the hall on the terrace; rear ones stand behind it, each on a plinth of
+  // its own, up against the hill where nobody walks (and where railings would only cost draw calls).
+  const X=b.x,front=b.z+b.depth/2,back=b.z-b.depth/2,W=b.width,wings=b.wings??[];
+  const colZ=front-.5,wallZ=front-b.porch,H1=TOP+5.4;    // eave of the lower roof
+  const side=wg=>Math.abs(wg.x)>W/2;
+  const T0=front+1.1,T1=back-.2;                         // the terrace: z T0..T1, x ±TX
+  const TX=Math.max(W/2+4.5,...wings.filter(side).map(wg=>Math.abs(wg.x)+wg.width/2+.2));
   const stairsFront=T0+(TOP/RISE-1)*TREAD,SW=4;          // stairs x ±SW
   const PZ=stairsFront+3.55;                             // the paifang, about z -10.5
 
@@ -135,18 +140,26 @@ export function buildWordHall(models,parent,b,lamps){
   tiledRoof(root,X,roofZ,UW,UD,H2,b.roof,13);
   mark(X,roofZ,UW/2+.65,UD/2+.75,H2,H2+3,'roof');
 
-  // --- the side halls: reading room west, study room east ---
-  for(const wg of b.wings??[]){
+  // --- the side halls (reading room west, study room east), and behind the hall the listening
+  // room and the courtyard, whose `open` wing is a walled yard with no roof ---
+  for(const wg of wings){
     const x=X+wg.x,z=b.z+wg.z,top=TOP+wg.height,f=z+wg.depth/2;
-    box(root,[x,(TOP+top)/2,z],[wg.width,wg.height,wg.depth],b.color);
-    latticeWindow(root,x,TOP+2,f+.06,1.6,1.6,C.pane).lookName='window';
-    box(root,[x,TOP+.35,f+.04],[wg.width+.05,.7,.08],C.stone);
-    tiledRoof(root,x,z,wg.width,wg.depth,top,b.roof,4);
+    if(wg.open)for(const [dx,dz,w,d] of [[0,wg.depth/2-.15,wg.width,.3],[0,.15-wg.depth/2,wg.width,.3],
+      [wg.width/2-.15,0,.3,wg.depth-.6],[.15-wg.width/2,0,.3,wg.depth-.6]])box(root,[x+dx,(TOP+top)/2,z+dz],[w,wg.height,d],b.color);
+    else box(root,[x,(TOP+top)/2,z],[wg.width,wg.height,wg.depth],b.color);
+    if(side(wg)){
+      tiledRoof(root,x,z,wg.width,wg.depth,top,b.roof,4);
+      latticeWindow(root,x,TOP+2,f+.06,1.6,1.6,C.pane).lookName='window';
+      box(root,[x,TOP+.35,f+.04],[wg.width+.05,.7,.08],C.stone);
+    }else{
+      box(root,[x,TOP/2,z],[wg.width,TOP,wg.depth],C.terrace);                     // its plinth
+      if(!wg.open)box(root,[x,top+.12,z],[wg.width+.6,.24,wg.depth+.6],b.roof);    // a plain roof, seen only from the hill
+    }
     mark(x,z,wg.width/2,wg.depth/2,0,top+1,'wall');
   }
 
   // --- covered corridors on the terrace, linking each side hall's front to the colonnade ---
-  for(const wg of b.wings??[]){
+  for(const wg of wings.filter(side)){
     const s=Math.sign(wg.x),z=b.z+wg.z+wg.depth/2+1.2,inner=X+s*(W/2+.4),outer=X+wg.x+s*(wg.width/2-.4);
     marks.push(...walkway(root,{x0:inner,x1:outer,z0:z,z1:z,width:2,y:TOP,group},lamps).marks);
   }

@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 
 /**
  * "Weird glitchy lines whenever I walk" (G-glitch, 2026-09-26). The causes, each checked here:
@@ -16,7 +17,7 @@ import {test,expect} from '@playwright/test';
  */
 async function start(page){
   await page.setViewportSize({width:1280,height:720});
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await page.waitForFunction(()=>!!window.__qinghe?.town);
   await page.evaluate(()=>{
     const town=window.__qinghe.town,app=town.app,gl=app.graphicsDevice.gl;
@@ -79,7 +80,8 @@ test('the renderer, the shadows and the camera keep edges steady',async({page})=
 // 4x MSAA, 24-bit depth): another GPU rounds depth ties differently, so re-check the ceiling there.
 const VIEWS=[
   ['the lighting shop glass front (was 78,590)',{place:'town',x:60,z:-2,yaw:0}],
-  ["home's study window (was 24,698)",{place:'town',x:16,z:10,yaw:180}],
+  // The house moved beside the park gate (x 16, z 48.7, facing south); its study wing's window is at x 8.1, z 49.9.
+  ["home's study window (was 24,698)",{place:'town',x:8.1,z:51.9,yaw:0}],
   ['the lighting shop from the side (was 3,203)',{place:'town',x:60,z:-2,yaw:90,pitch:-12}],
   ['down the market street (was 684)',{place:'town',x:34,z:0,yaw:-90}],
   // The seam was measured from x 16 looking east; the market gate's new hedge stands in that view now.

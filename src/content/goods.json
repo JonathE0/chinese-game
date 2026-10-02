@@ -1,0 +1,402 @@
+{
+  "note": "What fills each interior (task W5-rooms, drawn by src/world/jiangnan-rooms.js the first time a room is entered). `rooms` gives each room its trade, its ceiling (rafters, boards, coffers or panels; none for a room that is open or builds its own), what hangs from its beams ([kind, how many, colour]) and wall pieces; a building of several shops (the mall) has `zones` by floor height, side (the sign of x) and z range. `trades` says which set of goods a trade puts on each kind of fitting, by the fitting's sign where it has one (\"*\" for any other); `*` is every trade's default. A `set` lists goods with weights and colours; `look` is the objects.json name they are looked at by (a good can carry its own). Goods carry no writing: labels are blank paper.",
+  "rooms": {
+    "home": {"trade": "home", "ceiling": "rafters"},
+    "hall": {"trade": "hall", "ceiling": "coffers"},
+    "lifestyle": {"trade": "lifestyle", "ceiling": "boards"},
+    "cafe": {"trade": "cafe", "ceiling": "rafters"},
+    "supermarket": {"trade": "supermarket", "ceiling": "boards"},
+    "lights": {"trade": "lights", "ceiling": "rafters", "hang": [["pendant", 6, "#f4dfae"]]},
+    "restaurant": {"trade": "restaurant", "ceiling": "rafters", "hang": [["garlic", 1], ["chilli", 1]]},
+    "homeware": {"trade": "homeware"},
+    "resale": {"trade": "resale", "ceiling": "rafters", "hang": [["birdcage", 1, "#a8834f"], ["basket", 1, "#a8834f"]], "wall": [{"kind": "wallshelf", "set": "curios"}]},
+    "bank": {"trade": "bank", "ceiling": "coffers"},
+    "bakery": {"trade": "bakery", "ceiling": "rafters", "hang": [["basket", 2, "#c8a66a"]], "wall": [{"kind": "wallshelf", "set": "bakery-shelf"}]},
+    "library": {"trade": "library", "ceiling": "rafters"},
+    "teahouse": {"trade": "teahouse", "ceiling": "rafters", "hang": [["basket", 2, "#b8955a"]], "wall": [{"kind": "wallshelf", "set": "tea-shelf"}]},
+    "post-office": {"trade": "post", "ceiling": "boards", "wall": [{"kind": "pigeonholes", "look": "pigeonholes"}]},
+    "pharmacy": {"trade": "pharmacy", "ceiling": "rafters", "hang": [["gourds", 2, "#c9a24a"], ["herbs", 2, "#8a8a52"]], "wall": [{"kind": "wallshelf", "set": "herb-jars"}]},
+    "guesthouse": {"trade": "guesthouse", "ceiling": "rafters"},
+    "clothes-shop": {"trade": "clothes", "ceiling": "boards"},
+    "study": {"trade": "study", "ceiling": "boards"},
+    "kitchen": {"trade": "kitchen", "ceiling": "rafters", "hang": [["garlic", 1], ["chilli", 1]], "wall": [{"kind": "wallshelf", "set": "pantry"}]},
+    "hardware": {"trade": "hardware", "ceiling": "panels"},
+    "reading": {"trade": "library", "ceiling": "boards"},
+    "studyroom": {"trade": "study", "ceiling": "boards"},
+    "listening": {"trade": "study", "ceiling": "boards"},
+    "courtyard": {"trade": "study"},
+    "metro-platform": {"trade": "plain"},
+    "city-bank": {"trade": "bank", "ceiling": "panels"},
+    "city-bookshop": {"trade": "bookshop", "ceiling": "panels"},
+    "city-hospital": {"trade": "hospital", "ceiling": "panels"},
+    "city-noodles": {"trade": "noodles", "ceiling": "boards", "hang": [["garlic", 1], ["chilli", 2]], "wall": [{"kind": "wallshelf", "set": "pantry"}]},
+    "city-cinema": {"trade": "cinema", "ceiling": "panels"},
+    "city-cinema-hall": {"trade": "cinema"},
+    "city-store": {"trade": "convenience", "ceiling": "panels"},
+    "city-cafe": {"trade": "cafe", "ceiling": "panels"},
+    "mall": {"trade": "mall-food", "zones": [
+      {"y": 0, "side": 1, "z": [-13, 0], "trade": "mall-phones"},
+      {"y": 0, "side": 1, "z": [0, 13], "trade": "mall-tea"},
+      {"y": 0, "side": -1, "trade": "hardware"},
+      {"y": 6, "side": 1, "trade": "mall-sports"},
+      {"y": 6, "side": -1, "trade": "clothes"},
+      {"y": 12, "side": 1, "trade": "mall-toys"},
+      {"y": 12, "side": -1, "trade": "mall-books"},
+      {"y": 18, "side": 1, "trade": "mall-food"},
+      {"y": 18, "side": -1, "trade": "mall-food"}
+    ]},
+    "yunhai-central": {"trade": "plain"},
+    "riverside-lobby": {"trade": "lobby", "ceiling": "panels"},
+    "riverside-apartment": {"trade": "home", "ceiling": "panels"},
+    "harbour-lift": {"trade": "plain"},
+    "harbour-cafe": {"trade": "cafe", "ceiling": "panels"},
+    "harbour-laundry": {"trade": "laundry", "ceiling": "panels", "wall": [{"kind": "wallshelf", "set": "daily-goods"}]},
+    "harbour-gym": {"trade": "plain", "ceiling": "panels", "wall": [{"kind": "wallshelf", "set": "linen-table"}]},
+    "harbour-one-bed": {"trade": "home", "ceiling": "panels"},
+    "harbour-garden": {"trade": "study", "ceiling": "boards"},
+    "harbour-pool": {"trade": "plain", "ceiling": "panels", "wall": [{"kind": "wallshelf", "set": "linen-table"}]},
+    "harbour-view": {"trade": "home", "ceiling": "panels"},
+    "harbour-penthouse": {"trade": "home", "ceiling": "boards"},
+    "harbour-restaurant": {"trade": "restaurant", "ceiling": "boards"}
+  },
+  "trades": {
+    "*": {
+      "bookcase": "books", "cupshelf": "cups", "shelfunit": "household", "displaytable": "household-table",
+      "readingdesk": "reading-desk", "carrel": "carrel", "kitchen": "kitchen-counter", "fridge": "drinks-fridge",
+      "clothesrail": "clothes", "hatshelf": "hats", "shoeshelf": "shoes", "medicineshelf": "medicines",
+      "herbcabinet": "herb-jars", "parcelshelf": "parcels", "cratewall": "curios", "teatable": "tea-snacks",
+      "reception": "reception-desk", "toolwall": "hardware-boxes", "lendingdesk": "lending", "teabar": "tea-tins",
+      "ovenbank": "steamers", "bakerycounter": "pastries", "cakecase": "cakes", "breadshelf": "breads"
+    },
+    "home": {"diningtable": "table-home", "fridge": "home-fridge"},
+    "kitchen": {"diningtable": "table-home"},
+    "study": {},
+    "hall": {"bookcase": "classics"},
+    "library": {"displaytable": "book-table"},
+    "bookshop": {"displaytable": "book-table", "checkout": "book-counter", "diningtable": "table-cafe"},
+    "bakery": {"displaytable": "bread-table", "cupshelf": "bakery-shelf"},
+    "cafe": {"cupshelf": "mugs", "diningtable": "table-cafe"},
+    "teahouse": {"cupshelf": "teaware", "shelfunit": "tea-shelf"},
+    "restaurant": {"diningtable": "table-restaurant", "shelfunit": "pantry"},
+    "noodles": {"diningtable": "table-noodles", "kitchen": "noodle-kitchen"},
+    "supermarket": {"shelfunit": {"零食": "snacks", "日用品": "daily-goods", "*": "groceries"}, "fridge": {"饮料": "drinks-fridge", "*": "dairy-fridge"}},
+    "convenience": {"shelfunit": "convenience", "checkout": "sweets-counter"},
+    "lifestyle": {"shelfunit": {"日用品": "daily-goods", "*": "lifestyle-shelf"}, "displaytable": "linen-table", "cupshelf": "mugs", "checkout": "gift-counter"},
+    "homeware": {"cupshelf": "teaware", "displaytable": "homeware-table"},
+    "lights": {"shelfunit": "bulb-shelf"},
+    "pharmacy": {"checkout": "pharmacy-counter"},
+    "hospital": {},
+    "clothes": {"checkout": "clothes-counter"},
+    "post": {"postcounter": "post-counter"},
+    "bank": {"bankcounter": "bank-counter"},
+    "guesthouse": {},
+    "resale": {"displaytable": "curios-table"},
+    "hardware": {"shelfunit": "hardware-shelf", "displaytable": "hardware-table"},
+    "laundry": {"diningtable": "laundry-table"},
+    "lobby": {"reception": "lobby-desk"},
+    "cinema": {},
+    "plain": {},
+    "mall-phones": {"displaytable": "phone-table", "shelfunit": "phone-shelf"},
+    "mall-tea": {"cupshelf": "mugs", "teabar": "tea-tins"},
+    "mall-sports": {"shoeshelf": "trainers", "clothesrail": "sportswear"},
+    "mall-toys": {"shelfunit": "toys", "displaytable": "toys-table"},
+    "mall-books": {"bookcase": "kids-books"},
+    "mall-food": {"diningtable": "table-food-court"}
+  },
+  "sets": {
+    "breads": {"look": "bread", "goods": [
+      {"good": "loaf", "weight": 3, "colours": ["#d49a5a", "#c98a4a", "#e0b070", "#b8783e"]},
+      {"good": "batard", "weight": 3, "colours": ["#d9a468", "#c8884a", "#e5b87f"]},
+      {"good": "baguettes", "weight": 1, "colours": ["#d9a468", "#e2b275"]},
+      {"good": "buns", "weight": 2, "colours": ["#e8c08a", "#d9a468"]}
+    ]},
+    "bread-table": {"look": "bread", "goods": [
+      {"good": "loaf", "weight": 2, "colours": ["#d49a5a", "#c98a4a", "#b8783e"]},
+      {"good": "batard", "weight": 2, "colours": ["#d9a468", "#c8884a"]},
+      {"good": "buns", "weight": 2, "colours": ["#e8c08a", "#d9a468"]},
+      {"good": "tarts", "weight": 1, "look": "eggtart", "colours": ["#f0c44c"]}
+    ]},
+    "pastries": {"look": "bread", "gap": 0.04, "goods": [
+      {"good": "buns", "weight": 2, "colours": ["#e8c08a", "#e2b67a"]},
+      {"good": "tarts", "weight": 2, "look": "eggtart", "colours": ["#f0c44c", "#ecb83e"]}
+    ]},
+    "cakes": {"look": "cake", "gap": 0.03, "goods": [
+      {"good": "cake", "colours": ["#f3e3c8", "#6b3f2a", "#e8a8b0", "#b9cf94", "#f1d9a0"]}
+    ]},
+    "steamers": {"look": "steamer", "goods": [
+      {"good": "steamers", "colours": ["#c8a66a"]},
+      {"good": "steamers", "colours": ["#b8955a"]}
+    ]},
+    "bakery-shelf": {"look": "jar", "goods": [
+      {"good": "tin", "weight": 2, "colours": ["#b8443a", "#c99a4a", "#5f8a86"]},
+      {"good": "jar", "weight": 2, "colours": ["#eceee9", "#c99a4a"], "band": true},
+      {"good": "box", "weight": 1, "look": "box", "colours": ["#efe7d2", "#e8c8a0"], "ribbon": "#b8443a"}
+    ]},
+    "cups": {"look": "cup", "goods": [
+      {"good": "cups", "weight": 2, "colours": ["#eceee9", "#c9dce0", "#efe7d2"]},
+      {"good": "bowls", "weight": 2, "look": "bowl", "colours": ["#eceee9", "#9db8a6", "#efe7d2"]},
+      {"good": "teapot", "weight": 1, "look": "teapot", "colours": ["#9b5a46", "#3d5a8a", "#9db8a6"]}
+    ]},
+    "mugs": {"look": "cup", "goods": [
+      {"good": "mug", "weight": 3, "colours": ["#efe7d2", "#c9dce0", "#d9a08a", "#9db8a6", "#3d5a8a"]},
+      {"good": "cups", "weight": 1, "colours": ["#eceee9"]},
+      {"good": "jar", "weight": 1, "look": "jar", "colours": ["#6b4a33", "#2f2a28"]}
+    ]},
+    "teaware": {"look": "teapot", "goods": [
+      {"good": "teapot", "weight": 3, "colours": ["#9b5a46", "#7a4632", "#3d5a8a", "#9db8a6"]},
+      {"good": "cups", "weight": 2, "look": "cup", "colours": ["#eceee9", "#9db8a6"]},
+      {"good": "bowls", "weight": 1, "look": "bowl", "colours": ["#eceee9", "#9db8a6"]},
+      {"good": "tin", "weight": 1, "look": "jar", "colours": ["#a5302a", "#3f6a5a"]}
+    ]},
+    "tea-shelf": {"look": "jar", "goods": [
+      {"good": "tin", "weight": 3, "colours": ["#a5302a", "#3f6a5a", "#c99a4a", "#2f2a28", "#5f8a86"]},
+      {"good": "teacakes", "weight": 2, "look": "goods", "colours": ["#efe3c6", "#e8dcc0"]},
+      {"good": "jar", "weight": 2, "colours": ["#6b4a33", "#9db8a6", "#eceee9"], "band": true, "labels": ["#b8443a", "#2f2a28"]}
+    ]},
+    "tea-tins": {"look": "jar", "goods": [
+      {"good": "tin", "colours": ["#5f7a5e", "#b45b52", "#c9a45f", "#7f6d55", "#4f6a72"]}
+    ]},
+    "tea-snacks": {"look": "cup", "goods": [
+      {"good": "tray", "colours": ["#6e4a32"]},
+      {"good": "bowls", "look": "bowl", "colours": ["#eceee9"]}
+    ]},
+    "household": {"look": "goods", "goods": [
+      {"good": "jar", "weight": 2, "look": "jar", "colours": ["#6b4a33", "#9db8a6", "#c99a4a", "#eceee9"], "labels": ["#b8443a", "#2f2a28"]},
+      {"good": "box", "weight": 2, "look": "box", "colours": ["#efe7d2", "#a5302a", "#5f8a86", "#c99a4a"]},
+      {"good": "bottle", "weight": 1, "colours": ["#5c7f6a", "#8a5a3a", "#3f5a6e"]},
+      {"good": "tin", "weight": 1, "look": "jar", "colours": ["#a5302a", "#5f8a86"]}
+    ]},
+    "household-table": {"look": "goods", "goods": [
+      {"good": "box", "weight": 2, "look": "box", "colours": ["#efe7d2", "#c99a4a", "#5f8a86"]},
+      {"good": "vase", "weight": 1, "look": "vase", "colours": ["#9db8a6", "#eceee9", "#3d5a8a"]},
+      {"good": "folded", "weight": 1, "look": "clothes", "colours": ["#e8dcc0", "#c9d6cf", "#d9b8a8"]}
+    ]},
+    "groceries": {"look": "goods", "goods": [
+      {"good": "sack", "weight": 2, "colours": ["#e8dcc0", "#efe7d2"]},
+      {"good": "packet", "weight": 2, "look": "noodles", "colours": ["#e8c86a", "#efe3c6"]},
+      {"good": "bottle", "weight": 2, "colours": ["#c9a13b", "#3b2418", "#6a1f1a"]},
+      {"good": "jar", "weight": 1, "look": "jar", "colours": ["#6b4a33", "#b8443a"], "labels": ["#efe3c6"]},
+      {"good": "can", "weight": 1, "colours": ["#b8443a", "#d9a03a"]}
+    ]},
+    "snacks": {"look": "goods", "goods": [
+      {"good": "packet", "weight": 4, "colours": ["#d9534a", "#e8a33a", "#4f86b8", "#5aa06a", "#9a6ab8", "#e8c86a"]},
+      {"good": "box", "weight": 2, "look": "box", "colours": ["#c0392b", "#e8a33a", "#4f86b8"]},
+      {"good": "can", "weight": 1, "colours": ["#b8443a", "#4f86b8"]}
+    ]},
+    "daily-goods": {"look": "goods", "goods": [
+      {"good": "bottle", "weight": 2, "colours": ["#4f86b8", "#8fc0c4", "#e8a8b0", "#f1f0ea"]},
+      {"good": "box", "weight": 2, "look": "box", "colours": ["#f1f0ea", "#c9dce0", "#e8dcc0"]},
+      {"good": "packet", "weight": 2, "colours": ["#8fc0c4", "#f1f0ea", "#c9d6cf"]}
+    ]},
+    "convenience": {"look": "goods", "goods": [
+      {"good": "packet", "weight": 3, "colours": ["#d9534a", "#e8a33a", "#4f86b8", "#5aa06a", "#e8c86a"]},
+      {"good": "bottle", "weight": 2, "colours": ["#8fc0c4", "#5aa06a", "#c9a13b"]},
+      {"good": "can", "weight": 2, "colours": ["#b8443a", "#4f86b8", "#e8a33a"]},
+      {"good": "box", "weight": 1, "look": "box", "colours": ["#f1f0ea", "#c0392b"]}
+    ]},
+    "drinks-fridge": {"look": "goods", "goods": [
+      {"good": "bottle", "weight": 3, "colours": ["#8fc0c4", "#5aa06a", "#c9a13b", "#d9534a", "#e8a33a"]},
+      {"good": "can", "weight": 2, "colours": ["#b8443a", "#4f86b8", "#e8a33a", "#5aa06a"]}
+    ]},
+    "dairy-fridge": {"look": "milk", "goods": [
+      {"good": "carton", "weight": 3, "colours": ["#f4f2ea", "#eef0f2"]},
+      {"good": "bottle", "weight": 1, "look": "goods", "colours": ["#f4f2ea", "#e8a8b0"]}
+    ]},
+    "home-fridge": {"look": "milk", "goods": [
+      {"good": "carton", "weight": 2, "colours": ["#f4f2ea"]},
+      {"good": "bottle", "weight": 2, "look": "goods", "colours": ["#8fc0c4", "#c9a13b"]},
+      {"good": "jar", "weight": 1, "look": "jar", "colours": ["#b8443a", "#eceee9"]}
+    ]},
+    "lifestyle-shelf": {"look": "goods", "goods": [
+      {"good": "folded", "weight": 2, "look": "clothes", "colours": ["#e8dcc0", "#c9d6cf", "#d9b8a8", "#b9c7d8"]},
+      {"good": "box", "weight": 2, "look": "box", "colours": ["#efe7d2", "#c9d6cf", "#e8c8a0"]},
+      {"good": "vase", "weight": 1, "look": "vase", "colours": ["#9db8a6", "#eceee9"]},
+      {"good": "mug", "weight": 1, "look": "cup", "colours": ["#efe7d2", "#c9dce0"]}
+    ]},
+    "linen-table": {"look": "clothes", "goods": [
+      {"good": "folded", "colours": ["#e8dcc0", "#c9d6cf", "#d9b8a8", "#b9c7d8", "#efe7d2"]}
+    ]},
+    "homeware-table": {"look": "goods", "goods": [
+      {"good": "folded", "weight": 2, "look": "clothes", "colours": ["#d9b8a8", "#c9d6cf", "#efe7d2"]},
+      {"good": "bowls", "weight": 1, "look": "bowl", "colours": ["#eceee9", "#9db8a6"]},
+      {"good": "vase", "weight": 1, "look": "vase", "colours": ["#9db8a6", "#3d5a8a"]}
+    ]},
+    "gift-counter": {"look": "box", "goods": [
+      {"good": "box", "colours": ["#a5302a"], "ribbon": "#d9b45a"}
+    ]},
+    "sweets-counter": {"look": "jar", "goods": [
+      {"good": "jar", "colours": ["#eceee9"], "labels": ["#d9534a"]}
+    ]},
+    "bulb-shelf": {"look": "goods", "lit": true, "goods": [
+      {"good": "bulbs", "weight": 3, "colours": ["#efe7d2", "#f4dfae", "#c9dce0"]},
+      {"good": "tablelamp", "weight": 1, "look": "lamp", "colours": ["#6e4a32", "#2f2a28", "#9db8a6"]}
+    ]},
+    "table-restaurant": {"look": "table", "goods": [
+      {"good": "chopsticks", "look": "chopstick-holder", "colours": ["#6e4a32"]},
+      {"good": "menucard", "look": "menu", "colours": ["#a5302a"]},
+      {"good": "sauces"}
+    ]},
+    "table-noodles": {"look": "table", "goods": [
+      {"good": "chopsticks", "look": "chopstick-holder", "colours": ["#c8a66a"]},
+      {"good": "sauces"},
+      {"good": "menucard", "look": "menu", "colours": ["#2f5f7a"]}
+    ]},
+    "table-cafe": {"look": "cup", "goods": [
+      {"good": "mug", "colours": ["#efe7d2"]},
+      {"good": "vase", "look": "vase", "colours": ["#9db8a6"]},
+      {"good": "menucard", "look": "menu", "colours": ["#6e4a32"]}
+    ]},
+    "table-home": {"look": "bowl", "goods": [
+      {"good": "bowls", "colours": ["#eceee9"]},
+      {"good": "chopsticks", "look": "chopstick-holder", "colours": ["#6e4a32"]}
+    ]},
+    "table-food-court": {"look": "table", "goods": [
+      {"good": "sauces"},
+      {"good": "chopsticks", "look": "chopstick-holder", "colours": ["#c8a66a"]}
+    ]},
+    "laundry-table": {"look": "clothes", "goods": [
+      {"good": "folded", "colours": ["#f1f0ea", "#c9dce0", "#e8dcc0"]},
+      {"good": "folded", "colours": ["#b9c7d8", "#f1f0ea"]}
+    ]},
+    "pantry": {"look": "jar", "goods": [
+      {"good": "jar", "weight": 3, "colours": ["#6b4a33", "#2f2a28", "#c99a4a"], "labels": ["#b8443a", "#efe3c6"]},
+      {"good": "bottle", "weight": 2, "look": "goods", "colours": ["#3b2418", "#6a1f1a", "#c9a13b"]},
+      {"good": "bowls", "weight": 1, "look": "bowl", "colours": ["#eceee9", "#efe7d2"]}
+    ]},
+    "kitchen-counter": {"look": "jar", "goods": [
+      {"good": "jar", "colours": ["#eceee9"], "labels": ["#b8443a"]},
+      {"good": "bowls", "look": "bowl", "colours": ["#eceee9"]},
+      {"good": "teapot", "look": "teapot", "colours": ["#9b5a46"]},
+      {"good": "sauces", "look": "goods"}
+    ]},
+    "noodle-kitchen": {"look": "bowl", "goods": [
+      {"good": "bowls", "colours": ["#eceee9"]},
+      {"good": "bowls", "colours": ["#efe7d2"]},
+      {"good": "sauces", "look": "goods"},
+      {"good": "jar", "look": "jar", "colours": ["#6b4a33"], "labels": ["#b8443a"]}
+    ]},
+    "books": {"look": "book", "gap": 0.006, "goods": [
+      {"good": "books", "weight": 5, "colours": ["#8a3b2e", "#3f5a6e", "#5c7f6a", "#c9a45f", "#6e4a32", "#2f2a28", "#b9a27a", "#7a5a8a"]},
+      {"good": "bookstack", "weight": 1, "colours": ["#8a3b2e", "#3f5a6e", "#c9a45f"]}
+    ]},
+    "classics": {"look": "book", "gap": 0.01, "goods": [
+      {"good": "threadbooks", "weight": 2, "colours": ["#3d4f6e", "#2f3a52", "#5a6a5a"]},
+      {"good": "books", "weight": 3, "colours": ["#6e3a2a", "#3d4f6e", "#b9a27a", "#5a4632"]},
+      {"good": "jar", "weight": 1, "look": "vase", "colours": ["#eceee9"], "band": true}
+    ]},
+    "kids-books": {"look": "book", "gap": 0.006, "goods": [
+      {"good": "books", "weight": 4, "height": 0.28, "colours": ["#e8a33a", "#4f86b8", "#d9534a", "#5aa06a", "#e8c86a"]},
+      {"good": "bear", "weight": 1, "look": "goods", "colours": ["#b8875a", "#e8c8a0"]}
+    ]},
+    "book-table": {"look": "book", "goods": [
+      {"good": "bookstack", "colours": ["#8a3b2e", "#3f5a6e", "#5c7f6a", "#c9a45f", "#efe7d2"]}
+    ]},
+    "book-counter": {"look": "book", "goods": [
+      {"good": "bookstack", "colours": ["#3f5a6e", "#c9a45f"]}
+    ]},
+    "lending": {"look": "book", "goods": [
+      {"good": "bookstack", "colours": ["#8a3b2e", "#3f5a6e", "#5c7f6a"]},
+      {"good": "books", "colours": ["#c9a45f", "#6e4a32", "#3f5a6e"]}
+    ]},
+    "reading-desk": {"look": "lamp", "lit": true, "goods": [
+      {"good": "tablelamp", "colours": ["#3f5a4e"], "shade": "#9dbf9a"},
+      {"good": "bookstack", "look": "book", "colours": ["#8a3b2e", "#3f5a6e", "#c9a45f"]}
+    ]},
+    "carrel": {"look": "book", "goods": [
+      {"good": "bookstack", "colours": ["#8a3b2e", "#3f5a6e", "#c9a45f", "#5c7f6a"]}
+    ]},
+    "clothes": {"look": "clothes", "goods": [
+      {"good": "shirt", "weight": 3, "colours": ["#8fa9b8", "#c4896f", "#9d92b5", "#b0a07a", "#efe7d2", "#5f7a8a", "#a8453a"]},
+      {"good": "dress", "weight": 1, "colours": ["#c9707f", "#7f9ab0", "#5c7f6a", "#e8c86a"]}
+    ]},
+    "sportswear": {"look": "clothes", "goods": [
+      {"good": "shirt", "colours": ["#3f7a4a", "#2f5f8f", "#d9534a", "#f1f0ea", "#e8a33a", "#2f2a28"]}
+    ]},
+    "hats": {"look": "hat", "goods": [
+      {"good": "hat", "colours": ["#deb975", "#c8a66a", "#5f7a8a", "#a8453a", "#2f2a28", "#efe7d2"]}
+    ]},
+    "shoes": {"look": "shoes", "goods": [
+      {"good": "shoes", "colours": ["#2f2a28", "#6e4a32", "#a8453a", "#3f5a6e", "#efe7d2", "#5c7f6a"]}
+    ]},
+    "trainers": {"look": "shoes", "goods": [
+      {"good": "shoes", "colours": ["#f1f0ea", "#d9534a", "#4f86b8", "#2f2a28", "#5aa06a"]}
+    ]},
+    "clothes-counter": {"look": "clothes", "goods": [
+      {"good": "folded", "colours": ["#c9d6cf", "#e8dcc0", "#d9b8a8"]}
+    ]},
+    "medicines": {"look": "goods", "goods": [
+      {"good": "medbox", "weight": 4, "colours": ["#4f86b8", "#5aa06a", "#d9534a", "#e8a33a", "#9a6ab8", "#3f8a7e"]},
+      {"good": "pills", "weight": 2, "colours": ["#4f86b8", "#d9534a", "#5aa06a", "#e8c86a"]},
+      {"good": "bottle", "weight": 1, "colours": ["#7a4a2a", "#3f5a6e"]}
+    ]},
+    "herb-jars": {"look": "jar", "goods": [
+      {"good": "jar", "weight": 3, "colours": ["#eceee9", "#9db8a6", "#6b4a33"], "band": true, "labels": ["#b8443a"]},
+      {"good": "box", "weight": 1, "look": "box", "colours": ["#c99a4a", "#6e4a32"]}
+    ]},
+    "pharmacy-counter": {"look": "goods", "goods": [
+      {"good": "scale", "look": "scales", "colours": ["#6e4a32"]}
+    ]},
+    "parcels": {"look": "parcel", "goods": [
+      {"good": "parcel", "weight": 4, "colours": ["#c9a77a", "#b88f5e", "#d8bf95", "#a8875a"]},
+      {"good": "envelopes", "weight": 1, "look": "paper", "colours": ["#d8bf95", "#e8dcc0"]}
+    ]},
+    "post-counter": {"look": "paper", "goods": [
+      {"good": "envelopes", "colours": ["#d8bf95"]},
+      {"good": "parcel", "look": "parcel", "colours": ["#c9a77a"]},
+      {"good": "ledger", "look": "notebook", "colours": ["#2f5f4a"]}
+    ]},
+    "bank-counter": {"look": "notebook", "goods": [
+      {"good": "ledger", "colours": ["#3f4f6e"]},
+      {"good": "bell", "look": "goods"}
+    ]},
+    "reception-desk": {"look": "notebook", "goods": [
+      {"good": "ledger", "colours": ["#8a3b2e"]},
+      {"good": "brushpot", "look": "brush-pot", "colours": ["#eceee9"]},
+      {"good": "bell", "look": "goods"}
+    ]},
+    "lobby-desk": {"look": "goods", "goods": [
+      {"good": "vase", "look": "vase", "colours": ["#eceee9"]},
+      {"good": "bell"}
+    ]},
+    "curios": {"look": "goods", "goods": [
+      {"good": "curios", "weight": 3, "colours": ["#6e4a32", "#8a5a3a", "#5c6f6a", "#9b5a46"]},
+      {"good": "jar", "weight": 1, "look": "jar", "colours": ["#9db8a6", "#6b4a33"]},
+      {"good": "books", "weight": 1, "look": "book", "colours": ["#8a3b2e", "#5a4632", "#b9a27a"]}
+    ]},
+    "curios-table": {"look": "goods", "goods": [
+      {"good": "curios", "weight": 3, "colours": ["#6e4a32", "#8a5a3a", "#5c6f6a"]},
+      {"good": "vase", "weight": 1, "look": "vase", "colours": ["#9db8a6", "#3d5a8a"]}
+    ]},
+    "hardware-boxes": {"look": "goods", "goods": [
+      {"good": "painttin", "weight": 2, "colours": ["#d9534a", "#4f86b8", "#e8c86a", "#5aa06a", "#f1f0ea"]},
+      {"good": "box", "weight": 2, "look": "box", "colours": ["#c9a77a", "#82918c", "#d9a03a"]}
+    ]},
+    "hardware-shelf": {"look": "goods", "goods": [
+      {"good": "painttin", "weight": 3, "colours": ["#d9534a", "#4f86b8", "#e8c86a", "#5aa06a", "#f1f0ea"]},
+      {"good": "box", "weight": 2, "look": "box", "colours": ["#c9a77a", "#82918c", "#d9a03a"]},
+      {"good": "bottle", "weight": 1, "colours": ["#3f5a6e", "#c9a13b"]}
+    ]},
+    "hardware-table": {"look": "goods", "goods": [
+      {"good": "box", "weight": 2, "look": "box", "colours": ["#c9a77a", "#d9a03a"]},
+      {"good": "painttin", "weight": 1, "colours": ["#d9534a", "#4f86b8"]}
+    ]},
+    "phone-table": {"look": "goods", "goods": [
+      {"good": "phone", "colours": ["#2f3a52", "#5a6a7a", "#c9a45f", "#d9534a"]}
+    ]},
+    "phone-shelf": {"look": "goods", "goods": [
+      {"good": "phone", "weight": 2, "colours": ["#2f3a52", "#5a6a7a", "#c9a45f"]},
+      {"good": "box", "weight": 1, "look": "box", "colours": ["#f1f0ea", "#2f3a52"]}
+    ]},
+    "toys": {"look": "goods", "goods": [
+      {"good": "bear", "weight": 2, "colours": ["#b8875a", "#e8c8a0", "#c9707f"]},
+      {"good": "ball", "weight": 2, "colours": ["#d9534a", "#4f86b8", "#e8c86a", "#5aa06a"]},
+      {"good": "blocks", "weight": 2, "colours": ["#d9534a", "#4f86b8", "#e8c86a", "#5aa06a"]},
+      {"good": "box", "weight": 1, "look": "box", "colours": ["#e8a33a", "#4f86b8"]}
+    ]},
+    "toys-table": {"look": "goods", "goods": [
+      {"good": "blocks", "weight": 2, "colours": ["#d9534a", "#4f86b8", "#e8c86a", "#5aa06a"]},
+      {"good": "bear", "weight": 1, "colours": ["#b8875a", "#e8c8a0"]},
+      {"good": "ball", "weight": 1, "colours": ["#d9534a", "#4f86b8"]}
+    ]}
+  }
+}

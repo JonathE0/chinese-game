@@ -31,7 +31,7 @@ test('the three daytime stalls are already standing at their spots by mid-mornin
   expect(spots).toEqual([
     {id:'wonton',state:'open',x:-11.5,z:1.2},
     {id:'noodlestall',state:'open',x:-11.5,z:4},
-    {id:'breakfast',state:'open',x:-19.2,z:6.9},
+    {id:'breakfast',state:'open',x:-11.5,z:6.8},
   ]);
   expect(errors).toEqual([]);
 });

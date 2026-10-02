@@ -1,0 +1,37 @@
+{
+  "id": "fishing-wang-show",
+  "npc": "wang",
+  "title": "跟王爷爷学钓鱼",
+  "pinyin": "Gēn Wáng yéye xué diàoyú",
+  "en": "Showing Grandpa Wang your first fish",
+  "target": "saying what you caught with a measure word (一条鱼)",
+  "curriculumStatus": "Beginner prototype; HSK level mapping and native-speaker review pending",
+  "nodes": [
+    {
+      "id": "see",
+      "zh": "钓到了吗？给我看看。",
+      "pinyin": "Diàodào le ma? Gěi wǒ kànkan.",
+      "en": "Did you catch one? Let me see.",
+      "speaker": "wang",
+      "prompt": {"zh": "说你钓到了一条鱼。", "pinyin": "Shuō nǐ diàodào le yì tiáo yú.", "en": "Say you caught a fish."},
+      "intent": "variants",
+      "accepted": ["我钓到了一条鱼", "我钓到鱼了", "钓到了一条鱼", "我钓到了", "钓到了"],
+      "model": "我钓到了一条鱼。",
+      "choices": ["我钓到了一条鱼。"],
+      "audio": "fishing-wang-see"
+    },
+    {
+      "id": "carp",
+      "zh": "不错！这是一条鲤鱼。今天晚上可以做红烧鱼。",
+      "pinyin": "Búcuò! Zhè shì yì tiáo lǐyú. Jīntiān wǎnshang kěyǐ zuò hóngshāo yú.",
+      "en": "Not bad! That's a carp. You could make braised fish tonight.",
+      "speaker": "wang",
+      "prompt": {"zh": "说谢谢。", "pinyin": "Shuō xièxie.", "en": "Say thank you."},
+      "intent": "variants",
+      "accepted": ["谢谢王爷爷", "谢谢", "谢谢您", "太好了谢谢"],
+      "model": "谢谢王爷爷！",
+      "choices": ["谢谢王爷爷！"],
+      "audio": "fishing-wang-carp"
+    }
+  ]
+}

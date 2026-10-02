@@ -65,10 +65,13 @@ export class Sky {
   /** Every frame, after the camera is placed and before the look is worked out. */
   update(){
     const t=this.town,d=t.daylight,state=d.state,reg=t.registry;
-    const outdoors=t.place==='town'||!!t.rooms.get(t.place)?.data.outdoor;
+    // Up 云海中心 the windows look out on the city (src/world/views.js): the sky is hung round that
+    // view's camera instead, thousands of metres from the room, so only the window shows it.
+    const view=t.views?.tower&&t.views.camera.camera.enabled?t.views.camera:null;
+    const outdoors=t.place==='town'||!!t.rooms.get(t.place)?.data.outdoor||!!view;
     if(this.root.enabled!==outdoors)this.root.enabled=outdoors;
     if(!outdoors||!state)return;
-    const eye=t.camera.getPosition(),far=t.camera.camera.farClip*NEAR_FAR;
+    const eye=(view??t.camera).getPosition(),far=(view??t.camera).camera.farClip*NEAR_FAR;
     this.root.setPosition(eye);
     // The look boxes follow you from place to place (only a whole place's looks are ever cleared
     // without an owner, and only as the rooms are first registered).

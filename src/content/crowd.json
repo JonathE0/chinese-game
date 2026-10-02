@@ -1,11 +1,10 @@
 {
-  "note": "People walking around 云海 (src/world/crowd.js). `count` people in `colors` walk between spots on the flat ground inside `areas` ([x0, z0, x1, z1], city-local metres from the master layout: downtown and the promenade), wherever the collision registry leaves room, joined to the metro spawn. They stop, sit on anything the city marks as a bench (`seatHeight`), and look out over the bay from anywhere north of `bay.z`, facing `bay.yaw`. Ground the city marks as `keepOff` (a road) is left alone except where it is also marked `crossAt`. Looking at one names them (objects.json `pedestrian`); E has them say `lines[n]`, voiced as its audio id in its speaker's cast voice by scripts/generate-voice.py.",
-  "count": 32,
-  "areas": [[-28, -34, 28, 34], [-40, -48, 70, -34]],
+  "note": "People walking around 云海 (src/world/crowd.js): `count` of Yunhai's people (people.json mix `mix`, children among them) walk between spots on the flat ground inside `areas` ([x0, z0, x1, z1], city-local metres from the master layout: downtown and its boulevard, the promenade, 美食街, the ground round the station, 中心广场 and the business district, the way from there to the promenade, and 城市公园), wherever the collision registry leaves room, joined to the metro spawn. They stop, sit on anything the city marks as a bench (`seatHeight`), and look out over the bay from anywhere north of `bay.z`, facing `bay.yaw`. Looking at one names them (objects.json `pedestrian`); E has them say `lines[n]`, voiced as its audio id in its speaker's cast voice by scripts/generate-voice.py.",
+  "count": 40,
+  "mix": "city-crowd",
+  "areas": [[-28, -34, 28, 34], [-40, -48, 70, -34], [-98, 34, -24, 52], [-42, 34, 70, 66], [24, -15, 70, 40], [59, -34, 70, -15], [-42, 62, 70, 112]],
   "seatHeight": 0.5,
   "bay": {"z": -45.5, "yaw": 180},
-  "keepOff": "road",
-  "crossAt": "crossing",
   "colors": ["#4a5a6b", "#b0654f", "#6f8fb0", "#c9855f", "#5f7d6a", "#8a6fa3", "#d0a24f", "#3f4f5f"],
   "lines": [
     {"speaker": "friend-b", "audio": "crowd-1", "zh": "今天天气真好！", "pinyin": "Jīntiān tiānqì zhēn hǎo!", "en": "Lovely weather today!"},

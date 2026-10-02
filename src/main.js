@@ -27,6 +27,8 @@ import {syncSave,keepUnreadable} from './services/filesync.js';
 import {openHsk} from './ui/hsk.js';
 import {openDecorate,installPlacement,applyStarterHome} from './ui/decorate.js';
 import {openHallVisitor} from './ui/hall-visitors.js';
+import {openLinCard,openMetroCheck,showMetroLocked,refreshUnlock,AMBIENT_HINTS,townHint} from './ui/unlock.js';
+import {metroPanel} from './core/unlock.js';
 import ambient from './content/ambient.json' with {type:'json'};
 import objectNames from './content/objects.json' with {type:'json'};
 import rooms from './content/rooms.json' with {type:'json'};
@@ -41,11 +43,9 @@ import {openGuide} from './ui/guide.js';
 import {openSleep,openClosed} from './ui/rest.js';
 import {openLibrary} from './ui/library.js';
 import {openKitchen} from './ui/kitchen.js';
-import {openRental,installRental} from './ui/rental.js';
-import {rentalAccess} from './core/rental.js';
-import {openMetro,rideHome,installTransit} from './ui/metro.js';
+import {openRental,installRental,rentalDoor} from './ui/rental.js';
+import {openMetro,installTransit,leaveStation} from './ui/metro.js';
 import {openCityTalk} from './ui/citytalk.js';
-import {openTaxi} from './ui/taxi.js';
 import {openNoodles} from './ui/noodles.js';
 import {tickCooking,recipeById} from './core/cooking.js';
 import {openSite} from './ui/build.js';
@@ -67,10 +67,12 @@ import {openFestival} from './ui/festivals.js';
 import {openPostcard} from './ui/postcard.js';
 import {friends,pinned,noteVisit} from './core/friends.js';
 import {openHotpot,settleHotpot} from './ui/hotpot.js';
+import {fieldsAction} from './ui/fields.js';
 import {openCrowd} from './ui/crowd.js';
 import {openHarbour} from './ui/harbour.js';
 import {openMall} from './ui/mall.js';
 import {setQuality} from './core/quality.js';
+import {setScript} from './services/script.js';
 
 const loaded=loadProfile(localStorage);
 // holdSync keeps the folder copy untouched until the start-up check below has compared it.
@@ -132,7 +134,9 @@ function interact(id){
  const person=['lin','mei','chen','friend-a','friend-b'].includes(id)?id:/^(city|staff):/.test(id)?id.replace(/^(city|staff):/,''):null;
  if(person)ctx.tutorial.event('talk',{id:person});
  if(id==='zhou')return openRootsCaretaker(ctx);
- if(id==='lin'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,'lin',()=>openDialogue(ctx,npcs.find(n=>n.id==='lin').lesson));}
+ // 王爷爷, 刘奶奶, the pier and the plot out in the countryside (src/ui/fields.js).
+ if(fieldsAction(ctx,id))return;
+ if(id==='lin'){bump(ctx.profile,'talks');if(openLinCard(ctx))return;return openNpcGreeting(ctx,'lin',()=>openDialogue(ctx,npcs.find(n=>n.id==='lin').lesson));}
  if(id==='mei'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,ctx.profile.completed.includes('practice:first')?'mei':'mei-first',()=>openPractice(ctx));}
  if(id==='chen'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,'chen',()=>openShop(ctx,'chen'));}
  if(id==='friend-a'||id==='friend-b'){bump(ctx.profile,'talks');return openNpcGreeting(ctx,id);}
@@ -157,11 +161,12 @@ function interact(id){
  if(id==='postbox')return openPostcard(ctx);
  if(id==='sleep')return openSleep(ctx);
  if(id==='cook')return openKitchen(ctx);
- if(id==='rental')return openRental(ctx);
- if(id==='metro')return openMetro(ctx);
- if(id==='metro:home')return rideHome(ctx);
+ if(id==='rental'||id.startsWith('rental:'))return openRental(ctx,id.slice(7));
+ // Until the town is done and Grandpa's card is active, the attendant turns you back at Qinghe's
+ // gates; the card machines always let you top up (src/core/unlock.js metroPanel).
+ if(id==='metro'||id==='metro:machine')return metroPanel(id,ctx.profile,ctx.town.transit.get(ctx.town.place)?.station)==='card'?openMetro(ctx):showMetroLocked(ctx);
+ if(id==='metro:service')return openMetroCheck(ctx);
  if(id.startsWith('city:')){const who=id.slice(5);bump(ctx.profile,'talks');return openNpcGreeting(ctx,who,()=>openCityTalk(ctx,who));}
- if(id.startsWith('taxi:'))return openTaxi(ctx);
  if(id==='noodles')return openNoodles(ctx);
  if(id==='decorate')return openDecorate(ctx);
  if(id==='studydesk')return openWordBank(ctx,{venue:'desk'});
@@ -229,9 +234,9 @@ function showGate(id){
  ctx.ui.update();
 }
 function enterPlace(id){
- if(!rentalAccess(ctx.profile,id))return openRental(ctx);
+ if(rentalDoor(ctx,id))return;   // 海景公寓: a flat needs its lease, and a floor's way out is the lift
  if(id==='city')ctx.town.ensureCity();
- if(ctx.profile.metro?.journey?.phase==='reserved'&&ctx.town.rooms.get(ctx.town.place)?.data.transit){delete ctx.profile.metro.journey;ctx.save();}
+ leaveStation(ctx);   // walking out of a station without travelling lets go of the fare held there
  if(id==='home'){applyRootsEvent(ctx.profile,{type:'house'});ctx.save();}
  if(id==='town')ctx.town.leaveRoom();
  else{
@@ -309,8 +314,9 @@ try{
  // 画质, before the town is built (src/core/quality.js). The browser tests (vite --mode e2e) run on 高
  // unless their save picks a level: they count what one level builds, on whatever machine runs them.
  setQuality(ctx.profile.settings.quality??(import.meta.env.MODE==='e2e'?'high':undefined));
+ setScript(ctx.profile.settings.script,ctx);   // 繁體字: the converter loads on its own and redraws what is already up
  ctx.town=new Town(document.querySelector('#world'),{onInteract:interact,onNear:target=>ctx.ui.nearby(target),
-  onLook:name=>ctx.ui.nameplate(name,{known:!!name&&knowsLook(ctx.profile,name)}),
+  onLook:name=>{ctx.ui.nameplate(name,{known:!!name&&knowsLook(ctx.profile,name)});if(name&&!name.sign)ctx.tutorial.trigger('look-object');},
   onCollect:name=>collect(name),onFrame:town=>{
   const pos=town.player.entity.getPosition(),outside=town.place==='town';
   ctx.music.setPlace(town.place);
@@ -345,7 +351,7 @@ try{
   const bubble=document.querySelector('#ambient-bubble'),[ax,az]=spots[spot];const s=town.screen(ax,2.5,az),now=performance.now()/1000;
   const eligible=started&&outside&&!ctx.ui.panelId&&Math.hypot(pos.x-ax,pos.z-az)<13&&s.z>0&&s.x>-120&&s.x<innerWidth+120;
   let ambientLine=null;
-  spots.forEach((_,i)=>{const line=(ambientConversations[i]??=new AmbientConversations(ambient)).update(now,eligible&&i===spot);if(i===spot)ambientLine=line;});
+  spots.forEach((_,i)=>{const line=(ambientConversations[i]??=new AmbientConversations([...ambient,...AMBIENT_HINTS])).update(now,eligible&&i===spot);if(i===spot)ambientLine=townHint(ctx,line);});
   if(ambientLine){bubble.querySelector('span').textContent=ambientLine.zh;ambientShownUntil=now+6;ctx.voice.play(ambientLine.audio,{ambient:true});}
   const visible=eligible&&now<ambientShownUntil;
   bubble.hidden=!visible;
@@ -394,7 +400,7 @@ try{
   ctx.cookClock=town.clock;
   town.speedScale=speedFactor(ctx.profile);
   const crosshair=document.querySelector('#crosshair'),hint=document.querySelector('#look-hint');
-  const playing=started&&!ctx.ui.panelId;crosshair.hidden=!playing;hint.hidden=!(playing&&!town.locked()&&matchMedia('(pointer:fine)').matches);
+  const playing=started&&!ctx.ui.panelId;crosshair.hidden=!playing;hint.hidden=!(playing&&(town.mouseMode==='lock'?!town.locked():!town.dragged)&&matchMedia('(pointer:fine)').matches);
   ctx.tutorial.frame(town,started);
   festivalFrame(ctx,town);
  }});
@@ -408,6 +414,7 @@ try{
   if(ctx.ui.panelId||speaking)ctx.voice.duck(true);
  };
  ctx.town.sensitivity=ctx.profile.settings.sensitivity??0.12;
+ ctx.town.setMouseMode(ctx.profile.settings.mouse);
  // 水面倒影 (the bay's mirror, src/world/bay.js): the player's choice, else off on touch and otherwise
  // left to the graphics level (undefined: src/core/quality.js RENDER[level].reflections).
  ctx.town.reflections=typeof ctx.profile.settings.reflections==='boolean'?ctx.profile.settings.reflections:matchMedia('(pointer: coarse)').matches?false:undefined;
@@ -418,6 +425,8 @@ try{
  installCamera(ctx);
  installBusinesses(ctx,()=>cloudSync(ctx,{asked:true}));
  if(import.meta.env.DEV&&ADMIN)import('./services/test-businesses.js').then(({installTestBusinesses})=>installTestBusinesses(ctx));
+ // Frame rate, CPU and GPU time, draw calls, triangles, 画质 and pixel ratio, for play-testers (src/ui/perf.js).
+ if(import.meta.env.DEV&&ADMIN)import('./ui/perf.js').then(({installPerf})=>installPerf(ctx.town));
  installPlacement(ctx);
  ctx.town.daylight.setHour(ctx.profile.clock??15);
  // Place the day stalls at the real saved hour, before the first frame — not the constructor's
@@ -441,20 +450,22 @@ loadWords().then(list=>{
    if(w[key]!==undefined)saved[key]=w[key];else delete saved[key];
   }
  }
- refreshGates();
+ refreshGates();refreshUnlock(ctx);ctx.ui.update();
 }).catch(()=>ctx.ui.notice('HSK 词表暂时无法载入，区域暂不开放。 / Word list unavailable; districts stay closed.'));
-const saveProfileAndGates=ctx.save;ctx.save=()=>{saveProfileAndGates();refreshGates();refreshShops();refreshRootsWorld(ctx);};
+const saveProfileAndGates=ctx.save;ctx.save=()=>{saveProfileAndGates();refreshGates();refreshShops();refreshRootsWorld(ctx);refreshUnlock(ctx);};
 refreshShops();
 // Anything already built is standing when the town loads.
 if(ctx.town)for(const site of builtSites(ctx.profile))ctx.town.revealSite(site.id);
 // A postcard 陈叔叔 has received stays pinned up on his shop.
 if(ctx.town)for(const [npc,person] of Object.entries(friends.people))if(person.pin&&pinned(ctx.profile,npc))ctx.town.pinPostcard(person.pin);
 document.querySelector('#start-button').onclick=()=>{started=true;document.querySelector('#arrival').hidden=true;document.body.classList.add('playing');ctx.town.setPaused(false);ctx.music.start();settleHotpot(ctx);if(loaded.warning||loaded.notice)ctx.ui.notice([loaded.warning,loaded.notice].filter(Boolean).join(' '));
- // A brand-new traveller is walked through the basics; a save already mid-way picks up where it was.
+ // A brand-new traveller gets the tips (src/ui/tutorial.js) as they play, after the one short Roots welcome;
+ // a save already partway through them picks up where it was.
  const welcome=!ctx.profile.roots?.started&&shouldAutoStart(ctx.profile);
  showRootsOpening(ctx);
  ctx.tutorial.started=true;
- if(welcome)openRootsWelcome(ctx,()=>ctx.tutorial.start());else if(shouldAutoStart(ctx.profile))ctx.tutorial.start();else ctx.tutorial.sync();
+ if(shouldAutoStart(ctx.profile))ctx.tutorial.start();else ctx.tutorial.begin();
+ if(welcome)openRootsWelcome(ctx);
  // A connected folder with more progress than this browser's save is offered before anything overwrites it.
  // The cloud is checked after that, against whichever save the player kept.
  if(!ADMIN)offerFolderRestore(ctx).then(offered=>{if(!offered){ctx.holdSync=false;cloudSync(ctx);}},()=>{ctx.holdSync=false;cloudSync(ctx);});
@@ -475,7 +486,7 @@ addEventListener('keydown',e=>{
 const shortcuts=[['journal',openJournal],['inventory',openInventory],['wordbank',openWordBank],['status',openStatus],['settings',openSettings]];
 addEventListener('keydown',e=>{
  const choice=shortcuts.find(([action])=>isKey(e,action));
- // Nothing opens behind a fade (a taxi ride, a night's sleep): the veil holds all input until it lifts.
+ // Nothing opens behind a fade (a night's sleep): the veil holds all input until it lifts.
  if(!choice||document.querySelector('.fade-veil')||!shortcutAllowed(e,{started,panelId:ctx.ui.panelId,placing:!!ctx.town.ghost,
    reviewing:!!document.querySelector('#panel .drill-prompt')})||isTyping(document.activeElement))return;
  e.preventDefault();

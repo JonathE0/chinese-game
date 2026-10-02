@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 import {readFileSync} from 'node:fs';
 
 const SAVE_KEY='little-mandarin-town.v1';
@@ -30,18 +31,14 @@ async function seed(page,profile){
 }
 async function start(page){
   await page.goto('/');
-  await page.getByRole('button',{name:'开始旅行'}).click();
+  await startGame(page);
   await page.waitForTimeout(300);
   await page.mouse.click(700,500);          // take the pointer so the world has focus
 }
-/** Click to put down the piece in hand. Once the world has the pointer, Playwright's jump to the
- *  click point reads as a mouse turn and the piece would go wherever the view drifted, so
- *  mouse-look is off. The first click takes the pointer back (or, if closing the panel already
- *  has, puts the piece down); the second waits until the world has the pointer. */
+/** Click to put down the piece in hand. The mouse never locks in the default mode, so a click that
+ *  stays put is all it takes; mouse-look is off so the piece goes where the view already points. */
 async function clickToPlace(page){
   await page.evaluate(()=>{window.__qinghe.town.sensitivity=0;});
-  await page.mouse.click(700,520);
-  await expect.poll(()=>page.evaluate(()=>!!document.pointerLockElement)).toBe(true);
   await page.mouse.click(700,520);
 }
 /** Walk ahead until the prompt offers `label`: a fixed hold covers less ground when frames come
@@ -70,10 +67,10 @@ test('looking at something names it in Chinese, and F remembers it',async({page}
   expect(saved.discovered).toEqual(['fountain']);
   expect(saved.saved.map(w=>w.zh)).toContain('喷泉');
 
-  // Different things have different names: turn round and look up at the welcome sign, whose
-  // board hangs high enough to walk under.
-  await warp(page,0,7,180);
-  await page.evaluate(()=>{window.__qinghe.town.pitch=9;});
+  // Different things have different names: look up at the welcome board under the town gate's
+  // plaque (garden.json gate, z 64.8), which hangs high enough to walk under.
+  await warp(page,.8,61,180);
+  await page.evaluate(()=>{window.__qinghe.town.pitch=Math.atan2(3.46-1.62,3.8)*180/Math.PI;});
   await expect.poll(()=>plate(page),{timeout:6000}).toContain('欢迎来到青禾');
   expect(errors).toEqual([]);
 });
@@ -153,7 +150,7 @@ test('a bed you own can be placed at home, and a bad spot says so instead of can
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await seed(page,{inventory:{'wooden-bed':1,bookshelf:1},completed:['home:tutorial','home:starter']});
   await start(page);
-  await warp(page,11,7.8,180);            // on the square, facing the front door
+  await warp(page,16,56.6,0);             // by the park gate, a few steps out from the front door and facing it
   await walkUntil(page,'回家');
   await page.keyboard.press('e');
   await expect(page.locator('.location b')).toHaveText('我的家');

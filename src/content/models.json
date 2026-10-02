@@ -1,0 +1,16 @@
+{
+  "materials": {
+    "wood": {"surface": "wood"},
+    "bamboo": {"surface": "wood"},
+    "cloth": {"surface": "cloth"},
+    "silk": {"surface": "cloth", "glow": "#c8402f"},
+    "ceramic": {"gloss": 0.62}
+  },
+  "models": {
+    "jars": {"file": "jars.glb", "places": []},
+    "steamer": {"file": "steamer.glb", "places": []},
+    "lantern": {"file": "lantern.glb", "places": []},
+    "teaset": {"file": "teaset.glb", "places": []},
+    "lattice-window": {"file": "lattice-window.glb", "places": []}
+  }
+}

@@ -14,13 +14,16 @@ const totalClip=n=>`market-total-${n}`;
 const NO_FUNDS='<div class="feedback gentle">学习币不够。再练习一下，或者看看便宜一点的物品。</div>';
 
 // Vendor lines play one after another. A newer sequence, or the panel closing, ends an older one.
+// Resolves true when every line was heard (or had no clip), false when it was cut short, so a caller
+// waiting on a line (the metro ride) can tell a line that finished from one a Replay took over.
 let sequence=0;
 export async function say(ctx,el,entries){
   const run=++sequence,panel=el.closest?.('#panel');
+  const current=()=>run===sequence&&el.isConnected&&!panel?.hidden;
   for(const entry of entries){
     const [id,slow]=[].concat(entry);
     // Closing a panel only hides it, so its content stays connected: a hidden panel ends it too.
-    if(run!==sequence||!el.isConnected||panel?.hidden)return;
+    if(!current())return false;
     if(!ctx.voice.available(id))continue;
     // Wait for the clip to finish, fail to load, or be refused (play() settles with the audio still paused).
     const started=ctx.voice.play(id,{slow:!!slow}),audio=ctx.voice.foreground;
@@ -29,6 +32,7 @@ export async function say(ctx,el,entries){
       started.then(()=>{if(audio.paused)done();});
     });
   }
+  return current();
 }
 
 /**

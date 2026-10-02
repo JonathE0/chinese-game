@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 
 // The 打卡 camera (2026-09-27-development-wave-3.md, Task M-camera).
 const SAVE_KEY='little-mandarin-town.v1';
@@ -8,10 +9,13 @@ const photoCount=page=>page.evaluate(()=>new Promise(resolve=>{
   open.onsuccess=()=>{const get=open.result.transaction('kv').objectStore('kv').get('photos');get.onsuccess=()=>{resolve(get.result?.length??0);open.result.close();};};
 }));
 
-async function arrive(page){
+// A traveller with the Qinghe album photos done and a secondhand camera with film, so their own camera comes up.
+const ALBUM=['roots-fruit','roots-square','roots-home'];
+async function arrive(page,save={}){
   await page.addInitScript(([key,value])=>{if(!localStorage.getItem(key))localStorage.setItem(key,value);},[SAVE_KEY,JSON.stringify({
-    version:1,wallet:0,inventory:{},equipped:{},claims:{},words:{},completed:['home:tutorial','home:starter'],phrases:[],saved:[],home:[],discovered:[],
-    settings:{pinyin:true,english:true,dialogueVolume:0.9,ambientVolume:0.35,musicVolume:0},playerName:'旅人',
+    version:1,wallet:0,inventory:{'secondhand-camera':1,film:6},equipped:{},claims:{},words:{},completed:['home:tutorial','home:starter'],phrases:[],saved:[],home:[],discovered:[],
+    roots:{started:true,discovered:ALBUM,photos:ALBUM},
+    settings:{pinyin:true,english:true,dialogueVolume:0.9,ambientVolume:0.35,musicVolume:0},playerName:'旅人',...save,
   })]);
   await page.goto('/');
   await page.getByRole('button',{name:'开始旅行'}).click();
@@ -33,7 +37,12 @@ test('hold right to frame the fountain, click left to photograph it; the spot pa
   await page.mouse.down({button:'right'});
   await expect(page.locator('#viewfinder')).toBeVisible();
   await expect(page.locator('#viewfinder .vf-name')).toContainText('喷泉');
-  expect(await page.evaluate(()=>window.__qinghe.town.camera.camera.fov)).toBeLessThan(fov/2);
+  await expect(page.locator('#viewfinder .vf-which')).toHaveText('我的相机 · 胶卷 6');
+  // A gentle zoom to start with; the wheel (or a two-finger scroll) zooms further in.
+  const gentle=await page.evaluate(()=>window.__qinghe.town.camera.camera.fov);
+  expect(gentle).toBeLessThan(fov);expect(gentle).toBeGreaterThan(fov/2);
+  await page.mouse.wheel(0,-500);
+  await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.camera.camera.fov)).toBeLessThan(fov/2);
 
   await page.mouse.down({button:'left'});   // a chord: arrives as a pointermove
   await page.mouse.up({button:'left'});
@@ -41,6 +50,9 @@ test('hold right to frame the fountain, click left to photograph it; the spot pa
   await expect.poll(()=>page.evaluate(()=>window.__qinghe.profile.wallet)).toBe(5);
   expect(await page.evaluate(()=>window.__qinghe.profile.claims['checkin:fountain'])).toBe(true);
   await expect(page.locator('#toast')).toContainText('打卡成功！');
+  // One film a photo, and the first check-in with your own camera finishes the my-camera mission.
+  expect(await page.evaluate(()=>window.__qinghe.profile.inventory.film)).toBe(5);
+  expect(await page.evaluate(()=>window.__qinghe.profile.completed)).toContain('camera:first');
 
   await page.keyboard.press('Enter');   // a second shot of the same spot pays nothing
   await expect.poll(()=>photoCount(page),{timeout:4000}).toBe(2);
@@ -167,4 +179,113 @@ test('a photo that cannot be drawn says so, and the next one still works; deleti
   await expect(album.locator('.album-photo')).toHaveCount(0);
   await expect(album.locator('h3')).toBeFocused();
   expect(errors.filter(e=>!e.includes('tainted'))).toEqual([]);
+});
+
+// Two cameras, adjustable zoom, keyboard/trackpad/touch controls (2026-09-30-development-wave-4.md, W4-camera).
+const shots='.claude/checkpoints/W4-camera';
+test('Grandpa’s camera takes the friends-in-the-square photo at the default zoom after walking there; your own takes the check-in',async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  // A new traveller (the Roots opening gives Grandpa's camera) who has bought a secondhand camera and some film.
+  await page.addInitScript(([key,value])=>{if(!localStorage.getItem(key))localStorage.setItem(key,value);},[SAVE_KEY,JSON.stringify({
+    version:1,wallet:0,inventory:{'secondhand-camera':1,film:3},equipped:{},claims:{},words:{},completed:['home:tutorial','home:starter'],phrases:[],saved:[],home:[],discovered:[],
+    settings:{pinyin:true,english:true,dialogueVolume:0.9,ambientVolume:0.35,musicVolume:0},playerName:'旅人',
+  })]);
+  await page.goto('/');
+  await startGame(page);
+  await page.waitForFunction(()=>!!window.__qinghe?.town&&!window.__qinghe.town.paused);
+  expect(await page.evaluate(()=>window.__qinghe.profile.inventory['grandpa-camera'])).toBe(1);
+  expect(await page.evaluate(()=>window.__qinghe.profile.inventory.film)).toBe(3);
+
+  // Walk east across the south of the square (clear of Uncle Zhou's customers), then turn to face the fountain with the arrow keys.
+  await page.evaluate(()=>{const t=window.__qinghe.town;t.daylight.setHour(11);t.warp(-7.5,9.5,-90);});
+  await page.keyboard.down('w');
+  await page.waitForFunction(()=>window.__qinghe.town.player.entity.getPosition().x>=-.3,null,{timeout:10000});
+  await page.keyboard.up('w');
+  const where=()=>page.evaluate(()=>{const t=window.__qinghe.town,p=t.player.entity.getPosition();return {x:p.x,z:p.z,yaw:t.yaw};});
+  await page.waitForTimeout(300);   // let the walk settle
+  const before=await where();
+  await page.keyboard.down('ArrowLeft');await page.waitForTimeout(1000);await page.keyboard.up('ArrowLeft');
+  const after=await where();
+  expect(after.yaw-before.yaw).toBeGreaterThan(50);   // the arrows turn the view…
+  expect(Math.hypot(after.x-before.x,after.z-before.z)).toBeLessThan(.3);   // …and no longer walk
+
+  // At the album spot, with that photo still sought, the camera key brings up Grandpa's camera, ready at the default zoom.
+  await page.keyboard.press('c');
+  const finder=page.locator('#viewfinder');
+  await expect(finder.locator('.vf-which')).toHaveText('爷爷的相机');
+  await expect(finder.locator('.vf-zoom output')).toHaveText('1.5×');
+  await expect(finder.locator('.vf-name')).toContainText('Ready to capture');
+  await page.screenshot({path:shots+'/viewfinder-grandpa.png'});
+  await page.mouse.click(700,400);   // a single click on the view takes it (a trackpad tap is the same)
+  await expect.poll(()=>page.evaluate(()=>window.__qinghe.profile.roots.photos)).toContain('roots-square');
+  await expect(page.locator('#toast')).toContainText('Memory captured');
+  expect(await page.evaluate(()=>window.__qinghe.profile.inventory.film)).toBe(3);   // Grandpa's camera uses no film
+
+  // Switch to your own: the name, the film left, and the zoom from the keys and the slider.
+  await page.keyboard.press('b');
+  await expect(finder.locator('.vf-which')).toHaveText('我的相机 · 胶卷 3');
+  await page.evaluate(()=>{const t=window.__qinghe.town;t.yaw=0;t.pitch=-3;});
+  await expect(finder.locator('.vf-name')).toContainText('喷泉');
+  const fov=()=>page.evaluate(()=>window.__qinghe.town.camera.camera.fov);
+  const wide=await fov();
+  await page.keyboard.press('Equal');await page.keyboard.press('Equal');
+  await expect(finder.locator('.vf-zoom output')).toHaveText('2.3×');
+  expect(await fov()).toBeLessThan(wide);
+  await page.keyboard.press('Minus');
+  await expect(finder.locator('.vf-zoom output')).toHaveText('1.9×');
+  await finder.locator('.vf-zoom input').fill('3');
+  await expect(finder.locator('.vf-zoom output')).toHaveText('3.0×');
+  const sens=await page.evaluate(()=>({now:window.__qinghe.town.sensitivity,set:window.__qinghe.profile.settings.sensitivity??.12}));
+  expect(sens.now).toBeCloseTo(sens.set/3,4);   // the aim steadies with the zoom
+  // A click on the slider that does not move it still hands the keys back (the shutter below needs them).
+  await finder.locator('.vf-zoom input').fill('4');
+  const slider=await finder.locator('.vf-zoom input').boundingBox();
+  await page.mouse.click(slider.x+slider.width-2,slider.y+slider.height/2);
+  expect(await page.evaluate(()=>document.activeElement?.type)).not.toBe('range');
+  await page.screenshot({path:shots+'/viewfinder-mine.png'});
+  await page.keyboard.press('Space');   // the shutter while the camera is up, not a jump
+  await expect.poll(()=>photoCount(page),{timeout:4000}).toBe(1);
+  expect(await page.evaluate(()=>window.__qinghe.profile.inventory.film)).toBe(2);
+  expect(await page.evaluate(()=>window.__qinghe.profile.completed)).toContain('camera:first');
+  await expect(finder.locator('.vf-which')).toHaveText('我的相机 · 胶卷 2');
+
+  // Esc puts it down; the album page now holds the photo beside Grandpa's.
+  await page.keyboard.press('Escape');
+  await expect(finder).toBeHidden();
+  await page.evaluate(async()=>{const {openRootsAlbum}=await import('/src/ui/roots.js');openRootsAlbum(window.__qinghe);});
+  const card=page.locator('[data-memory="roots-square"]');
+  await expect(card).toContainText('Now — your photo');
+  await card.scrollIntoViewIfNeeded();
+  await card.screenshot({path:shots+'/square-photo.png'});
+  expect(errors).toEqual([]);
+});
+
+test('the resale shop sells the secondhand camera once',async({page})=>{
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await arrive(page,{wallet:50,inventory:{},completed:['home:tutorial','home:starter','purchase:first']});
+  await page.evaluate(async()=>{const {openResale}=await import('/src/ui/money.js');openResale(window.__qinghe);});
+  const card=page.locator('[data-buy="secondhand-camera"]');
+  await expect(card).toContainText('二手相机');await expect(card).toContainText('40');
+  await page.screenshot({path:shots+'/resale-shop.png'});
+  await card.click();
+  await page.locator('#confirm-purchase').click();
+  expect(await page.evaluate(()=>window.__qinghe.profile.inventory['secondhand-camera'])).toBe(1);
+  expect(await page.evaluate(()=>window.__qinghe.profile.wallet)).toBe(10);
+  await expect(card).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test.describe('on a touch screen',()=>{
+  test.use({hasTouch:true});
+  test('the camera button raises it and a tap on the view takes the photo',async({page})=>{
+    const errors=[];page.on('pageerror',e=>errors.push(e.message));
+    await arrive(page);
+    await page.evaluate(()=>{const t=window.__qinghe.town;t.daylight.setHour(12);t.warp(0,9,0);t.pitch=-4;});
+    await page.touchscreen.tap(900,300);   // the first touch brings up the touch controls
+    await page.locator('.touch-pad [data-action="camera"]').tap();
+    await expect(page.locator('#viewfinder')).toBeVisible();
+    await page.touchscreen.tap(900,300);
+    await expect.poll(()=>photoCount(page),{timeout:4000}).toBe(1);
+    expect(errors).toEqual([]);
+  });
 });

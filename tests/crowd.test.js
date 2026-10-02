@@ -4,6 +4,7 @@ import {Registry} from '../src/world/registry.js';
 import {buildCrowd} from '../src/world/crowd.js';
 import {CITY_OFFSET} from '../src/world/city.js';
 import crowd from '../src/content/crowd.json' with {type:'json'};
+import {RENDER,detail} from '../src/core/quality.js';
 
 const BODY_SPACE=.85;   // crowd.js BODY+SPACE: the closest two walkers ever come
 // A stand-in 云海: a 56 x 68 street with a block of towers down each side, benches, and one of the
@@ -20,7 +21,7 @@ function fakeCity({extra=[],player={x:0,z:24.5}}={}){
   const town={registry,lookingBox:null,app:{batcher:{addGroup:()=>({id:7})}},
     rooms:new Map([['city',{data:{size:[56,68],spawn:[0,24.5]},people:[{x:-4,z:0}]}]]),
     withinPlace:(place,x,z,edge)=>Math.abs(x-CITY_OFFSET)<=28-edge&&Math.abs(z)<=34-edge,
-    m:{person:()=>({entity:node(),legs:[node(),node()],arms:[node(),node()],eyes:[]})},
+    m:{person:()=>({entity:node(),legs:[node(),node()],arms:[node(),node()],eyes:[],seatDrop:.52,sit(){},stand(){}})},
     player:{entity:{getPosition:()=>at}}};
   return {town,registry,at,part:buildCrowd(town,node())};
 }
@@ -29,7 +30,8 @@ const upright=part=>part.people.filter(p=>p.mode!=='sit');
 test('people in 云海 walk about, keep out of everything solid and out of each other',()=>{
   const {registry,part}=fakeCity();
   const people=part.people;
-  assert.equal(people.length,crowd.count);
+  // As many as the graphics level in force builds (自动 starts on 中, which has three in four).
+  assert.equal(people.length,Math.round(crowd.count*RENDER[detail()].crowd));
   assert.ok(crowd.count>=24&&crowd.count<=40,'24 to 40 people');
   const start=people.map(p=>({x:p.x,z:p.z}));
   let sat=0;
@@ -54,19 +56,6 @@ test('walkers keep clear of the tourist standing among them, and nobody heads fo
   for(let step=0;step<2400;step++){
     part.update(.05,false);
     for(const p of upright(part))assert.ok(Math.hypot(p.x,p.z+20)>1.2,`walked into the tourist at ${p.x},${p.z}`);
-  }
-});
-
-test('walkers keep off a marked road except at its crossing',()=>{
-  const road={x:0,z:-4,hw:10,hd:2,y0:-.2,y1:.02,solid:false,name:{id:crowd.keepOff}};
-  const crossing={x:3,z:-4,hw:1.5,hd:2.2,y0:-.2,y1:.03,solid:false,name:{id:crowd.crossAt}};
-  const {part}=fakeCity({extra:[road,crossing]});
-  const onRoad=(x,z,inset)=>Math.abs(x)<10-inset&&Math.abs(z+4)<2-inset&&!(Math.abs(x-3)<1.5+inset);
-  assert.ok(!part.goals.some(c=>onRoad(c.x,c.z,0)),'a goal on the road');
-  assert.ok(part.goals.some(c=>Math.abs(c.x-3)<1.5&&Math.abs(c.z+4)<1),'the crossing is walkable');
-  for(let step=0;step<2400;step++){
-    part.update(.05,false);
-    for(const p of upright(part))assert.ok(!onRoad(p.x,p.z,.4),`walking down the road at ${p.x},${p.z}`);
   }
 });
 

@@ -4,6 +4,7 @@ import signTexts from '../content/signs.json' with {type:'json'};
 import objectNames from '../content/objects.json' with {type:'json'};
 import {MINUTES_PER_DAY} from './daylight.js';
 import {reflect} from './bay.js';
+import {zh,scripted} from '../services/script.js';
 
 /**
  * The drone show over the bay (task L-drones, docs/superpowers/plans/2026-09-26-development-wave-2.md).
@@ -95,8 +96,8 @@ function rasterise(formation,count,accent){
   const canvas=document.createElement('canvas'),g=canvas.getContext('2d',{willReadFrequently:true});
   if(formation.text){
     // `wrap`: at most that many characters to a line, so a long phrase stands in two big lines.
-    const lines=[],wrap=formation.wrap??formation.text.length;
-    for(let i=0;i<formation.text.length;i+=wrap)lines.push(formation.text.slice(i,i+wrap));
+    const text=zh(formation.text),lines=[],wrap=formation.wrap??text.length;   // 繁體字 when that is on
+    for(let i=0;i<text.length;i+=wrap)lines.push(text.slice(i,i+wrap));
     g.font=FONT;
     const w=Math.ceil(Math.max(...lines.map(line=>g.measureText(line).width)))+16,h=128*lines.length;
     canvas.width=w;canvas.height=h;
@@ -140,14 +141,17 @@ export function buildDrones(town,root){
   const origin=root.getPosition().clone();
   const [cx,cy,cz]=SHOW.centre,[bw,bh]=SHOW.size;
   // Every formation, and the barge, as city-local positions: main drones first, then accent.
-  const shapes=SHOW.formations.map(formation=>{
-    const [main,extra,w,h]=rasterise(formation,count,accent),scale=Math.min(bw/w,bh/h),out=new Float32Array(count*3);
+  const place=(formation,out=new Float32Array(count*3))=>{
+    const [main,extra,w,h]=rasterise(formation,count,accent),scale=Math.min(bw/w,bh/h);
     [...main,...extra].forEach((v,i)=>{
       const k=(i>>1)*3;
       if(i%2===0)out[k]=cx+(v-w/2)*scale;else{out[k+1]=cy+(h/2-v)*scale;out[k+2]=cz;}
     });
     return out;
-  });
+  };
+  const shapes=SHOW.formations.map(formation=>place(formation));
+  // 繁體字 on or off: the words are sampled again, in place (the city is built once and kept).
+  scripted(()=>SHOW.formations.forEach((formation,i)=>{if(formation.text)place(formation,shapes[i]);}));
   const side=Math.ceil(Math.sqrt(count)),grid=[];
   for(let i=0;i<count;i++)grid.push([SHOW.pad.centre[0]+(i%side-(side-1)/2)*SHOW.pad.spacing,SHOW.pad.centre[2]+(Math.floor(i/side)-(side-1)/2)*SHOW.pad.spacing]);
   grid.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
@@ -208,8 +212,10 @@ export function buildDrones(town,root){
         if(last!==null){last=null;entity.enabled=false;setLook(null);}
         return;
       }
-      if((last===null||last>t)&&t<SHOW.launch)town.onAnnounce?.(SHOW.lines.start);
-      if(last!==null&&last<landing&&t>=landing)town.onAnnounce?.(SHOW.lines[SHOW.times[which].end]);
+      // The loudspeakers are out in the street: a tower's window (src/world/rental.js) shows the show, silently.
+      const heard=town.place==='city';
+      if(heard&&(last===null||last>t)&&t<SHOW.launch)town.onAnnounce?.(SHOW.lines.start);
+      if(heard&&last!==null&&last<landing&&t>=landing)town.onAnnounce?.(SHOW.lines[SHOW.times[which].end]);
       last=t;entity.enabled=true;clock+=dt;
       stepAt(steps,t,step);
       const from=step.from<0?pad:shapes[step.from],to=step.to<0?pad:shapes[step.to];

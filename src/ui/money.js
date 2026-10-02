@@ -8,6 +8,7 @@ import {LOANS,loanById,totalDue,takeLoan,repay,debtOf,
   PERMITS,permitById,permitTotal,holdsPermit,permitPlan,buyPermit} from '../core/finance.js';
 import {calendarOf} from '../core/calendar.js';
 import {sellable,sell,offerFor} from '../core/resale.js';
+import {purchase} from '../core/economy.js';
 import {buildRapport,vendorState,moodNote} from '../core/vendor.js';
 import {outfit} from '../core/inventory.js';
 
@@ -180,12 +181,17 @@ export function openResale(ctx){
 function renderResale(ctx,body){
   const p=ctx.profile,vendor=vendorState(p,'resale');
   const rows=sellable(p);
+  // What 老周 sells as well as buys (catalog shop 'resale'): each piece once, until you own one.
+  const stock=catalog.filter(item=>[].concat(item.shop??[]).includes('resale')&&!(p.inventory[item.id]>0));
   body.innerHTML=`${languageLine(OLD_ZHOU,p.settings,{className:'shop-greeting'})}
     <div class="vendor-mood mood-${vendor.key}">
       <span class="mood-face" aria-hidden="true">${vendor.face}</span>
       <div><b>老周 ${vendor.zh}</b>${languageLine(moodNote(vendor),p.settings,{className:'mood-note'})}</div>
       <div class="rapport" title="熟悉程度"><span>熟</span><span class="rapport-bar"><i style="width:${Math.round(vendor.rapport/40*100)}%"></i></span></div>
     </div>
+    ${stock.length?`<p class="microcopy">二手出售 · For sale, second-hand</p><div class="shop-grid resale-stock">${stock.map(item=>`
+      <button class="shop-card" data-buy="${esc(item.id)}">${itemArt(item.visual)}<b>${esc(item.zh)}</b>
+        <span>${icon('coin',15)} ${item.price}</span><small>${esc(item.description)}</small></button>`).join('')}</div>`:''}
     <p class="panel-intro">他今天给的价钱，明天就不一样了。讲价买来的东西，运气好的时候能卖得比你付的还多。<br>
       Today's offers are rerolled tomorrow. Something you haggled hard for can, on a good day, sell for more than you paid.</p>
     <div class="shop-grid">${rows.length?rows.map(({item,offer,spare})=>`
@@ -195,6 +201,22 @@ function renderResale(ctx,body){
       :'<p class="microcopy">背包里没有可以卖的东西。房间里摆着的家具要先收起来。<br>Nothing spare to sell — furniture standing in your room has to be put away first.</p>'}</div>
     <div id="sell-confirm"></div>
     <p class="microcopy">卖掉的东西不会退回来。房间里正在用的家具不会出现在这里。</p>`;
+
+  body.querySelectorAll('[data-buy]').forEach(button=>button.onclick=()=>{
+    const item=catalog.find(i=>i.id===button.dataset.buy),confirm=body.querySelector('#sell-confirm');
+    if(ctx.profile.wallet<item.price){confirm.innerHTML='<div class="feedback gentle">学习币不够。再练习一下，或者看看便宜一点的物品。</div>';return;}
+    confirm.innerHTML=`<div class="purchase-confirm"><h3>确认购买？</h3><p>${esc(item.zh)} × 1</p>
+      <dl><div><dt>价格</dt><dd>${item.price} 学习币</dd></div><div><dt>购买后剩余</dt><dd>${ctx.profile.wallet-item.price} 学习币</dd></div></dl>
+      <button class="primary" id="confirm-purchase">确认购买</button><button class="secondary" id="cancel-purchase">取消</button></div>`;
+    confirm.querySelector('#cancel-purchase').onclick=()=>confirm.innerHTML='';
+    confirm.querySelector('#confirm-purchase').onclick=()=>{
+      if(!purchase(ctx.profile,item,item.price).ok)return ctx.ui.notice('暂时无法购买，请检查余额。');
+      buildRapport(ctx.profile,'resale',1);
+      ctx.music?.cue('purchase');ctx.save();
+      ctx.ui.notice(`${item.zh} · ${item.en}: in your bag.`);
+      renderResale(ctx,body);
+    };
+  });
 
   body.querySelectorAll('[data-sell]').forEach(button=>button.onclick=()=>{
     const item=catalog.find(i=>i.id===button.dataset.sell);

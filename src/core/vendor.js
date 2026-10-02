@@ -14,6 +14,7 @@ const MOODS=[
 ];
 import {impression} from './stats.js';
 import {isOverdue} from './finance.js';
+import {folded} from './language.js';
 
 const POLITE=/请|谢谢|您|麻烦|好吗|可以吗|拜托/;
 const clamp01=v=>Math.max(0,Math.min(1,v));
@@ -52,7 +53,7 @@ export function buildRapport(profile,shopId,amount){
   return record.rapport;
 }
 
-export const wasPolite=text=>POLITE.test(String(text??''));
+export const wasPolite=text=>POLITE.test(folded(text??''));
 
 export function moodNote(vendor){
   if(vendor.key==='sour')return {zh:'他今天心情不太好，别太用力砍价。',pinyin:'Tā jīntiān xīnqíng bú tài hǎo.',en:'They are in a poor mood today — push too hard and the price may go up.'};

@@ -35,7 +35,7 @@ test('naming the kitchen sink records where it was met, and 去找找 pins that 
   await seen.getByRole('button',{name:'去找找'}).click();
   await expect(page.locator('#panel')).toBeHidden();
   const route=await page.evaluate(()=>window.__qinghe.ui.route);
-  expect(route).toMatchObject({key:'kitchen',district:'square',x:11,z:10.7});
+  expect(route).toMatchObject({key:'kitchen',district:'garden',x:16,z:53.7});
   // Back outside, the minimap draws the pin on the house door.
   await page.evaluate(()=>window.__qinghe.town.leaveRoom?.());
   await expect(page.locator('#map-route circle').first()).toBeAttached();

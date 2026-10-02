@@ -1,4 +1,9 @@
-export const normalize = value => String(value).normalize('NFKC').toLowerCase().replace(/[\s，。！？、,.!?：:；;“”"'「」]/g,'');
+// With 繁體字 on (settings.script, src/services/script.js), typed traditional is folded back to the
+// simplified every answer is written in before anything is compared.
+let fold=null;
+export const setFold = fn => { fold=fn; };
+export const folded = value => { const text=String(value).normalize('NFKC'); return fold?fold(text):text; };
+export const normalize = value => folded(value).toLowerCase().replace(/[\s，。！？、,.!?：:；;“”"'「」]/g,'');
 
 export function matchAnswer(text,node) {
   const value = normalize(text);
@@ -38,7 +43,7 @@ function chineseNumber(s) {
   return s.length===1 ? digits[s] : undefined;
 }
 export function parseOffer(text) {
-  const value=String(text).normalize('NFKC');
+  const value=folded(text);
   if (/[-−.]|还是|或者|或/.test(value)) return null;
   const parts=value.match(/[0-9]+|[零一二两三四五六七八九十百千万]+/g);
   if (!parts || parts.length!==1) return null;

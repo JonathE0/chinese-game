@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 import {readFileSync} from 'node:fs';
 
 // The post office, pharmacy, guesthouse and clothes shop: walk in through the front door, then
@@ -8,8 +9,12 @@ const WORLD=JSON.parse(readFileSync('src/content/world.json','utf8'));
 const COUNTERS=['postcounter','checkout','reception'];
 // Where to turn on the way to the counter, where a straight line would clip the furniture.
 const LEGS={'post-office':[],pharmacy:[],guesthouse:[[-.3,-1.2]],'clothes-shop':[[0,-1],[2.4,-1]]};
-// The guesthouse faces north onto the lane behind 家居小铺, so you come in along the lane.
-const APPROACH={guesthouse:[[-14.5,7.4],[-17.5,8.2]]};
+// And on the way back out: the guesthouse's way to the door is the gap between a chair (x -.7) and
+// a tea table (x 1.15). Head for a point short of it; W carries you on to its mouth, then out.
+const BACK={guesthouse:[[-.6,-1.2]]};
+// A bench stands on the pavement in front of 青禾邮局, so you come along the frontage from the
+// postbox side. (The guesthouse, turned round to face north, takes the default from the north.)
+const APPROACH={'post-office':[[-32.5,7.3],[-29.5,7.0]]};
 
 /** Hold W and steer at (x,z) in the current place until there, or until something stops you. */
 async function walkTo(page,x,z,offset=0){
@@ -33,7 +38,7 @@ async function walkTo(page,x,z,offset=0){
 for(const [id,data] of Object.entries(ROOMS).filter(([id])=>id in LEGS)){
   test(`walk into ${data.zh} from the street and up to its counter`,async({page})=>{
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
-    await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+    await page.goto('/');await startGame(page);
     await page.waitForFunction(()=>!!window.__qinghe?.town);
     // A few steps out from the front, facing the door: south of it, or north for a building turned round.
     const face=(WORLD.buildings.find(b=>b.id===data.building).rotation??0)===180?-1:1;
@@ -59,6 +64,7 @@ for(const [id,data] of Object.entries(ROOMS).filter(([id])=>id in LEGS)){
     expect(at.z-(counter.z+hd)).toBeGreaterThan(0);
     expect(at.z-(counter.z+hd)).toBeLessThan(.8);
     // And back out onto the street, somewhere you can walk on from.
+    for(const [x,z] of BACK[id]??[])await walkTo(page,x,z,offset);
     await walkTo(page,data.exit[0],data.exit[1],offset);
     await expect(page.locator('#interact span')).toHaveText('出去');
     await page.keyboard.press('e');

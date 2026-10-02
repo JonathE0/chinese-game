@@ -30,9 +30,12 @@ async function walkTo(page,x,z,limit=9000){
 }
 const at=page=>page.evaluate(()=>{const t=window.__qinghe.town,p=t.player.entity.getPosition();return {x:p.x,y:p.y,z:p.z,place:t.place};});
 
-test('from the spawn, through the paifang and up the stairs into 词语馆',async({page})=>{
+test('from the spawn, through the park, the paifang and up the stairs into 词语馆',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await start(page);
+  // In at the town gate: up the park's avenue, over the bridges and the pavilion island, and
+  // through the moon gate onto the square.
+  for(const [x,z] of [[.5,44],[0,42.2],[0,25],[0,16]])expect(await walkTo(page,x,z),`to ${x},${z}`).toBeLessThan(.6);
   expect(await walkTo(page,3.2,2.6)).toBeLessThan(.6);
   expect(await walkTo(page,0,-9)).toBeLessThan(.6);
   expect(await walkTo(page,0,-12.5)).toBeLessThan(.6);        // through the paifang
@@ -77,6 +80,7 @@ test('the complex names its parts, stays in budget, and is photographed from the
 
 test('河边文化街 is found by walking west from the fountain, and its restaurant door opens',async({page})=>{
   await start(page);
+  await page.evaluate(()=>window.__qinghe.town.warp(0,8,0));   // by the fountain (you arrive in the park)
   // Due west from the fountain, into the lane between 青禾银行 and 家居小铺.
   for(const [x,z] of [[-9.5,5],[-9.7,0],[-11,-0.3],[-12.6,-1.85],[-19.5,-1.85]])
     expect(await walkTo(page,x,z),`to ${x},${z}`).toBeLessThan(.6);
@@ -97,7 +101,7 @@ test('河边文化街 is found by walking west from the fountain, and its restau
   const where=await page.evaluate(()=>{const t=window.__qinghe.town,p=t.player.entity.getPosition();return t.districtAt(p.x,p.z).id;});
   expect(where).toBe('riverside');
   // 家常餐厅 moved west with the quarter, door and all.
-  await page.evaluate(()=>window.__qinghe.town.warp(-51,6,0));
+  await page.evaluate(()=>window.__qinghe.town.warp(-52.1,6,0));
   await expect(page.locator('#interact span')).toHaveText('进餐厅');
   await page.keyboard.press('e');
   await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.place)).toBe('restaurant');

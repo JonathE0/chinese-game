@@ -24,3 +24,8 @@ skills-lock.json
 
 # Disposable local database binaries and test clusters
 .superpowers/**/dbtest/
+
+# Codex scratch, the 41 MB metro reference photo and the Blender previews stay local.
+.superpowers/
+/docs/references/metro/underground-platform-wide.png
+scripts/blender/previews/

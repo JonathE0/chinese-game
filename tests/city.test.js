@@ -1,58 +1,42 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {frontOfTower} from '../src/core/city.js';
 import city from '../src/content/city.json' with {type:'json'};
-import taxi from '../src/content/lessons/city-taxi.json' with {type:'json'};
 
-/** Where the taxi goes: the avenue's towers the city-taxi lesson names. */
-const destinations=new Set(JSON.stringify(taxi).match(/"value": ?"([^"]+)"/g).map(v=>v.split('"').at(-2)));
-
-test('frontOfTower is at 星光百货\'s door, as the city lists it',()=>{
-  const starlight=city.towers.find(t=>t.sign==='星光百货'),door=city.doors.find(d=>d.room==='mall');
-  const front=frontOfTower(starlight);
-  assert.ok(Math.hypot(front.x-door.x,front.z-door.z)<1.5,`${front.x},${front.z} is not at the door`);
-});
-test('frontOfTower sits just outside a tower\'s own hitbox, on whichever side it sits on',()=>{
-  const bookstore=city.towers.find(t=>t.sign==='一号书店');
-  assert.deepEqual(frontOfTower(bookstore),{x:-11,z:-16});
-  // A tower on the east side of the avenue gets a spot pulled back toward the kerb, not further out.
-  const hospital=city.towers.find(t=>t.sign==='中山医院');
-  const spot=frontOfTower(hospital);
-  assert.ok(spot.x<hospital.x);
-  assert.equal(spot.z,hospital.z);
-});
-test('the taxi drop-off stands clear of the tower\'s hitbox and of every solid street prop',async()=>{
-  const {dropOffAtTower}=await import('../src/core/city.js');
-  const PLAYER_RADIUS=.34;
-  const avenue=city.towers.filter(t=>destinations.has(t.sign));
-  assert.equal(avenue.length,6);
-  for(const tower of avenue){
-    const spot=dropOffAtTower(tower);
-    assert.equal(spot.z,tower.z);
-    // The tower's box reaches d/2 + 0.3 from its centre; the player must not overlap it.
-    assert.ok(Math.abs(spot.x-tower.x)-(tower.d/2+.3)>PLAYER_RADIUS,`${tower.sign} drop-off is inside the tower`);
-    // Same side of the avenue as frontOfTower.
-    assert.equal(Math.sign(spot.x-tower.x),Math.sign(frontOfTower(tower).x-tower.x));
-    for(const prop of city.props.filter(p=>p.kind!=='citycrossing'))
-      assert.ok(Math.hypot(prop.x-spot.x,prop.z-spot.z)>1.5,`${tower.sign} drop-off is on top of a ${prop.kind}`);
-  }
-  // 一号书店 (x -17.5, d 12): a metre clear of the facade, not half a metre.
-  assert.deepEqual(dropOffAtTower(city.towers.find(t=>t.sign==='一号书店')),{x:-10.5,z:-16});
-});
-
-test('云海 ground: downtown, the promenade and the hill side are walkable; the bay and past the edges are not',async()=>{
+test('云海 ground: downtown, the promenade, the hill side and the districts round the station are walkable; the bay and past the edges are not',async()=>{
   const {onCityGround}=await import('../src/core/city.js');
   const walk=city.place.walk,edge=.42;
-  // The avenue, the plaza on the promenade, both ends of the promenade, and the ground up to the hill.
-  for(const [x,z] of [[0,0],[0,24.5],[0,-41],[-38,-41],[68,-40],[-34,8],[-60,-40]])
+  // The boulevard, the plaza on the promenade, both ends of the promenade, the ground up to the hill,
+  // 站前广场, 美食街, 中心广场, the way from it to the promenade, 城市公园 and the business district.
+  for(const [x,z] of [[0,0],[0,24.5],[0,-41],[-38,-41],[68,-40],[-34,8],[-60,-40],[0,31],[-60,47],[40,5],[64,-25],[10,75],[60,60]])
     assert.equal(onCityGround(walk,x,z,edge),true,`(${x},${z}) should be walkable`);
-  // Past the railing into the bay, behind the promenade's east end, off the east and south edges.
-  for(const [x,z] of [[0,-48.5],[40,-20],[28.5,0],[0,34.5],[71,-40],[-121,0]])
+  // Past the railing into the bay, in front of 海风大厦, past the east, south and west edges, behind the mall.
+  for(const [x,z] of [[0,-48.5],[45,-31],[71,-40],[75,0],[0,113],[-100,45],[-50,85],[-121,0]])
     assert.equal(onCityGround(walk,x,z,edge),false,`(${x},${z}) should be off the ground`);
-  // Where two stretches of ground meet there is no seam: the avenue runs straight on into the plaza,
-  // and the promenade's west end runs on to the foot of the hill.
+  // Where two stretches of ground meet there is no seam: the boulevard runs on into the promenade's
+  // plaza, the promenade's west end to the foot of the hill, 站前广场 round the station into the park,
+  // 美食街 into 站前广场's side, and downtown's back lane into 中心广场.
   for(let z=-30;z>=-47;z-=.1)assert.equal(onCityGround(walk,0,z,edge),true,`seam at z ${z.toFixed(1)}`);
   for(let x=-30;x>=-45;x-=.1)assert.equal(onCityGround(walk,x,-41,edge),true,`seam at x ${x.toFixed(1)}`);
+  for(let z=20;z<=110;z+=.1)assert.equal(onCityGround(walk,-36,z,edge),true,`seam west of the station at z ${z.toFixed(1)}`);
+  for(let x=-90;x<=60;x+=.1)assert.equal(onCityGround(walk,x,44,edge),true,`seam across the station's front at x ${x.toFixed(1)}`);
+  for(let x=10;x<=66;x+=.1)assert.equal(onCityGround(walk,x,30,edge),true,`seam into 中心广场 at x ${x.toFixed(1)}`);
+  for(let z=-10;z>=-40;z-=.1)assert.equal(onCityGround(walk,65,z,edge),true,`seam to the promenade at z ${z.toFixed(1)}`);
+});
+
+test('the station\'s exits lead out on four sides, each to its own place, from a spawn on open ground',async()=>{
+  const {onCityGround}=await import('../src/core/city.js');
+  const exits=city.metroStation.exits,S=city.metroStation.building;
+  assert.deepEqual(exits.map(e=>e.id),['A','B','C','D']);
+  assert.equal(new Set(exits.map(e=>e.to.zh)).size,4,'four different places');
+  // Every exit faces away from the station's middle: town.facing() walks along (-sin yaw, -cos yaw).
+  for(const e of exits){
+    const [x,z,yaw]=e.spawn,a=yaw*Math.PI/180;
+    assert.ok(onCityGround(city.place.walk,x,z,.42),`${e.id} spawns off the ground`);
+    assert.ok(-Math.sin(a)*(x-S.x)-Math.cos(a)*(z-S.z)>0,`${e.id} faces back into the station`);
+    assert.ok(e.zh===`${e.id}出口`&&e.to.pinyin&&e.to.en,`${e.id} is signed`);
+  }
+  const sides=exits.map(({spawn:[x,z]})=>Math.round(Math.atan2(x-S.x,z-S.z)/(Math.PI/2)));
+  assert.equal(new Set(sides).size,4,'one exit to a side');
 });
 
 test('the promenade path curves inside the promenade and runs through the middle of its plaza',async()=>{

@@ -2,7 +2,7 @@ import data from '../content/keys.json' with {type:'json'};
 
 /**
  * Keyboard bindings. The player's changes live in profile.settings.keys as {action: code}, only for
- * actions moved off their default. Arrow keys are fixed extra movement keys; they, Escape, Tab, Meta,
+ * actions moved off their default. Arrow keys are fixed look keys (turn and tilt); they, Escape, Tab, Meta,
  * ContextMenu, the modifiers (Shift is the fixed sprint key), CapsLock and F1–F12 can never be bound. A numpad digit always counts as its plain digit.
  */
 export const KEY_ACTIONS=data.actions;

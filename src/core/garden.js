@@ -62,12 +62,46 @@ export function balustrade(island,spacing=.55){
   return points;
 }
 
+// An axis-aligned run from a to b ([x,z] points on one line along x or z), `h` either side of it.
+const run=([ax,az],[bx,bz],h)=>({x0:Math.min(ax,bx)-(ax===bx?h:0),x1:Math.max(ax,bx)+(ax===bx?h:0),
+  z0:Math.min(az,bz)-(az===bz?h:0),z1:Math.max(az,bz)+(az===bz?h:0)});
+const along=([x,z],[dx,dz],k)=>[x+dx*k,z+dz*k];
+const unit=(a,b)=>{const l=Math.hypot(b[0]-a[0],b[1]-a[1]);return [(b[0]-a[0])/l,(b[1]-a[1])/l];};
+
+/**
+ * A way across the water on foot: the 九曲桥, a low deck zigzagging through `points` (every run along
+ * x or z), or a line of stepping stones (two points). The deck is `width` across and `top` high, with
+ * a step `step` high for the first and last `ends` metres, which lie on the banks. Invisible guards
+ * run down both sides, turning where the runs turn, as a bridge's rails do. Rects {x0,x1,z0,z1}.
+ */
+export function crossingLayout(c){
+  const P=c.points,n=P.length-1,h=c.width/2,d=P.slice(1).map((p,i)=>unit(P[i],p));
+  const steps=[run(P[0],along(P[0],d[0],c.ends),h),run(along(P[n],d[n-1],-c.ends),P[n],h)];
+  // Each run reaches half a width past its corners, so the corners are deck too.
+  const deck=d.map((dir,i)=>run(along(P[i],dir,i===0?c.ends:-h),along(P[i+1],dir,i===n-1?-c.ends:h),h));
+  const guards=[];
+  for(const side of [-1,1]){
+    const out=i=>[-d[i][1]*side,d[i][0]*side];
+    const line=P.map((p,k)=>{
+      const a=out(Math.max(0,k-1)),b=out(Math.min(n-1,k)),o=k===0?b:k===n?a:[a[0]+b[0],a[1]+b[1]];
+      return [p[0]+o[0]*(h+.1),p[1]+o[1]*(h+.1)];
+    });
+    for(let k=0;k<n;k++)guards.push(run(line[k],line[k+1],.08));
+  }
+  return {deck,steps,guards};
+}
+/** Where the water's edge is crossed on foot: every deck and step, grown by `margin`. */
+export const crossingFootprint=(g,margin)=>(g.crossings??[]).flatMap(c=>{const L=crossingLayout(c);return [...L.deck,...L.steps];})
+  .map(s=>({x0:s.x0-margin,x1:s.x1+margin,z0:s.z0-margin,z1:s.z1+margin}));
+
 /** An invisible fence round the water's edge, taller than a jump, so a run and a hop cannot
  *  land you on the water's surface. It opens only where a bridge crosses the shore; the
  *  bridge's own rails close the gap. */
 export function shoreFence(g){
   const water=[...g.pond,...g.stream];
-  const underBridge=(x,z)=>g.bridges.some(b=>Math.abs(x-b.x)<b.width/2+.35&&z>b.steps[0][0]-.3&&z<b.steps.at(-1)[1]+.3);
+  const crossed=crossingFootprint(g,.35);
+  const underBridge=(x,z)=>g.bridges.some(b=>Math.abs(x-b.x)<b.width/2+.35&&z>b.steps[0][0]-.3&&z<b.steps.at(-1)[1]+.3)
+    ||inAny(crossed,x,z);
   // A waterside pavilion's platform reaches over the water; its own guard rails close that edge.
   const ws=g.waterside,platform=ws?{x0:ws.x0-.35,x1:ws.x1+.35,z0:ws.z0-.35,z1:ws.z1+.35}:null;
   const skip=(x,z)=>underBridge(x,z)||(!!platform&&inShape(platform,x,z));
@@ -85,6 +119,26 @@ function bridgeMarks(b,guard,group){
   // them to the bridge's own meshes, or to whatever stands behind it.
   for(const r of bridgeRails(b))marks.push({x:r.x,z:(r.z0+r.z1)/2,hw:.08,hd:(r.z1-r.z0)/2,y0:0,y1:r.crest+guard,name:null,group});
   return marks;
+}
+
+/** A crossing's decks and steps to walk on, and its guards, which are unnamed like a bridge's. */
+export function crossingMarks(c,rail,group){
+  const L=crossingLayout(c);
+  return [...L.steps.map(s=>shapeMark(s,{y0:0,y1:c.step,name:c.name,group})),
+    ...L.deck.map(s=>shapeMark(s,{y0:0,y1:c.top,name:c.name,group})),
+    ...L.guards.map(s=>shapeMark(s,{y0:0,y1:c.top+rail,name:null,group}))];
+}
+
+/**
+ * The town gate in the park's south wall: a lacquered column either side of the opening, a
+ * plastered pier from each column out to the end of the wall, and the two door leaves folded back
+ * against the wall's inner face. Its beams and roof are far overhead; its plaques are signs.
+ */
+export function gateLayout(gt){
+  const half=gt.opening/2,col=half+.3;
+  return {columns:[-1,1].map(s=>({x:gt.x+s*col,z:gt.z,r:.32})),
+    piers:[-1,1].map(s=>({x0:gt.x+(s<0?-gt.wallEnd:col+.32),x1:gt.x+(s<0?-col-.32:gt.wallEnd),z0:gt.z-.3,z1:gt.z+.3})),
+    leaves:[-1,1].map(s=>({x0:gt.x+(s<0?-col-.32-half:col+.32),x1:gt.x+(s<0?-col-.32:col+.32+half),z0:gt.z-.52,z1:gt.z-.32}))};
 }
 
 export function pavilionColumns(p){
@@ -105,6 +159,7 @@ export function gardenMarks(g){
   for(const c of pavilionColumns(pv))marks.push({x:c.x,z:c.z,radius:.18,y0:pv.floorTop,y1:pv.floorTop+pv.height,name:'pavilion',group:'pond'});
   marks.push({x:pv.x,z:pv.z,radius:pv.r+.6,y0:pv.floorTop+pv.height,y1:pv.floorTop+pv.height+1.8,name:'pavilion',solid:false});
   for(const b of g.bridges)marks.push(...bridgeMarks(b,g.guards.bridgeRail,'pond'));
+  for(const c of g.crossings??[])marks.push(...crossingMarks(c,g.guards.bridgeRail,'pond'));
   // 荷风水榭: a platform over the water at floor height, a step up from the bank, corner
   // columns, and guard rails on the three sides over the water (the bank side, +x, is open).
   const ws=g.waterside,guard=ws.floorTop+g.guards.bridgeRail;
@@ -114,7 +169,8 @@ export function gardenMarks(g){
   for(const z of [ws.z0,ws.z1])marks.push({x:(ws.x0+ws.x1)/2,z,hw:(ws.x1-ws.x0)/2,hd:.08,y0:0,y1:guard,name:'railing',group:'pond'});
   marks.push({x:ws.x0,z:(ws.z0+ws.z1)/2,hw:.08,hd:(ws.z1-ws.z0)/2,y0:0,y1:guard,name:'railing',group:'pond'});
   marks.push(...walkwayMarks(g.walkway,'pond'));
-  for(const r of g.waterfall.rocks)marks.push({x:r.x,z:r.z,radius:r.r,y0:0,y1:Math.max(r.h,g.guards.climbable),name:'waterfall',group:'pond'});
+  // The rockery heaped round the fall: the fall's own rocks are the waterfall, the rest 假山.
+  for(const r of g.waterfall.rocks)marks.push({x:r.x,z:r.z,radius:r.r,y0:0,y1:Math.max(r.h,g.guards.climbable),name:r.name??'waterfall',group:'pond'});
   const {house,wheel}=g.mill;
   marks.push({x:house.x,z:house.z,hw:house.width/2,hd:house.depth/2,y0:0,y1:house.height+1.2,name:'watermill',group:'mill'});
   marks.push({x:wheel.x,z:wheel.z,hw:wheel.radius,hd:wheel.thickness/2+.05,y0:0,y1:wheel.y+wheel.radius,name:'watermill',group:'pond'});
@@ -124,9 +180,10 @@ export function gardenMarks(g){
     marks.push({x:p.x,z:p.z,radius:.4*p.size,y0:0,y1:3*p.size,name:'pine'});
     marks.push({x:p.x,z:p.z,radius:1.5*p.size,y0:1.2*p.size,y1:3.4*p.size,name:'pine',solid:false});
   }
+  // Plum and peach trees in flower, each named for its blossom.
   for(const t of g.blossoms){
-    marks.push({x:t.x,z:t.z,radius:.3,y0:0,y1:2.2,name:'tree'});
-    marks.push({x:t.x,z:t.z,radius:1.4,y0:1.6,y1:3.6,name:'tree',solid:false});
+    marks.push({x:t.x,z:t.z,radius:.3,y0:0,y1:2.2,name:t.kind??'tree'});
+    marks.push({x:t.x,z:t.z,radius:1.4,y0:1.6,y1:3.6,name:t.kind??'tree',solid:false});
   }
   for(const l of g.lanterns){
     marks.push({x:l.x,z:l.z,radius:.2,y0:0,y1:3,name:'lantern'});
@@ -138,9 +195,26 @@ export function gardenMarks(g){
   }
   // Lotus pads and koi float on the pond's actual water level, not its top rim, so a look box
   // must sit at `level`, where they are drawn (`buildGarden`), not `top`.
-  for(const l of g.lotus)marks.push({x:l.x,z:l.z,radius:.5,y0:level-.05,y1:level+.4,name:'lotus',solid:false});
-  for(const k of g.koi)marks.push({x:k.x,z:k.z,radius:.35,y0:level-.05,y1:level+.15,name:'fish',solid:false});
+  // A pad is a lotus leaf; a flower standing on one is the smaller box, so it wins the look.
+  for(const l of g.lotus){
+    marks.push({x:l.x,z:l.z,radius:.5,y0:level-.05,y1:level+.1,name:'lotus-leaf',solid:false});
+    if(l.flower)marks.push({x:l.x+.12,z:l.z+.08,radius:.24,y0:level+.02,y1:level+.45,name:'lotus',solid:false});
+  }
+  for(const k of g.koi)marks.push({x:k.x,z:k.z,radius:.35,y0:level-.05,y1:level+.15,name:'koi',solid:false});
   for(const w of g.walls)marks.push(shapeMark(w,{y0:0,y1:g.wallHeight,name:'wall',group:'park-wall'}));
+  // The town gate stands in the gap in the south wall and is part of it.
+  const gate=gateLayout(g.gate);
+  for(const c of gate.columns)marks.push({x:c.x,z:c.z,radius:c.r,y0:0,y1:g.gate.height,name:'paifang',group:'park-wall'});
+  for(const p of gate.piers)marks.push(shapeMark(p,{y0:0,y1:g.wallHeight+.4,name:'paifang',group:'park-wall'}));
+  for(const l of gate.leaves)marks.push(shapeMark(l,{y0:0,y1:3.2,name:'door',group:'park-wall'}));
+  // Raised flowerbeds, too high to step onto; stone tables with their stools; clumps of bamboo.
+  for(const f of g.flowerbeds??[])marks.push(shapeMark(f,{y0:0,y1:.5,name:'flowerbed'}));
+  // A table, its stools and whoever sits at it are one group (src/world/town.js seats the players).
+  (g.stoneTables??[]).forEach((t,i)=>{
+    marks.push({x:t.x,z:t.z,radius:.55,y0:0,y1:.78,name:'stone-table',group:'stone-table:'+i});
+    for(const [dx,dz] of t.stools)marks.push({x:t.x+dx,z:t.z+dz,radius:.24,y0:0,y1:.45,name:'stone-stool',group:'stone-table:'+i});
+  });
+  for(const b of g.bamboo??[])marks.push({x:b.x,z:b.z,radius:b.r,y0:0,y1:6,name:'bamboo'});
   return marks;
 }
 

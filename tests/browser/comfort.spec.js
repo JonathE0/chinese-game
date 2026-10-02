@@ -1,8 +1,9 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 
 async function start(page){
   await page.goto('/');
-  await page.getByRole('button',{name:'开始旅行'}).click();
+  await startGame(page);
   await expect.poll(()=>page.evaluate(()=>!!window.__qinghe?.town)).toBe(true);
 }
 

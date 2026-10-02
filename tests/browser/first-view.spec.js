@@ -1,45 +1,40 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 
 /**
- * The first frame of a new game shows your home: the door and the 我的家 board are on screen and
- * nothing stands between you and them, and the kitchen's chimney is in view too.
+ * The first frame of a new game: you have just come in through the town gate of 莲池公园, looking up
+ * the avenue over the lotus pond at 莲心亭, with Grandfather's house beside you on the right and
+ * nothing standing between you and either.
  */
-test('a fresh start opens looking at the front of your home',async({page})=>{
+test('a fresh start opens inside the town gate, looking up the park at the pavilion with the house beside it',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/');
-  await page.getByRole('button',{name:'开始旅行'}).click();
+  await startGame(page);
   await page.waitForFunction(()=>!!window.__qinghe?.town);
   await page.waitForTimeout(400);
   const view=await page.evaluate(()=>{
     const t=window.__qinghe.town,cam=t.camera,eye=cam.getPosition().clone(),V=eye.constructor;
     const canvas=t.app.graphicsDevice.canvas,w=canvas.clientWidth,h=canvas.clientHeight;
-    const home=t.data.buildings.find(b=>b.id==='home'),front=home.z-(home.depth/2+.3);
-    const part=name=>{const c=t.registry.boxes.find(b=>b.place==='town'&&b.name?.id===name&&b.group==='home');return [c.x,(c.y0+c.y1)/2,c.z];};
-    const points={door:[home.x,1.1,front],sign:part('sign'),chimney:part('chimney'),balcony:part('balcony')};
-    const out={spawn:[...t.data.spawn],eye:[eye.x,eye.y,eye.z],w,h};
+    const home=t.data.buildings.find(b=>b.id==='home'),face=(home.rotation??0)===180?-1:1;
+    // The pavilion's roof, and the house's first ground-floor window beside the study wing, clear
+    // of the xiangqi players further along its front.
+    const points={pavilion:[0,3.4,34],house:[home.x-face*(home.width/2-1.35),1.8,home.z+face*home.depth/2]};
+    const out={place:t.place,spawn:[...t.data.spawn],eye:[eye.x,eye.y,eye.z],w,h,district:t.districtAt(eye.x,eye.z).id};
     for(const [id,[x,y,z]] of Object.entries(points)){
       const s=cam.camera.worldToScreen(new V(x,y,z));
       const dir=new V(x-eye.x,y-eye.y,z-eye.z),dist=dir.length();dir.normalize();
-      const hit=t.registry.look('town',eye,dir,40);
+      const hit=t.registry.look('town',eye,dir,60);
       out[id]={screen:[s.x,s.y,s.z],inside:s.z>0&&s.x>=0&&s.x<=w&&s.y>=0&&s.y<=h,dist,
-        hit:hit?.box.name?.id??null,hitGroup:hit?.box.group??null,hitDist:hit?.distance??null};
+        hit:hit?.box.name?.id??null,hitDist:hit?.distance??null};
     }
     return out;
   });
-  for(const id of ['door','sign','balcony','chimney'])expect(view[id].inside,id+' on screen '+JSON.stringify(view[id].screen)).toBe(true);
-  // Looking straight at the board, the first thing the ray meets is the board itself.
-  expect(view.sign.hit).toBe('sign');
-  expect(Math.abs(view.sign.hitDist-view.sign.dist)).toBeLessThan(.6);
-  expect(view.door.hit).toBe('door');
-  expect(view.chimney.hitGroup).toBe('home');
-  // From the square west of the kitchen, at the game's own look range, the chimney names itself.
-  const named=await page.evaluate(()=>{
-    const t=window.__qinghe.town,c=t.registry.boxes.find(b=>b.place==='town'&&b.name?.id==='chimney'&&b.group==='home');
-    const eye=t.camera.getPosition().clone(),V=eye.constructor;eye.set(c.x-6,1.62,c.z-4);
-    const dir=new V(c.x-eye.x,(c.y0+c.y1)/2+.8-eye.y,c.z-eye.z).normalize();
-    return t.registry.look('town',eye,dir)?.box.name?.id??null;
-  });
-  expect(named).toBe('chimney');
+  expect(view.place).toBe('town');
+  expect(view.district).toBe('garden');
+  for(const id of ['pavilion','house'])expect(view[id].inside,id+' on screen '+JSON.stringify(view[id].screen)).toBe(true);
+  // The first thing a ray meets on the way to each is the thing itself.
+  expect(['pavilion','sign:pavilion']).toContain(view.pavilion.hit);   // the roof, or the 莲心亭 plaque facing the gate
+  expect(['home','window']).toContain(view.house.hit);
   // Keep a half-size picture of the first frame for review.
   const shot=(await page.screenshot()).toString('base64');
   const small=await page.evaluate(async src=>{

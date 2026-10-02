@@ -1,28 +1,8 @@
 /**
- * Pure street geometry for 云海市中心 (Downtown Yunhai) — where a tower's door sits, in the same
- * local (un-offset) coordinates `city.json` itself uses. Kept separate from `src/world/city.js`,
- * which builds the scene; nothing here touches PlayCanvas or `CITY_OFFSET`.
+ * Pure street geometry for 云海市中心 (Downtown Yunhai), in the same local (un-offset) coordinates
+ * `city.json` itself uses. Kept separate from `src/world/city.js`, which builds the scene; nothing
+ * here touches PlayCanvas or `CITY_OFFSET`.
  */
-
-/**
- * The pavement spot in front of a tower's sign: half the tower's own depth out from its `x`,
- * plus a half-metre gap, on whichever side of the avenue it already sits — at the same `z`. This
- * is where `city.json`'s `mall` door sits in front of 星光百货.
- */
-export function frontOfTower(tower) {
-  const side=Math.sign(tower.x)||1;
-  return {x:tower.x-side*(tower.d/2+.5),z:tower.z};
-}
-
-/**
- * Where a taxi sets the player down in front of `tower`. `frontOfTower` is only half a metre out,
- * which puts a 0.34 m player 0.14 m inside the tower's hitbox (it reaches d/2 + 0.3), so the
- * drop-off stands a full metre out instead: clear of the facade and of the street furniture.
- */
-export function dropOffAtTower(tower) {
-  const side=Math.sign(tower.x)||1;
-  return {x:tower.x-side*(tower.d/2+1),z:tower.z};
-}
 
 /**
  * Whether a body of half-width `edge` standing at local (x,z) is on 云海's ground: `walk` is

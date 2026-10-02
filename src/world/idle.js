@@ -43,18 +43,12 @@ export function animateIdle(person,dt,moving=false){
   s.glance+=(s.glanceTo-s.glance)*Math.min(1,dt*3.4);
   person.neck?.setLocalEulerAngles(Math.sin(s.t*.7+s.phase)*1.6,s.glance,0);
 
-  // Expression drifts between neutral and a small smile; the corners of the mouth do the work.
+  // Expression drifts between a smaller grin and the sheets' open smile: the mouth hangs from its top
+  // edge (src/world/people.js), so opening it is a stretch down and a little wider.
   s.moodIn-=dt;
   if(s.moodIn<=0){s.smile=s.smile?0:1;s.moodIn=rand(9,26);}
   s.smileAt+=(s.smile-s.smileAt)*Math.min(1,dt*1.6);
-  if(person.lips){
-    for(let i=0;i<person.lips.length;i++){
-      const side=i?1:-1;
-      person.lips[i].setLocalPosition(side*.055,.17+s.smileAt*.016,.235);
-      person.lips[i].setLocalEulerAngles(0,0,side*s.smileAt*15);
-    }
-    person.brows?.forEach((brow,i)=>brow.setLocalPosition(i?.12:-.12,.39+s.smileAt*.008,.225));
-  }
+  person.mouth?.setLocalScale(.9+.1*s.smileAt,.7+.3*s.smileAt,1);
 
   if(moving)return;
   // Standing still: breathe, and shift weight from one foot to the other.

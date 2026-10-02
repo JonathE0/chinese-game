@@ -9,6 +9,7 @@
     "kind": "dialogue",
     "lesson": "introductions",
     "color": "#c77b60",
+    "look": {"archetype": "auntie", "style": "bun", "hair": "#1f1d1c"},
     "voice": "lin"
   },
   {
@@ -20,6 +21,7 @@
     "roleEn": "Learn four everyday words",
     "kind": "practice",
     "color": "#83996f",
+    "look": {"archetype": "v-young-woman", "style": "bob", "hair": "#1f1d1c"},
     "voice": "mei"
   },
   {
@@ -31,6 +33,7 @@
     "roleEn": "Browse & bargain",
     "kind": "shop",
     "color": "#608da0",
+    "look": {"archetype": "v-young-man", "style": "side", "hair": "#1f1d1c"},
     "voice": "chen"
   },
   {
@@ -42,6 +45,33 @@
     "roleEn": "Grandfather’s old fruit stand",
     "kind": "story",
     "color": "#83996f",
+    "look": {"archetype": "v-grandpa", "style": "short", "hair": "#8f8a82", "hat": false},
     "voice": "chen"
+  },
+  {
+    "id": "wang",
+    "zh": "王爷爷",
+    "pinyin": "Wáng yéye",
+    "en": "Grandpa Wang",
+    "role": "码头",
+    "roleEn": "Learn to fish",
+    "kind": "dialogue",
+    "lesson": "fishing-wang",
+    "color": "#384058",
+    "look": {"archetype": "v-grandpa", "props": true},
+    "voice": "wang"
+  },
+  {
+    "id": "liu",
+    "zh": "刘奶奶",
+    "pinyin": "Liú nǎinai",
+    "en": "Grandma Liu",
+    "role": "菜地",
+    "roleEn": "Pick vegetables",
+    "kind": "dialogue",
+    "lesson": "veggies-liu",
+    "color": "#7a4650",
+    "look": {"archetype": "v-grandma", "props": true},
+    "voice": "liu"
   }
 ]

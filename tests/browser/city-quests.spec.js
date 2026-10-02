@@ -78,7 +78,7 @@ test('asking the way: only the student offers it, and finding the bookstore is o
   await page.getByRole('button',{name:'回到小镇',exact:true}).click();
   expect((await profileOf(page)).completed).toContain('city-directions');
 
-  // Being set down right at the door (a warp, like a taxi drop-off) is not finding it yet.
+  // Being set down right at the door (a warp) is not finding it yet.
   const door=await page.evaluate(()=>window.__qinghe.town.targets().find(t=>t.id==='door:city-bookshop'));
   await warp(page,door.x,door.z,0);
   await expect(page.locator('#panel')).toBeHidden();

@@ -209,11 +209,22 @@
       {"kind": "lamp", "wall": "front", "at": 7.0}
     ]},
     "metro-platform": {"pieces": [
-      {"kind": "lamp", "wall": "back", "at": -3.6},
-      {"kind": "lamp", "wall": "west", "at": -2.5},
-      {"kind": "lamp", "wall": "east", "at": 1.6},
-      {"kind": "lamp", "wall": "front", "at": -3.0},
-      {"kind": "lamp", "wall": "front", "at": 3.0}
+      {"kind": "lamp", "wall": "back", "at": -11},
+      {"kind": "lamp", "wall": "back", "at": 11},
+      {"kind": "lamp", "wall": "west", "at": -5},
+      {"kind": "lamp", "wall": "west", "at": 1},
+      {"kind": "lamp", "wall": "west", "at": 10},
+      {"kind": "lamp", "wall": "east", "at": -5},
+      {"kind": "lamp", "wall": "east", "at": 2},
+      {"kind": "lamp", "wall": "east", "at": 8}
+    ]},
+    "yunhai-central": {"pieces": [
+      {"kind": "lamp", "wall": "back", "at": -14},
+      {"kind": "lamp", "wall": "back", "at": 14},
+      {"kind": "lamp", "wall": "west", "at": -12},
+      {"kind": "lamp", "wall": "west", "at": -4},
+      {"kind": "lamp", "wall": "east", "at": -12},
+      {"kind": "lamp", "wall": "east", "at": -4}
     ]}
   }
 }

@@ -1,12 +1,13 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 async function start(page){
- await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+ await page.goto('/');await startGame(page);
  await page.waitForFunction(()=>window.__qinghe?.hskWords?.length>0);
  await page.evaluate(()=>{const c=window.__qinghe;c.profile.wallet=200;c.profile.completed.push('home:tutorial','home:starter');c.save();});
 }
 test('through 星光百货 into the hardware store, buy a mixed basket, and walk back into the mall',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await start(page);
- await page.evaluate(()=>{const t=window.__qinghe.town;t.enterCity();t.warp(-4009.6,0,90);});
+ await page.evaluate(()=>{const t=window.__qinghe.town;t.enterCity();t.warp(-4000-76.5,49.6,180);});   // the mall's door is on 美食街 (city.json doors)
  await expect(page.locator('#interact span')).toHaveText('进商场');
  await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.nearest?.id)).toBe('door:mall');await page.keyboard.press('e');
  await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.place)).toBe('mall');
@@ -37,7 +38,7 @@ test('HSK cards display distinct bilingual definitions and preserve them in book
  await page.locator('[data-level="2"]').click();await page.locator('#hsk-search').fill('黄');
  const yellow=page.locator('[data-word="hsk-7720f8ea"]');await yellow.locator('.word-definitions > summary').click();
  await expect(yellow.locator('.definition-en')).toHaveText('yellow');await expect(yellow.locator('.definition-zh')).toContainText('颜色');
- await page.reload();await page.getByRole('button',{name:'开始旅行'}).click();
+ await page.reload();await startGame(page);
  const saved=await page.evaluate(()=>window.__qinghe.profile.saved.find(w=>w.zh==='说'));expect(saved.definitionZh.length).toBeGreaterThan(3);expect(saved.en).toContain('to scold');
 });
 test('independent world objects and full tree canopies have clear footprints',async({page})=>{

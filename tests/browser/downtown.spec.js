@@ -211,8 +211,9 @@ test('no two faces of different materials lie flush in the city, and its façade
 });
 
 test('the city stays inside its draw-call budget at every detail level, and costs less as the level drops',async({browser})=>{
-  test.setTimeout(240000);
-  const SPOTS=[['avenue',0,21,0,0,2],['plaza',0,-43,160,0,8],['hill',-98,-26,-100,26,-6],['promenade east',40,-44,120,0,10]];
+  test.setTimeout(300000);
+  const SPOTS=[['boulevard',0,21,0,0,2],['plaza',0,-43,160,0,8],['hill',-98,-26,-100,26,-6],['promenade east',40,-44,120,0,10],
+    ['station',0,26,180,0,6],['behind the station',0,72,0,0,8],['美食街',-34,47,90,0,2],['中心广场',30,20,-135,0,2]];
   const calls={};
   for(const level of ['high','medium','low']){
     const page=await browser.newPage();

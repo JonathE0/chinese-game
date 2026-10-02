@@ -68,7 +68,7 @@ table(['id','zh','done when','where'],quests.map(q=>
 '## Daily errands (`src/core/daily.js`)','',
 table(['id','zh','done when','coins'],TASKS.map(t=>[t.id,t.zh,`${t.metric} ≥ ${t.goal}`,t.reward])),'',
 `## City: ${city.place.zh} (${city.place.en})`,'',
-`- Metro from ${city.station.zh} in the square at ${at(city.station.x,city.station.z)}. Fares: single ${city.fare.single}, pass ${city.fare.pass} for ${city.fare.passDays} days. Size ${city.place.size.join('×')}.`,
+`- Metro from ${city.station.zh} in the square at ${at(city.station.x,city.station.z)}. Transit card (fares in metro.json); old tickets credit ${city.fare.single} each. Size ${city.place.size.join('×')}.`,
 `- Towers: ${city.towers.filter(t=>t.sign).map(t=>`${t.sign} ${at(t.x,t.z)}`).join(' · ')}; plus ${city.towers.filter(t=>!t.sign).length} unsigned.`,
 `- Props: ${tally(city.props.map(p=>p.kind))}.`,
 `- People: ${city.people.map(p=>`${p.id} ${p.zh} ${at(p.x,p.z)} (${p.lines.length} lines)`).join(' · ')}.`,

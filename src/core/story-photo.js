@@ -8,3 +8,22 @@ export async function commitCapture(shot,store,persistence){
  }
  const done={...record,done:true};await store.put(done);return done;
 }
+
+/** The two cameras (catalog ids). Grandpa's photographs the album places only and never uses film;
+ *  your own, bought at the resale shop, takes 打卡 check-ins and free photos for one film each. */
+export const CAMERAS={grandpa:'grandpa-camera',mine:'secondhand-camera'};
+/** quests.json `my-camera`: the first check-in photo taken with your own camera. */
+export const CAMERA_FLAG='camera:first';
+/** Grandpa's where an album photo is being sought (`seeking`), otherwise your own if you have one. */
+export const pickCamera=(p,seeking)=>!seeking&&(p.inventory?.[CAMERAS.mine]??0)>0?'mine':'grandpa';
+export const filmCost=camera=>camera==='mine'?1:0;
+export function ownCheckIn(p,camera,spot){
+ if(camera!=='mine'||!spot||p.completed.includes(CAMERA_FLAG))return false;
+ p.completed.push(CAMERA_FLAG);return true;
+}
+/** What keeps an album shot from counting: 'far' (or the wrong place), 'turn', 'blocked'; null when it counts. */
+export function framingHint(memory,shot){
+ if(qualifiesMemory(memory,shot))return null;
+ if(shot.place!==memory.place||!(shot.distance<=memory.radius))return 'far';
+ return shot.inView?'blocked':'turn';
+}

@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 import {readFileSync} from 'node:fs';
 
 const SHOW=JSON.parse(readFileSync('src/content/drones.json','utf8'));
@@ -22,12 +23,11 @@ const stats=page=>page.evaluate(()=>new Promise(done=>{
 
 test('the drone show draws 你好 over the bay in two draw calls, and looking at it names it',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await page.waitForFunction(()=>!!window.__qinghe?.town);
   await page.evaluate(()=>window.__qinghe.town.enterCity());
 
   await watch(page,-30);   // half a minute before the show: no drones out
-  const before=await stats(page);
   expect(await page.evaluate(()=>window.__qinghe.town.rooms.get('city').root.findByName('drones').enabled)).toBe(false);
 
   await watch(page,1);     // lights on at the barge, before take-off
@@ -40,8 +40,12 @@ test('the drone show draws 你好 over the bay in two draw calls, and looking at
   expect(drones.enabled).toBe(true);
   expect(drones.instances.reduce((a,b)=>a+b,0)).toBe(SHOW.count);
   expect(drones.instances.length).toBe(2);
-  // Two instanced draws for the drones, and two more if the bay reflects them.
-  expect(during-before,'draw calls the show adds').toBeLessThanOrEqual(4);
+  // Two instanced draws for the drones, and two more if the bay reflects them. Measured by hiding
+  // the drones at the same moment: the boats sail on with the clock, so an earlier frame differs.
+  await page.evaluate(()=>{window.__qinghe.town.rooms.get('city').root.findByName('drones').render.enabled=false;});
+  const without=await stats(page);
+  await page.evaluate(()=>{window.__qinghe.town.rooms.get('city').root.findByName('drones').render.enabled=true;});
+  expect(during-without,'draw calls the show adds').toBeLessThanOrEqual(4);
   expect(during,'draw calls on the promenade during the show').toBeLessThanOrEqual(900);
 
   await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.looking?.zh??null),{timeout:6000}).toBe('你好');
@@ -66,7 +70,7 @@ test('the drone show draws 你好 over the bay in two draw calls, and looking at
 });
 
 test('a show announcement that starts while a panel is open plays ducked under it',async({page})=>{
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await page.waitForFunction(()=>!!window.__qinghe?.town);
   const volumes=await page.evaluate(line=>{
     const ctx=window.__qinghe;

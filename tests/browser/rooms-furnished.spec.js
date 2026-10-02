@@ -48,12 +48,13 @@ test('each interior has its own named things, reachable counters and no fittings
       t.enterRoom(id);
       const room=t.rooms.get(id),[w,d]=room.data.size,ox=room.offsetX;
       const names=new Set([...t.registry.boxes,...t.registry.looks].filter(b=>b.place===id&&b.name).map(b=>b.name.id));
-      // Walk a 0.2 m grid out from the spawn point; every target needs a reachable spot in range.
-      const step=.2,seen=new Set(),cells=[],queue=[[room.data.spawn[0],room.data.spawn[1]]];
+      // Walk a 0.2 m grid out from the spawn point, on the floor you come in on (a metro station is
+      // entered on its upper level); every target offered there needs a reachable spot in range.
+      const step=.2,seen=new Set(),cells=[],queue=[[room.data.spawn[0],room.data.spawn[1]]],floor=room.data.upper?.entrance?room.data.upper.y:0;
       while(queue.length){
         const [x,z]=queue.pop(),key=Math.round(x/step)+','+Math.round(z/step);
         if(seen.has(key))continue;seen.add(key);
-        if(Math.abs(x)>w/2||Math.abs(z)>d/2||t.registry.blocks(id,ox+x,z,0,.34))continue;
+        if(Math.abs(x)>w/2||Math.abs(z)>d/2||t.registry.blocks(id,ox+x,z,floor,.34))continue;
         cells.push([x,z]);
         for(const [dx,dz] of [[step,0],[-step,0],[0,step],[0,-step]])queue.push([Math.round((x+dx)/step)*step,Math.round((z+dz)/step)*step]);
       }

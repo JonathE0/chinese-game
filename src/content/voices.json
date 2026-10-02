@@ -13,11 +13,14 @@
     "friend-b": {"voice": "zh-CN-YunxiaNeural",   "rate": "+0%",  "pitch": "+0Hz", "note": "Background stroller B."},
     "teacher":  {"voice": "zh-CN-XiaoyiNeural",   "rate": "-20%", "pitch": "+0Hz", "note": "Single words and vocabulary drills, deliberately slower."},
     "student":  {"voice": "zh-CN-XiaoxiaoNeural", "rate": "+8%",  "pitch": "+8Hz", "note": "A student on the Yunhai avenue, asked for directions. Young and helpful."},
-    "driver":   {"voice": "zh-CN-YunjianNeural",  "rate": "+6%",  "pitch": "+2Hz", "note": "A Yunhai taxi driver. Brisk and friendly."},
     "cook":     {"voice": "zh-CN-YunxiNeural",    "rate": "+4%",  "pitch": "-3Hz", "note": "The cook at 海风面馆 in Yunhai. Warm and quick."},
     "hotpot-waiter": {"voice": "zh-CN-XiaoyiNeural", "rate": "+6%", "pitch": "+3Hz", "note": "The waitress at 山城老火锅 on the hill. Bright and brisk."},
     "hotpot-chef": {"voice": "zh-CN-YunjianNeural", "rate": "+8%", "pitch": "-6Hz", "note": "The noodle-pulling chef at 山城老火锅. Loud and showy."},
     "ferry-crew": {"voice": "zh-CN-YunyangNeural", "rate": "+4%", "pitch": "+2Hz", "note": "The crew of the ferry across 云海湾, calling from the gangway. Clear and brisk."},
-    "wheel-attendant": {"voice": "zh-CN-XiaoxiaoNeural", "rate": "+2%", "pitch": "+4Hz", "note": "The attendant at the Ferris wheel on the far landing. Cheerful and careful."}
+    "wheel-attendant": {"voice": "zh-CN-XiaoxiaoNeural", "rate": "+2%", "pitch": "+4Hz", "note": "The attendant at the Ferris wheel on the far landing. Cheerful and careful."},
+    "attendant": {"voice": "zh-CN-YunyangNeural", "rate": "-2%", "pitch": "-3Hz", "note": "站务员, the station attendant at Qinghe's service counter and gates. Polite and patient."},
+    "receptionist": {"voice": "zh-CN-XiaoxiaoNeural", "rate": "-2%", "pitch": "-6Hz", "note": "The front desk at 海景公寓 in 云海中心, across the bay. Polished, calm and welcoming."},
+    "wang": {"voice": "zh-CN-YunjianNeural", "rate": "-10%", "pitch": "-10Hz", "note": "王爷爷, the old fisherman on the pier in 青禾田园. Slow, deep and kindly."},
+    "liu": {"voice": "zh-CN-XiaoxiaoNeural", "rate": "-9%", "pitch": "-12Hz", "note": "刘奶奶, the grandmother at her vegetable plot in 青禾田园. Warm, a little slower and lower than Auntie Lin."}
   }
 }

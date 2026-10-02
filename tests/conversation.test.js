@@ -38,16 +38,16 @@ test('a matched option is saved under its store key; every other intent leaves s
 });
 test('completing a lesson pays out once; repeat completions call in but earn nothing further',()=>{
   const p=freshProfile();
-  const first=completeLesson(p,'city-taxi',10);
+  const first=completeLesson(p,'city-noodles',10);
   assert.equal(first.amount,10);
   assert.equal(first.firstTime,true);
   assert.equal(p.wallet,10);
-  assert.deepEqual(p.completed,['city-taxi']);
-  const second=completeLesson(p,'city-taxi',10);
+  assert.deepEqual(p.completed,['city-noodles']);
+  const second=completeLesson(p,'city-noodles',10);
   assert.equal(second.amount,0);
   assert.equal(second.firstTime,false);
   assert.equal(p.wallet,10);
-  assert.deepEqual(p.completed,['city-taxi']);
+  assert.deepEqual(p.completed,['city-noodles']);
 });
 
 test('a close hook runs once however the panel closes, and closing before it is armed runs nothing',async()=>{
@@ -69,17 +69,17 @@ test('finishing a conversation pays and saves first, then runs onFinish once whe
   const {closeHook,finishConversation}=await import('../src/core/conversation.js');
   const p=freshProfile();const hook=closeHook();const seen=[];
   const onFinish=state=>seen.push(state);
-  const first=finishConversation(p,'city-taxi',5,{hook,state:{destination:'一号书店'},onFinish});
+  const first=finishConversation(p,'city-noodles',5,{hook,state:{dish:'beef'},onFinish});
   assert.equal(first.amount,5);
-  assert.ok(p.completed.includes('city-taxi'));
+  assert.ok(p.completed.includes('city-noodles'));
   assert.deepEqual(seen,[]);                          // nothing runs until the panel closes
   hook.run();hook.run();
-  assert.deepEqual(seen,[{destination:'一号书店'}]);
+  assert.deepEqual(seen,[{dish:'beef'}]);
 
   // A repeat completion runs onFinish again, once, with no second reward.
-  const again=finishConversation(p,'city-taxi',5,{hook,state:{destination:'光明电影院'},onFinish});
+  const again=finishConversation(p,'city-noodles',5,{hook,state:{dish:'egg'},onFinish});
   assert.equal(again.amount,0);
   hook.run();
-  assert.deepEqual(seen,[{destination:'一号书店'},{destination:'光明电影院'}]);
-  assert.equal(p.completed.filter(f=>f==='city-taxi').length,1);
+  assert.deepEqual(seen,[{dish:'beef'},{dish:'egg'}]);
+  assert.equal(p.completed.filter(f=>f==='city-noodles').length,1);
 });

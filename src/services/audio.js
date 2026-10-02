@@ -25,3 +25,23 @@ export class VoicePlayer {
   stop(){this.foreground?.pause();this.foreground=null;}
   duck(active){if(this.ambient)this.ambient.volume=this.settings.ambientVolume*(active?.18:1);}
 }
+
+/**
+ * A ticket gate's reader, synthesized: 'ok' is its short bright 嘀, 'error' a low double buzz.
+ * `volume` 0..1 (the dialogue volume); nothing plays at 0 or where WebAudio is missing.
+ */
+let tones=null;
+export function gateTone(kind,volume=1){
+  const Context=globalThis.AudioContext||globalThis.webkitAudioContext;
+  if(!(volume>0)||!Context)return;
+  tones??=new Context();tones.resume?.().catch(()=>{});
+  const now=tones.currentTime,gain=tones.createGain();gain.connect(tones.destination);
+  const blip=(freq,at,length,type,level)=>{
+    const o=tones.createOscillator();o.type=type;o.frequency.value=freq;o.connect(gain);
+    gain.gain.setValueAtTime(0,now+at);gain.gain.linearRampToValueAtTime(level*volume,now+at+.01);
+    gain.gain.setValueAtTime(level*volume,now+at+length-.03);gain.gain.linearRampToValueAtTime(0,now+at+length);
+    o.start(now+at);o.stop(now+at+length);
+  };
+  if(kind==='error'){blip(196,0,.17,'square',.12);blip(196,.23,.22,'square',.12);}
+  else blip(1760,0,.13,'sine',.25);
+}

@@ -12,31 +12,32 @@ the city uses its own coordinates.
 | market | 商业街 | Shopping Street | 2 | level 1 + words 25 |
 | riverside | 河边文化街 | Riverside Quarter | 3 | level 2 + words 30 |
 | garden | 莲池公园 | Lotus Pond Park | 1 | open |
+| fields | 青禾田园 | Qinghe Countryside | 1 | open |
 
 ## Buildings
 
 | sign | id | district | x,z | interior | build site |
 | --- | --- | --- | --- | --- | --- |
-| 青禾茶铺 | tea-house | square | -10.5,-8 |  |  |
+| 青禾茶铺 | tea-house | square | -9.6,-8 |  |  |
 | 地铁 | metro-station | square | -7.5,14.6 | metro-platform, yunhai-central |  |
-| 词语馆 | practice-house | square | 0,-22 | hall, reading, studyroom, listening, courtyard |  |
+| 词语馆 | practice-house | square | 0,-23.7 | hall, reading, studyroom, listening, courtyard |  |
 | 小小商店 | souvenir-house | square | 11,-8 |  |  |
-| 客栈 | guesthouse | square | -17.5,13 | guesthouse |  |
-| 我的家 | home | square | 11,14 | home, study, kitchen |  |
-| 青禾超市 | supermarket | market | 28,-9 | supermarket |  |
-| 慢慢咖啡 | cafe | market | 28,9 | cafe |  |
-| 麦香面包 | bakery | market | 39,-9 | bakery |  |
-| 生活馆 | lifestyle | market | 39,9 | lifestyle |  |
-| 青禾书馆 | bookshop | market | 48.5,-8 | library |  |
-| 服装店 | clothes-shop | market | 49,8 | clothes-shop |  |
-| 家常餐厅 | restaurant | riverside | -51,1 | restaurant |  |
-| 青禾邮局 | bank | riverside | -29,1 | post-office |  |
-| 青禾药店 | pharmacy | riverside | -40,-7 | pharmacy |  |
-| 青禾灯具 | lights | market | 58,-8 | lights |  |
-| 家居小铺 | homeware | square | -17.5,3 | homeware |  |
-| 青禾银行 | bank-branch | square | -18,-6 | bank |  |
-| 旧物铺 | resale | square | 15.5,4 | resale |  |
-| 青禾茶楼 | teahouse | garden | 12.5,46.5 | teahouse | teahouse |
+| 客栈 | guesthouse | square | -17.5,15.3 | guesthouse |  |
+| 我的家 | home | garden | 16,48.7 | home, study, kitchen |  |
+| 青禾超市 | supermarket | market | 28,-10.2 | supermarket |  |
+| 慢慢咖啡 | cafe | market | 28.7,9.7 | cafe |  |
+| 麦香面包 | bakery | market | 40.4,-10.7 | bakery |  |
+| 生活馆 | lifestyle | market | 40.1,10.2 | lifestyle |  |
+| 青禾书馆 | bookshop | market | 53.4,-9.2 | library |  |
+| 服装店 | clothes-shop | market | 52,9.7 | clothes-shop |  |
+| 家常餐厅 | restaurant | riverside | -52.1,-0.7 | restaurant |  |
+| 青禾邮局 | bank | riverside | -29.5,1.75 | post-office |  |
+| 青禾药店 | pharmacy | riverside | -40,-8.3 | pharmacy |  |
+| 青禾灯具 | lights | market | 65.9,-9.2 | lights |  |
+| 家居小铺 | homeware | square | -17.75,3.6 | homeware |  |
+| 青禾银行 | bank-branch | square | -17,-7.7 | bank |  |
+| 旧物铺 | resale | square | 15.25,5 | resale |  |
+| 青禾茶楼 | teahouse | garden | 23,29.5 | teahouse | teahouse |
 
 ## Interiors
 
@@ -76,9 +77,19 @@ the city uses its own coordinates.
 | city-store | 便利店 | Convenience store | city:store |  |  | inside only, 1 staff |
 | city-cafe | 海边咖啡 | Seaside Café | city:cafe |  |  | inside only, 1 staff |
 | mall | 星光百货 | Starlight Department Store | city:department |  |  | inside only, annexes → hardware, 7 staff |
-| yunhai-central | 云海中央车站 | Yunhai Central | metro-station |  |  |  |
-| riverside-lobby | 河畔公寓大厅 | Riverside Apartments lobby | city:riverside-apartments |  |  | annexes → riverside-apartment |
-| riverside-apartment | 河畔公寓 101 | Riverside Apartment 101 | city:riverside-apartments |  |  | decoratable |
+| yunhai-central | 云海市中心站 | Yunhai City Centre Station | metro-station |  |  | inside only |
+| riverside-lobby | 大堂 | Lobby | city:yunhai-centre |  |  | inside only, 1 staff |
+| riverside-apartment | 单间 | Studio | city:yunhai-centre |  |  | inside only, decoratable |
+| harbour-lift | 电梯 | Lift | city:yunhai-centre |  |  | inside only |
+| harbour-cafe | 咖啡厅 | Café | city:yunhai-centre |  |  | inside only, 1 staff |
+| harbour-laundry | 洗衣房 | Laundry | city:yunhai-centre |  |  | inside only |
+| harbour-gym | 健身房 | Gym | city:yunhai-centre |  |  | inside only |
+| harbour-one-bed | 一室一厅 | One-bedroom flat | city:yunhai-centre |  |  | inside only, decoratable |
+| harbour-garden | 空中花园 | Sky garden | city:yunhai-centre |  |  | inside only |
+| harbour-pool | 游泳池 | Pool | city:yunhai-centre |  |  | inside only |
+| harbour-view | 海景房 | Harbour-view flat | city:yunhai-centre |  |  | inside only, decoratable |
+| harbour-penthouse | 顶层公寓 | Penthouse | city:yunhai-centre |  |  | inside only, decoratable |
+| harbour-restaurant | 屋顶餐厅 | Rooftop restaurant | city:yunhai-centre |  |  | inside only, 1 staff |
 
 ## Shops and stock
 
@@ -117,7 +128,8 @@ Prices in 学习币; `~` marks a negotiable price. An item sold in several shops
 - **mall-clothes**: T恤 mall-txu 40
 - **mall-sports**: T恤 mall-txu 40, 运动鞋 mall-yundongxie 80
 - **mall-food**: 炒饭 mall-chaofan 15, 拉面 mall-lamian 16, 汉堡 mall-hanbao 18, 披萨 mall-pisa 12, 寿司 mall-shousi 25, 冰淇淋 mall-bingqilin 8
-- Not sold in any shop: 家常鸡蛋汤面 home-noodle-bowl 9, 家常青菜豆腐饭 home-vegetable-rice 10, 家常番茄豆腐饭 home-tomato-rice 7, 家常番茄鸡蛋面 home-tomato-egg-noodles 11, HSK一级证书 hsk-cert-1 1, HSK二级证书 hsk-cert-2 1, HSK三级证书 hsk-cert-3 1, HSK四级证书 hsk-cert-4 1, HSK五级证书 hsk-cert-5 1, HSK六级证书 hsk-cert-6 1
+- **resale** (旧物铺, room resale): 二手相机 secondhand-camera 40
+- Not sold in any shop: 家常鸡蛋汤面 home-noodle-bowl 9, 家常青菜豆腐饭 home-vegetable-rice 10, 家常番茄豆腐饭 home-tomato-rice 7, 家常番茄鸡蛋面 home-tomato-egg-noodles 11, HSK一级证书 hsk-cert-1 1, HSK二级证书 hsk-cert-2 1, HSK三级证书 hsk-cert-3 1, HSK四级证书 hsk-cert-4 1, HSK五级证书 hsk-cert-5 1, HSK六级证书 hsk-cert-6 1, 爷爷的交通卡 grandpa-card 1, 爷爷的相机 grandpa-camera 1, 鲤鱼 carp 4, 鲫鱼 crucian 3, 草鱼 grass-carp 5
 
 ## NPCs
 
@@ -126,7 +138,9 @@ Prices in 学习币; `~` marks a negotiable price. An item sold in several shops
 | lin | 林阿姨 | Auntie Lin | 茶铺 | introductions | -4.8,-9.4 | lin |
 | mei | 小美 | Xiaomei | 练习角 |  | -2.9,-6.4 | mei |
 | chen | 陈叔叔 | Uncle Chen | 小商店 |  | 4.8,-9.4 | chen |
-| zhou | 周叔叔 | Uncle Zhou | 水果摊 |  | -5,1.5 | chen |
+| zhou | 周叔叔 | Uncle Zhou | 水果摊 |  | -5,1.2 | chen |
+| wang | 王爷爷 | Grandpa Wang | 码头 | fishing-wang | -1.75,106.05 | wang |
+| liu | 刘奶奶 | Grandma Liu | 菜地 | veggies-liu | 3.8,83.4 | liu |
 
 ## Missions (`quests.json`, in order)
 
@@ -136,17 +150,19 @@ Prices in 学习币; `~` marks a negotiable price. An item sold in several shops
 | four-words | 认识四个新词 | flag practice:first | square -2.9,-6.4 练习角 · 小美 |
 | name-things | 认出十样东西 | discovered ≥ 10 | square 0,5 广场中心 |
 | souvenir | 带一份纪念品回家 | flag purchase:first | square 4.8,-9.4 小小商店 · 陈叔叔 |
-| furnish | 布置你的房间 | home ≥ 4 | square 11,9.6 我的家 |
+| furnish | 布置你的房间 | home ≥ 4 | garden 16,54.8 我的家 |
 | market | 走进商业街 | district (market) | square 19.4,0 商业街的门 |
-| order | 用中文点一道菜 | ordered | riverside -51,4.1 家常餐厅 |
-| furnish-shop | 去家居小铺看看 | flag homeware:first | square -17.5,-0.6 家居小铺 |
+| order | 用中文点一道菜 | ordered | riverside -52.1,4.1 家常餐厅 |
+| furnish-shop | 去家居小铺看看 | flag homeware:first | square -17.75,-0.6 家居小铺 |
 | daily | 完成一件日常小事 | flag daily:first | square 0,9 城里到处都行 |
 | metro-first | 坐地铁去云海 | flag metro:first | square -7.5,11.6 青禾地铁站 |
 | city-line | 记下城里人说的一句话 | flag city:line |  |
-| teahouse-permit | 拿到开店许可证 | flag permit:shop | square -18,-6 青禾银行 |
-| teahouse-build | 把茶楼盖起来 | flag built:teahouse | garden 12.5,43.1 茶楼工地 |
+| teahouse-permit | 拿到开店许可证 | flag permit:shop | square -17,-6 青禾银行 |
+| teahouse-build | 把茶楼盖起来 | flag built:teahouse | garden 23,25.1 茶楼工地 |
+| my-camera | 用自己的相机打卡 | flag camera:first | square 15.25,1.7 旧物铺 |
+| fishing | 跟王爷爷学钓鱼 | flag fish:first | fields -1.75,106.05 码头 · 王爷爷 |
+| vegetables | 帮刘奶奶摘菜 | flag veg:first | fields 3.8,83.4 菜地 · 刘奶奶 |
 | city-directions | 问路找书店 | flag city:found-bookstore |  |
-| city-taxi | 用中文打车 | flag city-taxi |  |
 | city-noodles | 在海风面馆吃碗面 | flag city-noodles |  |
 | home-noodles | 在家做番茄鸡蛋面 | flag cooked:tomato-egg-noodles |  |
 
@@ -168,16 +184,16 @@ Prices in 学习币; `~` marks a negotiable price. An item sold in several shops
 
 ## City: 云海市中心 (Downtown Yunhai)
 
-- Metro from 青禾地铁站 in the square at -7.5,14.6. Fares: single 6, pass 40 for 7 days. Size 56×68.
-- Towers: 云海银行 -17.5,16.5 · 星光百货 -20.6,-1.15 · 一号书店 -17.5,-16 · 中山医院 17.5,16 · 海风面馆 17.5,1 · 光明电影院 17.5,-15 · 便利店 -19,-31 · 海边咖啡 19,-31; plus 2 unsigned.
-- Props: citylamp ×17, cityplanter ×6, citybench ×12, bin ×2, citycrossing ×2, trafficlight ×2, cityshelter, citykiosk, gate, taxi ×2, promenadelamp ×9, citytree ×8, ledsign ×3, droneboard.
+- Metro from 青禾地铁站 in the square at -7.5,14.6. Transit card (fares in metro.json); old tickets credit 6 each. Size 56×68.
+- Towers: 云海银行 -17.5,16.5 · 星光百货 -76.5,70.5 · 一号书店 -18,-16 · 中山医院 18.2,17.3 · 海风面馆 17.5,1 · 光明电影院 17.5,-15 · 便利店 -19.2,-29.3 · 海边咖啡 19.6,-29.4 · 文化中心 60,3; plus 4 unsigned.
+- Props: citylamp ×34, cityplanter ×10, citybench ×29, bin ×5, pool ×3, citytree ×51, ledsign ×7, arch, shopfront ×4, flowerbed ×5, fountain, pond, pavilion, rockery ×2, promenadelamp ×16, citykiosk, gate, droneboard.
 - People: clerk 上班的人 -4.2,11 (3 lines) · student 学生 4.6,-6 (3 lines) · busker 街头艺人 -4.8,-19 (3 lines).
 
 ## Build sites
 
 | id | zh | district | x,z | permit | needs | unlocks | income |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| teahouse | 茶楼工地 | garden | 12.5,46.5 | shop | timber ×8, brick ×6, cloth-bolt ×4 | built:teahouse | 18 |
+| teahouse | 茶楼工地 | garden | 23,29.5 | shop | timber ×8, brick ×6, cloth-bolt ×4 | built:teahouse | 18 |
 
 ## Recipes
 
@@ -190,16 +206,17 @@ Prices in 学习币; `~` marks a negotiable price. An item sold in several shops
 
 ## Town props and passers-by
 
-- **square**: bench ×3, planter ×3, bin ×2, streetlight ×3, bicycle ×3, bollard, crate ×3, sign, fruitstand; 3 passers-by
+- **square**: bench ×5, planter ×5, bin ×2, streetlight ×3, bicycle ×3, bollard, crate ×3, sign, fruitstand; 3 passers-by
 - **market**: streetlight ×15, bench ×9, bin ×4, fruitstand ×2, crate ×2, cafetable ×3, chair ×6, parasol, sign ×2, bicycle ×3; 7 passers-by
 - **riverside**: bench ×2, streetlight ×2, planter ×4, cafetable, chair; 2 passers-by
 - **garden**: ; 0 passers-by
+- **fields**: ; 0 passers-by
 
 ## Words, lessons and reading
 
 - Town words (vocabulary.json): 水 water, 茶 tea, 苹果 apple, 书 book
-- Nameable objects (objects.json): 218 (HSK 1 ×20, HSK 3 ×27, HSK 2 ×31, HSK 4 ×26, HSK 5 ×13, HSK 6 ×14, no level ×87)
-- Lessons: city-directions 问路 (3 nodes), city-noodles 来一碗面 (5 nodes), city-taxi 打车 (2 nodes), introductions 初次见面 (4 nodes), npc-smalltalk 聊一会儿 (0 nodes)
+- Nameable objects (objects.json): 256 (HSK 1 ×20, HSK 3 ×28, HSK 2 ×32, HSK 4 ×27, HSK 5 ×16, HSK 6 ×16, no level ×117)
+- Lessons: city-directions 问路 (3 nodes), city-noodles 来一碗面 (5 nodes), fishing-wang-show 跟王爷爷学钓鱼 (2 nodes), fishing-wang 跟王爷爷学钓鱼 (2 nodes), introductions 初次见面 (4 nodes), npc-smalltalk 聊一会儿 (0 nodes), veggies-liu-check 帮刘奶奶摘菜 (2 nodes), veggies-liu 帮刘奶奶摘菜 (2 nodes)
 - Ambient lines: ambient-weather, ambient-walk, ambient-tea, ambient-yes, ambient-bread, ambient-breakfast, ambient-reading, ambient-story, ambient-lunch, ambient-noodles, ambient-river, ambient-later, ambient-park-view, ambient-park-lotus, ambient-park-fish, ambient-park-feed, ambient-snack-wonton, ambient-snack-try, ambient-snack-breakfast, ambient-snack-youtiao, ambient-study-words, ambient-study-count, ambient-study-quiet, ambient-study-like
 - Library stories: 早上 morning (level 1, 6 lines), 我的家 my-home (level 1, 6 lines), 买东西 shopping (level 2, 6 lines), 一把伞 umbrella (level 2, 6 lines), 老照片 photographs (level 3, 6 lines), 夜市 night-market (level 4, 6 lines)
 - HSK word lists: `public/hsk/words.json` and `src/content/hsk*.json` (large: query them, never read them whole)

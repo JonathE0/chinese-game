@@ -5,8 +5,8 @@
     "en": "My home",
     "building": "home",
     "door": {
-      "x": 11,
-      "z": 10.7
+      "x": 16,
+      "z": 53.7
     },
     "enterLabel": "回家",
     "size": [
@@ -323,8 +323,8 @@
     "roofBeam": "#8a3a2e",
     "decoratable": false,
     "window": [
-      -6.5,
-      6.5
+      -2.6,
+      2.6
     ],
     "lectern": {
       "x": 0,
@@ -468,7 +468,7 @@
       {
         "room": "listening",
         "zh": "听力室",
-        "x": -4,
+        "x": -6,
         "z": -6,
         "wall": "back",
         "label": "进听力室 · 练听力"
@@ -476,7 +476,7 @@
       {
         "room": "courtyard",
         "zh": "庭院",
-        "x": 4,
+        "x": 6,
         "z": -6,
         "wall": "back",
         "label": "去庭院 · 坐一坐"
@@ -516,7 +516,7 @@
     "en": "Lifestyle store",
     "building": "lifestyle",
     "door": {
-      "x": 39,
+      "x": 40.1,
       "z": 5.9
     },
     "enterLabel": "进生活馆",
@@ -669,7 +669,7 @@
     "en": "Slow coffee",
     "building": "cafe",
     "door": {
-      "x": 28,
+      "x": 28.7,
       "z": 5.9
     },
     "enterLabel": "进慢慢咖啡",
@@ -999,7 +999,7 @@
     "en": "Qinghe lighting",
     "building": "lights",
     "door": {
-      "x": 58,
+      "x": 65.9,
       "z": -4.4
     },
     "enterLabel": "进灯具店",
@@ -1136,12 +1136,12 @@
     "en": "Home-style restaurant",
     "building": "restaurant",
     "door": {
-      "x": -51,
+      "x": -52.1,
       "z": 4.1
     },
     "enterLabel": "进餐厅",
     "size": [
-      12,
+      11.6,
       9
     ],
     "spawn": [
@@ -1253,13 +1253,13 @@
       },
       {
         "kind": "menuboard",
-        "x": 5.2,
+        "x": 5,
         "z": -1.6,
         "rot": -90
       },
       {
         "kind": "shelfunit",
-        "x": -5.7,
+        "x": -5.5,
         "z": -2.6,
         "rot": 90
       },
@@ -1277,7 +1277,7 @@
       },
       {
         "kind": "wallsign",
-        "x": 6,
+        "x": 5.8,
         "z": -1.6,
         "rot": -90,
         "sign": "菜单"
@@ -1291,7 +1291,7 @@
       },
       {
         "kind": "wallclock",
-        "x": -6,
+        "x": -5.8,
         "z": 1.6,
         "rot": 90
       }
@@ -1370,22 +1370,23 @@
     "pinyin": "jiājū xiǎo pù",
     "en": "Home goods",
     "building": "homeware",
+    "look": "jiangnan",
     "door": {
-      "x": -17.5,
+      "x": -17.75,
       "z": 0.2
     },
     "enterLabel": "进家居小铺",
     "size": [
-      10,
-      8
+      6.1,
+      5.8
     ],
     "spawn": [
       0,
-      2.6
+      1.5
     ],
     "exit": [
       0,
-      3.6
+      2.5
     ],
     "height": 3.5,
     "floor": "#c6b494",
@@ -1394,97 +1395,85 @@
     "roofBeam": "#8c7554",
     "decoratable": false,
     "window": [
-      -3.6,
-      3.6
+      -2.2,
+      2.2
     ],
     "stock": "homeware",
     "fittings": [
       {
         "kind": "bedshow",
-        "x": -3,
-        "z": -0.4,
+        "x": -1.7,
+        "z": 0.3,
         "rot": 0,
         "sign": "床上用品"
       },
       {
         "kind": "displaytable",
-        "x": 2.4,
-        "z": -0.6,
+        "x": 1.6,
+        "z": -0.1,
         "rot": 0
-      },
-      {
-        "kind": "displaytable",
-        "x": 2.4,
-        "z": 1.9,
-        "rot": 0
-      },
-      {
-        "kind": "shelfunit",
-        "x": -4.4,
-        "z": 2.2,
-        "rot": 90
       },
       {
         "kind": "cupshelf",
-        "x": 4.78,
-        "z": -2.6,
+        "x": 2.83,
+        "z": -1.9,
         "rot": -90
       },
       {
         "kind": "plantpot",
-        "x": 4.2,
-        "z": 3,
+        "x": -2.65,
+        "z": -2.5,
         "rot": 0
       },
       {
         "kind": "stool",
-        "x": -0.6,
-        "z": 2.3,
+        "x": 1.2,
+        "z": 1.1,
         "rot": 0
       },
       {
         "kind": "wallsign",
-        "x": 5,
-        "z": -2.6,
+        "x": 3.05,
+        "z": -1.9,
         "rot": -90,
         "sign": "厨具"
       },
       {
         "kind": "sofa",
-        "x": 4.5,
-        "z": 0.9,
-        "rot": -90
+        "x": -2,
+        "z": 2.4,
+        "rot": 180
       },
       {
         "kind": "wallsign",
-        "x": 5,
-        "z": 0.9,
+        "x": 3.05,
+        "z": 1.7,
         "rot": -90,
         "sign": "家具"
       },
       {
         "kind": "floorlamp",
-        "x": 4.5,
-        "z": -0.6,
+        "x": 2.75,
+        "z": 0.3,
         "rot": 0
       },
       {
         "kind": "floorsign",
-        "x": -1.8,
-        "z": 3.3,
+        "x": 1.8,
+        "z": 2.45,
         "rot": 0,
         "sign": "今日特价"
       },
       {
         "kind": "wallclock",
-        "x": -5,
-        "z": -2.4,
+        "x": -3.05,
+        "z": -1.96,
         "rot": 90
       },
       {
         "kind": "wrapdesk",
         "x": 0,
-        "z": -2.2,
+        "z": -1.6,
         "rot": 0,
         "action": "shop:homeware",
         "label": "看看家具 · 布置你的家"
@@ -1500,12 +1489,12 @@
         "color": "#b45b52",
         "path": [
           [
-            -0.9,
-            -3.2
+            -0.55,
+            -2.5
           ],
           [
-            0.9,
-            -3.2
+            0.55,
+            -2.5
           ]
         ],
         "speed": 0.5
@@ -1518,21 +1507,21 @@
     "en": "Second-hand shop",
     "building": "resale",
     "door": {
-      "x": 15.5,
+      "x": 15.25,
       "z": 1.7
     },
     "enterLabel": "进旧物铺",
     "size": [
-      9,
-      6
+      7.5,
+      5.6
     ],
     "spawn": [
       0,
-      1.8
+      1.6
     ],
     "exit": [
       0,
-      2.6
+      2.4
     ],
     "height": 3.2,
     "floor": "#bda88a",
@@ -1541,8 +1530,8 @@
     "roofBeam": "#8a6a4c",
     "decoratable": false,
     "window": [
-      -3,
-      3
+      -2.5,
+      2.5
     ],
     "opens": {
       "flag": "purchase:first",
@@ -1553,7 +1542,7 @@
       {
         "kind": "resalecounter",
         "x": 0,
-        "z": -1.7,
+        "z": -1.59,
         "rot": 0,
         "approach": 1.6,
         "action": "panel:resale",
@@ -1561,63 +1550,63 @@
       },
       {
         "kind": "cratewall",
-        "x": -3.4,
-        "z": -1.4,
+        "x": -2.83,
+        "z": -1.31,
         "rot": 90
       },
       {
         "kind": "cratewall",
-        "x": 3.4,
-        "z": -1.4,
+        "x": 2.83,
+        "z": -1.31,
         "rot": -90
       },
       {
         "kind": "cratewall",
-        "x": -3.4,
-        "z": 1.4,
+        "x": -2.83,
+        "z": 1.31,
         "rot": 90
       },
       {
         "kind": "displaytable",
-        "x": 1.9,
-        "z": 1.1,
+        "x": 1.58,
+        "z": 1.03,
         "rot": 0
       },
       {
         "kind": "basketstack",
-        "x": -1.6,
-        "z": 1.2,
+        "x": -1.33,
+        "z": 1.12,
         "rot": 0
       },
       {
         "kind": "plantpot",
-        "x": 3.4,
-        "z": 1.8,
+        "x": 2.83,
+        "z": 1.68,
         "rot": 0
       },
       {
         "kind": "wallsign",
-        "x": 4.5,
-        "z": 0.4,
+        "x": 3.75,
+        "z": 0.37,
         "rot": -90,
         "sign": "旧物回收"
       },
       {
         "kind": "wallsign",
-        "x": 2.4,
-        "z": 3,
+        "x": 2,
+        "z": 2.8,
         "rot": 180,
         "sign": "营业时间"
       },
       {
         "kind": "noticeboard",
-        "x": -2.4,
-        "z": 3,
+        "x": -2,
+        "z": 2.8,
         "rot": 180
       },
       {
         "kind": "wallclock",
-        "x": -4.5,
+        "x": -3.75,
         "z": 0,
         "rot": 90
       }
@@ -1629,12 +1618,12 @@
     "en": "Qinghe bank",
     "building": "bank-branch",
     "door": {
-      "x": -18,
+      "x": -17,
       "z": -3.4
     },
     "enterLabel": "进银行",
     "size": [
-      10,
+      7.6,
       8
     ],
     "spawn": [
@@ -1652,8 +1641,8 @@
     "roofBeam": "#6d7d8c",
     "decoratable": false,
     "window": [
-      -3.4,
-      3.4
+      -2.58,
+      2.58
     ],
     "opens": {
       "flag": "practice:first",
@@ -1663,7 +1652,7 @@
     "fittings": [
       {
         "kind": "bankcounter",
-        "x": -3.8,
+        "x": -2.75,
         "z": 0,
         "rot": 90,
         "sign": [
@@ -1676,69 +1665,69 @@
       },
       {
         "kind": "atm",
-        "x": -4.4,
+        "x": -3.34,
         "z": -2.8,
         "rot": 90
       },
       {
         "kind": "atm",
-        "x": 4.4,
+        "x": 3.34,
         "z": -2.8,
         "rot": -90
       },
       {
         "kind": "sofa",
-        "x": 3.2,
+        "x": 2.43,
         "z": 2,
         "rot": -90
       },
       {
         "kind": "plantpot",
-        "x": 4.2,
+        "x": 3.19,
         "z": -1,
         "rot": 0
       },
       {
         "kind": "scroll",
-        "x": -3.4,
+        "x": -2.58,
         "z": -3.85,
         "rot": 0
       },
       {
         "kind": "scroll",
-        "x": 3.4,
+        "x": 2.58,
         "z": -3.85,
         "rot": 0
       },
       {
         "kind": "queuerail",
-        "x": -2.4,
+        "x": -1.3,
         "z": 1.6,
         "rot": 90
       },
       {
         "kind": "floorsign",
-        "x": -1.8,
-        "z": 2.9,
+        "x": -2.3,
+        "z": 3.1,
         "rot": 0,
         "sign": "请排队"
       },
       {
         "kind": "wallsign",
-        "x": 2.4,
+        "x": 1.82,
         "z": 4,
         "rot": 180,
         "sign": "营业时间"
       },
       {
         "kind": "wallclock",
-        "x": 5,
+        "x": 3.8,
         "z": -1.8,
         "rot": -90
       },
       {
         "kind": "noticeboard",
-        "x": 5,
+        "x": 3.8,
         "z": 0.8,
         "rot": -90
       }
@@ -1753,11 +1742,11 @@
         "color": "#36594f",
         "path": [
           [
-            -4.55,
+            -3.45,
             -1
           ],
           [
-            -4.55,
+            -3.45,
             1
           ]
         ],
@@ -1771,7 +1760,7 @@
     "en": "Wheat-scent bakery",
     "building": "bakery",
     "door": {
-      "x": 39,
+      "x": 40.4,
       "z": -6.2
     },
     "enterLabel": "进面包店",
@@ -1905,7 +1894,7 @@
     "en": "Qinghe library",
     "building": "bookshop",
     "door": {
-      "x": 48.5,
+      "x": 53.4,
       "z": -4.2
     },
     "enterLabel": "进书馆",
@@ -2094,21 +2083,21 @@
     "en": "Qinghe tea house",
     "building": "teahouse",
     "door": {
-      "x": 12.5,
-      "z": 43.7
+      "x": 23,
+      "z": 25.9
     },
     "enterLabel": "进茶楼",
     "size": [
       10,
-      8
+      6.2
     ],
     "spawn": [
       0,
-      2.6
+      1.7
     ],
     "exit": [
       0,
-      3.6
+      2.7
     ],
     "height": 3.6,
     "floor": "#c2a077",
@@ -2130,125 +2119,125 @@
       {
         "kind": "cupshelf",
         "x": -3.4,
-        "z": -3.4,
+        "z": -2.63,
         "rot": 0
       },
       {
         "kind": "teatable",
         "x": -3,
-        "z": 0.6,
+        "z": 0.47,
         "rot": 0
       },
       {
         "kind": "diningchair",
         "x": -3,
-        "z": -0.5,
+        "z": -0.63,
         "rot": 0
       },
       {
         "kind": "diningchair",
         "x": -4.4,
-        "z": 0.6,
+        "z": 0.47,
         "rot": 90
       },
       {
         "kind": "teatable",
         "x": 2.2,
-        "z": 1.4,
+        "z": 1.09,
         "rot": 0
       },
       {
         "kind": "diningchair",
         "x": 2.2,
-        "z": 0.2999999999999998,
+        "z": -0.01,
         "rot": 0
       },
       {
         "kind": "scroll",
         "x": -1,
-        "z": -3.85,
+        "z": -2.98,
         "rot": 0
       },
       {
         "kind": "plantpot",
         "x": 4.3,
-        "z": 3.2,
+        "z": 2.48,
         "rot": 0
       },
       {
         "kind": "stool",
         "x": -1.6,
-        "z": 2.9,
+        "z": 2.25,
         "rot": 0
       },
       {
         "kind": "shelfunit",
         "x": 4.68,
-        "z": -1.2,
+        "z": -0.93,
         "rot": -90,
         "tint": "#8d6b4d"
       },
       {
         "kind": "wallsign",
         "x": 5,
-        "z": -1.2,
+        "z": -0.93,
         "rot": -90,
         "sign": "茶叶"
       },
       {
         "kind": "diningchair",
         "x": -1.6,
-        "z": 0.6,
+        "z": 0.47,
         "rot": -90
       },
       {
         "kind": "diningchair",
         "x": 3.6,
-        "z": 1.4,
+        "z": 1.09,
         "rot": -90
       },
       {
         "kind": "diningchair",
         "x": 0.8,
-        "z": 1.4,
+        "z": 1.09,
         "rot": 90
       },
       {
         "kind": "menuboard",
         "x": -4.72,
-        "z": 2.4,
+        "z": 1.86,
         "rot": 90
       },
       {
         "kind": "wallsign",
         "x": -5,
-        "z": 2.4,
+        "z": 1.86,
         "rot": 90,
         "sign": "菜单"
       },
       {
         "kind": "floorsign",
         "x": 1.8,
-        "z": 3.3,
+        "z": 2.56,
         "rot": 0,
         "sign": "今日推荐"
       },
       {
         "kind": "scroll",
         "x": 1,
-        "z": -3.85,
+        "z": -2.98,
         "rot": 0
       },
       {
         "kind": "wallclock",
         "x": -5,
-        "z": -1.8,
+        "z": -1.39,
         "rot": 90
       },
       {
         "kind": "teabar",
         "x": 0,
-        "z": -2.2,
+        "z": -1.71,
         "rot": 0,
         "action": "shop:teahouse",
         "label": "点一壶茶"
@@ -2257,11 +2246,11 @@
     "lanterns": [
       [
         -3,
-        0.6
+        0.47
       ],
       [
         2.2,
-        1.4
+        1.09
       ]
     ],
     "staff": [
@@ -2275,11 +2264,11 @@
         "path": [
           [
             -0.9,
-            -3.2
+            -2.48
           ],
           [
             0.9,
-            -3.2
+            -2.48
           ]
         ],
         "speed": 0.5
@@ -2292,21 +2281,21 @@
     "en": "Qinghe Post Office",
     "building": "bank",
     "door": {
-      "x": -29,
-      "z": 4.3
+      "x": -29.5,
+      "z": 5.8
     },
     "enterLabel": "进邮局",
     "size": [
-      10,
-      8
+      8.8,
+      7.1
     ],
     "spawn": [
       0,
-      2.6
+      2.15
     ],
     "exit": [
       0,
-      3.6
+      3.15
     ],
     "height": 3.6,
     "floor": "#c9c2ad",
@@ -2318,83 +2307,83 @@
       {
         "kind": "postcounter",
         "x": 0,
-        "z": -1.9,
+        "z": -1.69,
         "rot": 0
       },
       {
         "kind": "parcelshelf",
-        "x": -3,
-        "z": -3.65,
+        "x": -2.64,
+        "z": -3.24,
         "rot": 0,
         "sign": "包裹"
       },
       {
         "kind": "parcelshelf",
-        "x": 3,
-        "z": -3.65,
+        "x": 2.64,
+        "z": -3.24,
         "rot": 0
       },
       {
         "kind": "stampcase",
-        "x": -2.8,
-        "z": 0.4,
+        "x": -2.46,
+        "z": 0.36,
         "rot": 90,
         "sign": "邮票"
       },
       {
         "kind": "letterslot",
-        "x": -4.94,
-        "z": -1.4,
+        "x": -4.35,
+        "z": -1.24,
         "rot": 90,
         "sign": "寄信"
       },
       {
         "kind": "queuerail",
-        "x": 1.9,
-        "z": -0.2,
+        "x": 1.67,
+        "z": -0.18,
         "rot": 90
       },
       {
         "kind": "floorsign",
-        "x": 1.9,
-        "z": 1.4,
+        "x": 1.67,
+        "z": 1.24,
         "rot": 0,
         "sign": "请排队"
       },
       {
         "kind": "noticeboard",
-        "x": 4.94,
-        "z": -0.6,
+        "x": 4.35,
+        "z": -0.53,
         "rot": -90
       },
       {
         "kind": "wallclock",
-        "x": 4.94,
-        "z": 1.6,
+        "x": 4.35,
+        "z": 1.42,
         "rot": -90
       },
       {
         "kind": "bench",
-        "x": 4.4,
-        "z": 1.6,
+        "x": 3.87,
+        "z": 1.42,
         "rot": -90
       },
       {
         "kind": "poster",
-        "x": -4.92,
-        "z": 1.6,
+        "x": -4.33,
+        "z": 1.42,
         "rot": 90
       },
       {
         "kind": "plantpot",
-        "x": -4.2,
-        "z": 3.2,
+        "x": -3.7,
+        "z": 2.84,
         "rot": 0
       },
       {
         "kind": "plantpot",
-        "x": 4.2,
-        "z": 3.2,
+        "x": 3.7,
+        "z": 2.84,
         "rot": 0
       }
     ],
@@ -2408,12 +2397,12 @@
         "color": "#4f7a5e",
         "path": [
           [
-            -0.8,
-            -3.1
+            -0.7,
+            -2.75
           ],
           [
-            0.8,
-            -3.1
+            0.7,
+            -2.75
           ]
         ],
         "speed": 0.5
@@ -2432,15 +2421,15 @@
     "enterLabel": "进药店",
     "size": [
       9,
-      8
+      7.2
     ],
     "spawn": [
       0,
-      2.6
+      2.2
     ],
     "exit": [
       0,
-      3.6
+      3.2
     ],
     "height": 4.2,
     "floor": "#cfc6b0",
@@ -2452,21 +2441,21 @@
       {
         "kind": "herbcabinet",
         "x": -2.3,
-        "z": -3.7,
+        "z": -3.3,
         "rot": 0,
         "sign": "中药"
       },
       {
         "kind": "medicineshelf",
         "x": 2.3,
-        "z": -3.72,
+        "z": -3.32,
         "rot": 0,
         "sign": "西药"
       },
       {
         "kind": "checkout",
         "x": 0,
-        "z": -1.8,
+        "z": -1.4,
         "rot": 0,
         "sign": "取药",
         "action": "shop:pharmacy",
@@ -2481,32 +2470,32 @@
       {
         "kind": "poster",
         "x": -4.42,
-        "z": -1.2,
+        "z": -1.1,
         "rot": 90
       },
       {
         "kind": "noticeboard",
         "x": -4.44,
-        "z": 1.2,
+        "z": 1,
         "rot": 90
       },
       {
         "kind": "wallclock",
         "x": 4.44,
-        "z": 2,
+        "z": 1.8,
         "rot": -90
       },
       {
         "kind": "floorsign",
         "x": 2,
-        "z": 2.8,
+        "z": 2.4,
         "rot": 0,
         "sign": "小心地滑"
       },
       {
         "kind": "plantpot",
         "x": -3.8,
-        "z": 3.2,
+        "z": 2.8,
         "rot": 0
       }
     ],
@@ -2521,11 +2510,11 @@
         "path": [
           [
             -0.6,
-            -2.85
+            -2.45
           ],
           [
             0.6,
-            -2.85
+            -2.45
           ]
         ],
         "speed": 0.5
@@ -2539,20 +2528,20 @@
     "building": "guesthouse",
     "door": {
       "x": -17.5,
-      "z": 9.4
+      "z": 11.05
     },
     "enterLabel": "进客栈",
     "size": [
-      10,
-      9
+      6.6,
+      5.9
     ],
     "spawn": [
       0,
-      3
+      1.55
     ],
     "exit": [
       0,
-      4
+      2.55
     ],
     "height": 4.2,
     "floor": "#b99a74",
@@ -2562,104 +2551,98 @@
     "decoratable": false,
     "lanterns": [
       [
-        -2.5,
-        0.5
+        -1.8,
+        0.55
       ],
       [
-        2,
-        0.5
+        1.15,
+        0.9
       ],
       [
-        -2.5,
-        -1.4
+        -1.65,
+        -0.9
       ]
     ],
     "fittings": [
       {
         "kind": "reception",
-        "x": -2.4,
-        "z": -2.9,
+        "x": -1.58,
+        "z": -1.9,
         "rot": 0,
         "sign": "前台"
       },
       {
         "kind": "keyrack",
-        "x": -2.4,
-        "z": -4.44,
+        "x": -1.58,
+        "z": -2.9,
         "rot": 0
       },
       {
         "kind": "stairflight",
-        "x": 4.3,
-        "z": -1.4,
+        "x": 2.6,
+        "z": -0.9,
         "rot": 0,
         "sign": "客房"
       },
       {
         "kind": "teatable",
-        "x": -2.4,
-        "z": 1,
+        "x": -1.8,
+        "z": 0.55,
         "rot": 0
       },
       {
         "kind": "diningchair",
-        "x": -3.5,
-        "z": 1,
+        "x": -2.9,
+        "z": 0.55,
         "rot": 90
       },
       {
         "kind": "diningchair",
-        "x": -1.3,
-        "z": 1,
+        "x": -0.7,
+        "z": 0.55,
         "rot": -90
       },
       {
         "kind": "teatable",
-        "x": 1.4,
-        "z": 1.6,
+        "x": 1.15,
+        "z": 0.9,
         "rot": 0
       },
       {
         "kind": "diningchair",
-        "x": 2.5,
-        "z": 1.6,
-        "rot": -90
-      },
-      {
-        "kind": "diningchair",
-        "x": 1.4,
-        "z": 0.5,
+        "x": 1.15,
+        "z": -0.2,
         "rot": 0
       },
       {
         "kind": "scroll",
-        "x": -4.96,
-        "z": -0.5,
+        "x": -3.27,
+        "z": -0.35,
         "rot": 90
       },
       {
         "kind": "wallclock",
-        "x": 2.2,
-        "z": -4.44,
+        "x": 1.45,
+        "z": -2.9,
         "rot": 0
       },
       {
         "kind": "floorsign",
-        "x": -1.6,
-        "z": 3.4,
+        "x": -2,
+        "z": 1.85,
         "rot": 0,
         "sign": "欢迎光临"
       },
       {
         "kind": "plantpot",
-        "x": -4.2,
-        "z": 3.7,
+        "x": -2.77,
+        "z": 2.5,
         "rot": 0
       },
       {
         "kind": "plantpot",
-        "x": 4.2,
-        "z": 3.7,
+        "x": 2.77,
+        "z": 2.5,
         "rot": 0
       }
     ]
@@ -2670,7 +2653,7 @@
     "en": "Clothes shop",
     "building": "clothes-shop",
     "door": {
-      "x": 49,
+      "x": 52,
       "z": 5.2
     },
     "enterLabel": "进服装店",
@@ -2803,8 +2786,8 @@
     "en": "Study",
     "building": "home",
     "door": {
-      "x": 11,
-      "z": 10.7
+      "x": 16,
+      "z": 53.7
     },
     "size": [
       5,
@@ -2881,8 +2864,8 @@
     "en": "Home kitchen",
     "building": "home",
     "door": {
-      "x": 11,
-      "z": 10.7
+      "x": 16,
+      "z": 53.7
     },
     "enterLabel": "进厨房",
     "size": [
@@ -2943,8 +2926,8 @@
     "en": "Starlight hardware & home",
     "building": "city:department",
     "door": {
-      "x": -10.5,
-      "z": 0
+      "x": -76.5,
+      "z": 51.1
     },
     "interiorOnly": true,
     "returnPlace": "mall",
@@ -3503,7 +3486,7 @@
     "trim": "#6f8570",
     "roofBeam": "#5f7160",
     "returnSpawn": [
-      -4,
+      -6,
       -4.4,
       180
     ],
@@ -3624,7 +3607,7 @@
     "trim": "#8d8472",
     "roofBeam": "#8d8472",
     "returnSpawn": [
-      4,
+      6,
       -4.4,
       180
     ],
@@ -3700,22 +3683,27 @@
       "x": -7.5,
       "z": 13.1
     },
-    "enterLabel": "Enter station · 进站",
+    "enterLabel": "进站 · Enter station",
     "size": [
       24,
-      24
+      30
     ],
     "spawn": [
       0,
-      8,
+      13.4,
       0
     ],
     "exit": [
       0,
-      11
+      14
     ],
-    "height": 5.6,
-    "doorHeight": 3.5,
+    "height": 8,
+    "doorHeight": 6.6,
+    "upper": {
+      "y": 4,
+      "entrance": true
+    },
+    "underground": true,
     "floor": "#b9c3c9",
     "wall": "#e2e8e9",
     "trim": "#467d9f",
@@ -3725,28 +3713,53 @@
     "fittings": [
       {
         "kind": "ticketmachine",
-        "x": 3,
-        "z": 5,
-        "action": "metro",
-        "label": "Transit card · 交通卡充值"
+        "x": 5.5,
+        "z": -0.3,
+        "action": "metro:machine",
+        "label": "充值 · Top up card"
+      },
+      {
+        "kind": "ticketmachine",
+        "x": 6.7,
+        "z": -0.3,
+        "action": "metro:machine",
+        "label": "充值 · Top up card"
       },
       {
         "kind": "floorsign",
-        "x": 0,
-        "z": 2.6,
-        "action": "metro",
-        "label": "Tap card / exit · 刷卡",
-        "sign": "刷卡 TAP"
+        "x": 6.1,
+        "z": 1.4,
+        "sign": "请排队"
       },
       {
         "kind": "bench",
+        "x": -11.3,
+        "z": 8.6,
+        "rot": 90
+      },
+      {
+        "kind": "bench",
+        "x": -11.3,
+        "z": 6,
+        "rot": 90
+      },
+      {
+        "kind": "wallclock",
+        "x": -11.96,
+        "z": 3.2,
+        "rot": 90
+      },
+      {
+        "kind": "poster",
         "x": -6,
-        "z": -1
+        "z": 11.12,
+        "rot": 180
       },
       {
-        "kind": "bench",
-        "x": 6,
-        "z": -1
+        "kind": "poster",
+        "x": 8,
+        "z": 11.12,
+        "rot": 180
       }
     ]
   },
@@ -4073,13 +4086,13 @@
     "building": "city:hospital",
     "door": {
       "x": 10.6,
-      "z": 16
+      "z": 17.3
     },
     "interiorOnly": true,
     "returnPlace": "city",
     "returnSpawn": [
       9.5,
-      16,
+      17.3,
       90
     ],
     "returnLabel": "回到步行街",
@@ -4772,14 +4785,14 @@
     "en": "Convenience store",
     "building": "city:store",
     "door": {
-      "x": -12.6,
-      "z": -29
+      "x": -12.8,
+      "z": -29.3
     },
     "interiorOnly": true,
     "returnPlace": "city",
     "returnSpawn": [
-      -11.5,
-      -29,
+      -11.7,
+      -29.3,
       -90
     ],
     "returnLabel": "回到步行街",
@@ -4896,17 +4909,17 @@
     "en": "Seaside Café",
     "building": "city:cafe",
     "door": {
-      "x": 19,
+      "x": 19.6,
       "z": -35.6
     },
     "interiorOnly": true,
     "returnPlace": "city",
     "returnSpawn": [
-      19,
+      19.6,
       -36.7,
       0
     ],
-    "returnLabel": "回到步行街",
+    "returnLabel": "回到滨海步道",
     "decoratable": false,
     "enterLabel": "进咖啡馆",
     "size": [
@@ -5114,15 +5127,15 @@
     "en": "Starlight Department Store",
     "building": "city:department",
     "door": {
-      "x": -10.5,
-      "z": 0
+      "x": -76.5,
+      "z": 51.1
     },
     "interiorOnly": true,
     "returnPlace": "city",
     "returnSpawn": [
-      -9.4,
-      0,
-      -90
+      -76.5,
+      50,
+      0
     ],
     "returnLabel": "出口",
     "enterLabel": "进商场",
@@ -5983,30 +5996,42 @@
     ]
   },
   "yunhai-central": {
-    "zh": "云海中央车站",
-    "pinyin": "Yúnhǎi zhōngyāng chēzhàn",
-    "en": "Yunhai Central",
+    "zh": "云海市中心站",
+    "pinyin": "Yúnhǎi Shì Zhōngxīn Zhàn",
+    "en": "Yunhai City Centre Station",
     "building": "metro-station",
     "door": {
       "x": -7.5,
       "z": 13.1
     },
-    "enterLabel": "Enter station · 进站",
+    "enterLabel": "进站 · Enter station",
+    "interiorOnly": true,
+    "underground": true,
     "size": [
       40,
-      32
+      46
     ],
     "spawn": [
       0,
-      12,
+      16,
       0
     ],
     "exit": [
       0,
-      15
+      22
     ],
-    "height": 9,
-    "doorHeight": 3.5,
+    "height": 16,
+    "doorHeight": 8.5,
+    "upper": {
+      "y": 5,
+      "entrance": true
+    },
+    "exits": [
+      {"id": "A", "wall": "front", "at": 0},
+      {"id": "B", "wall": "west", "at": 16},
+      {"id": "C", "wall": "east", "at": 16},
+      {"id": "D", "wall": "front", "at": 12}
+    ],
     "floor": "#b9c3c9",
     "wall": "#e2e8e9",
     "trim": "#467d9f",
@@ -6014,136 +6039,213 @@
     "decoratable": false,
     "transit": "yunhai",
     "returnPlace": "city",
-    "returnSpawn": [
-      0,
-      26,
-      0
-    ],
-    "returnLabel": "Exit to Yunhai · 出站",
     "fittings": [
       {
         "kind": "ticketmachine",
-        "x": 3,
-        "z": 5,
-        "action": "metro",
-        "label": "Transit card · 交通卡充值"
+        "x": 8.5,
+        "z": 5.3,
+        "y": 5,
+        "action": "metro:machine",
+        "label": "充值 · Top up card"
+      },
+      {
+        "kind": "ticketmachine",
+        "x": 9.7,
+        "z": 5.3,
+        "y": 5,
+        "action": "metro:machine",
+        "label": "充值 · Top up card"
       },
       {
         "kind": "floorsign",
-        "x": 0,
-        "z": 2.6,
-        "action": "metro",
-        "label": "Tap card / exit · 刷卡",
-        "sign": "刷卡 TAP"
+        "x": 9.1,
+        "z": 7,
+        "y": 5,
+        "sign": "请排队"
       },
       {
         "kind": "bench",
-        "x": -6,
-        "z": -1
+        "x": -16.5,
+        "z": 11,
+        "y": 5,
+        "rot": 90
       },
       {
         "kind": "bench",
-        "x": 6,
-        "z": -1
+        "x": 16.5,
+        "z": 11,
+        "y": 5,
+        "rot": -90
+      },
+      {
+        "kind": "wallclock",
+        "x": -19.96,
+        "z": 20.5,
+        "y": 5,
+        "rot": 90
+      },
+      {
+        "kind": "poster",
+        "x": 19.92,
+        "z": 21,
+        "y": 5,
+        "rot": -90
       }
     ]
   },
   "riverside-lobby": {
-    "building": "city:riverside-apartments",
+    "building": "city:yunhai-centre",
     "door": {
-      "x": -12,
-      "z": -178.2
+      "x": 20,
+      "z": -189
     },
-    "height": 3.8,
-    "floor": "#c8ad8a",
-    "wall": "#f0e7d8",
-    "trim": "#8bada5",
-    "roofBeam": "#ae9682",
-    "zh": "河畔公寓大厅",
-    "pinyin": "hépàn gōngyù dàtīng",
-    "en": "Riverside Apartments lobby",
+    "interiorOnly": true,
+    "height": 7.6,
+    "doorHeight": 2.8,
+    "floor": "#d8d2c4",
+    "wall": "#efe9df",
+    "trim": "#9aa3a6",
+    "roofBeam": "#c9c2b4",
+    "zh": "大堂",
+    "pinyin": "dàtáng",
+    "en": "Lobby",
     "size": [
-      12,
-      10
+      18,
+      14
     ],
     "spawn": [
       0,
-      3,
+      5.6,
       0
     ],
     "exit": [
       0,
-      4.5
+      6.6
     ],
     "returnPlace": "city",
     "returnSpawn": [
-      -12,
-      -177,
+      20,
+      -186.9,
       180
     ],
     "returnLabel": "Return to ferry · 渡轮",
     "decoratable": false,
-    "annexes": [
-      {
-        "room": "riverside-apartment",
-        "zh": "101 室",
-        "x": 4,
-        "z": -4.7,
-        "wall": "back",
-        "label": "Apartment 101 · 房间"
-      }
-    ],
     "fittings": [
       {
-        "kind": "noticeboard",
-        "x": 0,
-        "z": -4.8,
+        "kind": "reception",
+        "x": -5,
+        "z": -3.2,
         "action": "rental",
-        "label": "Rent / renew · 租房"
-      },
-      {
-        "kind": "bench",
-        "x": -3,
-        "z": 1
+        "label": "前台 · Front desk",
+        "approach": 1.1
       },
       {
         "kind": "wallsign",
-        "x": 3,
-        "z": -4.8,
-        "sign": "101 →"
+        "x": -5,
+        "z": -6.95,
+        "sign": "前台"
+      },
+      {
+        "kind": "wallsign",
+        "x": -8.95,
+        "z": -3.2,
+        "rot": 90,
+        "sign": "物业"
+      },
+      {
+        "kind": "sofa",
+        "x": -7.6,
+        "z": 2.2,
+        "rot": 90
+      },
+      {
+        "kind": "sofa",
+        "x": -3.6,
+        "z": 2.2,
+        "rot": -90
+      },
+      {
+        "kind": "rug",
+        "x": -5.6,
+        "z": 2.2,
+        "tint": "#7d6a5c"
+      },
+      {
+        "kind": "plantpot",
+        "x": -8.3,
+        "z": 5.6
+      },
+      {
+        "kind": "plantpot",
+        "x": 8.3,
+        "z": 5.6
+      },
+      {
+        "kind": "plantpot",
+        "x": 1.4,
+        "z": -6.3
+      },
+      {
+        "kind": "plantpot",
+        "x": 7.9,
+        "z": -6.2
+      }
+    ],
+    "staff": [
+      {
+        "id": "lobby-receptionist",
+        "zh": "前台",
+        "pinyin": "qiántái",
+        "en": "receptionist",
+        "color": "#2f5d62",
+        "path": [
+          [
+            -5.6,
+            -4.3
+          ],
+          [
+            -4.4,
+            -4.3
+          ]
+        ],
+        "speed": 0.3,
+        "talk": false
       }
     ]
   },
   "riverside-apartment": {
-    "building": "city:riverside-apartments",
+    "building": "city:yunhai-centre",
     "door": {
-      "x": -12,
-      "z": -178.2
+      "x": 20,
+      "z": -189
     },
+    "interiorOnly": true,
     "height": 3.8,
     "floor": "#c8ad8a",
     "wall": "#f0e7d8",
     "trim": "#8bada5",
     "roofBeam": "#ae9682",
-    "zh": "河畔公寓 101",
-    "pinyin": "hépàn gōngyù yī líng yī",
-    "en": "Riverside Apartment 101",
+    "zh": "单间",
+    "pinyin": "dānjiān",
+    "en": "Studio",
     "size": [
       10,
       9
     ],
-    "spawn": [
-      0,
-      3,
-      0
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
     ],
+    "returnLabel": "电梯 · Lift",
+    "returnWall": "back",
     "exit": [
       0,
-      4
+      -4.2
     ],
-    "returnPlace": "riverside-lobby",
-    "returnSpawn": [
-      4,
+    "spawn": [
+      0,
       -3,
       180
     ],
@@ -6194,13 +6296,986 @@
         "x": -3,
         "z": -4.4,
         "action": "rental",
-        "label": "Lease details · 房租",
-        "sign": "河畔公寓 101"
+        "label": "Rent and lease · 房租",
+        "sign": "房租"
+      },
+      {
+        "kind": "kitchen",
+        "x": -4.4,
+        "z": 0.6,
+        "rot": 90,
+        "action": "cook",
+        "label": "做饭 · 厨房"
+      },
+      {
+        "kind": "plantpot",
+        "x": 4.1,
+        "z": 3.6
+      }
+    ]
+  },
+  "harbour-lift": {
+    "building": "city:yunhai-centre",
+    "door": {
+      "x": 20,
+      "z": -189
+    },
+    "interiorOnly": true,
+    "height": 2.7,
+    "doorHeight": 2.25,
+    "floor": "#b9b4aa",
+    "wall": "#c8ccce",
+    "trim": "#8e9599",
+    "roofBeam": "#aab0b3",
+    "zh": "电梯",
+    "pinyin": "diàntī",
+    "en": "Lift",
+    "size": [
+      2.8,
+      2.4
+    ],
+    "spawn": [
+      0,
+      -0.4,
+      180
+    ],
+    "exit": [
+      0,
+      0.8
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
+    ],
+    "returnLabel": "电梯 · Lift",
+    "decoratable": false
+  },
+  "harbour-cafe": {
+    "building": "city:yunhai-centre",
+    "door": {
+      "x": 20,
+      "z": -189
+    },
+    "interiorOnly": true,
+    "height": 3.6,
+    "floor": "#b89872",
+    "wall": "#f1e6d6",
+    "trim": "#8d6b4d",
+    "roofBeam": "#b59872",
+    "zh": "咖啡厅",
+    "pinyin": "kāfēitīng",
+    "en": "Café",
+    "size": [
+      14,
+      10
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
+    ],
+    "returnLabel": "电梯 · Lift",
+    "returnWall": "back",
+    "exit": [
+      -5,
+      -4.7
+    ],
+    "spawn": [
+      -5,
+      -3.5,
+      180
+    ],
+    "decoratable": false,
+    "fittings": [
+      {
+        "kind": "espressobar",
+        "x": 2.5,
+        "z": -3.9,
+        "action": "shop:city-cafe",
+        "label": "看看菜单"
+      },
+      {
+        "kind": "diningtable",
+        "x": -3.5,
+        "z": 1.8
+      },
+      {
+        "kind": "diningchair",
+        "x": -3.5,
+        "z": 0.8
+      },
+      {
+        "kind": "diningtable",
+        "x": 0,
+        "z": 1.8
+      },
+      {
+        "kind": "diningchair",
+        "x": 0,
+        "z": 0.8
+      },
+      {
+        "kind": "diningtable",
+        "x": 3.5,
+        "z": 1.8
+      },
+      {
+        "kind": "diningchair",
+        "x": 3.5,
+        "z": 0.8
+      },
+      {
+        "kind": "plantpot",
+        "x": 6.3,
+        "z": 4.2
+      },
+      {
+        "kind": "plantpot",
+        "x": -6.3,
+        "z": 4.2
       }
     ],
-    "window": [
-      -3,
-      3
+    "staff": [
+      {
+        "id": "cafe-barista",
+        "zh": "服务员",
+        "pinyin": "fúwùyuán",
+        "en": "barista",
+        "color": "#6f4e37",
+        "path": [
+          [
+            1.8,
+            -4.6
+          ],
+          [
+            3.2,
+            -4.6
+          ]
+        ],
+        "speed": 0.4,
+        "talk": false
+      }
+    ]
+  },
+  "harbour-laundry": {
+    "building": "city:yunhai-centre",
+    "door": {
+      "x": 20,
+      "z": -189
+    },
+    "interiorOnly": true,
+    "height": 3.4,
+    "floor": "#d6d2c1",
+    "wall": "#eef1ef",
+    "trim": "#8fa3a6",
+    "roofBeam": "#b7c1c2",
+    "zh": "洗衣房",
+    "pinyin": "xǐyīfáng",
+    "en": "Laundry",
+    "size": [
+      9,
+      7
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
+    ],
+    "returnLabel": "电梯 · Lift",
+    "returnWall": "back",
+    "exit": [
+      2.5,
+      -3.2
+    ],
+    "spawn": [
+      2.5,
+      -2,
+      180
+    ],
+    "decoratable": false,
+    "fittings": [
+      {
+        "kind": "bench",
+        "x": 1,
+        "z": 1.8
+      },
+      {
+        "kind": "diningtable",
+        "x": 1.2,
+        "z": -0.6
+      },
+      {
+        "kind": "plantpot",
+        "x": 3.9,
+        "z": 2.9
+      }
+    ]
+  },
+  "harbour-gym": {
+    "building": "city:yunhai-centre",
+    "door": {
+      "x": 20,
+      "z": -189
+    },
+    "interiorOnly": true,
+    "height": 3.6,
+    "floor": "#5f6668",
+    "wall": "#e9ecec",
+    "trim": "#6f7a7e",
+    "roofBeam": "#b9c0c2",
+    "zh": "健身房",
+    "pinyin": "jiànshēnfáng",
+    "en": "Gym",
+    "size": [
+      14,
+      10
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
+    ],
+    "returnLabel": "电梯 · Lift",
+    "returnWall": "back",
+    "exit": [
+      5,
+      -4.7
+    ],
+    "spawn": [
+      5,
+      -3.5,
+      180
+    ],
+    "decoratable": false,
+    "fittings": [
+      {
+        "kind": "mirror",
+        "x": -6.85,
+        "z": -1,
+        "rot": 90
+      },
+      {
+        "kind": "mirror",
+        "x": -6.85,
+        "z": 1,
+        "rot": 90
+      },
+      {
+        "kind": "bench",
+        "x": 1.5,
+        "z": -2.6
+      },
+      {
+        "kind": "plantpot",
+        "x": 6.3,
+        "z": 4.2
+      }
+    ]
+  },
+  "harbour-one-bed": {
+    "building": "city:yunhai-centre",
+    "door": {
+      "x": 20,
+      "z": -189
+    },
+    "interiorOnly": true,
+    "height": 3.6,
+    "floor": "#b8956b",
+    "wall": "#f3ece0",
+    "trim": "#8d7a5f",
+    "roofBeam": "#b9a07e",
+    "zh": "一室一厅",
+    "pinyin": "yí shì yì tīng",
+    "en": "One-bedroom flat",
+    "size": [
+      13,
+      10
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
+    ],
+    "returnLabel": "电梯 · Lift",
+    "returnWall": "back",
+    "exit": [
+      4.5,
+      -4.7
+    ],
+    "spawn": [
+      4.5,
+      -3.5,
+      180
+    ],
+    "decoratable": true,
+    "decorateAt": [
+      3,
+      -2.6
+    ],
+    "slots": {
+      "lamp": {
+        "zh": "灯",
+        "x": -2.4,
+        "z": -4.2,
+        "rot": 0,
+        "accepts": [
+          "lamp"
+        ]
+      },
+      "rug": {
+        "zh": "地毯",
+        "x": -4.4,
+        "z": 0.6,
+        "rot": 0,
+        "accepts": [
+          "rug"
+        ]
+      }
+    },
+    "fittings": [
+      {
+        "kind": "rentalbed",
+        "x": -4.4,
+        "z": -3.2,
+        "action": "sleep",
+        "label": "Rest in your rented room · 休息"
+      },
+      {
+        "kind": "floorlamp",
+        "x": -6,
+        "z": -4.4
+      },
+      {
+        "kind": "kitchen",
+        "x": 1.2,
+        "z": -4.4,
+        "action": "cook",
+        "label": "做饭 · 厨房"
+      },
+      {
+        "kind": "diningtable",
+        "x": 1.2,
+        "z": -1.6
+      },
+      {
+        "kind": "diningchair",
+        "x": 0.2,
+        "z": -1.6,
+        "rot": 90
+      },
+      {
+        "kind": "diningchair",
+        "x": 2.2,
+        "z": -1.6,
+        "rot": -90
+      },
+      {
+        "kind": "sofa",
+        "x": 3.6,
+        "z": 1
+      },
+      {
+        "kind": "rug",
+        "x": 3.6,
+        "z": 2.3,
+        "tint": "#9b6f5a"
+      },
+      {
+        "kind": "plantpot",
+        "x": 5.8,
+        "z": 3
+      }
+    ]
+  },
+  "harbour-garden": {
+    "building": "city:yunhai-centre",
+    "door": {
+      "x": 20,
+      "z": -189
+    },
+    "interiorOnly": true,
+    "height": 3.8,
+    "floor": "#9fae8c",
+    "wall": "#eef2e8",
+    "trim": "#7d8f76",
+    "roofBeam": "#c5cdb8",
+    "zh": "空中花园",
+    "pinyin": "kōngzhōng huāyuán",
+    "en": "Sky garden",
+    "size": [
+      16,
+      12
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
+    ],
+    "returnLabel": "电梯 · Lift",
+    "returnWall": "back",
+    "exit": [
+      6,
+      -5.7
+    ],
+    "spawn": [
+      6,
+      -4.5,
+      180
+    ],
+    "decoratable": false,
+    "fittings": [
+      {
+        "kind": "pond",
+        "x": 0,
+        "z": 0.6
+      },
+      {
+        "kind": "rock",
+        "x": -2.6,
+        "z": 1.9
+      },
+      {
+        "kind": "path",
+        "x": 0,
+        "z": 3.5
+      },
+      {
+        "kind": "bench",
+        "x": -3.6,
+        "z": 4.3
+      },
+      {
+        "kind": "bench",
+        "x": 3.6,
+        "z": 4.3
+      },
+      {
+        "kind": "plantpot",
+        "x": -7.3,
+        "z": 5.3
+      },
+      {
+        "kind": "plantpot",
+        "x": 7.3,
+        "z": 5.3
+      },
+      {
+        "kind": "plantpot",
+        "x": -2.2,
+        "z": -5.3
+      },
+      {
+        "kind": "plantpot",
+        "x": 2.2,
+        "z": -5.3
+      }
+    ]
+  },
+  "harbour-pool": {
+    "building": "city:yunhai-centre",
+    "door": {
+      "x": 20,
+      "z": -189
+    },
+    "interiorOnly": true,
+    "height": 3.8,
+    "floor": "#dfe6e4",
+    "wall": "#f4f7f6",
+    "trim": "#7fa3ad",
+    "roofBeam": "#c7d4d6",
+    "zh": "游泳池",
+    "pinyin": "yóuyǒngchí",
+    "en": "Pool",
+    "size": [
+      16,
+      12
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
+    ],
+    "returnLabel": "电梯 · Lift",
+    "returnWall": "back",
+    "exit": [
+      -6,
+      -5.7
+    ],
+    "spawn": [
+      -6,
+      -4.5,
+      180
+    ],
+    "decoratable": false,
+    "fittings": [
+      {
+        "kind": "bench",
+        "x": -6.8,
+        "z": 1,
+        "rot": 90
+      },
+      {
+        "kind": "plantpot",
+        "x": 7.4,
+        "z": -5.4
+      },
+      {
+        "kind": "plantpot",
+        "x": 7.4,
+        "z": 5.3
+      },
+      {
+        "kind": "plantpot",
+        "x": -7.4,
+        "z": 5.3
+      }
+    ]
+  },
+  "harbour-view": {
+    "building": "city:yunhai-centre",
+    "door": {
+      "x": 20,
+      "z": -189
+    },
+    "interiorOnly": true,
+    "height": 3.6,
+    "floor": "#caa982",
+    "wall": "#f5efe4",
+    "trim": "#7f6448",
+    "roofBeam": "#bfa27c",
+    "zh": "海景房",
+    "pinyin": "hǎijǐng fáng",
+    "en": "Harbour-view flat",
+    "size": [
+      16,
+      11
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
+    ],
+    "returnLabel": "电梯 · Lift",
+    "returnWall": "back",
+    "exit": [
+      5.5,
+      -5.2
+    ],
+    "spawn": [
+      5.5,
+      -4,
+      180
+    ],
+    "decoratable": true,
+    "decorateAt": [
+      4.2,
+      -2.6
+    ],
+    "slots": {
+      "rug": {
+        "zh": "地毯",
+        "x": -5.8,
+        "z": 2.2,
+        "rot": 0,
+        "accepts": [
+          "rug"
+        ]
+      },
+      "lamp": {
+        "zh": "灯",
+        "x": 2.6,
+        "z": 1.2,
+        "rot": 0,
+        "accepts": [
+          "lamp"
+        ]
+      }
+    },
+    "desk": {
+      "x": 5.6,
+      "z": 0.8,
+      "rot": 90,
+      "label": "复习生词 · 书桌"
+    },
+    "fittings": [
+      {
+        "kind": "rentalbed",
+        "x": -6.9,
+        "z": -1.2,
+        "rot": 90,
+        "action": "sleep",
+        "label": "Rest in your rented room · 休息"
+      },
+      {
+        "kind": "floorlamp",
+        "x": -7.5,
+        "z": 1
+      },
+      {
+        "kind": "mirror",
+        "x": -5.2,
+        "z": -5.35
+      },
+      {
+        "kind": "kitchen",
+        "x": 0,
+        "z": -4.9,
+        "action": "cook",
+        "label": "做饭 · 厨房"
+      },
+      {
+        "kind": "fridge",
+        "x": 3.6,
+        "z": -5
+      },
+      {
+        "kind": "diningtable",
+        "x": 0,
+        "z": -2.3
+      },
+      {
+        "kind": "diningchair",
+        "x": -1,
+        "z": -2.3,
+        "rot": 90
+      },
+      {
+        "kind": "diningchair",
+        "x": 1,
+        "z": -2.3,
+        "rot": -90
+      },
+      {
+        "kind": "sofa",
+        "x": 0.5,
+        "z": 1.2
+      },
+      {
+        "kind": "rug",
+        "x": 0.5,
+        "z": 2.5,
+        "tint": "#6f7f8f"
+      },
+      {
+        "kind": "bookcase",
+        "x": 7.7,
+        "z": 0.8,
+        "rot": -90
+      },
+      {
+        "kind": "plantpot",
+        "x": 7.4,
+        "z": 4.6
+      }
+    ]
+  },
+  "harbour-penthouse": {
+    "building": "city:yunhai-centre",
+    "door": {
+      "x": 20,
+      "z": -189
+    },
+    "interiorOnly": true,
+    "height": 7.6,
+    "floor": "#9c7654",
+    "wall": "#f4efe7",
+    "trim": "#5e4430",
+    "roofBeam": "#a8876a",
+    "zh": "顶层公寓",
+    "pinyin": "dǐngcéng gōngyù",
+    "en": "Penthouse",
+    "size": [
+      13.6,
+      13.2
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
+    ],
+    "returnLabel": "电梯 · Lift",
+    "returnWall": "back",
+    "exit": [
+      4,
+      -6.3
+    ],
+    "spawn": [
+      4,
+      -5.1,
+      180
+    ],
+    "decoratable": true,
+    "decorateAt": [
+      2.6,
+      -3.8
+    ],
+    "upper": {
+      "y": 3.8,
+      "well": [
+        -6.8,
+        -1.28,
+        -5.2,
+        6.6
+      ],
+      "stairs": {
+        "x": -6.2,
+        "z": 3.2,
+        "width": 1.1,
+        "steps": 14,
+        "tread": 0.32
+      },
+      "decorateAt": [
+        -1.6,
+        -1.6
+      ]
+    },
+    "slots": {
+      "lamp": {
+        "zh": "灯",
+        "x": -3.6,
+        "z": -1.2,
+        "rot": 0,
+        "accepts": [
+          "lamp"
+        ]
+      },
+      "rug": {
+        "zh": "地毯",
+        "x": 1.8,
+        "z": -1.4,
+        "rot": 0,
+        "accepts": [
+          "rug"
+        ],
+        "y": 3.8
+      }
+    },
+    "desk": {
+      "x": 4.6,
+      "z": -1.4,
+      "rot": 90,
+      "label": "复习生词 · 书桌"
+    },
+    "fittings": [
+      {
+        "kind": "kitchen",
+        "x": -0.9,
+        "z": -6,
+        "action": "cook",
+        "label": "做饭 · 厨房"
+      },
+      {
+        "kind": "fridge",
+        "x": 2.5,
+        "z": -6.2
+      },
+      {
+        "kind": "diningtable",
+        "x": -0.9,
+        "z": -3.4
+      },
+      {
+        "kind": "diningchair",
+        "x": -1.9,
+        "z": -3.4,
+        "rot": 90
+      },
+      {
+        "kind": "diningchair",
+        "x": 0.1,
+        "z": -3.4,
+        "rot": -90
+      },
+      {
+        "kind": "sofa",
+        "x": -1.6,
+        "z": 1.8
+      },
+      {
+        "kind": "sofa",
+        "x": 1,
+        "z": 1.8
+      },
+      {
+        "kind": "rug",
+        "x": -0.3,
+        "z": 3.2,
+        "tint": "#5f6f7f"
+      },
+      {
+        "kind": "floorlamp",
+        "x": 2.6,
+        "z": 2.2
+      },
+      {
+        "kind": "bookcase",
+        "x": 6.5,
+        "z": 1.8,
+        "rot": -90
+      },
+      {
+        "kind": "plantpot",
+        "x": 6.2,
+        "z": 4.4
+      },
+      {
+        "kind": "rentalbed",
+        "x": 1.8,
+        "z": -4,
+        "y": 3.8,
+        "action": "sleep",
+        "label": "Rest in your rented room · 休息"
+      },
+      {
+        "kind": "floorlamp",
+        "x": 3.4,
+        "z": -5.6,
+        "y": 3.8
+      },
+      {
+        "kind": "mirror",
+        "x": 5.8,
+        "z": -6.45,
+        "y": 3.8
+      },
+      {
+        "kind": "plantpot",
+        "x": 6.2,
+        "z": 3.2,
+        "y": 3.8
+      }
+    ]
+  },
+  "harbour-restaurant": {
+    "building": "city:yunhai-centre",
+    "door": {
+      "x": 20,
+      "z": -189
+    },
+    "interiorOnly": true,
+    "height": 3.4,
+    "floor": "#6f5a48",
+    "wall": "#efe6da",
+    "trim": "#5e4430",
+    "roofBeam": "#9c8266",
+    "zh": "屋顶餐厅",
+    "pinyin": "wūdǐng cāntīng",
+    "en": "Rooftop restaurant",
+    "size": [
+      10.6,
+      10.4
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      20,
+      -186.9,
+      180
+    ],
+    "returnLabel": "电梯 · Lift",
+    "returnWall": "back",
+    "exit": [
+      3,
+      -4.9
+    ],
+    "spawn": [
+      3,
+      -3.7,
+      180
+    ],
+    "decoratable": false,
+    "fittings": [
+      {
+        "kind": "diningtable",
+        "x": -3,
+        "z": 2.2
+      },
+      {
+        "kind": "diningchair",
+        "x": -3,
+        "z": 1.2
+      },
+      {
+        "kind": "tablet",
+        "x": -3.95,
+        "z": 1.4,
+        "action": "rental:menu",
+        "label": "看菜单点菜"
+      },
+      {
+        "kind": "diningtable",
+        "x": 0,
+        "z": 2.2
+      },
+      {
+        "kind": "diningchair",
+        "x": 0,
+        "z": 1.2
+      },
+      {
+        "kind": "tablet",
+        "x": -0.95,
+        "z": 1.4,
+        "action": "rental:menu",
+        "label": "看菜单点菜"
+      },
+      {
+        "kind": "diningtable",
+        "x": 3,
+        "z": 2.2
+      },
+      {
+        "kind": "diningchair",
+        "x": 3,
+        "z": 1.2
+      },
+      {
+        "kind": "tablet",
+        "x": 2.05,
+        "z": 1.4,
+        "action": "rental:menu",
+        "label": "看菜单点菜"
+      },
+      {
+        "kind": "plantpot",
+        "x": -4.7,
+        "z": -4.6
+      },
+      {
+        "kind": "plantpot",
+        "x": 4.7,
+        "z": 4.6
+      }
+    ],
+    "staff": [
+      {
+        "id": "rooftop-waiter",
+        "zh": "服务员",
+        "pinyin": "fúwùyuán",
+        "en": "waiter",
+        "color": "#1f2a36",
+        "path": [
+          [
+            -3.8,
+            -0.6
+          ],
+          [
+            3.8,
+            -0.6
+          ]
+        ],
+        "speed": 0.5,
+        "talk": false
+      }
     ]
   }
 }

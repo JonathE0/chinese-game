@@ -12,10 +12,12 @@
     "check:content": "node scripts/check-content.js && node scripts/content-map.js",
     "map": "node scripts/content-map.js",
     "audit:voice": "node scripts/audit-voice.js",
+    "models": "node scripts/blender/run.js",
     "verify": "node --test --test-reporter=dot tests/*.test.js && node scripts/check-content.js && node scripts/content-map.js && vite build --logLevel warn"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.1",
+    "opencc-js": "^1.4.2",
     "playcanvas": "2.22.1"
   },
   "devDependencies": {

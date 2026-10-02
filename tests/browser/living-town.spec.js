@@ -32,7 +32,8 @@ test('fruit can be lifted out of a stall, thrown, and the gap quietly restocks',
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await seed(page,{});
   await start(page);
-  await warp(page,-6.4,1.8,0);                 // the stall stands at (-6.4, 0)
+  // The stall stands at (-6.4, 0) and 周叔叔 keeps it from its east end (-5, 1.2): come at it from the west.
+  await warp(page,-7.4,1.6,0);
   await expect(page.locator('#interact span')).toHaveText('拿一个水果');
 
   await page.keyboard.press('e');
@@ -44,7 +45,8 @@ test('fruit can be lifted out of a stall, thrown, and the gap quietly restocks',
   expect(held).toEqual({carrying:true,bodies:1,emptySlots:1});
 
   // Nothing you lift out of a display is inventory: it cannot be eaten, worn or sold.
-  expect(Object.keys((await saved(page)).inventory)).toEqual([]);
+  // (Grandpa's camera is every traveller's from the start: roots.json `camera`.)
+  expect(Object.keys((await saved(page)).inventory)).toEqual(['grandpa-camera']);
 
   const flight=await page.evaluate(async()=>{
     const t=window.__qinghe.town;

@@ -152,10 +152,11 @@ export function buildHotpot(town,root){
   const ribbon=Array.from({length:RIBBON},()=>{const r=box(service,[0,0,0],[.045,.03,.16],'#f3e6c0');r.enabled=false;return r;});
 
   const staff=(color,[x,z],chefHat)=>{
-    const p=initIdle(m.person(root,color,[x,Y,z]));
+    // Yunhai's people (people.json) in the staff's colour; the chef is a young man under his hat.
+    const p=initIdle(m.person(root,color,[x,Y,z],false,undefined,chefHat?{archetype:'young-man',top:color}:{mix:'city',top:color}));
     p.entity.setLocalEulerAngles(0,180,0);
-    if(chefHat){cylinder(p.neck,[0,.72,0],[.4,.34,.4],'#f7f5ee');ball(p.neck,[0,.92,0],[.5,.2,.5],'#f7f5ee');}
-    else box(p.upper,[0,.9,.19],[.5,.5,.02],'#2a2320');           // the waiter's apron
+    if(chefHat){box(p.neck,[0,p.top+.1,0],[.46,.3,.42],'#f7f5ee');box(p.neck,[0,p.top+.32,0],[.52,.16,.48],'#f7f5ee');}   // blocky, like the head
+    else box(p.upper,[0,p.seatDrop+.28,p.front+.03],[.42,.5,.02],'#2a2320');           // the waiter's apron, from the waist down
     return Object.assign(p,{x,z,path:[],then:null,walk:0});
   };
   const waiter=staff('#8e1f16',L.waiter,false),chef=staff('#f2f0e8',L.chef,true);
