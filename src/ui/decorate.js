@@ -1,3 +1,4 @@
+import {rentalAccess} from '../core/rental.js';
 import catalog from '../content/catalog.json' with {type:'json'};
 import rooms from '../content/rooms.json' with {type:'json'};
 import {languageLine,pinyinHtml} from './shell.js';
@@ -43,6 +44,7 @@ function putAway(ctx,record){
 }
 
 export function openDecorate(ctx){
+ if(!rentalAccess(ctx.profile,ctx.town.place))return ctx.ui.notice('Renew your lease to decorate. Your belongings are safe.');
   if(!ctx.profile.completed.includes('home:tutorial'))return tutorial(ctx);
   slotView(ctx);
 }
@@ -226,3 +228,5 @@ export function installPlacement(ctx){
     }
   };
 }
+
+export function storeRoomFurniture(ctx,room){for(const record of [...ctx.profile.home].filter(r=>roomOf(r)===room))putAway(ctx,record);}

@@ -813,3 +813,5 @@ body.camera-up #nameplate{display:none}
 
 /* English-first arrival guidance; Mandarin expands with practice. */
 .roots-english{font-size:15px;line-height:1.65;color:#334c42}.roots-mandarin{margin:8px 0 16px;font-size:13px}.roots-mandarin summary{cursor:pointer;color:#526e60}#roots-photo-guide{padding:14px 18px;background:#e8eee2;border-radius:10px;margin-bottom:20px}#roots-photo-guide h3{margin-top:0}#roots-photo-guide li{margin-bottom:10px;line-height:1.5}#roots-photo-guide ol{padding-left:20px}.roots-goal small{display:block;margin-top:6px}
+
+#status-button{position:relative}.condition-warning{position:absolute;right:0;top:-6px;width:16px;height:16px;border-radius:50%;background:#f6bf42;color:#352510;font:bold 12px/16px sans-serif;text-align:center;pointer-events:none;box-shadow:0 0 0 2px #fff}.condition-warning[hidden]{display:none}

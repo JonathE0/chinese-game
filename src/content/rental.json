@@ -1,0 +1,89 @@
+{
+  "id": "riverside-apartment",
+  "lobby": "riverside-lobby",
+  "name": "河畔公寓 · Riverside Apartments",
+  "price": 35,
+  "days": 7,
+  "warningDays": 2,
+  "entrance": {
+    "x": -12,
+    "z": -178.2
+  },
+  "building": {
+    "x": -12,
+    "z": -183,
+    "width": 11,
+    "depth": 8,
+    "height": 12
+  },
+  "lesson": {
+    "id": "rental-practice",
+    "title": "Renting a room",
+    "nodes": [
+      {
+        "id": "rent-room",
+        "speaker": "Rental desk",
+        "zh": "你想租一个房间吗？",
+        "pinyin": "Nǐ xiǎng zū yí ge fángjiān ma?",
+        "en": "Would you like to rent a room?",
+        "prompt": {
+          "zh": "说说你想租什么。",
+          "pinyin": "Shuōshuo nǐ xiǎng zū shénme.",
+          "en": "Say you would like to rent a room."
+        },
+        "accepted": [
+          "我想租一个房间",
+          "我要租房间",
+          "我想租房",
+          "租一个房间",
+          "我想租一间房",
+          "可以租房吗",
+          "我想住这里",
+          "我想租这个房间"
+        ],
+        "answerRules": {
+          "templates": [
+            "{polite}{request}{room}{ending}"
+          ],
+          "slots": {
+            "polite": [
+              "",
+              "你好",
+              "请问"
+            ],
+            "request": [
+              "我想租",
+              "我要租",
+              "我想要租"
+            ],
+            "room": [
+              "一个房间",
+              "一间房",
+              "这个房间",
+              "房间"
+            ],
+            "ending": [
+              "",
+              "谢谢",
+              "可以吗"
+            ]
+          }
+        },
+        "model": "我想租一个房间。",
+        "feedback": "You can also say 我想租一间房。",
+        "intent": "rent",
+        "choices": [
+          "我想租一个房间",
+          "我要租房间",
+          "我想租房"
+        ]
+      }
+    ],
+    "host": {
+      "zh": "租房练习",
+      "en": "Rental practice",
+      "color": "#719d93"
+    },
+    "en": "Practise asking for temporary housing."
+  }
+}

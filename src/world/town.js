@@ -3,6 +3,8 @@ import {createModels} from './models.js';
 import worldData from '../content/world.json' with {type:'json'};
 import npcs from '../content/npcs.json' with {type:'json'};
 import rooms from '../content/rooms.json' with {type:'json'};
+import {buildRentalExterior} from './rental.js';
+import {buildMetroStation} from './metro-station.js';
 import {buildRoom,ROOM_OFFSET,annexDoor,annexApproach,upperParts} from './interior.js';
 import {Registry,raySpan} from './registry.js';
 import {walkClear,rotatedHalf} from './navigation.js';
@@ -153,7 +155,7 @@ export class Town {
     this.drag={id:null,x:0,y:0};this.stick={id:null,ox:0,oy:0,dx:0,dz:0};
     this.lookPending={x:0,y:0};this.speedScale=1;this.seated=null;this.roomOpen=new Map();
     initIdle(this.player,.37);
-    this.place='town';this.rooms=new Map();this.buildRooms();this.registerRooms();
+    this.place='town';this.rooms=new Map();this.buildRooms();this.registerRooms();this.transit=new Map();for(const room of this.rooms.values())if(room.data.transit)this.transit.set(room.id,buildMetroStation(this,room));
     // People in the word hall (src/world/visitors.js), walking whether or not you are there.
     this.visitors=new Visitors({registry:this.registry,rooms:this.rooms,models:this.m,seatDrop:SEAT_DROP,
       player:()=>{const p=this.player.entity.getPosition();return {place:this.place,x:p.x,z:p.z,seat:this.seated?.index};}});
@@ -316,7 +318,7 @@ export class Town {
       this.mark('city',CITY_OFFSET+person.x,person.z,.52,.48,0,1.95,'person');
     // The parts of 云海 kept in their own files. Each adds its entities under the city root and its
     // own marks, and may hand back {update(dt,paused), targets()}; anything that moves sets noBatch.
-    room.parts=[buildBay,buildHill,buildHotpot,buildDrones,buildHarbour,buildMall,buildCrowd].map(build=>build(this,built.root)).filter(Boolean);
+    room.parts=[buildBay,buildHill,buildHotpot,buildDrones,buildHarbour,buildMall,buildCrowd,buildRentalExterior].map(build=>build(this,built.root)).filter(Boolean);
     room.parts.push({update:built.update});   // the city's own LED façades (src/world/leds.js)
     this.registerLooks('city',built.root,{skip:new Set(built.people.map(one=>one.entity))});
     this.batchStatics('city-scenery',built.root);
@@ -893,7 +895,7 @@ export class Town {
   }
   /** Out in 云海: the way home, the doors, the people on the street, the shop window and the taxis. */
   cityTargets(room) {
-    const list=[{id:'metro:home',x:room.offsetX+room.data.exit[0],z:room.data.exit[1],
+    const list=[{id:'door:yunhai-central',x:room.offsetX+room.data.exit[0],z:room.data.exit[1],
       radius:3.0,label:room.data.returnLabel,wide:true}];
     // Doors into the city's buildings (city.json `doors`: {room, x, z, label}); each room returns here.
     for(const door of CITY.doors??[])list.push({id:'door:'+door.room,x:room.offsetX+door.x,z:door.z,radius:2.6,label:door.label,wide:true});
@@ -1082,7 +1084,7 @@ export class Town {
   }
   beginPlacement(item) {
     // Only a room the save can hold furniture for: anywhere else it would vanish on reload.
-    if(!this.rooms.get(this.place)?.data.decoratable)return false;
+    if(!this.rooms.get(this.place)?.data.decoratable||this.rentalAllowed?.(this.place)===false)return false;
     this.cancelPlacement();
     const room=this.rooms.get(this.place);
     this.ghost={item,rot:0,valid:false,x:0,z:0,
@@ -1524,6 +1526,8 @@ export class Town {
     this.dayMarket.update(dt,{hour:this.daylight.hour,place:this.place,offCamera:(x,z)=>this.offCamera(x,z)});
     this.dayMarket.syncHitboxes(this.registry,id=>({id:role(id),...NAMES[role(id)]}));
     for(const material of this.dayMarket.claimLamps())this.dayMarket.onLit?.(material);
+    this.transit?.get(this.place)?.update(dt);
+    if(this.ghost&&this.rentalAllowed?.(this.place)===false)this.cancelPlacement();
     this.toys.update(dt,this.place);
     this.water.update(dt,this);   // every pond, stream, fountain and the bay: one update a frame
     if(this.toys.held){

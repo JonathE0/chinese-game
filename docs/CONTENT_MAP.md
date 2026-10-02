@@ -18,7 +18,7 @@ the city uses its own coordinates.
 | sign | id | district | x,z | interior | build site |
 | --- | --- | --- | --- | --- | --- |
 | 青禾茶铺 | tea-house | square | -10.5,-8 |  |  |
-| 地铁 | metro-station | square | -7.5,14.6 | metro-platform |  |
+| 地铁 | metro-station | square | -7.5,14.6 | metro-platform, yunhai-central |  |
 | 词语馆 | practice-house | square | 0,-22 | hall, reading, studyroom, listening, courtyard |  |
 | 小小商店 | souvenir-house | square | 11,-8 |  |  |
 | 客栈 | guesthouse | square | -17.5,13 | guesthouse |  |
@@ -66,7 +66,7 @@ the city uses its own coordinates.
 | studyroom | 自习室 | Study room | practice-house |  |  | inside only |
 | listening | 听力室 | Listening room | practice-house |  |  | inside only |
 | courtyard | 庭院 | Courtyard | practice-house |  |  | inside only |
-| metro-platform | 地铁站台 | Metro platform | metro-station |  |  |  |
+| metro-platform | 青禾地铁站 | Qinghe Metro | metro-station |  |  |  |
 | city-bank | 云海银行 | Yunhai Bank | city:bank |  |  | inside only, bank panel, 1 staff |
 | city-bookshop | 一号书店 | No. 1 Bookshop | city:bookshop |  |  | inside only, 1 staff |
 | city-hospital | 中山医院 | Zhongshan Hospital | city:hospital |  |  | inside only, 2 staff |
@@ -76,6 +76,9 @@ the city uses its own coordinates.
 | city-store | 便利店 | Convenience store | city:store |  |  | inside only, 1 staff |
 | city-cafe | 海边咖啡 | Seaside Café | city:cafe |  |  | inside only, 1 staff |
 | mall | 星光百货 | Starlight Department Store | city:department |  |  | inside only, annexes → hardware, 7 staff |
+| yunhai-central | 云海中央车站 | Yunhai Central | metro-station |  |  |  |
+| riverside-lobby | 河畔公寓大厅 | Riverside Apartments lobby | city:riverside-apartments |  |  | annexes → riverside-apartment |
+| riverside-apartment | 河畔公寓 101 | Riverside Apartment 101 | city:riverside-apartments |  |  | decoratable |
 
 ## Shops and stock
 

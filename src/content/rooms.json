@@ -3692,129 +3692,63 @@
     ]
   },
   "metro-platform": {
-    "zh": "地铁站台",
-    "pinyin": "dìtiě zhàntái",
-    "en": "Metro platform",
+    "zh": "青禾地铁站",
+    "pinyin": "Qīnghé dìtiězhàn",
+    "en": "Qinghe Metro",
     "building": "metro-station",
     "door": {
       "x": -7.5,
       "z": 13.1
     },
-    "enterLabel": "进地铁站 · 去市里",
+    "enterLabel": "Enter station · 进站",
     "size": [
-      10,
-      8
+      24,
+      24
     ],
     "spawn": [
       0,
-      2.6,
+      8,
       0
     ],
     "exit": [
       0,
-      3.5
+      11
     ],
     "height": 5.6,
-    "doorHeight": 5.1,
-    "floor": "#b9bab3",
-    "wall": "#dfe3df",
-    "trim": "#4f7fae",
-    "roofBeam": "#8f979d",
+    "doorHeight": 3.5,
+    "floor": "#b9c3c9",
+    "wall": "#e2e8e9",
+    "trim": "#467d9f",
+    "roofBeam": "#bdc7ce",
     "decoratable": false,
+    "transit": "qinghe",
     "fittings": [
       {
-        "kind": "platformedge",
-        "x": 0.7,
-        "z": -3.35,
-        "action": "metro",
-        "label": "上车 · Board the train"
-      },
-      {
         "kind": "ticketmachine",
-        "x": 2.6,
-        "z": 2.8,
-        "y": 2.9,
-        "rot": -90,
-        "action": "metro",
-        "label": "买票 · BUY A TICKET"
-      },
-      {
-        "kind": "bench",
-        "x": 1.5,
-        "z": 0.2,
-        "rot": 180
-      },
-      {
-        "kind": "poster",
         "x": 3,
-        "z": -3.9,
-        "y": 2.9,
-        "rot": 0,
-        "sign": "地铁 1 号线"
-      },
-      {
-        "kind": "wallclock",
-        "x": 5,
-        "z": 0.4,
-        "rot": -90
-      },
-      {
-        "kind": "poster",
-        "x": 4.95,
-        "z": -1.6,
-        "rot": -90
+        "z": 5,
+        "action": "metro",
+        "label": "Transit card · 交通卡充值"
       },
       {
         "kind": "floorsign",
-        "x": 3.2,
-        "z": -2.2,
-        "rot": 0,
-        "sign": "请排队"
+        "x": 0,
+        "z": 2.6,
+        "action": "metro",
+        "label": "Tap card / exit · 刷卡",
+        "sign": "刷卡 TAP"
       },
       {
         "kind": "bench",
-        "x": -1.8,
-        "z": 0.2,
-        "rot": 180
+        "x": -6,
+        "z": -1
       },
       {
-        "kind": "plantpot",
-        "x": 4.3,
-        "z": 2.9,
-        "rot": 0
-      },
-      {
-        "kind": "wallsign",
-        "x": 0.7,
-        "z": -4,
-        "rot": 0,
-        "sign": "地铁 1 号线"
-      },
-      {
-        "kind": "plantpot",
-        "x": 4.3,
-        "z": -3.3,
-        "rot": 0,
-        "y": 2.9
+        "kind": "bench",
+        "x": 6,
+        "z": -1
       }
-    ],
-    "upper": {
-      "y": 2.9,
-      "entrance": true,
-      "well": [
-        -5,
-        -1.38,
-        -3.5,
-        4
-      ],
-      "stairs": {
-        "x": -4.45,
-        "z": 3.1,
-        "width": 1.1,
-        "steps": 14,
-        "tread": 0.32
-      }
-    }
+    ]
   },
   "city-bank": {
     "zh": "云海银行",
@@ -6046,6 +5980,227 @@
         "speed": 0.4,
         "line": "shop-mall-eat"
       }
+    ]
+  },
+  "yunhai-central": {
+    "zh": "云海中央车站",
+    "pinyin": "Yúnhǎi zhōngyāng chēzhàn",
+    "en": "Yunhai Central",
+    "building": "metro-station",
+    "door": {
+      "x": -7.5,
+      "z": 13.1
+    },
+    "enterLabel": "Enter station · 进站",
+    "size": [
+      40,
+      32
+    ],
+    "spawn": [
+      0,
+      12,
+      0
+    ],
+    "exit": [
+      0,
+      15
+    ],
+    "height": 9,
+    "doorHeight": 3.5,
+    "floor": "#b9c3c9",
+    "wall": "#e2e8e9",
+    "trim": "#467d9f",
+    "roofBeam": "#bdc7ce",
+    "decoratable": false,
+    "transit": "yunhai",
+    "returnPlace": "city",
+    "returnSpawn": [
+      0,
+      26,
+      0
+    ],
+    "returnLabel": "Exit to Yunhai · 出站",
+    "fittings": [
+      {
+        "kind": "ticketmachine",
+        "x": 3,
+        "z": 5,
+        "action": "metro",
+        "label": "Transit card · 交通卡充值"
+      },
+      {
+        "kind": "floorsign",
+        "x": 0,
+        "z": 2.6,
+        "action": "metro",
+        "label": "Tap card / exit · 刷卡",
+        "sign": "刷卡 TAP"
+      },
+      {
+        "kind": "bench",
+        "x": -6,
+        "z": -1
+      },
+      {
+        "kind": "bench",
+        "x": 6,
+        "z": -1
+      }
+    ]
+  },
+  "riverside-lobby": {
+    "building": "city:riverside-apartments",
+    "door": {
+      "x": -12,
+      "z": -178.2
+    },
+    "height": 3.8,
+    "floor": "#c8ad8a",
+    "wall": "#f0e7d8",
+    "trim": "#8bada5",
+    "roofBeam": "#ae9682",
+    "zh": "河畔公寓大厅",
+    "pinyin": "hépàn gōngyù dàtīng",
+    "en": "Riverside Apartments lobby",
+    "size": [
+      12,
+      10
+    ],
+    "spawn": [
+      0,
+      3,
+      0
+    ],
+    "exit": [
+      0,
+      4.5
+    ],
+    "returnPlace": "city",
+    "returnSpawn": [
+      -12,
+      -177,
+      180
+    ],
+    "returnLabel": "Return to ferry · 渡轮",
+    "decoratable": false,
+    "annexes": [
+      {
+        "room": "riverside-apartment",
+        "zh": "101 室",
+        "x": 4,
+        "z": -4.7,
+        "wall": "back",
+        "label": "Apartment 101 · 房间"
+      }
+    ],
+    "fittings": [
+      {
+        "kind": "noticeboard",
+        "x": 0,
+        "z": -4.8,
+        "action": "rental",
+        "label": "Rent / renew · 租房"
+      },
+      {
+        "kind": "bench",
+        "x": -3,
+        "z": 1
+      },
+      {
+        "kind": "wallsign",
+        "x": 3,
+        "z": -4.8,
+        "sign": "101 →"
+      }
+    ]
+  },
+  "riverside-apartment": {
+    "building": "city:riverside-apartments",
+    "door": {
+      "x": -12,
+      "z": -178.2
+    },
+    "height": 3.8,
+    "floor": "#c8ad8a",
+    "wall": "#f0e7d8",
+    "trim": "#8bada5",
+    "roofBeam": "#ae9682",
+    "zh": "河畔公寓 101",
+    "pinyin": "hépàn gōngyù yī líng yī",
+    "en": "Riverside Apartment 101",
+    "size": [
+      10,
+      9
+    ],
+    "spawn": [
+      0,
+      3,
+      0
+    ],
+    "exit": [
+      0,
+      4
+    ],
+    "returnPlace": "riverside-lobby",
+    "returnSpawn": [
+      4,
+      -3,
+      180
+    ],
+    "decoratable": true,
+    "decorateAt": [
+      -3,
+      -2
+    ],
+    "slots": {
+      "table": {
+        "zh": "桌子",
+        "x": -2,
+        "z": -1,
+        "rot": 0,
+        "accepts": [
+          "table"
+        ]
+      },
+      "rug": {
+        "zh": "地毯",
+        "x": 0,
+        "z": 1,
+        "rot": 0,
+        "accepts": [
+          "rug"
+        ]
+      },
+      "lamp": {
+        "zh": "灯",
+        "x": 3,
+        "z": 2,
+        "rot": 0,
+        "accepts": [
+          "lamp"
+        ]
+      }
+    },
+    "fittings": [
+      {
+        "kind": "rentalbed",
+        "x": 3,
+        "z": -3,
+        "action": "sleep",
+        "label": "Rest in your rented room · 休息"
+      },
+      {
+        "kind": "wallsign",
+        "x": -3,
+        "z": -4.4,
+        "action": "rental",
+        "label": "Lease details · 房租",
+        "sign": "河畔公寓 101"
+      }
+    ],
+    "window": [
+      -3,
+      3
     ]
   }
 }

@@ -2,15 +2,77 @@
   "_note": "Station announcements for the ride in src/ui/metro.js, spoken by the teacher voice with clip ids metro-<key>. They play in the order doors, hold, the next-stop line for the direction of travel (next-city going out, next-town coming home), arriving, arrived. On arrival `question` is asked once per ride with `choices`; `answers` is the right choice for each direction and `reward` the coins for picking it (once per ride, see core/metro.js).",
   "speaker": "teacher",
   "lines": {
-    "doors": {"zh": "车门即将关闭，请注意。", "pinyin": "Chēmén jíjiāng guānbì, qǐng zhùyì.", "en": "The doors are closing. Please take care."},
-    "hold": {"zh": "请站稳扶好。", "pinyin": "Qǐng zhàn wěn fú hǎo.", "en": "Please hold on."},
-    "next-city": {"zh": "下一站：云海市中心。", "pinyin": "Xià yí zhàn: Yúnhǎi Shì Zhōngxīn.", "en": "Next stop: Yunhai City Centre."},
-    "next-town": {"zh": "下一站：青禾。", "pinyin": "Xià yí zhàn: Qīnghé.", "en": "Next stop: Qinghe."},
-    "arriving": {"zh": "列车即将进站，请注意安全。", "pinyin": "Lièchē jíjiāng jìn zhàn, qǐng zhùyì ānquán.", "en": "The train is arriving. Please stand clear."},
-    "arrived": {"zh": "到站了，请带好随身物品。", "pinyin": "Dào zhàn le, qǐng dài hǎo suíshēn wùpǐn.", "en": "We have arrived. Please take all your belongings."},
-    "question": {"zh": "刚才广播说下一站是哪儿？", "pinyin": "Gāngcái guǎngbō shuō xià yí zhàn shì nǎr?", "en": "Where did the announcement say the next stop was?"}
+    "doors": {
+      "zh": "车门即将关闭，请注意。",
+      "pinyin": "Chēmén jíjiāng guānbì, qǐng zhùyì.",
+      "en": "The doors are closing. Please take care."
+    },
+    "hold": {
+      "zh": "请站稳扶好。",
+      "pinyin": "Qǐng zhàn wěn fú hǎo.",
+      "en": "Please hold on."
+    },
+    "next-city": {
+      "zh": "下一站：云海市中心。",
+      "pinyin": "Xià yí zhàn: Yúnhǎi Shì Zhōngxīn.",
+      "en": "Next stop: Yunhai City Centre."
+    },
+    "next-town": {
+      "zh": "下一站：青禾。",
+      "pinyin": "Xià yí zhàn: Qīnghé.",
+      "en": "Next stop: Qinghe."
+    },
+    "arriving": {
+      "zh": "列车即将进站，请注意安全。",
+      "pinyin": "Lièchē jíjiāng jìn zhàn, qǐng zhùyì ānquán.",
+      "en": "The train is arriving. Please stand clear."
+    },
+    "arrived": {
+      "zh": "到站了，请带好随身物品。",
+      "pinyin": "Dào zhàn le, qǐng dài hǎo suíshēn wùpǐn.",
+      "en": "We have arrived. Please take all your belongings."
+    },
+    "question": {
+      "zh": "刚才广播说下一站是哪儿？",
+      "pinyin": "Gāngcái guǎngbō shuō xià yí zhàn shì nǎr?",
+      "en": "Where did the announcement say the next stop was?"
+    }
   },
-  "choices": ["云海市中心", "青禾", "莲池公园"],
-  "answers": {"city": "云海市中心", "town": "青禾"},
-  "reward": 1
+  "choices": [
+    "云海市中心",
+    "青禾",
+    "莲池公园"
+  ],
+  "answers": {
+    "city": "云海市中心",
+    "town": "青禾"
+  },
+  "reward": 1,
+  "network": {
+    "stations": [
+      "qinghe",
+      "yunhai"
+    ],
+    "routes": [
+      {
+        "from": "qinghe",
+        "to": "yunhai",
+        "distance": 12
+      }
+    ],
+    "fareBands": [
+      {
+        "max": 5,
+        "cost": 3
+      },
+      {
+        "max": 15,
+        "cost": 5
+      },
+      {
+        "max": 1000,
+        "cost": 8
+      }
+    ]
+  }
 }

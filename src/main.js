@@ -41,7 +41,9 @@ import {openGuide} from './ui/guide.js';
 import {openSleep,openClosed} from './ui/rest.js';
 import {openLibrary} from './ui/library.js';
 import {openKitchen} from './ui/kitchen.js';
-import {openMetro,rideHome} from './ui/metro.js';
+import {openRental,installRental} from './ui/rental.js';
+import {rentalAccess} from './core/rental.js';
+import {openMetro,rideHome,installTransit} from './ui/metro.js';
 import {openCityTalk} from './ui/citytalk.js';
 import {openTaxi} from './ui/taxi.js';
 import {openNoodles} from './ui/noodles.js';
@@ -155,6 +157,7 @@ function interact(id){
  if(id==='postbox')return openPostcard(ctx);
  if(id==='sleep')return openSleep(ctx);
  if(id==='cook')return openKitchen(ctx);
+ if(id==='rental')return openRental(ctx);
  if(id==='metro')return openMetro(ctx);
  if(id==='metro:home')return rideHome(ctx);
  if(id.startsWith('city:')){const who=id.slice(5);bump(ctx.profile,'talks');return openNpcGreeting(ctx,who,()=>openCityTalk(ctx,who));}
@@ -226,6 +229,9 @@ function showGate(id){
  ctx.ui.update();
 }
 function enterPlace(id){
+ if(!rentalAccess(ctx.profile,id))return openRental(ctx);
+ if(id==='city')ctx.town.ensureCity();
+ if(ctx.profile.metro?.journey?.phase==='reserved'&&ctx.town.rooms.get(ctx.town.place)?.data.transit){delete ctx.profile.metro.journey;ctx.save();}
  if(id==='home'){applyRootsEvent(ctx.profile,{type:'house'});ctx.save();}
  if(id==='town')ctx.town.leaveRoom();
  else{
@@ -377,6 +383,7 @@ try{
    // every few seconds would redraw the whole HUD under the player's hands.
    if(Math.abs(hour-(ctx.persisted??-99))>1){ctx.persisted=hour;ctx.save();}
   } else tickStats(ctx.profile,hour);
+  ctx.ui.updateCondition();
   if(ctx.profile.cooking){
    const dt=town.clock-(ctx.cookClock??town.clock);
    if(dt>0&&tickCooking(ctx.profile,dt)){
@@ -419,6 +426,7 @@ try{
  // Every decoratable room gets its own furniture back; a record with no room is the living room's.
  ctx.profile.home=[...ctx.town.rooms.values()].filter(room=>room.data.decoratable)
   .flatMap(room=>ctx.town.furnish(room.id,ctx.profile.home.filter(record=>(record.room??'home')===room.id)));
+ installTransit(ctx);installRental(ctx);
  applyStarterHome(ctx);
 }catch(error){console.error(error);document.querySelector('#start-button').disabled=true;document.querySelector('.arrival-en').textContent='The 3D scene could not start. Please enable hardware acceleration and use a WebGL2-capable browser.';}
 ctx.ui.update();ctx.voice.load();

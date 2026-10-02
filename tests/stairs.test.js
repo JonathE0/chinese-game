@@ -45,15 +45,7 @@ test('the railing keeps you on the stairs, and upstairs out of the stairwell',()
   assert.equal(registry.blocks('home',wx1+.5,wz0+1,data.upper.y),false,'along the landing beside it');
 });
 
-test('on the metro platform you arrive upstairs, walk down the flight to the platform, and back up',()=>{
-  const {registry,data,id}=room('metro-platform'),{x,z}=data.upper.stairs,top=data.upper.well[1];
-  assert.equal(data.upper.entrance,true,'the way in and out is on the landing');
-  const down=walk(registry,x,top-.6,data.upper.y,z+.4,id);
-  assert.ok(down.z>=z+.4-1e-9,`stopped at z ${down.z.toFixed(2)}, height ${down.y.toFixed(2)}`);
-  assert.equal(down.y,0);
-  const up=walk(registry,x,down.z,0,top-.6,id);
-  assert.equal(up.y,data.upper.y);
-});
+test('metro stations have a step-free route from concourse to platform',()=>{for(const id of ['metro-platform','yunhai-central']){const {registry,data}=room(id);assert.equal(data.upper,undefined);const path=walk(registry,0,data.spawn[1],0,-4,id);assert.ok(path.z<=-3.9);assert.equal(path.y,0);}});
 
 test('no railing can be jumped onto: from the landing, the highest place to jump from, its top is out of reach',()=>{
   const {registry,data}=home(),u=data.upper,s=u.stairs,[,wz0,wx1,wz1]=u.well;

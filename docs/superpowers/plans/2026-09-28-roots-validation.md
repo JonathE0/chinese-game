@@ -53,7 +53,3 @@ The portable PostgreSQL suite passed all seven reported checks: insufficient fun
 Expanded natural afternoon greetings, fruit measure-word alternatives, and polite bank requests. All offered model answers are checked against the actual matcher; negation, wrong quantities, conflicting destinations and oversized text remain rejected. The content validator now detects missing translations, duplicate IDs, unsupported examples, fractional film prices and malformed collections. New failing tests were observed before fixes.
 
 Six focused browser tests passed, including the complete chapter and playback metadata for all 13 clips. The developer-generated listening page is docs/roots-voice-review.html, available through the development server. This is preparation for human review, not a claim that the speech has been listened to by a human. Final npm verification is recorded in continued-verify.log.
-
-## Merge approval — 2026-09-29
-
-The user approved the presented preview and requested merging the chapter. This records product approval; it does not certify a native-speaker language audit. The release candidate preserves the previously merged town updates and excludes local scratch files. Hosted Supabase migration and authenticated RPC smoke testing remain deployment work.

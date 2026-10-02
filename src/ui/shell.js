@@ -1,3 +1,5 @@
+import {leaseStatus} from '../core/rental.js';
+import {readStats,band} from '../core/stats.js';
 import {icon} from './art.js';
 import {escapeHtml as esc} from '../core/language.js';
 import npcs from '../content/npcs.json' with {type:'json'};
@@ -62,7 +64,7 @@ export class Shell {
   const hud=hudOf(ctx.profile);
   document.querySelector('#app').innerHTML=`
   <header class="topbar"><div class="brand"><span class="brand-mark">禾</span><div><h1>青禾小镇</h1><span>A LITTLE MANDARIN GETAWAY</span></div></div><div class="top-actions"><div class="wallet" title="学习币">${icon('coin')}<b id="wallet-count">0</b><span>学习币</span></div>${[['journal-button','journal','旅行手册','Journal','book'],['inventory-button','inventory','背包','Inventory','bag'],['review-button','wordbank','生词本','Encountered words','leaf'],['status-button','status','状态','Condition','heart'],['settings-button','settings','设置','Settings','settings'],['labels-button','labels','名字标签','Labels','eye']]
-    .map(([id,action,zh,en,svg])=>`<button class="icon-button" id="${id}" aria-label="${zh}" data-shortcut="${action}" data-title="${zh} · ${en}">${icon(svg)}<kbd data-key="${action}"></kbd></button>`).join('')}</div></header>
+    .map(([id,action,zh,en,svg])=>`<button class="icon-button" id="${id}" aria-label="${zh}" data-shortcut="${action}" data-title="${zh} · ${en}">${icon(svg)}<kbd data-key="${action}"></kbd>${action==='status'?'<span id="condition-warning" class="condition-warning" hidden aria-hidden="true">!</span>':''}</button>`).join('')}</div></header>
   <aside class="quest-card${hud.quests?'':' collapsed'}" id="quest-card"><button class="quest-toggle" id="quest-toggle" aria-expanded="${hud.quests}" aria-controls="quest-body" title="收起 / 展开 · Collapse"><span class="dot"></span><span class="quest-eyebrow">你的第一天 <small>YOUR MISSIONS</small></span><span class="chapter" id="quest-count">0 / 7</span><span class="chevron">${icon('chevron',14)}</span></button><div id="quest-body"><h2>从一句你好开始。</h2><p class="quest-sub">慢慢逛，慢慢学。点一个任务，地图上就会给你带路。</p><div id="quest-list"></div><div class="quest-foot">${icon('leaf',15)} <span id="quest-foot-text">自由探索 · 随时休息</span></div></div></aside>
   <div id="world-labels">${npcs.map(n=>`<div class="npc-label" id="label-${n.id}"><span class="label-dot" style="background:${n.color}"></span>${n.zh}<small>${n.role}</small></div>`).join('')}</div>
   <button id="ambient-bubble" class="ambient-bubble" hidden aria-label="听听闲聊"><span>今天天气真好！</span><small>···</small></button>
@@ -162,7 +164,13 @@ export class Shell {
   if(done.metric==='district'){const s=this.ctx.gateStates?.find(g=>g.id===done.district);return s?`${Math.min(s.need,s.have)} / ${s.need}`:'';}
   return '';
  }
+ updateCondition(){
+  const s=readStats(this.ctx.profile),low=[band(s.hunger).key==='low'?'Hungry':'',band(s.energy).key==='low'?'Needs rest':''].filter(Boolean);
+  const badge=document.querySelector('#condition-warning'),button=document.querySelector('#status-button');
+  if(!badge||!button)return;badge.hidden=!low.length;button.setAttribute('aria-label',low.length?'Condition — '+low.join(' and '):'状态 · Condition');button.dataset.title=low.length?low.join(' · ')+' — check Condition':'状态 · Condition';
+ }
  update(){
+  this.updateCondition();
   const p=this.ctx.profile;
   this.cardBox=null;
   document.querySelector('#wallet-count').textContent=p.wallet;
@@ -193,8 +201,10 @@ export class Shell {
    el.onclick=e=>{if(!e.target.closest('[data-help]'))go();};
    el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};
   });
+  const rent=leaseStatus(p);
+  document.querySelector('#journal-button').title=rent.held?(rent.active?'Apartment rent: '+rent.days+' in-game days left':'Apartment lease expired — renew at the far-shore lobby'):'';
   const ready=dailyReady(p,p.dayIndex??0);
-  document.querySelector('#journal-button').dataset.due=(dueCount(p)+ready)||'';
+  document.querySelector('#journal-button').dataset.due=(dueCount(p)+ready+(rent.soon||(rent.held&&!rent.active)?1:0))||'';
   document.querySelector('#quest-foot-text').textContent=ready?`今天有 ${ready} 件小事可以领奖`:'自由探索 · 随时休息';
  }
  // ------------------------------------------------------------ way-finding

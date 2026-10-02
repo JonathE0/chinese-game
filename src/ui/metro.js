@@ -1,108 +1,46 @@
 import {escapeHtml as esc} from '../core/language.js';
-import {icon} from './art.js';
-import {languageLine,pinyinWith,pinyinHtml} from './shell.js';
-import {CITY} from '../world/city.js';
+import {pinyinHtml} from './shell.js';
 import {say} from './order.js';
 import metro from '../content/metro.json' with {type:'json'};
-import {FARE,metroOf,passValid,passDaysLeft,buyTickets,buyPass,boardingProblem,board,returnTrip,announcementReward} from '../core/metro.js';
-
-/**
- * 青禾地铁站 — the fare hall, and the ride itself.
- *
- * The ride is a real scene rather than a loading screen: the doors close, the tunnel lights go
- * past, the announcements play the way real ones do (metro.json), and on arrival one listening
- * question asks where the train was going. Only then does the city appear. It is the one moment in the game that
- * takes the player somewhere instead of just changing what is on screen, so it is worth the
- * five seconds — and it is skippable for the tenth journey.
- */
-const CLERK={zh:'去哪儿？买张票吧。',pinyin:'Qù nǎr? Mǎi zhāng piào ba.',en:'Where to? Buy a ticket.',
-  note:'张 (zhāng) is the measure word for flat things — tickets, paper, tables. 一张票 is one ticket.'};
-
+import {cardBalance,topUpCard,enterJourney,cancelJourney,completeJourney,passValid,announcementReward} from '../core/metro.js';
 
 export function openMetro(ctx){
-  const body=ctx.ui.open('metro',CITY.station.zh,'地铁 · METRO');
-  render(ctx,body);
-}
-
-function render(ctx,body){
-  const p=ctx.profile,day=p.dayIndex??0;
-  const {rides}=metroOf(p),onPass=passValid(p,day),left=passDaysLeft(p,day);
-  const problem=boardingProblem(p,day);
-  const want=Math.max(1,Math.min(9,ctx.metroWant??1));
-  // The ticket machine is up on the landing; the train is boarded down on the platform.
-  const upstairs=ctx.town.floorY()>0;
-
-  body.innerHTML=`${languageLine(CLERK,p.settings,{className:'dialogue-line'})}
-    <p class="panel-intro">${pinyinWith(CITY.station.pinyin,CITY.station.zh,CITY.station.en)}<br>
-      一号线开往${esc(CITY.place.zh)}。回程免费。<br>
-      Line 1 runs to ${esc(CITY.place.en)}. Coming back is free.</p>
-
-    <div class="fare-state ${onPass?'held':''}">
-      ${onPass?`${icon('check',16)} 通票还有 ${left} 天。 / Your pass has ${left} day${left===1?'':'s'} left.`
-        :`${icon('map',16)} 手上有 ${rides} 张单程票。 / You are carrying ${rides} single ticket${rides===1?'':'s'}.`}
-    </div>
-
-    <h3 class="section-title">买票 <small>BUY A TICKET</small></h3>
-    <div class="fare-card">
-      <div class="fare-head"><b>单程票</b><small>dānchéngpiào · single ticket</small>
-        <span class="fare-price">${icon('coin',14)} ${FARE.single}</span></div>
-      <div class="qty-row">
-        <button class="qty-step" data-want="-1" aria-label="少一张">−</button>
-        <b class="qty-count">${want}</b>
-        <button class="qty-step" data-want="1" aria-label="多一张">+</button>
-        <button class="primary" id="buy-tickets">买 ${want} 张 · ${FARE.single*want}</button>
-      </div>
-    </div>
-    <div class="fare-card ${onPass?'dim':''}">
-      <div class="fare-head"><b>一周通票</b><small>tōngpiào · seven-day pass</small>
-        <span class="fare-price">${icon('coin',14)} ${FARE.pass}</span></div>
-      <p class="microcopy">七天内随便坐。坐满七趟就回本了。<br>
-        Unlimited journeys for ${FARE.passDays} days — worth it from the seventh ride.</p>
-      <button class="secondary wide" id="buy-pass" ${onPass?'disabled':''}>
-        ${onPass?'已经有通票了':'买通票'}</button>
-    </div>
-
-    <button class="primary wide" id="ride" ${problem?'disabled':''} ${upstairs?'hidden':''}>
-      ${problem?'先买张票':'上车 · Board the train'} ${problem?'':icon('arrow')}</button>
-    <p class="microcopy">${esc(CITY.place.zh)}是另一座城市，路牌和店名都不一样。回青禾不用买票。<br>
-      ${esc(CITY.place.en)} is a different city — different signs, different shops, different people
-      to talk to. The journey home is always free.</p>`;
-
-  body.querySelectorAll('[data-want]').forEach(button=>button.onclick=()=>{
-    ctx.metroWant=Math.max(1,Math.min(9,want+Number(button.dataset.want)));
-    render(ctx,body);
-  });
-  body.querySelector('#buy-tickets').onclick=()=>{
-    const got=buyTickets(p,want);
-    if(!got.ok)return ctx.ui.notice('钱不够。 / Not enough coins.');
-    ctx.music?.cue('place');ctx.save();
-    ctx.ui.notice(`买了 ${got.bought} 张票，花了 ${got.cost}。 / ${got.bought} ticket${got.bought===1?'':'s'}, ${got.cost} coins.`);
-    render(ctx,body);
+ const p=ctx.profile,station=ctx.town.rooms.get(ctx.town.place)?.data.transit;
+ if(!station)return;
+ const body=ctx.ui.open('metro','交通卡 · Transit card','LINE 1 · QINGHE ↔ YUNHAI');
+ const render=()=>{
+  const pending=p.metro?.journey;
+  body.innerHTML=`<p>Load coins onto your card, tap in, then walk through the open train doors. Trains come regularly.</p><div class="fare-state">Card balance / 余额: <b>${cardBalance(p)}</b> · Wallet: ${p.wallet}</div><p>Fare: <b>${passValid(p)?'0 · existing pass':'5 coins each way'}</b>. Only Qinghe–Yunhai is operating.</p><h3>充值 · Top up</h3><div class="button-row">${[10,20,50].map(n=>' <button class="secondary" id="transit-topup-'+n+'" data-topup="'+n+'">+'+n+'</button>').join('')}</div><p class="microcopy">Not enough coins? Study words to earn more, then return to top up. There is no free return trip.</p><label><input id="transit-fade" type="checkbox" ${p.metro?.fade?'checked':''}> Always fade after boarding</label><button id="transit-enter" class="primary wide">${pending?'Cancel entry / refund reservation':'Tap card · 刷卡进站'}</button><button id="transit-exit" class="secondary wide">Exit gates · 出站</button><p>After tapping in: walk towards the blue platform doors. Wait for the train to stop and open its doors, then step inside.</p>`;
+  body.querySelectorAll('[data-topup]').forEach(b=>b.onclick=()=>{if(ctx.profile!==p)return;const result=topUpCard(p,Number(b.dataset.topup));if(!result.ok)return ctx.ui.notice('Not enough coins. Study to earn more.');ctx.save();render();});
+  body.querySelector('#transit-fade').onchange=e=>{p.metro={...p.metro,fade:e.target.checked};ctx.save();};
+  body.querySelector('#transit-enter').onclick=()=>{
+   if(p.metro?.journey){cancelJourney(p);ctx.save();ctx.ui.close();return;}
+   const result=enterJourney(p,station,station==='qinghe'?'yunhai':'qinghe');
+   if(!result.ok)return ctx.ui.notice('Please top up your transit card first.');
+   ctx.save();ctx.ui.close();ctx.ui.notice('Card accepted. Walk into the train when the doors open.');
   };
-  body.querySelector('#buy-pass').onclick=()=>{
-    const got=buyPass(p,p.dayIndex??0);
-    if(!got.ok)return ctx.ui.notice('钱不够。 / Not enough coins.');
-    ctx.music?.cue('reward');ctx.save();
-    ctx.ui.notice(`通票买好了，七天内随便坐。 / A week's pass — ride as much as you like.`);
-    render(ctx,body);
-  };
-  body.querySelector('#ride').onclick=()=>{
-    const fare=board(p,p.dayIndex??0);
-    if(!fare.ok)return;
-    if(!p.completed.includes('metro:first'))p.completed.push('metro:first');
-    ctx.save();
-    ctx.ui.close();
-    ride(ctx,{to:'city',arrive:()=>ctx.town.enterCity()});
-  };
+  body.querySelector('#transit-exit').onclick=()=>{cancelJourney(p);ctx.save();ctx.ui.close();const r=ctx.town.rooms.get(ctx.town.place);ctx.town.warp(r.offsetX,4,180);};
+ };render();
 }
-
-/** Leaving the city again. No fare hall, no ticket — you just get on. */
-export function rideHome(ctx){
-  returnTrip(ctx.profile);
-  ctx.save();
-  ride(ctx,{to:'town',arrive:()=>ctx.town.leaveCity()});
+export function rideHome(ctx){ctx.town.enterRoom('yunhai-central');ctx.syncPlace?.();}
+function arrive(ctx,p,j){
+ if(ctx.profile!==p)return;
+ const result=completeJourney(p,j.id);if(!result.ok)return;
+ if(!p.completed.includes('metro:first'))p.completed.push('metro:first');
+ ctx.save();const id=j.destination==='yunhai'?'yunhai-central':'metro-platform';
+ ctx.town.enterRoom(id);const room=ctx.town.rooms.get(id);ctx.town.transit.get(id).arrive();ctx.town.warp(room.offsetX,-7,180);ctx.syncPlace?.();
 }
-
+export function installTransit(ctx){
+ ctx.town.transitJourney=()=>ctx.profile.metro?.journey;
+ ctx.town.onTransitBoard=()=>{
+  const p=ctx.profile,j=p.metro?.journey;if(!j||j.phase!=='reserved')return;
+  j.phase='riding';ctx.save();
+  ride(ctx,{to:j.destination==='yunhai'?'city':'town',arrive:()=>arrive(ctx,p,j),fareProfile:p});
+ };
+ const j=ctx.profile.metro?.journey;
+ if(j?.phase==='riding')arrive(ctx,ctx.profile,j);
+ else if(j){cancelJourney(ctx.profile);ctx.save();}
+}
 /**
  * The tunnel. A carriage window with lights streaming past it, the announcement board above the
  * doors, and a skip for anyone who has seen it before. The scene owns the screen while it runs:
@@ -112,7 +50,7 @@ export function rideHome(ctx){
  * instead. On arrival the board asks where the train was going: the right stop pays once per ride,
  * a wrong one plays the next-stop line again, and 跳过 skips the lot.
  */
-function ride(ctx,{to,arrive}){
+function ride(ctx,{to,arrive,fareProfile}){
   const host=document.querySelector('#app');
   const scene=document.createElement('div');
   scene.id='metro-ride';scene.className=to==='town'?'homeward':'';
@@ -157,12 +95,14 @@ function ride(ctx,{to,arrive}){
     if(done)return;
     quiz.innerHTML=metro.choices.map(stop=>`<button class="choice" data-stop="${esc(stop)}">${esc(stop)}</button>`).join('');
     quiz.querySelectorAll('[data-stop]').forEach(button=>button.onclick=()=>{
+      if(done)return;
       if(button.dataset.stop!==metro.answers[to]){
         button.disabled=true;
         say(ctx,scene,['metro-'+next]);
         return;
       }
-      const coins=announcementReward(ctx.profile);
+      if(ctx.profile!==fareProfile)return finish();
+      const coins=1;ctx.profile.wallet+=coins;
       if(coins){ctx.save();ctx.music?.cue('reward');ctx.ui.notice(`+${coins} 学习币。`);}
       finish();
     });
@@ -186,5 +126,5 @@ function ride(ctx,{to,arrive}){
   const onKey=e=>{if(e.code==='Escape'||(e.code==='Space'&&!quiz.childElementCount))finish();};
   addEventListener('keydown',onKey);
   scene.querySelector('.metro-skip').onclick=finish;
-  run();
+  if(fareProfile?.metro?.fade)finish();else run();
 }

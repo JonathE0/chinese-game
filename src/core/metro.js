@@ -22,7 +22,7 @@ export function metroOf(profile){
     trips:Math.max(0,Math.trunc(m?.trips??0)),heard:Number.isSafeInteger(m?.heard)?m.heard:null};
 }
 function write(profile,next){
-  profile.metro={rides:next.rides,...(next.passUntil===null?{}:{passUntil:next.passUntil}),trips:next.trips,
+  profile.metro={...profile.metro,rides:next.rides,...(next.passUntil===null?{}:{passUntil:next.passUntil}),trips:next.trips,
     ...(next.heard===null?{}:{heard:next.heard})};
   return profile.metro;
 }
@@ -104,6 +104,24 @@ export function normalizeMetro(m){
   if(!whole(m.rides??0,999)||!whole(m.trips??0,100000))throw Error('Invalid metro');
   if(m.passUntil!==undefined&&!whole(m.passUntil,1000000))throw Error('Invalid metro');
   if(m.heard!==undefined&&!whole(m.heard,100000))throw Error('Invalid metro');
-  return {rides:m.rides??0,...(m.passUntil===undefined?{}:{passUntil:m.passUntil}),trips:m.trips??0,
+  const card=validateCard(m);
+  return {...card,rides:m.rides??0,...(m.passUntil===undefined?{}:{passUntil:m.passUntil}),trips:m.trips??0,
     ...(m.heard===undefined?{}:{heard:m.heard})};
 }
+
+// Transit-card state is additive; legacy tickets retain their six-coin purchase value.
+function validateCard(m){
+ const out={};
+ for(const key of ['balance','sequence'])if(m[key]!==undefined){if(!Number.isSafeInteger(m[key])||m[key]<0||m[key]>100000000)throw Error('Invalid transit card');out[key]=m[key];}
+ if(m.fade!==undefined){if(typeof m.fade!=='boolean')throw Error('Invalid ride preference');out.fade=m.fade;}
+ if(m.journey!=null){const j=m.journey;if(!j||typeof j!=='object'||!Number.isSafeInteger(j.id)||j.id<1||!quoteFare(j.origin,j.destination).ok||!Number.isSafeInteger(j.cost)||j.cost<0||j.cost>8||!['reserved','riding'].includes(j.phase))throw Error('Invalid journey');out.journey={id:j.id,origin:j.origin,destination:j.destination,cost:j.cost,phase:j.phase};}
+ return out;
+}
+export function cardBalance(p){return p.metro?.balance??(p.metro?.rides??0)*FARE.single;}
+function card(p){const old=normalizeMetro(p.metro)??{rides:0,trips:0};p.metro={...old,balance:cardBalance(p),rides:0,sequence:old.sequence??0};return p.metro;}
+export function fareForDistance(distance){if(!Number.isFinite(distance)||distance<=0)return null;return metro.network.fareBands.find(b=>distance<=b.max)?.cost??null;}
+export function quoteFare(origin,destination){const route=metro.network.routes.find(r=>(r.from===origin&&r.to===destination)||(r.to===origin&&r.from===destination));return route?{ok:true,cost:fareForDistance(route.distance),distance:route.distance}:{ok:false,reason:'route'};}
+export function topUpCard(p,amount){if(!Number.isSafeInteger(amount)||amount<=0||amount>100000||!Number.isFinite(p.wallet)||p.wallet<amount||cardBalance(p)+amount>100000000)return {ok:false,reason:'money'};const m=card(p);p.wallet-=amount;m.balance+=amount;return {ok:true,balance:m.balance};}
+export function enterJourney(p,origin,destination){const quote=quoteFare(origin,destination);if(!quote.ok)return quote;const m=card(p);if(m.journey)return {ok:false,reason:'pending'};const cost=passValid(p)?0:quote.cost;if(m.balance<cost)return {ok:false,reason:'balance',cost};const id=++m.sequence;m.journey={id,origin,destination,cost,phase:'reserved'};return {ok:true,id,cost};}
+export function cancelJourney(p){const m=card(p);if(!m.journey||m.journey.phase==='riding')return {ok:false};delete m.journey;return {ok:true};}
+export function completeJourney(p,id){const m=card(p),j=m.journey;if(!j||j.id!==id||m.balance<j.cost)return {ok:false};m.balance-=j.cost;m.trips++;delete m.journey;return {ok:true,destination:j.destination,cost:j.cost};}

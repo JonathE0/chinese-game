@@ -1,3 +1,4 @@
+import {leaseStatus} from '../core/rental.js';
 import {keepLocalBusinessProgress} from '../core/business-sync.js';
 import {openRootsAlbum} from './roots.js';
 import catalog from '../content/catalog.json' with {type:'json'};
@@ -25,6 +26,7 @@ import {folderSupported,folderStatus,chooseFolder,reconnectFolder,stopSync,readF
 
 export function download(name,data){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 export function openJournal(ctx){
+ queueMicrotask(()=>{if(ctx.ui.panelId!=='journal')return;const rent=leaseStatus(ctx.profile);if(!rent.held)return;const note=document.createElement('p');note.className='fare-state';note.textContent=rent.active?'Riverside Apartment: '+rent.days+' in-game days left. Renew at the far-shore rental desk.':'Apartment lease expired. Your belongings are safe; renew at the far-shore rental desk.';document.querySelector('#panel-body')?.prepend(note);});
  const body=ctx.ui.open('journal','旅行手册','你的中文，慢慢生长');
  const tasks=todaysTasks(ctx.profile,ctx.profile.dayIndex??0);
  body.innerHTML=`<button class="primary wide" id="journal-roots">Grandfather’s album · 爷爷的相册</button><h3 class="section-title">今天的小事 <small>TODAY'S ERRANDS</small></h3>

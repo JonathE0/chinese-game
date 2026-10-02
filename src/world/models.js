@@ -69,7 +69,7 @@ export function createModels(app) {
   const cylinder=(p,xyz,s,c,r)=>shape(p,'cylinder',xyz,s,c,r);
   function label(parent,text,pos,width=3,height=.65,bg='#f4e3b9',fg='#425d54') {
     const canvas=document.createElement('canvas');canvas.width=768;canvas.height=160;
-    const ctx=canvas.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,768,160);ctx.strokeStyle=fg;ctx.lineWidth=6;ctx.strokeRect(12,12,744,136);ctx.fillStyle=fg;ctx.font='bold 84px "Microsoft YaHei", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,384,84);
+    const ctx=canvas.getContext('2d');ctx.fillStyle=bg;ctx.fillRect(0,0,768,160);ctx.strokeStyle=fg;ctx.lineWidth=6;ctx.strokeRect(12,12,744,136);ctx.fillStyle=fg;ctx.font='bold 84px "Microsoft YaHei", sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,384,84,700);
     const tex=new pc.Texture(app.graphicsDevice,{width:768,height:160,mipmaps:true});tex.setSource(canvas);
     const m=new pc.StandardMaterial();m.diffuseMap=tex;m.emissiveMap=tex;m.emissive=new pc.Color(.3,.3,.3);m.update();
     const e=box(parent,pos,[width,height,.08],bg);e.render.meshInstances[0].material=m;e.signText=text;return e;
@@ -1788,6 +1788,7 @@ export function createModels(app) {
     // The metro platform: a waist-high ticket machine with a lit screen, and the platform edge,
     // a dark track bed behind a painted safety line. The edge is solid to waist height, so you
     // wait behind the line; its strips lie flat on the floor and need no name.
+    if(kind==='rentalbed'){furniture(e,'bed',tint??'#8aafa5');return {entity:e,half:[1.1,.75],top:.65,name:'bed'};}
     if(kind==='ticketmachine') {
       box(e,[0,.55,0],[.8,1.1,.55],tint??'#6d7880');
       box(e,[0,1.12,.02],[.72,.08,.5],'#4a5358',[-18,0,0]);
