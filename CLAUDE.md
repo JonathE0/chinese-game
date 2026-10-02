@@ -58,6 +58,8 @@ Delegate to the project agents in `.claude/agents/`:
 - `browser-checker` (Sonnet) — anything that needs the running game or screenshots
 - `task-implementer` (Sonnet) — one self-contained plan task at a time. Invoke it with model
   `opus` when the task is complex or cross-cutting (new systems, engine changes, tricky state).
+- `task-implementer-max` (Opus, maximum effort) — the same job for the hardest tasks: new
+  rendering or engine systems, large restyles, whole districts.
 - `reviewer` (Opus, read-only) — reviews finished agent work for bugs, plan compliance and
   invented Chinese before it counts as done
 
