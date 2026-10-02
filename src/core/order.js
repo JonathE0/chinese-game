@@ -1,6 +1,7 @@
 import catalog from '../content/catalog.json' with {type:'json'};
 import balance from '../content/balance.json' with {type:'json'};
 import {grant} from './economy.js';
+import {folded} from './language.js';
 
 /**
  * Ordering food in Chinese: 我要 + number + measure word + dish, then paying a total you heard.
@@ -34,7 +35,7 @@ const NOT_AFTER='(?<![0-9一二三四五六七八九十两])';
  * 二 before a measure is the classic slip and gets its own reason, so the UI can show 两.
  */
 export function matchSpoken(text,item){
-  const said=String(text??'').replace(/[\s，。！？、,.!?]/g,'');
+  const said=folded(text??'').replace(/[\s，。！？、,.!?]/g,'');
   if(!said.includes(orderName(item)))return {ok:false,reason:'again'};
   const right=said.match(new RegExp(`${NOT_AFTER}([一两三123])(${fits(item).join('|')})`));
   if(right)return {ok:true,quantity:SPOKEN_NUMBER[right[1]]};

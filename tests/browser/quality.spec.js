@@ -39,8 +39,9 @@ const sample=(page,frames=90)=>page.evaluate(frames=>new Promise(done=>{
 test('低 holds 30 fps on a CPU slowed four times: the square, the terrace at night, the mall atrium',async({page})=>{
   test.setTimeout(180_000);
   await start(page,'low');
-  // The city is built on the first ride: build it before slowing the CPU, then slow it once.
-  await page.evaluate(()=>window.__qinghe.town.ensureCity());
+  // The city is built on the first ride: build it before slowing the CPU, then slow it once. (Return
+  // nothing: handing the built room back would have Playwright copy its whole scene graph, minutes of it.)
+  await page.evaluate(()=>{window.__qinghe.town.ensureCity();});
   const spin=()=>page.evaluate(()=>{const s=performance.now();let x=0;for(let i=0;i<4e6;i++)x+=Math.sqrt(i);return performance.now()-s+x*0;});
   const quick=await spin();
   const cdp=await page.context().newCDPSession(page);
@@ -115,6 +116,70 @@ test('画质 in Settings changes the renderer and survives a reload',async({page
   await expect(page.getByRole('combobox',{name:/画质/})).toHaveValue('low');
   await page.getByRole('combobox',{name:/画质/}).selectOption('high');
   expect(await renderer()).toMatchObject({level:'high',saved:'high',shadow:[4,2048,75]});
+});
+
+// 自动 (task W6-perf, src/core/quality.js LADDER): a new player starts on 中 whatever the GPU's name,
+// and while frames run long (here the CPU slowed eight times over) the pixel ratio comes down a rung;
+// with the CPU back to speed and the GPU timer showing room, it goes back up within 中.
+test('自动 starts on 中, lowers the pixel ratio while frames run long, and raises it again',async({page})=>{
+  test.setTimeout(120_000);
+  await start(page,'auto');
+  await page.evaluate(()=>window.__qinghe.ui.close?.());
+  const state=()=>page.evaluate(async()=>{const t=window.__qinghe.town,q=await import('/src/core/quality.js');
+    return {level:q.detail(),ratio:t.app.graphicsDevice.maxPixelRatio,paused:t.paused,timer:t.app.graphicsDevice.gpuProfiler?._frameTime>0};});
+  // The test window has one pixel per point, so 中's own 1.25 is 1 here.
+  expect(await state()).toMatchObject({level:'medium',ratio:1,paused:false});
+  const cdp=await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate',{rate:8});
+  await expect.poll(async()=>(await state()).ratio,{timeout:40_000}).toBeLessThan(1);
+  await cdp.send('Emulation.setCPUThrottlingRate',{rate:1});
+  const slowed=await state();
+  expect(slowed.level).toBe('medium');
+  if(slowed.timer)await expect.poll(async()=>(await state()).ratio,{timeout:40_000}).toBe(1);
+});
+
+// 自动 may change level in play, so a change must leave the picture as that level draws it: the people
+// studio once went dark when its look was applied a second time. The square by day, and the gym with
+// its mirror drawing, each level's mean brightness the same every time it comes round.
+test('switching levels back and forth never darkens the scene, mirror drawing or not',async({page})=>{
+  test.setTimeout(180_000);
+  await start(page,'high');
+  await page.evaluate(()=>{const c=window.__qinghe,t=c.town;c.ui.close?.();t.daylight.paused=true;t.daylight.setHour(15);t.ensureCity();});
+  const bright=level=>page.evaluate(async level=>{
+    const t=window.__qinghe.town,app=t.app,g=app.graphicsDevice,gl=g.gl,q=await import('/src/core/quality.js');
+    q.setQuality(level);t.applyQuality();
+    for(let i=0;i<30;i++)await new Promise(r=>requestAnimationFrame(r));
+    return new Promise(done=>app.once('frameend',()=>{
+      const b=new Uint8Array(g.width*g.height*4);gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.readPixels(0,0,g.width,g.height,gl.RGBA,gl.UNSIGNED_BYTE,b);
+      let s=0,n=0;for(let i=0;i<b.length;i+=4*97){s+=b[i]+b[i+1]+b[i+2];n++;}done(s/n/3);
+    }));
+  },level);
+  for(const [place,x,z,yaw] of [['town',0,2,0],['harbour-gym',-4.65,-1,90]]){
+    await page.evaluate(([place,x,z,yaw])=>{const t=window.__qinghe.town;if(place!=='town'){t.enterRoom(place);window.__qinghe.syncPlace?.();}
+      t.warp((t.rooms.get(place)?.offsetX??0)+x,z,yaw);t.pitch=-6;},[place,x,z,yaw]);
+    const seen={};
+    for(const level of ['high','medium','high','low','high','medium'])(seen[level]??=[]).push(await bright(level));
+    console.log(place,'brightness by level',JSON.stringify(seen));
+    for(const [level,[a,...again]] of Object.entries(seen))for(const b of again)expect(Math.abs(b-a),`${place} ${level}`).toBeLessThan(a*.03);
+    if(place!=='town')expect(await page.evaluate(()=>window.__qinghe.town.mirrors.camera.camera.enabled)).toBe(true);
+  }
+});
+
+// ?admin (the dev server's play-test mode) shows what the machine does: frame rate and time, the CPU's
+// and GPU's share, draw calls, triangles, the level and pixel ratio. Never in normal play.
+test('?admin shows the performance overlay, and normal play does not',async({page})=>{
+  await page.goto('/?admin');
+  await page.getByRole('button',{name:'开始旅行'}).click();
+  const box=page.locator('#perf-overlay');
+  await expect(box).toContainText(/\d+ fps · [\d.]+ ms \(p90 [\d.]+\)/,{timeout:20_000});
+  await expect(box).toContainText(/CPU [\d.]+ · GPU ([\d.]+|—) ms/);
+  await expect(box).toContainText(/\d+ draw calls · [\d.]+M tris/);
+  await expect(box).toContainText(/高 · ratio [\d.]+\/[\d.]+ · \d+×\d+/);
+  await expect.poll(async()=>Number((await box.textContent()).match(/([\d.]+)M tris/)?.[1]??0)).toBeGreaterThan(0);
+  await page.goto('/');
+  await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.waitForFunction(()=>!!window.__qinghe?.town);
+  await expect(page.locator('#perf-overlay')).toHaveCount(0);
 });
 
 // Batched pieces share their meshes (models.repaint), so nothing may take a shared mesh away with it:

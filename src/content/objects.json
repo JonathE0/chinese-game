@@ -733,12 +733,6 @@
       "en": "hardware rack",
       "hsk": null
     },
-    "taxi": {
-      "zh": "出租车",
-      "pinyin": "chūzūchē",
-      "en": "taxi",
-      "hsk": 2
-    },
     "kitchen": {
       "zh": "厨房",
       "pinyin": "chúfáng",
@@ -797,6 +791,102 @@
       "zh": "柳树",
       "pinyin": "liǔshù",
       "en": "weeping willow",
+      "hsk": null
+    },
+    "zigzag-bridge": {
+      "zh": "九曲桥",
+      "pinyin": "jiǔqū qiáo",
+      "en": "zigzag bridge",
+      "hsk": null
+    },
+    "bamboo": {
+      "zh": "竹林",
+      "pinyin": "zhúlín",
+      "en": "bamboo grove",
+      "hsk": null
+    },
+    "lotus-leaf": {
+      "zh": "荷叶",
+      "pinyin": "héyè",
+      "en": "lotus leaf",
+      "hsk": null
+    },
+    "koi": {
+      "zh": "锦鲤",
+      "pinyin": "jǐnlǐ",
+      "en": "koi",
+      "hsk": null
+    },
+    "duck": {
+      "zh": "鸭子",
+      "pinyin": "yāzi",
+      "en": "duck",
+      "hsk": 5
+    },
+    "taiji": {
+      "zh": "太极拳",
+      "pinyin": "tàijíquán",
+      "en": "tai chi",
+      "hsk": null
+    },
+    "xiangqi": {
+      "zh": "下象棋",
+      "pinyin": "xià xiàngqí",
+      "en": "playing Chinese chess",
+      "hsk": null
+    },
+    "dishu": {
+      "zh": "地书",
+      "pinyin": "dìshū",
+      "en": "water calligraphy",
+      "hsk": null
+    },
+    "kite": {
+      "zh": "放风筝",
+      "pinyin": "fàng fēngzheng",
+      "en": "flying a kite",
+      "hsk": null
+    },
+    "stone-table": {
+      "zh": "石桌",
+      "pinyin": "shízhuō",
+      "en": "stone table",
+      "hsk": null
+    },
+    "stone-stool": {
+      "zh": "石凳",
+      "pinyin": "shídèng",
+      "en": "stone stool",
+      "hsk": null
+    },
+    "flowerbed": {
+      "zh": "花坛",
+      "pinyin": "huātán",
+      "en": "flowerbed",
+      "hsk": null
+    },
+    "plum": {
+      "zh": "梅花",
+      "pinyin": "méihuā",
+      "en": "plum blossom",
+      "hsk": 6
+    },
+    "peach": {
+      "zh": "桃花",
+      "pinyin": "táohuā",
+      "en": "peach blossom",
+      "hsk": 5
+    },
+    "butterfly": {
+      "zh": "蝴蝶",
+      "pinyin": "húdié",
+      "en": "butterfly",
+      "hsk": null
+    },
+    "firefly": {
+      "zh": "萤火虫",
+      "pinyin": "yínghuǒchóng",
+      "en": "firefly",
       "hsk": null
     },
     "ginkgo": {
@@ -1308,6 +1398,144 @@
       "pinyin": "diàntī",
       "en": "lift",
       "hsk": 4
+    },
+    "fishing-rod": {
+      "zh": "鱼竿",
+      "pinyin": "yúgān",
+      "en": "fishing rod",
+      "hsk": null
+    },
+    "fish-hook": {
+      "zh": "鱼钩",
+      "pinyin": "yúgōu",
+      "en": "fish hook",
+      "hsk": null
+    },
+    "fishing-net": {
+      "zh": "渔网",
+      "pinyin": "yúwǎng",
+      "en": "fishing net",
+      "hsk": null
+    },
+    "small-boat": {
+      "zh": "小船",
+      "pinyin": "xiǎochuán",
+      "en": "boat",
+      "hsk": null
+    },
+    "river": {
+      "zh": "河",
+      "pinyin": "hé",
+      "en": "river",
+      "hsk": 2
+    },
+    "paddy": {
+      "zh": "稻田",
+      "pinyin": "dàotián",
+      "en": "rice paddy",
+      "hsk": null
+    },
+    "veg-plot": {
+      "zh": "菜地",
+      "pinyin": "càidì",
+      "en": "vegetable plot",
+      "hsk": null
+    },
+    "tomato": {
+      "zh": "西红柿",
+      "pinyin": "xīhóngshì",
+      "en": "tomato",
+      "hsk": 5
+    },
+    "cucumber": {
+      "zh": "黄瓜",
+      "pinyin": "huángguā",
+      "en": "cucumber",
+      "hsk": 4
+    },
+    "cabbage": {
+      "zh": "白菜",
+      "pinyin": "báicài",
+      "en": "Chinese cabbage",
+      "hsk": 3
+    },
+    "carrot": {
+      "zh": "胡萝卜",
+      "pinyin": "húluóbo",
+      "en": "carrot",
+      "hsk": null
+    },
+    "aubergine": {
+      "zh": "茄子",
+      "pinyin": "qiézi",
+      "en": "aubergine",
+      "hsk": 6
+    },
+    "spring-onion": {
+      "zh": "葱",
+      "pinyin": "cōng",
+      "en": "spring onion",
+      "hsk": null
+    },
+    "chicken": {
+      "zh": "鸡",
+      "pinyin": "jī",
+      "en": "chicken",
+      "hsk": 2
+    },
+    "farmhouse": {
+      "zh": "农舍",
+      "pinyin": "nóngshè",
+      "en": "farmhouse",
+      "hsk": null
+    },
+    "scarecrow": {
+      "zh": "稻草人",
+      "pinyin": "dàocǎorén",
+      "en": "scarecrow",
+      "hsk": null
+    },
+    "haystack": {
+      "zh": "草垛",
+      "pinyin": "cǎoduò",
+      "en": "haystack",
+      "hsk": null
+    },
+    "conical-hat": {
+      "zh": "斗笠",
+      "pinyin": "dǒulì",
+      "en": "conical straw hat",
+      "hsk": null
+    },
+    "steamer": {
+      "zh": "蒸笼",
+      "pinyin": "zhēnglóng",
+      "en": "bamboo steamer",
+      "hsk": null
+    },
+    "chopstick-holder": {
+      "zh": "筷子筒",
+      "pinyin": "kuàizitǒng",
+      "en": "chopstick holder",
+      "hsk": null
+    },
+    "gourd": {
+      "zh": "葫芦",
+      "pinyin": "húlu",
+      "en": "gourd",
+      "hsk": null
+    },
+    "pigeonholes": {
+      "zh": "格子",
+      "pinyin": "gézi",
+      "en": "pigeonholes",
+      "hsk": null
+    },
+    "herbs": {
+      "zh": "药材",
+      "pinyin": "yàocái",
+      "en": "medicinal herbs",
+      "hsk": null
     }
   }
 }

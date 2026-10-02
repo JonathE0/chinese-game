@@ -1,3 +1,4 @@
+import {rentalAccess} from '../core/rental.js';
 import rooms from '../content/rooms.json' with {type:'json'};
 import {escapeHtml as esc} from '../core/language.js';
 import {icon} from './art.js';
@@ -18,6 +19,7 @@ const TIMES=[
 ];
 
 export function openSleep(ctx){
+ if(!rentalAccess(ctx.profile,ctx.town.place))return ctx.ui.notice('Your lease has expired. Renew at the rental desk to rest here.');
   const body=ctx.ui.open('sleep','睡一觉','床 · REST');
   const s=readStats(ctx.profile);
   const now=ctx.town.daylight.hour;

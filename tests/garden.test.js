@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import garden from '../src/content/garden.json' with {type:'json'};
 import world from '../src/content/world.json' with {type:'json'};
 import objects from '../src/content/objects.json' with {type:'json'};
-import {gardenMarks,shoreline,inAny,inShape,isDisc,bridgeRails,balustrade} from '../src/core/garden.js';
+import {gardenMarks,shoreline,inAny,inShape,isDisc,bridgeRails,balustrade,crossingLayout} from '../src/core/garden.js';
 import {Registry} from '../src/world/registry.js';
 
 const park=world.districts.find(d=>d.id==='garden');
@@ -66,12 +66,41 @@ test('the shoreline lies on the edge of the pond, not inside it',()=>{
   for(const p of points)assert.ok(!inAny(garden.pond,p.x,p.z,.05),`${p.x},${p.z} is inside the water`);
 });
 
-test('lotus and koi float in open water, clear of the island and the bridges',()=>{
-  const is=garden.island;
+test('lotus and koi float in open water, clear of the island, the bridges and the 九曲桥',()=>{
+  const is=garden.island,decks=garden.crossings.flatMap(c=>crossingLayout(c).deck);
   for(const l of [...garden.lotus,...garden.koi]){
     assert.ok(inAny(garden.pond,l.x,l.z,.4),`${l.x},${l.z} is not in the pond`);
     assert.ok(Math.hypot(l.x-is.x,l.z-is.z)>is.r+.5,`${l.x},${l.z} is on the island`);
     assert.ok(Math.abs(l.x)>1.6,`${l.x},${l.z} is under a bridge`);
+    assert.ok(!inAny(decks,l.x,l.z,-.6),`${l.x},${l.z} is under the 九曲桥`);
+  }
+});
+
+/** Walk the centre line of a crossing from end to end, as the player would: stepping up onto it,
+ *  never blocked, and on its deck (not on the water) all the way across. */
+function walkAcross(r,c){
+  const P=c.points;let [x,z]=P[0],y=0,peak=0;
+  for(let k=0;k+1<P.length;k++){
+    const [bx,bz]=P[k+1],n=Math.ceil(Math.hypot(bx-x,bz-z)/.05),[ax,az]=[x,z];
+    for(let i=1;i<=n;i++){
+      const nx=ax+(bx-ax)*i/n,nz=az+(bz-az)*i/n;
+      if(r.blocks('town',nx,nz,y))return {stopped:`${nx.toFixed(2)},${nz.toFixed(2)} y ${y.toFixed(2)}`};
+      x=nx;z=nz;y=r.moveVertical('town',x,z,y,y-.08).y;peak=Math.max(peak,y);
+      if(inAny(water,x,z,.05)&&y<c.top-1e-6)return {stopped:`off the deck at ${x.toFixed(2)},${z.toFixed(2)}`};
+    }
+  }
+  return {x,z,y,peak};
+}
+
+test('the 九曲桥 and the stepping stones can be walked from bank to bank',()=>{
+  const r=registry();
+  for(const c of garden.crossings){
+    const end=walkAcross(r,c);
+    assert.ok(!end.stopped,`${c.id} stopped at ${end.stopped}`);
+    assert.ok(Math.abs(end.peak-c.top)<1e-6,`${c.id} deck at ${end.peak}`);
+    assert.ok(c.step<=.42&&c.top-c.step<=.42,`${c.id} steps are walkable`);
+    // Both ends lie on dry land, so the step is on the bank and the deck carries you over the water.
+    for(const [x,z] of [c.points[0],c.points.at(-1)])assert.ok(!inAny(water,x,z),`${c.id} ends in the water at ${x},${z}`);
   }
 });
 
@@ -101,8 +130,12 @@ test('on foot you reach the north bank, the mill and the lot door from the gate,
   const reach=(x,z)=>!!seen[at(...cell(x,z))];
   assert.ok(reach(-6,25.2),'north bank');
   assert.ok(reach(-13.8,36.4),'beside the mill');
-  assert.ok(reach(12.5,43),'the teahouse lot door');
+  assert.ok(reach(...garden.reservedLot.door),'the teahouse lot door');
   assert.ok(reach(0,42.6),'the foot of the south bridge');
+  // In from the town gate: the forecourt, round the pond to the bamboo and the east lawn.
+  assert.ok(reach(garden.gate.x,garden.gate.z-1.2),'inside the town gate');
+  assert.ok(reach(-30,40),'the west lawn by the bamboo');
+  assert.ok(reach(33,35),'the east lawn');
   assert.equal(free(-5,30),false,'the pond');
   assert.equal(free(-16.4,43),false,'the stream');
   assert.equal(free(0,34),false,'the island from the water line');
@@ -167,6 +200,11 @@ test('jumping never lands you on the water: from the banks, the bridge crests or
   for(const b of garden.bridges){
     const crest=b.steps.reduce((a,s)=>s[2]>a[2]?s:a);
     for(const dx of [-1,1]){const landed=hop(r,b.x,(crest[0]+crest[1])/2,dx,0,crest[2]);if(landed)wet.push(b.id+' '+landed);}
+  }
+  // Off the 九曲桥 and the stepping stones, from the middle of every run, every way.
+  for(const c of garden.crossings)for(const s of crossingLayout(c).deck)for(let k=0;k<8;k++){
+    const a=k/8*Math.PI*2,landed=hop(r,(s.x0+s.x1)/2,(s.z0+s.z1)/2,Math.cos(a),Math.sin(a),c.top);
+    if(landed)wet.push(c.id+' '+landed);
   }
   for(let i=0;i<12;i++){
     const a=i/12*Math.PI*2,landed=hop(r,island.x+Math.cos(a)*3.1,island.z+Math.sin(a)*3.1,Math.cos(a),Math.sin(a),island.top);

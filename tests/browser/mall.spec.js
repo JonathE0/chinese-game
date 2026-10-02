@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';
 
-// 星光百货 (docs/superpowers/plans/2026-09-27-development-wave-3.md, Y-mall): in from the avenue, up
+// 星光百货 (docs/superpowers/plans/2026-09-27-development-wave-3.md, Y-mall; on 美食街 since wave 4): in from the street, up
 // and down its four floors by escalator and by lift, something bought in every shop, the hardware
 // store off the ground floor, what each floor costs to draw, and lighter builds on lower settings.
 const SAVE_KEY='little-mandarin-town.v1';
@@ -23,11 +23,12 @@ const prompt=page=>page.locator('#interact span');
 /** E, once the town has settled on what E is for. */
 const press=async(page,id)=>{await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.nearest?.id)).toBe(id);await page.keyboard.press('e');};
 
-test('in from the avenue, up every floor by escalator and down again, and the lift to the top',async({page})=>{
+test('in from 美食街, up every floor by escalator and down again, and the lift to the top',async({page})=>{
   test.setTimeout(120000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await start(page);
-  await page.evaluate(()=>{const t=window.__qinghe.town;t.enterCity();t.setPaused(false);t.warp(-4000-9.6,0,90);});
+  // Its door (city.json `doors`) is on 美食街, the mall's front facing north over the street.
+  await page.evaluate(()=>{const t=window.__qinghe.town;t.enterCity();t.setPaused(false);t.warp(-4000-76.5,49.6,180);});
   await expect(prompt(page)).toHaveText('进商场');
   await press(page,'door:mall');
   await expect.poll(()=>place(page)).toBe('mall');
@@ -59,7 +60,7 @@ test('in from the avenue, up every floor by escalator and down again, and the li
   const out=await page.evaluate(()=>{const t=window.__qinghe.town,p=t.player.entity.getPosition();return {z:p.z,free:t.canMove(p.x,p.z)};});
   expect(out.z).toBeLessThan(-10);
   expect(out.free).toBe(true);
-  // And the way out, from the ground floor, back onto the avenue facing it.
+  // And the way out, from the ground floor, back onto 美食街 facing it.
   await stand(page,0,16.8,180);
   await expect(prompt(page)).toHaveText('出口');
   await page.keyboard.press('e');

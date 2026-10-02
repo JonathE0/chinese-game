@@ -32,6 +32,6 @@ export function validateRoots(data){
  }
  if(!Array.isArray(data.bankLesson?.nodes)||!data.bankLesson.nodes.length)errors.push('Missing bank lesson');
  else for(const node of data.bankLesson.nodes)validateNode(node);
- for(const key of ['starter','price','pack'])if(!Number.isSafeInteger(data.film?.[key])||data.film[key]<=0)errors.push('Invalid film balance: '+key);
+ for(const key of ['price','pack'])if(!Number.isSafeInteger(data.film?.[key])||data.film[key]<=0)errors.push('Invalid film balance: '+key);
  return errors;
 }

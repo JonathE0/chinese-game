@@ -1,5 +1,8 @@
 import * as pc from 'playcanvas';
 import {detail,RENDER} from '../core/quality.js';
+import {towerView} from './rental.js';
+import {CITY} from './city.js';
+import rental from '../content/rental.json' with {type:'json'};
 
 /**
  * The street, seen from inside a shop. A room stands hundreds of metres from the town, so its
@@ -11,12 +14,12 @@ import {detail,RENDER} from '../core/quality.js';
  * The camera's near plane is tilted onto the building front (an oblique projection), so the
  * building's own walls and door are never drawn, and its frustum is cropped to the openings' part
  * of the screen, so only what can be seen through them is drawn. It renders only while an opening
- * is on screen, at half resolution (a quarter on 低), and never in the town.
+ * is on screen, at half the screen's resolution (a quarter on 低), and never in the town.
  */
 
 const FRONT=.35;    // the view starts this far out from a building's front, past its door leaf, frame and pillars
 const TO_ROOM=new pc.Quat().setFromEulerAngles(0,180,0);
-const VP=new pc.Mat4(),FRUSTUM=new pc.Frustum(),CORNER=new pc.Vec4(),ROT=new pc.Quat();
+const VP=new pc.Mat4(),FRUSTUM=new pc.Frustum(),CORNER=new pc.Vec4(),ROT=new pc.Quat(),CORNER_RECT=new pc.Vec4();
 
 // Camera-relative, as town.js's CAMERA_RELATIVE patches every engine material: a room stands up to
 // 10 km out, where viewProjection * worldPosition in 32-bit floats rounds each corner differently
@@ -29,13 +32,15 @@ void main(void){
   vec3 posW=(matrix_model*vec4(vertex_position,1.0)).xyz;
   gl_Position=matrix_projection*vec4(mat3(matrix_view)*(posW+matrix_view[3].xyz*mat3(matrix_view)),1.0);
 }`;
-// The texture holds the cropped part of the screen (`viewRect`: centre and half size in NDC).
+// The cropped part of the screen (`viewRect`: centre and half size in NDC) is drawn into the
+// bottom-left corner of the texture, as big as it is on screen over the scale (task W6-perf: drawn
+// over the whole texture, a doorway a fifth of the screen cost up to twenty-five times its pixels).
 const FS=`uniform sampler2D viewMap;
 uniform vec4 viewRect;
 uniform vec2 viewScreen;
 void main(void){
   vec2 ndc=gl_FragCoord.xy*viewScreen*2.0-1.0;
-  gl_FragColor=vec4(texture2D(viewMap,((ndc-viewRect.xy)/viewRect.zw)*0.5+0.5).rgb,1.0);
+  gl_FragColor=vec4(texture2D(viewMap,(ndc-viewRect.xy+viewRect.zw)*0.5).rgb,1.0);
 }`;
 
 export class Views {
@@ -78,27 +83,37 @@ export class Views {
   /** Called once a frame, after the player's camera is placed. */
   update(){
     const t=this.town,room=t.place==='town'?null:t.rooms.get(t.place),view=room&&this.viewOf(room);
+    // 云海 is switched off behind you as you go indoors; a floor of one of its towers looks out on it.
+    // It stays on while you are up there: thousands of metres past the room's far clip, it is never
+    // drawn from inside, and switching it on and off with every glance would rebuild its batches.
+    if(view?.city&&!view.city.root.enabled)view.city.root.enabled=true;
     const on=!!view&&this.aim(view);
     if(this.camera.camera.enabled!==on)this.camera.camera.enabled=on;
     if(on)this.frames++;
   }
 
-  /** How a room maps onto its building front in the town, made the first time it is entered. */
+  /** How a room maps onto its building front in the town, made the first time it is entered. A
+   *  floor of 云海中心 (src/world/rental.js) maps onto the tower's own front, up at that floor. */
   viewOf(room){
     if(this.views.has(room.id))return this.views.get(room.id);
     const {data,openings:o}=room,b=this.town.data.buildings.find(b=>b.id===data.building);
+    const up=!b&&towerView(room.id),city=up&&this.town.rooms.get('city');
     let view=null;
     // A back room or the city's store has no front on a street: its openings stay as they are.
-    if(b&&data.door&&o&&!data.interiorOnly&&!data.outdoor&&(o.door||o.panes.length)){
-      // The building's front, or the door spot when that is further in: the word hall's door is
-      // at the back of its colonnade.
-      const face=(b.rotation??0)===180?-1:1,front=b.z+face*b.depth/2,x=data.door.x;
-      const z=(face*(data.door.z-front)<0?data.door.z:front)+face*FRONT;
-      view={face,boxes:[],
-        room:new pc.Vec3(room.offsetX,o.sill,o.face),
+    if(o&&(o.door||o.panes.length)&&(city||b&&data.door&&!data.interiorOnly&&!data.outdoor)){
+      let face,at;
+      if(city){face=up.face;at=new pc.Vec3(city.offsetX+up.x,up.y,up.z+face*FRONT);}
+      else{
+        // The building's front, or the door spot when that is further in: the word hall's door is
+        // at the back of its colonnade.
+        face=(b.rotation??0)===180?-1:1;
+        const front=b.z+face*b.depth/2,x=data.door.x,z=(face*(data.door.z-front)<0?data.door.z:front)+face*FRONT;
         // At the height of the ground in front of the door: the word hall's is up on its terrace. The
         // lowest of a few spots, as the door spot can graze the building's own box or a crate.
-        town:new pc.Vec3(x,Math.min(...[0,.3,.6].map(k=>this.town.registry.groundAt('town',x,data.door.z+face*k,2,.05))),z),
+        at=new pc.Vec3(x,Math.min(...[0,.3,.6].map(k=>this.town.registry.groundAt('town',x,data.door.z+face*k,2,.05))),z);
+      }
+      view={face,boxes:[],city:city||null,
+        room:new pc.Vec3(room.offsetX,o.sill,o.face),town:at,
         lights:room.root.findComponents('light').filter(l=>l.type==='directional')};
       if(o.door){
         const d=o.door;
@@ -161,6 +176,15 @@ export class Views {
     cam2.clearColor=cam.clearColor;   // day and night follow the town's sky
     // Should the street keep its shadows (see the constructor), the sun's map is fitted to this field of view.
     cam2.fov=cam.fov;cam2.nearClip=cam.nearClip;cam2.farClip=cam.farClip;
+    // Out over 云海 the view reaches as far as the city's own camera does, through a lighter haze
+    // (rental.json `tower.viewHaze`) than walking it, so downtown and the bay read clearly from up there.
+    this.tower=!!view.city;
+    if(view.city){
+      cam2.farClip=CITY.place.farClip;
+      this.haze??=Object.assign(new pc.FogParams(),{type:pc.FOG_LINEAR,start:rental.tower.viewHaze[0],end:rental.tower.viewHaze[1]});
+      this.haze.color=cam.clearColor;cam2.fog=this.haze;
+    }else cam2.fog=null;
+    cam2.rect=CORNER_RECT.set(0,0,rect[2],rect[3]);   // the corner of the texture the openings' part of the screen fills
     this.target(g);
     this.material.setParameter('viewRect',this.rect);
     this.screen[0]=1/g.width;this.screen[1]=1/g.height;
@@ -169,9 +193,10 @@ export class Views {
     return true;
   }
 
-  /** Half the canvas size (a quarter on 低, src/core/quality.js), remade when that changes. */
+  /** Half the canvas size (a quarter on 低, src/core/quality.js), remade when that changes; a window
+   *  up 云海中心 full size on 高 (`towerScale`), so the city reads sharply through it. */
   target(g){
-    const k=RENDER[detail()].viewScale,w=Math.max(1,Math.floor(g.width/k)),h=Math.max(1,Math.floor(g.height/k)),old=this.rt;
+    const k=RENDER[detail()][this.tower?'towerScale':'viewScale'],w=Math.max(1,Math.floor(g.width/k)),h=Math.max(1,Math.floor(g.height/k)),old=this.rt;
     if(old?.width===w&&old.height===h)return;
     const texture=new pc.Texture(g,{name:'street-view',width:w,height:h,format:pc.PIXELFORMAT_RGBA8,mipmaps:false,
       minFilter:pc.FILTER_LINEAR,magFilter:pc.FILTER_LINEAR,addressU:pc.ADDRESS_CLAMP_TO_EDGE,addressV:pc.ADDRESS_CLAMP_TO_EDGE});
@@ -185,7 +210,8 @@ export class Views {
    *  The engine hands in the same matrix more than once a frame, so it is rebuilt from scratch. */
   project(m){
     const cam=this.town.camera.camera,d=m.data,c=this.clip;
-    m.setPerspective(cam.fov,cam.aspectRatio,cam.nearClip,cam.farClip);
+    // The view's own far plane: out over 云海 it reaches past the room's 200 m (see update).
+    m.setPerspective(cam.fov,cam.aspectRatio,cam.nearClip,this.camera.camera.farClip);
     if(this.clipped){
       // Lengyel's oblique near plane: the far corner opposite the plane stays put.
       const qx=(Math.sign(c[0])+d[8])/d[0],qy=(Math.sign(c[1])+d[9])/d[5],qw=(1+d[10])/d[14];

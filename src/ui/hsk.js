@@ -1,7 +1,7 @@
 import {meta,loadWords} from '../services/hsk-data.js';
 import {languageLine,pinyinHtml} from './shell.js';
 import {icon} from './art.js';
-import {escapeHtml as esc} from '../core/language.js';
+import {escapeHtml as esc,folded} from '../core/language.js';
 import {familiarity,reviewWord,cardCoins,pickReviewWords} from '../core/review.js';
 import {addWord} from '../core/bank.js';
 import {openGames} from './games.js';
@@ -35,7 +35,7 @@ export async function openHsk(ctx,{mode=null}={}){
 
 function browse(ctx,body,query=''){
   const level=ctx.hskLevel,all=levelWords(level);
-  const needle=query.trim().toLowerCase();
+  const needle=folded(query.trim()).toLowerCase();
   const matches=needle?all.filter(w=>w.zh.includes(needle)||w.pinyin.toLowerCase().includes(needle)||w.en.toLowerCase().includes(needle)):all;
   const shown=matches.slice(0,LIST_LIMIT);
   const saved=new Set(ctx.profile.saved.map(w=>w.zh));

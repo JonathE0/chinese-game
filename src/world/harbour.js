@@ -4,6 +4,7 @@ import {addedGround} from '../core/city.js';
 import {detail} from '../core/quality.js';
 import {raySpan} from './registry.js';
 import {reflect,BAY} from './bay.js';
+import {blockGeometry} from './models.js';
 import objects from '../content/objects.json' with {type:'json'};
 
 /**
@@ -50,15 +51,16 @@ function bake(device,from,tris=[]){
   const m=new pc.Mat4(),n=new pc.Mat4(),p=new pc.Vec3(),q=new pc.Vec3();
   const bytes=(c,glow)=>[c.r*255,c.g*255,c.b*255,glow*255].map(Math.round);
   from.forEach(e=>{
-    const r=e.render,geo=r?SHAPES[r.type]:null;
+    // A person's merged detail (models.js `blocks`) keeps its blocks and brings its own colours.
+    const r=e.render,geo=e.blocks?blockGeometry(e.blocks):r?SHAPES[r.type]:null;
     if(!geo)return;
     m.mul2(inv,e.getWorldTransform());n.copy(m).invert().transpose();
     // A piece models.js has repainted in vertex colours still names its colour as `render.material`.
-    const c=bytes((r.material??r.meshInstances[0].material).diffuse,e.glow??0),base=pos.length/3;
+    const c=e.blocks?null:bytes((r.material??r.meshInstances[0].material).diffuse,e.glow??0),base=pos.length/3;
     for(let i=0;i<geo.positions.length;i+=3){
       m.transformPoint(p.set(geo.positions[i],geo.positions[i+1],geo.positions[i+2]),q);pos.push(q.x,q.y,q.z);
       n.transformVector(p.set(geo.normals[i],geo.normals[i+1],geo.normals[i+2]),q).normalize();nor.push(q.x,q.y,q.z);
-      col.push(...c);
+      col.push(...(c??[...geo.colors.slice(i/3*4,i/3*4+3),0]));
     }
     for(const i of geo.indices)idx.push(base+i);
   });
@@ -154,7 +156,7 @@ export function buildHarbour(town,root){
   const baked=(build,tris)=>{const scratch=new pc.Entity('scratch');build(scratch);const mesh=bake(device,scratch,tris);scratch.destroy();return mesh;};
   /** Someone who stands still (the ticket seller, the crew at the gangway, the wheel's attendant): one mesh, batched. */
   const figure=(x,y,z,turn,color,hat,solid=true)=>{
-    const mesh=baked(s=>{const made=m.person(s,color,[0,0,0],hat);if(!hat)made.hat.destroy();});
+    const mesh=baked(s=>{const made=m.person(s,color,[0,0,0],hat,undefined,{mix:'city',top:color});if(!hat)made.hat.destroy();});   // Yunhai's people, in the harbour's colours
     const e=drawn('person',g,[mesh],paint);e.noBatch=false;e.setLocalPosition(x,y,z);e.setLocalEulerAngles(0,turn,0);
     e.lookName='person';if(solid)mark(x,z,.3,.3,y,y+1.95,null);
     return e;
@@ -292,7 +294,8 @@ export function buildHarbour(town,root){
       railing(ax,az,bx,bz,deckTop);
       mark((ax+bx)/2,(az+bz)/2,Math.max(.06,Math.abs(bx-ax)/2),Math.max(.06,Math.abs(bz-az)/2),deckTop,deckTop+1.05,'railing');
     };
-    railed(x0+.05,z0+.1,x0+.05,z1-.1);railed(x1-.05,z0+.1,x1-.05,z1-.1);   // the sides end against the front and back railsrailed(x0,z0+.05,x1,z0+.05);
+    railed(x0+.05,z0+.1,x0+.05,z1-.1);railed(x1-.05,z0+.1,x1-.05,z1-.1);   // the sides end against the front and back rails
+    railed(x0,z0+.05,x1,z0+.05);
     railed(x0,z1-.05,gx-1.6,z1-.05);railed(gx+1.6,z1-.05,x1,z1-.05);
     for(const x of [gx-1.4,gx+1.4]){box(platform,[x,deckTop+1.7,z1-.05],[.25,3.4,.25],'#c9453b');mark(x,z1-.05,.15,.15,deckTop,deckTop+3.4,null);}
     box(platform,[gx,deckTop+3.5,z1-.05],[3.2,.3,.3],'#c9453b');

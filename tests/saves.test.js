@@ -373,3 +373,55 @@ test('a desk lamp from the old living-room floor spot loads where it stood, as a
   assert.deepEqual([up.home[0].x, up.home[0].z, up.home[0].rot], [bedSlot.x, bedSlot.z, bedSlot.rot]);
   assert.ok(bedSlot.z - 0.7 < -rooms.home.size[1] / 2 + 0.1, 'its long side is against the back wall');
 });
+
+test('a version 7 save: unused metro tickets become card credit at what they cost, an unexpired pass stays, and nothing else changes', () => {
+  const old = { ...freshProfile(), version: 7, wallet: 44, completed: ['metro:first', 'lesson:intro'], dayIndex: 3,
+    words: { water: { recognition: { stage: 2, due: 1, last: 1, reviews: 2, learned: true } } },
+    metro: { rides: 2, trips: 3, heard: 3, passUntil: 10 } };
+  const store = memory({ [SAVE_KEY]: JSON.stringify(old) });
+  const { profile, repairs, warning } = loadProfile(store, 7);
+  assert.deepEqual([repairs, warning], [[], null]);
+  assert.ok(SAVE_VERSION > 7, 'a format step: a build from before the card refuses this save instead of dropping the card');
+  assert.equal(profile.version, SAVE_VERSION);
+  // Two six-coin singles: twelve coins on the card, the pass still good until day 10, the counts kept.
+  assert.deepEqual(profile.metro, { balance: 12, trips: 3, heard: 3, passUntil: 10 });
+  assert.deepEqual([profile.wallet, profile.completed, profile.dayIndex, Object.keys(profile.words)], [44, ['metro:first', 'lesson:intro'], 3, ['water']]);
+  // A save from before the metro, and one that already held card credit, keep what they had.
+  assert.equal(decodeProfile(JSON.stringify({ ...freshProfile(), version: 7 })).metro, undefined);
+  const carded = decodeProfile(JSON.stringify({ ...freshProfile(), version: 7, metro: { rides: 0, trips: 1, balance: 5, sequence: 2,
+    journey: { id: 2, origin: 'qinghe', destination: 'yunhai', cost: 5, phase: 'riding' } } }));
+  assert.deepEqual(carded.metro, { balance: 5, trips: 1, sequence: 2, journey: { id: 2, origin: 'qinghe', destination: 'yunhai', cost: 5, phase: 'riding' } });
+  // The first saves of all (version 1) carry tickets too.
+  assert.equal(decodeProfile(JSON.stringify({ ...freshProfile(), version: 1, metro: { rides: 1, trips: 0 } })).metro.balance, 6);
+});
+
+test('a damaged travel record keeps its money and counts: only the bad field goes', () => {
+  const repairs = [];
+  const p = decodeProfile(JSON.stringify({ ...freshProfile(), wallet: 9, metro: { balance: 30, trips: 2, passUntil: 'soon', journey: { id: 1, phase: 'flying' } } }), repairs);
+  assert.deepEqual(p.metro, { balance: 30, trips: 2 });
+  assert.equal(p.wallet, 9);
+  assert.deepEqual(repairs, ['metro']);
+  const gone = [];
+  assert.equal(decodeProfile(JSON.stringify({ ...freshProfile(), metro: 'x' }), gone).metro, undefined);
+  assert.deepEqual(gone, ['metro']);
+});
+
+test('a bad hud setting is repaired, so the journal can still note the word list is open', () => {
+  for (const hud of ['open', [], null, 7]) {
+    const p = freshProfile(); p.settings.hud = hud;
+    const repairs = [];
+    const back = decodeProfile(JSON.stringify(p), repairs);
+    assert.deepEqual(back.settings.hud, freshProfile().settings.hud, String(hud));
+    assert.ok(repairs.includes('settings'));
+  }
+  const p = freshProfile(); p.settings.hud = {quests:false, names:true, controls:'zh', words:'yes'};
+  const back = decodeProfile(JSON.stringify(p));
+  assert.equal(back.settings.hud.words, undefined);
+  assert.equal(back.settings.hud.quests, false, 'the rest of the hud is kept');
+  const kept = freshProfile(); kept.settings.hud.words = true;
+  assert.equal(decodeProfile(JSON.stringify(kept)).settings.hud.words, true);
+  const old = freshProfile(); delete old.settings.hud;
+  const clean = [];
+  decodeProfile(JSON.stringify(old), clean);
+  assert.ok(!clean.includes('settings'), 'saves from before the hud are not damaged');
+});

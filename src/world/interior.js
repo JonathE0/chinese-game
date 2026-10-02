@@ -30,7 +30,7 @@ export function annexApproach(wall,x,z,w,d,offset){
  * up the open side of the flight and along the stairwell's edge upstairs.
  */
 export function upperParts(data){
-  const u=data.upper;if(!u)return [];
+  const u=data.upper;if(!u?.stairs)return [];   // a metro station builds its own levels (metro-station.js)
   const [w,d]=data.size,s=u.stairs,[wx0,wz0,wx1,wz1]=u.well,parts=[];
   const add=(kind,x0,z0,x1,z1,y0,y1)=>{if(x1>x0&&z1>z0)parts.push({kind,x:(x0+x1)/2,z:(z0+z1)/2,hw:(x1-x0)/2,hd:(z1-z0)/2,y0,y1});};
   for(const [x0,z0,x1,z1] of [[-w/2,-d/2,wx0,d/2],[wx1,-d/2,w/2,d/2],[wx0,-d/2,wx1,wz0],[wx0,wz1,wx1,d/2]])add('slab',x0,z0,x1,z1,u.y-.2,u.y);
@@ -86,7 +86,7 @@ export function buildRoom(models,parent,data,index,id){
       box(root,[x,(y0+y1-.02)/2,z],[hw*2,y1-y0-.02,hd*2],data.wall).lookName='ceiling';
     } else if(kind==='step')box(root,[x,y1/2,z],[hw*2,y1,hd*2],data.trim).lookName='stairs';
   }
-  if(data.upper){
+  if(data.upper?.stairs){
     const u=data.upper,s=u.stairs,[,wz0,wx1,wz1]=u.well,edge=s.x+s.width/2,rise=u.y/s.steps;
     // Up the flight: a sloping handrail from the third step to the landing, on posts.
     const z0=s.z-2*s.tread,y0=2*rise+.9,y1=u.y+.9,railAt=z=>y0+(z0-z)/(z0-wz0)*(y1-y0);
@@ -208,7 +208,7 @@ export function buildRoom(models,parent,data,index,id){
 
   // Wall decor from walls.json: wainscoting round the walls, and pieces that go up only where
   // nothing else already is (a counter added later simply wins its stretch of wall).
-  const decor=walls.rooms[id];
+  const decor=walls.rooms[id],hung=[];
   if(decor){
     const blocked=wallBlockers(data,fittings);
     if(decor.wainscot)for(const wall of ['front','back','west','east'])for(const [a0,a1] of wainscotRuns(data,blocked,wall)){
@@ -217,8 +217,23 @@ export function buildRoom(models,parent,data,index,id){
       box(face,[0,WAINSCOT/2,.035],[a1-a0,WAINSCOT,.07],decor.wainscot).lookName='wall';
       box(face,[0,WAINSCOT,.045],[a1-a0+.01,.06,.09],data.trim).lookName='wall';
     }
-    for(const piece of decor.pieces??[])if(wallFits(piece,blocked,data))lamps.push(...wallPiece(models,onWall(root,piece.wall,piece.at,w,d),piece));
+    for(const piece of decor.pieces??[])if(wallFits(piece,blocked,data)){
+      lamps.push(...wallPiece(models,onWall(root,piece.wall,piece.at,w,d),piece));
+      const size=WALL_PIECES[piece.kind],mid=piece.y??(size.y0+size.y1)/2,half=(size.y1-size.y0)/2;
+      hung.push({wall:piece.wall,a0:piece.at-size.w/2,a1:piece.at+size.w/2,y0:mid-half,y1:mid+half});
+    }
   }
+  /** A free stretch of wall for a trade's own wall piece (goods.json `wall`): the middle of the back
+   *  wall if it is clear, else the nearest clear spot, then the side walls and the front. */
+  const wallSpot=kind=>{
+    const size=WALL_PIECES[kind],blocked=[...wallBlockers(data,fittings),...hung];
+    if(!size)return null;
+    for(const wall of ['back','east','west','front'])for(let k=0;k<=wallLength(data,wall)/.25;k++){
+      const at=(k%2?1:-1)*Math.ceil(k/2)*.25;
+      if(wallFits({kind,wall,at},blocked,data)){hung.push({wall,a0:at-size.w/2,a1:at+size.w/2,y0:size.y0,y1:size.y1});return {frame:onWall(root,wall,at,w,d),y:(size.y0+size.y1)/2};}
+    }
+    return null;
+  };
 
   // The study desk is part of the house, so the review spot always exists.
   if(data.desk){
@@ -250,15 +265,27 @@ export function buildRoom(models,parent,data,index,id){
       for(let i=0;i<4;i++)box(root,[x+dx,.42+i*.56,z-.35],[.36,.06,1.55],'#c7ab83');
     }
   }
-  return {root,ceilings,fittings,sun,lamps,openings};
+  // The Jiangnan look (rooms.json `look`, src/world/jiangnan.js): painted surfaces and a shop's
+  // dressing, its lanterns dimmed by day and its solid parts given hitboxes (town.js registerRooms).
+  const dressed=data.look==='jiangnan'?dressShop(models,root,data,fittings,decor?.wainscot):null;
+  if(dressed)lamps.push(...dressed.lamps);
+  // Every room's finish, ceiling and goods (src/world/jiangnan-rooms.js), the first time it is entered
+  // (town.enterRoom), so a room nobody visits costs nothing at start.
+  let done=false;
+  const dress=town=>{if(done)return;done=true;
+    dressRoom(models,town,town.rooms.get(id),{wainscot:decor?.wainscot,panes:openings.panes,wallSpot,slabs:upperParts(data).filter(p=>p.kind==='slab')});};
+  return {root,ceilings,fittings,sun,lamps,openings,solids:dressed?.solids,dress};
 }
 import {rotatedHalf} from './navigation.js';
+import {dressShop} from './jiangnan.js';
+import {dressRoom} from './jiangnan-rooms.js';
 import {floorMaterial} from './paving.js';
 import floors from '../content/floors.json' with {type:'json'};
 import walls from '../content/walls.json' with {type:'json'};
 
 /** Wall pieces from walls.json: how wide each is along its wall, and the band of wall it covers. */
-const WALL_PIECES={scroll:{w:.7,y0:1.0,y1:2.5},painting:{w:1.2,y0:1.3,y1:2.2},shelf:{w:1.4,y0:1.3,y1:2.0},lattice:{w:1.4,y0:1.05,y1:2.35},lamp:{w:.4,y0:1.85,y1:2.45}};
+const WALL_PIECES={scroll:{w:.7,y0:1.0,y1:2.5},painting:{w:1.2,y0:1.3,y1:2.2},shelf:{w:1.4,y0:1.3,y1:2.0},lattice:{w:1.4,y0:1.05,y1:2.35},lamp:{w:.4,y0:1.85,y1:2.45},
+  pigeonholes:{w:1.36,y0:1.25,y1:2.2},wallshelf:{w:1.2,y0:1.36,y1:1.8}};   // the last two a trade's own (goods.json `wall`), drawn by jiangnan-rooms.js
 const WAINSCOT=.9;
 const wallLength=(data,wall)=>wall==='front'||wall==='back'?data.size[0]:data.size[1];
 
@@ -286,7 +313,7 @@ export function wallBlockers(data,fittings=[]){
   const rects=fittings.map(({x,z,hw,hd})=>({x,z,hw,hd}));
   if(data.lectern){const {x,z}=data.lectern;rects.push({x,z,hw:1.15,hd:.5});for(const dx of [-2.1,2.1])rects.push({x:x+dx,z:z-.35,hw:.2,hd:.78});}
   if(data.desk)rects.push({x:data.desk.x,z:data.desk.z,hw:.95,hd:.95});   // whichever way it is turned
-  if(data.upper){const s=data.upper.stairs,run=s.steps*s.tread/2;rects.push({x:s.x,z:s.z-run,hw:s.width/2,hd:run});}
+  if(data.upper?.stairs){const s=data.upper.stairs,run=s.steps*s.tread/2;rects.push({x:s.x,z:s.z-run,hw:s.width/2,hd:run});}
   for(const r of rects){
     if(r.x-r.hw<-w/2+.5)add('west',r.z,r.hd,0,h,true);
     if(r.x+r.hw>w/2-.5)add('east',r.z,r.hd,0,h,true);

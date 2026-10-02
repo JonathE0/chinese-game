@@ -1,11 +1,12 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 
 /**
  * 莲池公园: open from the first frame through the moon gate south of the square, a pond you
  * cannot step into, bridges that carry you over it to the pavilion island, and names on it all.
  */
 async function start(page){
- await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+ await page.goto('/');await startGame(page);   // past the Roots welcome, which pauses the game
  await page.waitForFunction(()=>window.__qinghe?.hskWords?.length>0);
  await page.evaluate(()=>{const c=window.__qinghe;c.profile.completed.push('home:tutorial','home:starter');c.save();});
 }
@@ -23,7 +24,7 @@ test('walking south from the square through the moon gate arrives in 莲池公�
 
 test('the moon gate is open even when the word list never loads',async({page})=>{
  await page.route('**/hsk/**',route=>route.abort());
- await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+ await page.goto('/');await startGame(page);
  await page.waitForFunction(()=>!!window.__qinghe?.town);
  expect(await page.evaluate(()=>window.__qinghe.hskWords?.length??0)).toBe(0);
  await page.evaluate(()=>{const t=window.__qinghe.town;t.warp(0,15,180);t.keys.add('KeyW');});
@@ -35,7 +36,7 @@ test('the moon gate is open even when the word list never loads',async({page})=>
 test('on foot from the gateway you reach the bank, the mill and the teahouse lot, not the water',async({page})=>{
  await start(page);
  const result=await page.evaluate(()=>{
-  const t=window.__qinghe.town,step=.25,x0=-19,z0=15,W=Math.round(38/step)+1,H=Math.round(36/step)+1;
+  const t=window.__qinghe.town,step=.25,x0=-36,z0=15,W=Math.round(72/step)+1,H=Math.round(51/step)+1;
   const at=(i,j)=>j*W+i,seen=new Uint8Array(W*H),cell=(x,z)=>[Math.round((x-x0)/step),Math.round((z-z0)/step)];
   let frontier=[cell(0,17)];seen[at(...frontier[0])]=1;
   while(frontier.length){
@@ -48,9 +49,10 @@ test('on foot from the gateway you reach the bank, the mill and the teahouse lot
    frontier=next;
   }
   const reach=(x,z)=>!!seen[at(...cell(x,z))];
-  return {bank:reach(-6,25.2),mill:reach(-13.8,36.4),lot:reach(12.5,43),pond:t.canMove(-5,30,0),island:t.canMove(3.5,34,0)};
+  // The teahouse lot's door, and the town gate at the far end of the park.
+  return {bank:reach(-6,25.2),mill:reach(-13.8,36.4),lot:reach(23,25.9),gate:reach(0,63.8),pond:t.canMove(-5,30,0),island:t.canMove(3.5,34,0)};
  });
- expect(result).toEqual({bank:true,mill:true,lot:true,pond:false,island:false});
+ expect(result).toEqual({bank:true,mill:true,lot:true,gate:true,pond:false,island:false});
 });
 
 test('walking at the pond from its bank stops at the water',async({page})=>{
@@ -85,9 +87,11 @@ test('looking up at the pavilion names it 亭子, and the park stays within its 
  await expect.poll(()=>page.evaluate(()=>window.__qinghe.town.looking?.zh)).toBe('亭子');
  const meshes=await page.evaluate(()=>window.__qinghe.town.garden.root.find(e=>!!e.render).length);
  console.log('garden meshes',meshes);
- // The covered walkway and 荷风水榭 (Task S) added about 120 meshes; they batch into existing draw
- // calls (performance.spec.js holds the draw-call budget), so this caps runaway geometry only.
- expect(meshes).toBeLessThan(600);
+ // The covered walkway and 荷风水榭 (Task S) added about 120 meshes, and wave 4's bigger park (the town
+ // gate, the 九曲桥, bamboo, flowerbeds, trails and its people and animals) about 1,700 more. The
+ // static ones batch into existing draw calls and the moving ones share one dynamic batch
+ // (performance.spec.js holds the draw-call budget), so this caps runaway geometry only.
+ expect(meshes).toBeLessThan(2600);
 });
 
 test('screenshot: from the entrance court across the pond',async({page})=>{

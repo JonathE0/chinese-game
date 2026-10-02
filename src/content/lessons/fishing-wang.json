@@ -1,0 +1,37 @@
+{
+  "id": "fishing-wang",
+  "npc": "wang",
+  "title": "跟王爷爷学钓鱼",
+  "pinyin": "Gēn Wáng yéye xué diàoyú",
+  "en": "Learn to fish from Grandpa Wang",
+  "target": "saying what you would like to learn; thanking an elder",
+  "curriculumStatus": "Beginner prototype; HSK level mapping and native-speaker review pending",
+  "nodes": [
+    {
+      "id": "ask",
+      "zh": "年轻人，你也喜欢钓鱼吗？",
+      "pinyin": "Niánqīngrén, nǐ yě xǐhuan diàoyú ma?",
+      "en": "Young one, do you like fishing too?",
+      "speaker": "wang",
+      "prompt": {"zh": "说你想学钓鱼。", "pinyin": "Shuō nǐ xiǎng xué diàoyú.", "en": "Say you'd like to learn to fish."},
+      "intent": "variants",
+      "accepted": ["我想学钓鱼", "我要学钓鱼", "我想学", "我喜欢钓鱼", "请教我钓鱼", "你可以教我吗", "王爷爷，我想学钓鱼"],
+      "model": "我想学钓鱼。",
+      "choices": ["我想学钓鱼。"],
+      "audio": "fishing-wang-ask"
+    },
+    {
+      "id": "rod",
+      "zh": "好啊！这是鱼竿。把鱼钩放到水里，等鱼上钩。",
+      "pinyin": "Hǎo a! Zhè shì yúgān. Bǎ yúgōu fàng dào shuǐ lǐ, děng yú shàng gōu.",
+      "en": "Sure! Here's a rod. Put the hook in the water and wait for a bite.",
+      "speaker": "wang",
+      "prompt": {"zh": "说谢谢。", "pinyin": "Shuō xièxie.", "en": "Say thank you."},
+      "intent": "variants",
+      "accepted": ["谢谢王爷爷", "谢谢", "谢谢您", "好的谢谢"],
+      "model": "谢谢王爷爷！",
+      "choices": ["谢谢王爷爷！"],
+      "audio": "fishing-wang-rod"
+    }
+  ]
+}

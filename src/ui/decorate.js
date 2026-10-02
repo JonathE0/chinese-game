@@ -1,3 +1,4 @@
+import {rentalAccess} from '../core/rental.js';
 import catalog from '../content/catalog.json' with {type:'json'};
 import rooms from '../content/rooms.json' with {type:'json'};
 import {languageLine,pinyinHtml} from './shell.js';
@@ -43,6 +44,7 @@ function putAway(ctx,record){
 }
 
 export function openDecorate(ctx){
+ if(!rentalAccess(ctx.profile,ctx.town.place))return ctx.ui.notice('Renew your lease to decorate. Your belongings are safe.');
   if(!ctx.profile.completed.includes('home:tutorial'))return tutorial(ctx);
   slotView(ctx);
 }
@@ -59,22 +61,31 @@ const STEPS=[
    body:'白天窗户就够亮了，晚上房间会暗下来。灯具店里的灯，放进房间会真的发光。<br>Daylight comes through the windows, but the room really does go dark at night. Lamps from the lighting shop actually light it.'},
 ];
 
+/** The steps for the room you are in: the first names the Qinghe home, so a rented flat starts at
+ *  the second, its example spots this room's own. */
+function stepsHere(ctx){
+  const room=here(ctx);
+  if(room==='home')return STEPS;
+  const spots=Object.values(slotsOf(room)).map(slot=>slot.zh).join('、');
+  return STEPS.slice(1).map(s=>spots&&s.body.includes('床位、五斗柜、衣柜、灯')?{...s,body:s.body.replace('床位、五斗柜、衣柜、灯',spots)}:s);
+}
 function tutorial(ctx,step=0){
-  const body=ctx.ui.open('decorate','布置房间','第一次回家 · WELCOME HOME');
-  const s=STEPS[step];
+  const room=here(ctx),steps=stepsHere(ctx);
+  const body=ctx.ui.open('decorate','布置房间',room==='home'?'第一次回家 · WELCOME HOME':`${rooms[room].zh} · ${rooms[room].en.toUpperCase()}`);
+  const s=steps[step];
   body.innerHTML=`
-    <div class="tutorial-step"><span>${step+1} / ${STEPS.length}</span>
-      <div class="step-track">${STEPS.map((_,i)=>`<i class="${i<=step?'active':''}"></i>`).join('')}</div></div>
+    <div class="tutorial-step"><span>${step+1} / ${steps.length}</span>
+      <div class="step-track">${steps.map((_,i)=>`<i class="${i<=step?'active':''}"></i>`).join('')}</div></div>
     ${languageLine(s,ctx.profile.settings,{className:'dialogue-line'})}
     <p class="tutorial-body">${fillKeys(s.body)}</p>
     <div class="button-row tutorial-actions">
       ${step>0?'<button class="secondary" id="tut-back">上一步</button>':''}
-      <button class="primary" id="tut-next">${step===STEPS.length-1?'开始布置':'下一步'} ${icon('arrow',15)}</button>
+      <button class="primary" id="tut-next">${step===steps.length-1?'开始布置':'下一步'} ${icon('arrow',15)}</button>
       <button class="subtle" id="tut-skip">跳过</button>
     </div>`;
   body.querySelector('#tut-back')?.addEventListener('click',()=>tutorial(ctx,step-1));
   body.querySelector('#tut-skip').onclick=()=>finishTutorial(ctx);
-  body.querySelector('#tut-next').onclick=()=>step===STEPS.length-1?finishTutorial(ctx):tutorial(ctx,step+1);
+  body.querySelector('#tut-next').onclick=()=>step===steps.length-1?finishTutorial(ctx):tutorial(ctx,step+1);
 }
 function finishTutorial(ctx){
   if(!ctx.profile.completed.includes('home:tutorial'))ctx.profile.completed.push('home:tutorial');
@@ -226,3 +237,5 @@ export function installPlacement(ctx){
     }
   };
 }
+
+export function storeRoomFurniture(ctx,room,only=()=>true){for(const record of [...ctx.profile.home].filter(r=>roomOf(r)===room&&only(r)))putAway(ctx,record);}

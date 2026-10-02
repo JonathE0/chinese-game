@@ -13,7 +13,7 @@ test('sellersOf finds both the town shop and the city department store for a bui
   const sellers=sellersOf('timber');
   assert.equal(sellers.length,2);
   const town=sellers.find(s=>s.shop==='homeware');
-  assert.deepEqual(town,{shop:'homeware',zh:'家居小铺',en:'Home goods',district:'square',x:-17.5,z:0.2});
+  assert.deepEqual(town,{shop:'homeware',zh:'家居小铺',en:'Home goods',district:'square',x:-17.75,z:0.2});
   const dept=sellers.find(s=>s.shop==='hardware');
   assert.equal(dept.city,true);
   assert.equal(dept.zh,'星光五金百货');

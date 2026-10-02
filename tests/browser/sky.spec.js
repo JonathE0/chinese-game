@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 
 /**
  * S-sky: the sun, the moon and the stars (src/world/sky.js). The sun is drawn where the light comes
@@ -8,7 +9,7 @@ import {test,expect} from '@playwright/test';
 async function start(page){
   await page.setViewportSize({width:1280,height:720});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await page.waitForFunction(()=>!!window.__qinghe?.town);
   await page.evaluate(()=>{
     const town=window.__qinghe.town,app=town.app;
@@ -30,7 +31,8 @@ async function start(page){
 
 test('the sun agrees with the light, and night things stay out of the day',async({page})=>{
   const errors=await start(page);
-  await page.evaluate(()=>{window.__qinghe.profile.dayIndex=27;});   // 中秋节: a full moon
+  // In the open square, not at the park gate where new travellers start under the pines.
+  await page.evaluate(()=>{window.__qinghe.profile.dayIndex=27;window.__qinghe.town.warp(0.6,4.9,0);});   // 中秋节: a full moon
   for(const hour of [7.5,10,12.5,16,18]){
     const seen=await page.evaluate(h=>window.__sky(h,'sun'),hour);
     expect(seen.sun,`sun up at ${hour}`).toBe(true);

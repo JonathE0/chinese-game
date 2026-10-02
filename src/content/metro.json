@@ -1,16 +1,231 @@
 {
-  "_note": "Station announcements for the ride in src/ui/metro.js, spoken by the teacher voice with clip ids metro-<key>. They play in the order doors, hold, the next-stop line for the direction of travel (next-city going out, next-town coming home), arriving, arrived. On arrival `question` is asked once per ride with `choices`; `answers` is the right choice for each direction and `reward` the coins for picking it (once per ride, see core/metro.js).",
+  "_note": "The metro: Line 1 between 青禾站 and 云海市中心站, paid with a transit card (src/core/metro.js). `lines` are the announcements, spoken by the teacher voice with clip ids metro-<key>; `-city` / `-town` pairs are said on the way to 云海市中心 / 青禾. `announcements` says when the stations and the ride play them: `platform` at each moment of the timetable while you are in a station (`enter` on walking in, `approach` as a train comes in, `open` as its doors open, `closing` as they close, `aboard` instead of `closing` when you are on the train, `short` at the gates with too little on the card), and `ride` in the carriage in order, where `bound`, `next` and `arrive` take the direction's suffix and `tip` is one of `tips` in turn. A line heard less than `every` seconds ago is left out, except those in `always`. On arrival `question` is asked once per ride with `choices`; `answers` is the right choice for each direction and `reward` the coins for picking it (once per ride). `network` lists the stations, the operating routes with their distance, and `fareBands` (the fare for a route up to `max` distance); only routes listed here can be travelled. `timetable` is the train's cycle in seconds (`away`, `arriving`, `open`, `closing`, `departing`) and `hold`, the longest a doorway keeps the doors open past their time. `topUps` are the amounts the card machines offer. `line` is Line 1's name and colour. `signs` are the station signs, Chinese first with English help; a sign whose Chinese is also in signs.json can be looked at and learned (`countdown` fills in {n}). `stations` are keyed by the `transit` id of their room in rooms.json (src/world/metro-station.js builds them): `name` and `en` the station's name, `towards` the direction its trains run, `announce` the direction suffix of the ride there, `gate` and `doors` the room-local z of the ticket gates and of the platform doors, `gateLevel` the gates' floor (0, or the room's `upper.y`), `flight` the stairs between the two levels (z of its `foot` and `top`, the x span of the `stairs`, and escalators [x0, x1, up or down]), `ceiling` a lower ceiling over the concourse and platform, `service` the service centre's counter on the gate line (its x and z; `check`: its attendant is the one to talk to, target metro:service), `map` the line map on the platform, `hall` a high hall with ring lights, and `future` the lines that are not running yet, drawn as closed entrances on the hall's `wall` at `at` along it: scenery only, with no fare and no departures.",
   "speaker": "teacher",
   "lines": {
-    "doors": {"zh": "车门即将关闭，请注意。", "pinyin": "Chēmén jíjiāng guānbì, qǐng zhùyì.", "en": "The doors are closing. Please take care."},
-    "hold": {"zh": "请站稳扶好。", "pinyin": "Qǐng zhàn wěn fú hǎo.", "en": "Please hold on."},
-    "next-city": {"zh": "下一站：云海市中心。", "pinyin": "Xià yí zhàn: Yúnhǎi Shì Zhōngxīn.", "en": "Next stop: Yunhai City Centre."},
-    "next-town": {"zh": "下一站：青禾。", "pinyin": "Xià yí zhàn: Qīnghé.", "en": "Next stop: Qinghe."},
-    "arriving": {"zh": "列车即将进站，请注意安全。", "pinyin": "Lièchē jíjiāng jìn zhàn, qǐng zhùyì ānquán.", "en": "The train is arriving. Please stand clear."},
-    "arrived": {"zh": "到站了，请带好随身物品。", "pinyin": "Dào zhàn le, qǐng dài hǎo suíshēn wùpǐn.", "en": "We have arrived. Please take all your belongings."},
-    "question": {"zh": "刚才广播说下一站是哪儿？", "pinyin": "Gāngcái guǎngbō shuō xià yí zhàn shì nǎr?", "en": "Where did the announcement say the next stop was?"}
+    "doors": {
+      "zh": "车门即将关闭，请注意。",
+      "pinyin": "Chēmén jíjiāng guānbì, qǐng zhùyì.",
+      "en": "The doors are closing. Please take care."
+    },
+    "hold": {
+      "zh": "请站稳扶好。",
+      "pinyin": "Qǐng zhàn wěn fú hǎo.",
+      "en": "Please hold on."
+    },
+    "next-city": {
+      "zh": "下一站：云海市中心。",
+      "pinyin": "Xià yí zhàn: Yúnhǎi Shì Zhōngxīn.",
+      "en": "Next stop: Yunhai City Centre."
+    },
+    "next-town": {
+      "zh": "下一站：青禾。",
+      "pinyin": "Xià yí zhàn: Qīnghé.",
+      "en": "Next stop: Qinghe."
+    },
+    "arriving": {
+      "zh": "列车即将进站，请注意安全。",
+      "pinyin": "Lièchē jíjiāng jìn zhàn, qǐng zhùyì ānquán.",
+      "en": "The train is arriving. Please stand clear."
+    },
+    "arrived": {
+      "zh": "到站了，请带好随身物品。",
+      "pinyin": "Dào zhàn le, qǐng dài hǎo suíshēn wùpǐn.",
+      "en": "We have arrived. Please take all your belongings."
+    },
+    "question": {
+      "zh": "刚才广播说下一站是哪儿？",
+      "pinyin": "Gāngcái guǎngbō shuō xià yí zhàn shì nǎr?",
+      "en": "Where did the announcement say the next stop was?"
+    },
+    "welcome": {
+      "zh": "欢迎乘坐青禾地铁。",
+      "pinyin": "Huānyíng chéngzuò Qīnghé Dìtiě.",
+      "en": "Welcome to the Qinghe Metro."
+    },
+    "bound-city": {
+      "zh": "本次列车开往云海市中心。",
+      "pinyin": "Běn cì lièchē kāiwǎng Yúnhǎi Shì Zhōngxīn.",
+      "en": "This train is bound for Yunhai City Centre."
+    },
+    "bound-town": {
+      "zh": "本次列车开往青禾。",
+      "pinyin": "Běn cì lièchē kāiwǎng Qīnghé.",
+      "en": "This train is bound for Qinghe."
+    },
+    "yellow-line": {
+      "zh": "请站在黄线以内候车。",
+      "pinyin": "Qǐng zhàn zài huángxiàn yǐnèi hòuchē.",
+      "en": "Please wait behind the yellow line."
+    },
+    "off-first": {
+      "zh": "请先下后上。",
+      "pinyin": "Qǐng xiān xià hòu shàng.",
+      "en": "Please let passengers off first."
+    },
+    "gap": {
+      "zh": "请注意列车与站台之间的空隙。",
+      "pinyin": "Qǐng zhùyì lièchē yǔ zhàntái zhījiān de kòngxì.",
+      "en": "Please mind the gap between the train and the platform."
+    },
+    "doors-closing": {
+      "zh": "车门即将关闭，请勿上下车。",
+      "pinyin": "Chēmén jíjiāng guānbì, qǐng wù shàng xià chē.",
+      "en": "The doors are closing. Please don't board or alight."
+    },
+    "move-in": {
+      "zh": "请往车厢中部走。",
+      "pinyin": "Qǐng wǎng chēxiāng zhōngbù zǒu.",
+      "en": "Please move to the middle of the carriage."
+    },
+    "seats": {
+      "zh": "请为有需要的乘客让座。",
+      "pinyin": "Qǐng wèi yǒu xūyào de chéngkè ràngzuò.",
+      "en": "Please offer your seat to passengers in need."
+    },
+    "no-lean": {
+      "zh": "请勿倚靠车门。",
+      "pinyin": "Qǐng wù yǐkào chēmén.",
+      "en": "Please don't lean on the doors."
+    },
+    "get-ready": {
+      "zh": "下车的乘客请做好准备。",
+      "pinyin": "Xià chē de chéngkè qǐng zuòhǎo zhǔnbèi.",
+      "en": "Passengers getting off, please get ready."
+    },
+    "arrive-city": {
+      "zh": "云海市中心站到了。",
+      "pinyin": "Yúnhǎi Shì Zhōngxīn Zhàn dào le.",
+      "en": "This is Yunhai City Centre."
+    },
+    "arrive-town": {
+      "zh": "青禾站到了。",
+      "pinyin": "Qīnghé Zhàn dào le.",
+      "en": "This is Qinghe."
+    },
+    "low-balance": {
+      "zh": "余额不足，请充值。",
+      "pinyin": "Yú'é bùzú, qǐng chōngzhí.",
+      "en": "Insufficient balance. Please top up."
+    }
   },
-  "choices": ["云海市中心", "青禾", "莲池公园"],
-  "answers": {"city": "云海市中心", "town": "青禾"},
-  "reward": 1
+  "announcements": {
+    "platform": {
+      "enter": ["welcome"],
+      "approach": ["arriving", "yellow-line"],
+      "open": ["bound", "off-first", "gap"],
+      "closing": ["doors-closing"],
+      "aboard": ["doors"],
+      "short": ["low-balance"]
+    },
+    "ride": ["hold", "bound", "next", "tip", "get-ready", "arrive", "arrived"],
+    "tips": ["move-in", "seats", "no-lean"],
+    "every": 140,
+    "always": ["arriving", "bound", "doors-closing", "doors", "low-balance"]
+  },
+  "choices": [
+    "云海市中心",
+    "青禾",
+    "莲池公园"
+  ],
+  "answers": {
+    "city": "云海市中心",
+    "town": "青禾"
+  },
+  "reward": 1,
+  "network": {
+    "stations": [
+      "qinghe",
+      "yunhai"
+    ],
+    "routes": [
+      {
+        "from": "qinghe",
+        "to": "yunhai",
+        "distance": 12
+      }
+    ],
+    "fareBands": [
+      {
+        "max": 5,
+        "cost": 3
+      },
+      {
+        "max": 15,
+        "cost": 5
+      },
+      {
+        "max": 1000,
+        "cost": 8
+      }
+    ]
+  },
+  "timetable": {"away": 34, "arriving": 6, "open": 20, "closing": 4, "departing": 6, "hold": 5},
+  "topUps": [10, 20, 50],
+  "line": {"name": "1号线", "colour": "#2f7fb5"},
+  "signs": {
+    "card": {"zh": "交通卡", "en": "Transit card"},
+    "balance": {"zh": "余额", "en": "Balance"},
+    "short": {"zh": "余额不足", "en": "Insufficient balance"},
+    "entry": {"zh": "进站", "en": "Entrance"},
+    "exit": {"zh": "出站", "en": "Way out"},
+    "way-out": {"zh": "出口", "en": "Exit"},
+    "top-up": {"zh": "充值", "en": "Top up"},
+    "tap": {"zh": "刷卡", "en": "Tap card"},
+    "tap-in": {"zh": "刷卡进站", "en": "Tap card to enter"},
+    "tap-out": {"zh": "刷卡出站", "en": "Tap card to exit"},
+    "gap": {"zh": "小心站台间隙", "en": "Mind the gap"},
+    "yellow-line": {"zh": "请站在黄线以内", "en": "Stay behind the yellow line"},
+    "next": {"zh": "下一班", "en": "Next train"},
+    "countdown": {"zh": "下一班 {n} 分钟", "en": "Next train {n} min"},
+    "soon": {"zh": "即将到站", "en": "Arriving soon"},
+    "arriving": {"zh": "列车进站", "en": "Train arriving"},
+    "waiting": {"zh": "候车区", "en": "Waiting area"},
+    "line": {"zh": "地铁 1 号线", "en": "Metro Line 1"},
+    "metro": {"zh": "地铁", "en": "Metro"},
+    "concourse": {"zh": "站厅", "en": "Concourse"},
+    "platform": {"zh": "站台", "en": "Platform"},
+    "stairs": {"zh": "楼梯", "en": "Stairs"},
+    "escalator": {"zh": "扶梯", "en": "Escalator"},
+    "gates": {"zh": "闸机", "en": "Gates"},
+    "doors": {"zh": "屏蔽门", "en": "Platform doors"},
+    "train": {"zh": "列车", "en": "Train"},
+    "service": {"zh": "服务中心", "en": "Service centre"},
+    "toilets": {"zh": "洗手间", "en": "Toilets"},
+    "transfer": {"zh": "换乘", "en": "Transfer"},
+    "replay": {"zh": "重播", "en": "Replay"}
+  },
+  "stations": {
+    "qinghe": {
+      "name": "青禾站",
+      "en": "Qinghe Station",
+      "towards": "往云海市中心",
+      "towardsEn": "To Yunhai City Centre",
+      "announce": "town",
+      "gate": -1,
+      "doors": -8.5,
+      "gateLevel": 0,
+      "flight": {"foot": 5.2, "top": 11.2, "stairs": [-1.7, 1.7], "escalators": [[2.1, 3.1, "down"], [-3.1, -2.1, "up"]]},
+      "ceiling": 4.4,
+      "service": {"x": -7, "z": 0.2, "check": true},
+      "map": "1号线   青禾站 ━━━━━━ 云海市中心站"
+    },
+    "yunhai": {
+      "name": "云海市中心站",
+      "en": "Yunhai City Centre Station",
+      "towards": "往青禾",
+      "towardsEn": "To Qinghe",
+      "announce": "city",
+      "gate": 4.5,
+      "doors": -15.5,
+      "gateLevel": 5,
+      "flight": {"foot": -6, "top": 1.5, "stairs": [-2.5, 2.5], "escalators": [[3, 4.1, "up"], [-4.1, -3, "down"]]},
+      "service": {"x": -9, "z": 5.9},
+      "map": "1号线   青禾站 ━━━━━━ 云海市中心站",
+      "hall": true,
+      "future": [
+        {"line": "2号线", "colour": "#b25f95", "wall": "west", "at": 8, "status": "即将开通", "en": "Opening soon"},
+        {"line": "3号线", "colour": "#c7963e", "wall": "east", "at": 8, "status": "建设中", "en": "Under construction"}
+      ]
+    }
+  }
 }

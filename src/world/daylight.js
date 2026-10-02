@@ -1,4 +1,5 @@
 import * as pc from 'playcanvas';
+import {LOOK} from './look.js';
 
 // A day passes in twenty-four real minutes. Keyframes are picked so the town reads as warm and
 // legible at every hour: the palette shifts, but text and faces never fall into the dark.
@@ -89,7 +90,7 @@ export class Daylight {
     this.moonLit=1;
   }
   /** Register a material that should glow after dark (lanterns, street lights, room lamps). */
-  addLamp(material,peak=1){this.lamps.push({material,peak,last:-1});return material;}
+  addLamp(material,peak=1){if(!this.lamps.some(l=>l.material===material))this.lamps.push({material,peak,last:-1});return material;}   // a shared lamp material once
   advance(dt){
     if(!this.paused)this.hour=(this.hour+dt*(24/(MINUTES_PER_DAY*60)))%24;
     this.apply(this.camera.getPosition().length()<SUN_TURNS_WITHIN||Math.floor(this.hour/SUN_STEP_HOURS)!==this.sunStep);
@@ -116,8 +117,9 @@ export class Daylight {
     this.sun.light.intensity=state.intensity*(FLOOR*(1-rise)+rise*moonlight);
     // emissiveIntensity is a shader uniform: it needs an update() to take effect, so only
     // push a change when the value has actually moved.
+    // With the post pass on (src/world/look.js) they burn brighter than white, so they bloom.
     for(const lamp of this.lamps){
-      const value=state.lamps*lamp.peak;
+      const value=state.lamps*lamp.peak*LOOK.glow;
       if(Math.abs(value-lamp.last)<.02)continue;
       lamp.last=value;lamp.material.emissiveIntensity=value*1.6;lamp.material.update();
     }

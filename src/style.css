@@ -42,6 +42,7 @@
 .lookup-status{color:#8a917c;padding:6px 0;font-size:11px}
 .lookup-credit{margin-top:6px;padding-top:6px;border-top:1px solid #efece0;font-size:9px;color:#a0a692;letter-spacing:.3px}
 .saved-words{display:flex;flex-direction:column;gap:2px}
+.journal-fold>summary{cursor:pointer;list-style:none}.journal-fold>summary::-webkit-details-marker{display:none}.journal-fold>summary::after{content:'▸';margin-left:6px;color:#6b8577}.journal-fold[open]>summary::after{content:'▾'}
 .saved-word{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-top:1px solid #eae6d6}
 .saved-word:first-child{border-top:none}
 /* Indoors there is no square to map and nobody to overhear. */
@@ -225,7 +226,8 @@ body.after-dark .brand div>span{color:#c2c9bb}
 /* Small or short windows: the HUD cards have to stop fighting each other. The quest card
    collapses to the mission you are actually on; the rest is still in the journal. */
 @media (max-width:900px), (max-height:760px) {
-  .quest-card{top:64px;left:12px;width:min(210px,42vw);padding:11px 12px;border-radius:4px 12px 12px 12px}
+  /* Below the brand, which keeps its full size (top 26px, 52px tall) until 720px wide. */
+  .quest-card{top:92px;left:12px;width:min(210px,42vw);padding:11px 12px;border-radius:4px 12px 12px 12px}
   .quest-card h2{font-size:14px;margin-top:6px;letter-spacing:0}
   .quest-sub,.quest-foot{display:none}
   #quest-list{max-height:none;overflow:visible}
@@ -247,6 +249,10 @@ body.after-dark .brand div>span{color:#c2c9bb}
   #placing{bottom:96px}
   #nameplate{top:calc(50% + 20px);padding:6px 12px}
   #nameplate b{font-size:16px}
+}
+/* Phones: the brand is smaller (top 15px, 40px tall), so the card can sit higher. */
+@media (max-width:720px){
+  .quest-card{top:64px}
 }
 /* Very short windows lose the mission card entirely; it lives in the journal anyway. */
 @media (max-height:620px){
@@ -579,6 +585,9 @@ body.unlocked.playing #look-hint{background:#3c5548ee;color:#fdf6e2;border-color
 .fare-state{display:flex;align-items:center;gap:9px;padding:11px 14px;border-radius:11px;font-size:12px;
   border:1px solid #cdd6de;background:#eef3f7;color:#4b6376;margin-bottom:6px}
 .fare-state.held{border-color:#cfd9bd;background:#eef2e2;color:#4f6b55}
+/* 海景公寓 (src/ui/rental.js): the four flats at the desk, and the lift's floors top down. */
+.rental-units{display:grid;gap:8px;margin-top:10px}.rental-unit.held{outline:2px solid #9fb88c}.rental-unit .wide{margin-top:10px}
+.lift-floors{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}.lift-floors button{justify-content:flex-start;text-align:left;flex-wrap:wrap;gap:4px 8px}
 .fare-card{border:1px solid #e4dcc6;border-radius:12px;background:#fdf9ec;padding:13px 15px;margin-bottom:11px}
 .fare-card.dim{opacity:.62}
 .fare-head{display:flex;align-items:baseline;gap:9px}
@@ -591,50 +600,23 @@ body.unlocked.playing #look-hint{background:#3c5548ee;color:#fdf6e2;border-color
 .qty-count{min-width:22px;text-align:center;font-size:16px}
 .qty-row .primary{margin-left:auto;font-size:12px;padding:10px 15px}
 
-/* The ride itself owns the screen: the town is paused behind it and the HUD is out of the way. */
+/* The ride: you stay in the carriage (the 3D scene, src/world/metro-station.js) and the HUD is out of
+   the way; a strip along the bottom carries the announcements, the question and the buttons. */
 body.riding .topbar,body.riding .quest-card,body.riding .mini-map,body.riding .location,
 body.riding .controls,body.riding #crosshair,body.riding #interact,body.riding #look-hint{display:none!important}
-/* The scene is opaque from the first frame on purpose. A tab that is not being rendered freezes
-   CSS animations, so anything whose visibility depends on one finishing can be left transparent
-   with the game showing through it. Movement here is decoration; the blackout is not. */
-#metro-ride{pointer-events:auto;position:absolute;inset:0;z-index:40;background:#141a20;opacity:1;
-  display:flex;flex-direction:column;align-items:center;justify-content:center}
-#metro-ride.arriving{animation:ride-out .4s ease forwards}
-@keyframes ride-out{from{opacity:1}to{opacity:0}}
-#metro-ride .carriage{animation:carriage-in .55s ease both;width:min(760px,88vw);border-radius:14px;overflow:hidden;
-  background:linear-gradient(#3c4750,#2b333a);box-shadow:0 30px 90px #0009;position:relative;
-  display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:56px 26px 30px}
-.carriage-roof{position:absolute;inset:0 0 auto 0;height:42px;background:#20282f;
-  display:flex;align-items:center;justify-content:center;border-bottom:1px solid #47535c}
-.line-name{font-size:10px;letter-spacing:3px;color:#8fb4d4}
-.carriage-window{height:min(230px,32vh);border-radius:8px;border:3px solid #59656e;background:#0d1319;
-  overflow:hidden;position:relative}
-.carriage-window::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,#0d131980,transparent 22%,transparent 78%,#0d131980)}
-.tunnel{position:absolute;inset:0}
-.tunnel i{position:absolute;left:-14%;top:18%;width:5%;height:64%;border-radius:3px;
-  background:linear-gradient(#f2d79a,#e5b96b);opacity:.85;filter:blur(.4px);
-  animation:tunnel-pass 1.05s linear infinite}
-.tunnel i:nth-child(2){animation-delay:.17s;top:34%;height:26%;opacity:.5}
-.tunnel i:nth-child(3){animation-delay:.35s}
-.tunnel i:nth-child(4){animation-delay:.52s;top:30%;height:34%;opacity:.6}
-.tunnel i:nth-child(5){animation-delay:.7s}
-.tunnel i:nth-child(6){animation-delay:.88s;top:40%;height:20%;opacity:.42}
-.tunnel.slow i{animation-duration:1.35s}
-@keyframes carriage-in{from{transform:translateY(14px) scale(.985)}to{transform:none}}
-@keyframes tunnel-pass{from{transform:translateX(0) scaleY(1)}to{transform:translateX(2400%) scaleY(1.15)}}
-.carriage-floor{grid-column:1/-1;height:16px;border-radius:6px;background:#1c2329;margin-top:4px}
-#metro-ride .announce{width:min(760px,88vw);margin-top:22px;padding:17px 22px;border-radius:12px;
-  background:#20282f;border:1px solid #3a444d;text-align:center;min-height:78px}
-#metro-ride.speaking .announce{border-color:#6d9ac4;box-shadow:0 0 0 1px #6d9ac455}
-.announce-zh{font-family:'Noto Serif SC',serif;font-size:21px;letter-spacing:2px;color:#e9f1f8;line-height:1.7}
-.announce-en{font-size:11px;color:#9fb3c4;margin-top:7px;line-height:1.7}
-#metro-ride .announce-quiz{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}
-.metro-skip{margin-top:20px;padding:9px 16px;border:1px solid #4d5a64;background:transparent;
-  color:#9fb3c4;border-radius:8px;font-size:11px}
-.metro-skip:hover{background:#20282f}
-@media(max-width:720px){#metro-ride .carriage{grid-template-columns:1fr;padding:50px 16px 22px}
-  .carriage-window:nth-of-type(3){display:none}.announce-zh{font-size:18px}}
+#metro-ride{pointer-events:none;position:absolute;left:0;right:0;bottom:0;z-index:40;padding:0 16px 22px;
+  display:flex;flex-direction:column;align-items:center;gap:10px}
+#metro-ride>*{pointer-events:auto}
+#metro-ride .announce{width:min(760px,92vw);padding:12px 20px;border-radius:12px;min-height:64px;
+  background:#141a20d9;border:1px solid #3a444d;text-align:center;box-shadow:0 12px 40px #0007}
+#metro-ride.speaking .announce{border-color:#6d9ac4;box-shadow:0 0 0 1px #6d9ac455,0 12px 40px #0007}
+.announce-zh{font-family:'Noto Serif SC',serif;font-size:22px;letter-spacing:2px;color:#f1f6fa;line-height:1.6}
+.announce-en{font-size:12px;color:#b4c6d4;margin-top:4px;line-height:1.6}
+#metro-ride .announce-quiz{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+#metro-ride .ride-buttons{display:flex;gap:10px}
+.metro-skip{padding:8px 16px;border:1px solid #4d5a64;background:#141a20cc;color:#c9d6e0;border-radius:8px;font-size:12px}
+.metro-skip:hover,.metro-skip:focus-visible{background:#20282f}
+@media(max-width:720px){.announce-zh{font-size:18px}}
 /* Definitions remain readable at card width, including long original dictionary entries. */
 .word-definitions{margin-top:.7rem;font-size:.9rem;line-height:1.65;font-weight:400;min-width:0;overflow-wrap:anywhere}
 .word-definitions summary{cursor:pointer;color:#53766a;font-weight:600}
@@ -642,7 +624,7 @@ body.riding .controls,body.riding #crosshair,body.riding #interact,body.riding #
 .word-definitions .definition-zh{padding-left:.75rem;border-left:2px solid #a9b99b}
 .definition-source{display:block;margin-top:.7rem;font-size:.72rem;color:#727568}
 
-/* ---- Task 3 (打车 taxi): a short fade to black hides the jump across town ---- */
+/* ---- A short fade to black hides a jump (a night's sleep: src/ui/fade.js) ---- */
 .fade-veil{position:fixed;inset:0;z-index:50;background:#0b0c0d;opacity:0;pointer-events:auto;
   transition:opacity .4s ease}
 .fade-veil.opaque{opacity:1}
@@ -699,6 +681,10 @@ body.riding .controls,body.riding #crosshair,body.riding #interact,body.riding #
 .tutorial-did{display:flex;align-items:baseline;justify-content:center;gap:9px;padding:9px 0}
 .tutorial-did b{font-family:'Noto Serif SC',serif;font-size:18px;letter-spacing:1px;color:#456d58}
 .tutorial-did small{font-size:11px;color:#7c8575}
+.tutorial-close{background:none;border:0;padding:0 3px;font-size:18px;line-height:1;color:#8f9680;cursor:pointer}
+.tutorial-close:hover{color:#394c41}
+/* The look and Esc hints follow settings.mouse: lock shows the pointer-lock wording, drag (the default) the other. */
+body:not(.mouse-lock) [data-mouse=lock],body.mouse-lock [data-mouse=drag]{display:none}
 #arrival .arrival-tutorial{font-size:13px;line-height:1.7;color:#5d6f60;margin-top:14px}
 #arrival .arrival-tutorial small{display:block;font-family:Arial,sans-serif;font-size:11.5px;line-height:1.6;color:#858b78;margin-top:2px}
 /* Cloud on and signed out: sign in or play as a guest. The Google slot keeps its height, so the
@@ -762,6 +748,8 @@ body.riding .controls,body.riding #crosshair,body.riding #interact,body.riding #
 .setting-row select{padding:7px 9px;background:#f2efdf;border:1px solid #ccd2b9;border-radius:7px;color:#58694f;font-size:12px}
 /* Admin mode badge (?admin on the dev server). */
 body.admin::after{content:'ADMIN';position:fixed;left:8px;bottom:8px;z-index:50;padding:2px 7px;border-radius:6px;background:#b8463a;color:#fff;font:600 11px/1.4 system-ui,sans-serif;letter-spacing:1px;pointer-events:none}
+/* Admin performance overlay (src/ui/perf.js), just above the badge. */
+#perf-overlay{position:fixed;left:8px;bottom:32px;z-index:50;margin:0;padding:4px 8px;border-radius:6px;background:rgba(24,28,26,.74);color:#eef3ef;font:11px/1.4 ui-monospace,Consolas,monospace;pointer-events:none}
 /* 山城老火锅: the hotpot menu (src/ui/hotpot.js). Tabs, choices and steppers reuse the shared styles. */
 .hotpot-tabs{margin:14px 0 6px}
 .hotpot-choices{display:flex;flex-direction:column;gap:6px}
@@ -787,15 +775,26 @@ body.admin::after{content:'ADMIN';position:fixed;left:8px;bottom:8px;z-index:50;
 .vf-name{position:absolute;left:50%;top:calc(50% + 30px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:4px;color:#fffbee;text-shadow:0 2px 10px #000a;white-space:nowrap}
 .vf-name b{font-family:'Noto Serif SC',serif;font-size:40px;font-weight:500;letter-spacing:4px;line-height:1.1}
 .vf-name small{font-size:14px}
-.vf-zoom{position:absolute;right:14px;top:12px;font-size:12px;letter-spacing:1px;color:#fffbeee6;text-shadow:0 1px 4px #000a}
+.vf-bar{position:absolute;left:50%;bottom:52px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:12px;background:#0b120e8c;pointer-events:auto;white-space:nowrap}
+.vf-bar button{min-height:36px;padding:4px 12px;border:1px solid #fffbee66;border-radius:8px;background:#fffbee1f;color:#fffbee;font:inherit;font-size:14px;cursor:pointer}
+.vf-bar button:hover,.vf-bar button:focus-visible{background:#fffbee40}
+.vf-bar small{font-size:10px;opacity:.8}
+.vf-which{font-family:'Noto Serif SC',serif}
+.vf-zoom{display:flex;align-items:center;gap:6px;font-size:13px;color:#fffbee}
+.vf-zoom input{width:120px;accent-color:#e8bd55}
+.vf-zoom output{min-width:3.2em;font-variant-numeric:tabular-nums}
+.vf-keys{display:block}
+body.touch .vf-shoot{display:none}
 .vf-hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:13px;color:#fffbeee6;text-shadow:0 1px 4px #000a;white-space:nowrap}
 .vf-hint small{font-size:10px}
 body.camera-up #nameplate{display:none}
+/* Notices go above the viewfinder's bar and key hint (it sits 9vh up from the bottom). */
+body.camera-up .interaction-stack{bottom:calc(9vh + 112px)}
 .camera-flash{position:fixed;inset:0;z-index:30;background:#fff;opacity:0;pointer-events:none}
 .camera-flash.on{animation:camera-flash .45s ease-out}
 @keyframes camera-flash{from{opacity:.85}to{opacity:0}}
 @media(prefers-reduced-motion:reduce){.camera-flash.on{animation-duration:.01s}}
-@media(max-width:720px){.vf-name b{font-size:28px}.vf-hint{display:none}}
+@media(max-width:720px){.vf-name b{font-size:28px}.vf-hint{display:none}.vf-bar{bottom:12px;gap:4px}.vf-zoom input{width:80px}.vf-zoom span{display:none}}
 .checkin-stamps{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}
 .checkin-stamp{padding:4px 8px;border:1px dashed #d4cfb8;border-radius:7px;font-size:12px;color:#a3a58e}
 .checkin-stamp.done{border:1px solid #b9483a;color:#b9483a;background:#fbefe6}
@@ -813,3 +812,54 @@ body.camera-up #nameplate{display:none}
 
 /* English-first arrival guidance; Mandarin expands with practice. */
 .roots-english{font-size:15px;line-height:1.65;color:#334c42}.roots-mandarin{margin:8px 0 16px;font-size:13px}.roots-mandarin summary{cursor:pointer;color:#526e60}#roots-photo-guide{padding:14px 18px;background:#e8eee2;border-radius:10px;margin-bottom:20px}#roots-photo-guide h3{margin-top:0}#roots-photo-guide li{margin-bottom:10px;line-height:1.5}#roots-photo-guide ol{padding-left:20px}.roots-goal small{display:block;margin-top:6px}
+
+#status-button{position:relative}.condition-warning{position:absolute;right:0;top:-6px;width:16px;height:16px;border-radius:50%;background:#f6bf42;color:#352510;font:bold 12px/16px sans-serif;text-align:center;pointer-events:none;box-shadow:0 0 0 2px #fff}.condition-warning[hidden]{display:none}
+
+/* The arrival screen: one calm card that fits any screen, with balanced lines. Chinese is never
+   broken inside a phrase (keep-all breaks only at its punctuation), short English lines are
+   balanced so no single word is left alone, and the key hints wrap as whole chips. */
+#arrival{width:min(460px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow-y:auto;box-sizing:border-box;transform:translate(-50%,-50%);padding:30px clamp(20px,6vw,40px) 22px}
+#arrival .arrival-stamp{margin-bottom:18px}
+#arrival h2{font-size:clamp(25px,7vw,34px);letter-spacing:2px;margin:14px 0 10px;text-wrap:balance}
+#arrival p{text-wrap:balance;word-break:keep-all;overflow-wrap:break-word}
+#arrival .arrival-lead{font-family:Arial,sans-serif;font-size:14px;line-height:1.7;letter-spacing:.2px;color:#4c5f52}
+#arrival .arrival-tutorial{margin-top:16px;padding-top:14px;border-top:1px solid #e6dfca}
+#arrival .arrival-en{display:grid;gap:6px;margin-top:14px!important;font-size:12.5px!important;line-height:1.7}
+#arrival .arrival-en>span{display:block;text-wrap:balance}
+#arrival i{font-style:normal;white-space:nowrap}
+#arrival .primary{margin-top:22px;min-width:min(240px,100%);padding:15px 28px;font-size:16px;letter-spacing:1px}
+#arrival .arrival-note{margin-top:18px;font-size:11px;line-height:1.7}
+#arrival .arrival-note p{margin:0;font-size:inherit;letter-spacing:0}
+#arrival .arrival-keys{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 14px;margin-bottom:6px!important;color:#7d8873}
+#arrival .arrival-keys [data-key]{font-weight:600;color:#5d6f60}
+@media (max-height:640px){#arrival .arrival-stamp{display:none}#arrival{padding-top:22px}}
+/* Signed out with the cloud on: choosing how to play comes first, the how-to lines follow it. */
+#arrival:has(.arrival-cloud){display:flex;flex-direction:column;max-height:calc(100dvh - 32px)}
+#arrival:has(.arrival-cloud) .arrival-stamp{display:none}
+#arrival:has(.arrival-cloud) .arrival-cloud{order:1;margin-top:14px}
+#arrival:has(.arrival-cloud) .arrival-tutorial,#arrival:has(.arrival-cloud) .arrival-en{order:2}
+#arrival:has(.arrival-cloud) .arrival-note{order:3}
+#arrival .arrival-google .primary{font-size:13px;padding:12px 16px;gap:4px 10px;flex-wrap:wrap;letter-spacing:.3px}
+
+/* 青禾田园 (src/ui/fields.js): 刘奶奶's basket on screen, and the fishing mini-game over the river. */
+.fields-basket{position:fixed;right:32px;bottom:262px;z-index:12;min-width:150px;padding:11px 14px;border-radius:14px;background:#f4efe0ee;border:1px solid #ded7c1;box-shadow:var(--shadow);font-size:12px;color:#4f5f50}
+.fields-basket b{font-family:'Noto Serif SC',serif;font-size:14px;font-weight:500;letter-spacing:1px}
+.fields-basket small{color:#8b9280;font-size:9.5px;font-family:inherit;letter-spacing:0}
+.fields-basket ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:5px}
+.fields-basket li{display:flex;align-items:center;gap:8px}
+.fields-basket li span{flex:1}
+.fields-basket em{font-style:normal;font-weight:600;color:#456d58}
+.fields-basket button{width:24px;height:24px;border-radius:50%;background:#e6dfc8;color:#5f6b55;font-size:15px;line-height:1;pointer-events:auto}
+.fields-basket button:hover{background:#d9d0b4}
+.fields-basket p{margin-top:6px;color:#9aa189}
+.fishing{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:12px;padding-bottom:9vh;cursor:pointer;touch-action:none;user-select:none}
+.fishing-state{min-height:64px;display:grid;place-items:center}
+.fishing-bite{background:#fcf7e8f2;border:1px solid #e6c98a;border-radius:16px;padding:10px 22px;box-shadow:var(--shadow);animation:fishing-bite .35s ease-in-out infinite alternate}
+.fishing-bite .zh{font-size:26px}
+@keyframes fishing-bite{from{transform:scale(1)}to{transform:scale(1.06)}}
+.fishing-hint{background:#364e3ee0;color:#fff8e5;border-radius:12px;padding:8px 16px;font-size:12px;text-align:center;max-width:min(520px,90vw)}
+.fishing .fishing-reel{padding:12px 26px;border-radius:24px}
+.fishing.bite .fishing-reel{box-shadow:0 0 0 4px #f2e2a7}
+@media(max-width:720px){.fields-basket{right:14px;bottom:200px;min-width:130px;font-size:11px}}
+/* A double-click on a button must not select its label, or the word look-up pops open over the panel. */
+button,[role=button]{user-select:none;-webkit-user-select:none}

@@ -34,14 +34,10 @@ async function press(page,label){
   await page.keyboard.press('e');
   await page.waitForTimeout(320);
 }
-/** Click to put down the piece in hand. Once the world has the pointer, Playwright's jump to the
- *  click point reads as a mouse turn and the piece would go wherever the view drifted, so
- *  mouse-look is off. The first click takes the pointer (or, if the world already has it, puts
- *  the piece down); the second waits until the world has the pointer. */
+/** Click to put down the piece in hand. The mouse never locks in the default mode, so a click that
+ *  stays put is all it takes; mouse-look is off so the piece goes where the view already points. */
 async function clickToPlace(page){
   await page.evaluate(()=>{window.__qinghe.town.sensitivity=0;});
-  await page.mouse.click(700,520);
-  await expect.poll(()=>page.evaluate(()=>!!document.pointerLockElement)).toBe(true);
   await page.mouse.click(700,520);
 }
 

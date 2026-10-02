@@ -1,13 +1,18 @@
+import {leaseStatus} from '../core/rental.js';
+import {readStats,band} from '../core/stats.js';
 import {icon} from './art.js';
 import {escapeHtml as esc} from '../core/language.js';
 import npcs from '../content/npcs.json' with {type:'json'};
 import {dueCount} from '../core/review.js';
 import questData from '../content/quests.json' with {type:'json'};
+import unlockData from '../content/unlock.json' with {type:'json'};
+import {questDone,townSteps,metroOpen,CARD_FLAG} from '../core/unlock.js';
 import {KEY_ACTIONS,keyLabel,fillKeys} from '../core/keys.js';
 import {dailyReady} from '../core/daily.js';
 import {closeHook} from '../core/conversation.js';
 import {TUTORIAL_UI,shouldAutoStart} from '../core/tutorial.js';
 import {gardenMapParts} from './garden-map.js';
+import {fieldsMapParts} from './fields-map.js';
 import {knowsLook} from '../core/bank.js';
 import {showPinyin,pinyinMarkup} from '../core/pinyin.js';
 
@@ -43,14 +48,15 @@ export function languageLine(line,settings,{className='',help=true}={}) {
  *  the Chinese, and it is the one strip of the screen that exists to get you moving. */
 const CONTROLS=[
   {keys:['forward','left','back','right'],en:'Move',zh:'移动'},
-  {keys:[],en:'Mouse to look',zh:'移动鼠标转身'},
+  {keys:[],en:'Mouse to look',zh:'移动鼠标转身',mouse:'lock'},
+  {keys:[],en:'Drag to look',zh:'拖动转视角',mouse:'drag'},
   {keys:['interact'],en:'Talk / enter',zh:'交谈 · 进门'},
   {keys:['collect'],en:'Learn this word',zh:'记住这个词'},
   {keys:['jump'],en:'Jump',zh:'跳'},
   {keys:['view'],en:'Third person',zh:'视角'},
   {keys:['camera'],en:'Camera',zh:'相机'},
   {keys:['labels'],en:'Hide labels',zh:'隐藏名字'},
-  {keys:['Esc'],en:'Free the cursor',zh:'松开鼠标'},
+  {keys:['Esc'],en:'Free the cursor',zh:'松开鼠标',mouse:'lock'},
 ];
 /** A <kbd> for a bindable action is filled in by applyKeys(); anything else (Esc) is fixed. */
 const kbd=k=>KEY_ACTIONS.some(a=>a.id===k)?`<kbd data-key="${k}"></kbd>`:`<kbd>${esc(k)}</kbd>`;
@@ -62,23 +68,23 @@ export class Shell {
   const hud=hudOf(ctx.profile);
   document.querySelector('#app').innerHTML=`
   <header class="topbar"><div class="brand"><span class="brand-mark">禾</span><div><h1>青禾小镇</h1><span>A LITTLE MANDARIN GETAWAY</span></div></div><div class="top-actions"><div class="wallet" title="学习币">${icon('coin')}<b id="wallet-count">0</b><span>学习币</span></div>${[['journal-button','journal','旅行手册','Journal','book'],['inventory-button','inventory','背包','Inventory','bag'],['review-button','wordbank','生词本','Encountered words','leaf'],['status-button','status','状态','Condition','heart'],['settings-button','settings','设置','Settings','settings'],['labels-button','labels','名字标签','Labels','eye']]
-    .map(([id,action,zh,en,svg])=>`<button class="icon-button" id="${id}" aria-label="${zh}" data-shortcut="${action}" data-title="${zh} · ${en}">${icon(svg)}<kbd data-key="${action}"></kbd></button>`).join('')}</div></header>
+    .map(([id,action,zh,en,svg])=>`<button class="icon-button" id="${id}" aria-label="${zh}" data-shortcut="${action}" data-title="${zh} · ${en}">${icon(svg)}<kbd data-key="${action}"></kbd>${action==='status'?'<span id="condition-warning" class="condition-warning" hidden aria-hidden="true">!</span>':''}</button>`).join('')}</div></header>
   <aside class="quest-card${hud.quests?'':' collapsed'}" id="quest-card"><button class="quest-toggle" id="quest-toggle" aria-expanded="${hud.quests}" aria-controls="quest-body" title="收起 / 展开 · Collapse"><span class="dot"></span><span class="quest-eyebrow">你的第一天 <small>YOUR MISSIONS</small></span><span class="chapter" id="quest-count">0 / 7</span><span class="chevron">${icon('chevron',14)}</span></button><div id="quest-body"><h2>从一句你好开始。</h2><p class="quest-sub">慢慢逛，慢慢学。点一个任务，地图上就会给你带路。</p><div id="quest-list"></div><div class="quest-foot">${icon('leaf',15)} <span id="quest-foot-text">自由探索 · 随时休息</span></div></div></aside>
   <div id="world-labels">${npcs.map(n=>`<div class="npc-label" id="label-${n.id}"><span class="label-dot" style="background:${n.color}"></span>${n.zh}<small>${n.role}</small></div>`).join('')}</div>
   <button id="ambient-bubble" class="ambient-bubble" hidden aria-label="听听闲聊"><span>今天天气真好！</span><small>···</small></button>
   <div class="location"><span class="location-icon">${icon('map',17)}</span><div><b>青禾广场</b><span id="place-time">下午 · 15:00</span></div></div>
   <div class="interaction-stack"><div id="toast" role="status" hidden></div><div id="interact" hidden><button id="interact-button"><kbd data-key="interact"></kbd> <span></span></button></div></div>
   <div class="controls" id="controls" data-lang="${esc(hud.controls??'en')}">${CONTROLS.map(c=>
-    `<span class="ctl">${c.keys.map(kbd).join('')}<em data-en>${esc(c.en)}</em><em data-zh>${esc(c.zh)}</em></span><i></i>`).join('')}<button class="lang-toggle" id="controls-lang" title="按键说明的语言 · Language of these hints">中 / EN</button></div>
+    `<span class="ctl"${c.mouse?` data-mouse="${c.mouse}"`:''}>${c.keys.map(kbd).join('')}<em data-en>${esc(c.en)}</em><em data-zh>${esc(c.zh)}</em></span><i${c.mouse?` data-mouse="${c.mouse}"`:''}></i>`).join('')}<button class="lang-toggle" id="controls-lang" title="按键说明的语言 · Language of these hints">中 / EN</button></div>
   <aside id="tutorial-card" class="tutorial-card" hidden aria-live="polite" aria-label="新手教程"></aside>
   <div id="crosshair" hidden aria-hidden="true"></div>
   <div id="nameplate" hidden aria-live="polite"></div>
   <div id="carrying" hidden><b></b><small><kbd>点击</kbd> 扔出去 · <kbd data-key="drop"></kbd> 放下</small><i>Click to throw · <span data-key="drop"></span> to put down</i></div>
   <div id="seated" hidden><kbd data-key="jump"></kbd> 站起来 <small><span data-key="jump"></span> to stand up</small></div>
   <div id="placing" hidden><b></b><span class="placing-state"></span><small><kbd>点击</kbd> 放下 · <kbd data-key="rotate"></kbd> 转向 · <kbd data-key="cancel"></kbd> 取消</small></div>
-  <div id="look-hint" hidden>点击画面转身 · Click the town to look around, Esc to free the cursor</div>
+  <div id="look-hint" hidden><span data-mouse="lock">点击画面转身 · Click the town to look around, Esc to free the cursor</span><span data-mouse="drag">拖动转视角 · Hold the left button and drag to look around</span></div>
   <aside class="mini-map"><div class="map-heading">青禾广场 <span>N ↑</span></div><svg id="map-svg" viewBox="-24 -24 48 48"><g id="map-content"></g><g id="map-route"></g><g id="map-facing" transform="translate(0,9)"><path d="M0 -5.4L2.7 -1.4L-2.7 -1.4Z" fill="#345f51" opacity=".45"/></g><circle id="map-player" cx="0" cy="9" r="1.4" fill="#345f51" stroke="#fff8de" stroke-width=".6"/></svg><div class="map-caption" id="map-caption">一段属于你的旅程</div></aside>
-  <section id="arrival"><span class="arrival-stamp">旅</span><div class="eyebrow">WELCOME TO YOUR LITTLE GETAWAY</div><h2>Welcome, traveller.</h2><p>A new town. Your grandfather’s memories. A little Mandarin at a time.</p>${shouldAutoStart(ctx.profile)?`<p class="arrival-tutorial">${esc(TUTORIAL_UI.arrival.zh)}<small>${esc(TUTORIAL_UI.arrival.en)}</small></p>`:''}<p class="arrival-en">You see the town through your own eyes. Walk up to someone and say hello.<br>Start with English guidance; Mandarin grows with your practice. Tap <b>?</b> for extra help.<br>Choose 开始旅行 below to start your journey.</p><button class="primary" id="start-button">开始旅行 ${icon('arrow')}</button><div class="arrival-note"><span data-key="forward"></span><span data-key="left"></span><span data-key="back"></span><span data-key="right"></span> to move · Move the mouse to look · <span data-key="interact"></span> to talk · <span data-key="view"></span> for third person<br>Playable prototype · Mandarin voices are AI generated</div></section>
+  <section id="arrival"><span class="arrival-stamp">旅</span><div class="eyebrow">WELCOME TO YOUR LITTLE GETAWAY</div><h2>Welcome, traveller.</h2><p class="arrival-lead">A new town. Your grandfather’s memories. A little Mandarin at a time.</p>${shouldAutoStart(ctx.profile)?`<p class="arrival-tutorial">${esc(TUTORIAL_UI.arrival.zh)}<small>${esc(TUTORIAL_UI.arrival.en)}</small></p>`:''}<p class="arrival-en"><span>You see the town through your own eyes. Walk up to someone and say hello.</span><span>Start with English guidance; Mandarin grows with your practice. <i>Tap <b>?</b> for extra help.</i></span><span>Choose 开始旅行 below to start your journey.</span></p><button class="primary" id="start-button">开始旅行 ${icon('arrow')}</button><div class="arrival-note"><p class="arrival-keys"><i><span data-key="forward"></span><span data-key="left"></span><span data-key="back"></span><span data-key="right"></span> to move</i><i data-mouse="drag">Drag the mouse to look</i><i data-mouse="lock">Move the mouse to look</i><i><span data-key="interact"></span> to talk</i><i><span data-key="view"></span> for third person</i></p><p>Playable prototype · Mandarin voices are AI generated</p></div></section>
   <div id="scrim" hidden></div><section id="panel" hidden role="dialog" aria-modal="true" aria-labelledby="panel-title"></section>`;
   document.addEventListener('click',e=>{const b=e.target.closest('[data-help]');if(b){const target=b.parentElement.querySelector('.help-content');target.hidden=!target.hidden;b.setAttribute('aria-expanded',String(!target.hidden));if(!target.hidden)this.ctx.hinted=true;}});
   document.addEventListener('keydown',e=>{if(e.code==='Escape'&&!e.repeat&&this.panelId)this.close();if(e.key==='Tab'&&this.panelId){const els=[...document.querySelector('#panel').querySelectorAll('button,input,select,a,textarea')].filter(x=>!x.disabled&&x.offsetParent!==null);if(!els.length)return;const first=els[0],last=els.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
@@ -146,31 +152,43 @@ export class Shell {
   this.closeHook.run();}
  notice(message){const el=document.querySelector('#toast');el.textContent=message;el.hidden=false;clearTimeout(this.toastTimer);this.toastTimer=setTimeout(()=>el.hidden=true,5500);}
  /** A mission is named in Chinese and explained in English, so it always reads at a glance. */
- questDone(quest){
-  const p=this.ctx.profile,done=quest.done??{};
-  if(done.flag)return p.completed.includes(done.flag);
-  if(done.metric==='discovered')return (p.discovered?.length??0)>=done.count;
-  if(done.metric==='home')return (p.home?.length??0)>=done.count;
-  if(done.metric==='ordered')return Object.keys(p.claims??{}).some(k=>k.startsWith('order:'));
-  if(done.metric==='district')return !!this.ctx.gateStates?.find(s=>s.id===done.district)?.unlocked;
-  return false;
- }
+ questDone(quest){return questDone(this.ctx.profile,quest,this.ctx.gateStates);}
  questProgress(quest){
   const p=this.ctx.profile,done=quest.done??{};
+  // The metro waits for the town (src/core/unlock.js): say so with the count, then that Lin has the card.
+  if(quest.id==='metro-first'&&!metroOpen(p)){
+   const steps=townSteps(p,this.ctx.gateStates),n=steps.filter(s=>s.done).length;
+   if(n<steps.length)return `${esc(unlockData.questLocked.zh)}（${n} / ${steps.length}）`;
+   if(!p.completed.includes(CARD_FLAG))return esc(unlockData.linCalls.zh);
+  }
   if(done.metric==='discovered')return `${Math.min(done.count,p.discovered?.length??0)} / ${done.count}`;
   if(done.metric==='home')return `${Math.min(done.count,p.home?.length??0)} / ${done.count}`;
   if(done.metric==='district'){const s=this.ctx.gateStates?.find(g=>g.id===done.district);return s?`${Math.min(s.need,s.have)} / ${s.need}`:'';}
   return '';
  }
+ updateCondition(){
+  // Runs on every stats tick, so the DOM is only touched when the set of low needs changes.
+  const s=readStats(this.ctx.profile),low=[band(s.hunger).key==='low'?'饿了 Hungry':'',band(s.energy).key==='low'?'累了 Needs rest':''].filter(Boolean);
+  const badge=document.querySelector('#condition-warning'),button=document.querySelector('#status-button'),state=low.join(' · ');
+  if(!badge||!button||this.conditionState===state)return;
+  this.conditionState=state;badge.hidden=!low.length;
+  if(low.length)this.ctx.tutorial?.trigger('needs');
+  button.dataset.title=low.length?'状态 · Condition — '+state:'状态 · Condition';
+  button.setAttribute('aria-label',button.dataset.title);
+  button.title=`${button.dataset.title} (${keyLabel('status')})`;
+ }
  update(){
+  this.updateCondition();
   const p=this.ctx.profile;
   this.cardBox=null;
   document.querySelector('#wallet-count').textContent=p.wallet;
+  this.ctx.tutorial?.watch('coins',p.wallet);
   // Unfinished missions first, so the card always opens on what to do next.
   const ordered=questData.quests.map((quest,i)=>({quest,i,done:this.questDone(quest)}))
     .sort((a,b)=>(a.done?1:0)-(b.done?1:0)||a.i-b.i);
   const finished=ordered.filter(q=>q.done).length;
   document.querySelector('#quest-count').textContent=`${finished} / ${questData.quests.length}`;
+  this.ctx.tutorial?.watch('quests',finished);
   // The list is redrawn on every save, so hold on to where the player had scrolled it.
   const list=document.querySelector('#quest-list'),scrolled=list.scrollTop;
   list.innerHTML=ordered.map(({quest,i,done})=>{
@@ -193,8 +211,12 @@ export class Shell {
    el.onclick=e=>{if(!e.target.closest('[data-help]'))go();};
    el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}};
   });
-  const ready=dailyReady(p,p.dayIndex??0);
-  document.querySelector('#journal-button').dataset.due=(dueCount(p)+ready)||'';
+  // The lease note goes under the journal's own tooltip, and it only nags until three days after expiry.
+  const rent=leaseStatus(p),journal=document.querySelector('#journal-button'),day=p.dayIndex??0;
+  const lease=rent.held?(rent.active?`租期还剩 ${rent.days} 天 · Lease: ${rent.days} in-game day${rent.days===1?'':'s'} left`:'租期到了 · Lease expired — renew at the rental desk'):'';
+  journal.title=`${journal.dataset.title} (${keyLabel('journal')})`+(lease?'\n'+lease:'');
+  const ready=dailyReady(p,day);
+  journal.dataset.due=(dueCount(p)+ready+(rent.soon||(rent.held&&!rent.active&&day-rent.until<3)?1:0))||'';
   document.querySelector('#quest-foot-text').textContent=ready?`今天有 ${ready} 件小事可以领奖`:'自由探索 · 随时休息';
  }
  // ------------------------------------------------------------ way-finding
@@ -235,11 +257,14 @@ export class Shell {
  }
  routeLeg(world,district){
   if(this.route.district===district.id)return {x:this.route.x,z:this.route.z};
-  // The square is the hub: leave your own district through its gate, then cross the square.
-  const target=world.districts.find(d=>d.id===this.route.district);
-  const hop=district.id==='square'?target:world.districts.find(d=>d.id===district.id);
-  if(!hop?.gate)return null;
-  return {x:hop.gate.x,z:hop.gate.z,via:hop===target?target.zh:'青禾广场'};
+  // Each district's gate opens onto the one it hangs off (`gate.from`; the square, the hub, unless it
+  // says otherwise: the countryside hangs off the park). Go in through the gate of the next district
+  // on the way to the target, or else out through your own.
+  const up=d=>d?.gate&&world.districts.find(x=>x.id===(d.gate.from??'square'));
+  for(let d=world.districts.find(x=>x.id===this.route.district);d;d=up(d))
+   if(up(d)?.id===district.id)return {x:d.gate.x,z:d.gate.z,via:d.zh};
+  const out=world.districts.find(x=>x.id===district.id),next=up(out);
+  return next?{x:out.gate.x,z:out.gate.z,via:next.zh}:null;
  }
  nearby(target){
   // The world keeps evaluating proximity while paused. A panel always owns the keyboard and
@@ -277,6 +302,7 @@ export class Shell {
   document.querySelector('#map-svg').setAttribute('viewBox',`${cx-size/2} ${cz-size/2} ${size} ${size}`);
   const parts=[`<rect x="${x0}" y="${z0}" width="${x1-x0}" height="${z1-z0}" rx="2" fill="#f6eedb"/>`];
   if(district.id==='garden')parts.push(...gardenMapParts());
+  if(district.id==='fields')parts.push(...fieldsMapParts());
   const labels=[];          // drawn last, so nothing on the map covers a landmark's name
   for(const b of world.buildings.filter(b=>b.district===district.id)){
    if(b.label)labels.push(`<text x="${b.x}" y="${b.z}" font-size="4.5" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#3d2a1e" stroke="#fcf6e8" stroke-width=".8" paint-order="stroke">${esc(b.label)}</text>`);

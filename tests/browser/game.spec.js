@@ -1,8 +1,9 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 import {pastGreeting} from './greeting.js';
 test('town loads, stays player initiated, and Chinese help is opt-in',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await expect(page.locator('#arrival')).toBeHidden();
   await expect(page.locator('#panel')).toBeHidden();
   await page.getByRole('button',{name:'旅行手册'}).click();
@@ -15,14 +16,14 @@ test('town loads, stays player initiated, and Chinese help is opt-in',async({pag
 });
 test('denied microphone keeps the response editable and does not alter rewards',async({page})=>{
   await page.addInitScript(()=>{window.SpeechRecognition=class{start(){queueMicrotask(()=>this.onerror?.({error:'not-allowed'}));}abort(){}};});
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await toLin(page);await page.keyboard.press('e');await pastGreeting(page);
   await page.getByRole('button',{name:'麦克风回答'}).click();await expect(page.locator('#speech-status')).toContainText('denied');
   await expect(page.getByRole('textbox',{name:'你的回答'})).toBeEditable();await expect(page.locator('#wallet-count')).toHaveText('0');
   await page.getByRole('textbox',{name:'你的回答'}).fill('您好');await page.getByRole('button',{name:'提交回答'}).click();await expect(page.getByRole('button',{name:'继续',exact:true})).toBeVisible();
 });
 test('practice gives saved rewards and repeat completion cannot farm coins',async({page})=>{
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   // The picture drill is 小美's corner of the square, not a sidebar tab.
   await page.evaluate(()=>window.__qinghe.town.onInteract('mei'));await pastGreeting(page);
   await page.getByRole('button',{name:'开始练习'}).click();
@@ -33,7 +34,7 @@ test('practice gives saved rewards and repeat completion cannot farm coins',asyn
   }
   await expect(page.getByText('练习完成！')).toBeVisible();
   const wallet=Number(await page.locator('#wallet-count').textContent());expect(wallet).toBeGreaterThan(0);
-  await page.reload();await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.reload();await startGame(page);
   await expect(page.locator('#wallet-count')).toHaveText(String(wallet));
   await page.evaluate(()=>window.__qinghe.town.onInteract('mei'));await pastGreeting(page);await page.getByRole('button',{name:'开始练习'}).click();
   for(let i=0;i<4;i++){const word=await page.locator('#practice-word').getAttribute('data-word');await page.locator(`[data-item="${word}"]`).click();await page.getByRole('button',{name:i===3?'完成练习':'下一个'}).click();}
@@ -61,7 +62,7 @@ test('walk to NPC, introduce yourself, bargain and confirm a wearable purchase',
      completed:['home:tutorial','home:starter'],phrases:[],saved:[],home:[],discovered:[],clock:14,dayIndex:0,vendors:{},
      settings:{pinyin:true,english:true,dialogueVolume:0.9,ambientVolume:0.35,musicVolume:0},playerName:'旅人'})]);
   const clips=[];page.on('request',r=>{if(r.url().includes('/audio/clips/'))clips.push(r.url());});
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await page.screenshot({path:'test-results/town.png'});
   await toLin(page);
   await expect(page.locator('#interact')).toBeVisible();await expect(page.locator('#panel')).toBeHidden();
@@ -95,7 +96,7 @@ test('walk to NPC, introduce yourself, bargain and confirm a wearable purchase',
   expect(errors).toEqual([]);
 });
 test('settings export, layout preview, ambient collection and mobile layout',async({page})=>{
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));   // the neighbours chat in view of the old arrival spot
   await page.getByRole('button',{name:'听听闲聊'}).click();await page.locator('[data-save-phrase]').first().click();await expect(page.locator('[data-save-phrase]').first()).toHaveText('已收藏');await page.keyboard.press('Escape');
   await page.getByRole('button',{name:'设置',exact:true}).click();await page.locator('#setting-pinyin').selectOption('never');
@@ -108,14 +109,15 @@ test('settings export, layout preview, ambient collection and mobile layout',asy
 });
 test('mouse look turns the view and walking follows where you face',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   const at=async axis=>Number(await page.locator('#map-player').getAttribute(axis));
   const heading=async()=>Number((await page.locator('#map-facing').getAttribute('transform')).match(/rotate\(([-\d.]+)\)/)[1]);
   await expect(page.locator('#crosshair')).toBeVisible();
   // You arrive facing your home; start this from the middle of the square, facing north.
   await page.evaluate(()=>window.__qinghe.town.warp(0,9,0));
   await expect.poll(heading).toBe(0);   // the map redraws on the next frame
-  // Clicking the town grabs the mouse, then moving it turns the tourist.
+  // The locked mouse (Settings, 鼠标): clicking the town grabs it, then moving it turns the tourist.
+  await page.evaluate(()=>window.__qinghe.town.setMouseMode('lock'));
   await page.mouse.click(700,500);
   expect(await page.evaluate(()=>document.pointerLockElement?.id)).toBe('world');
   await page.mouse.move(1000,500);
@@ -138,7 +140,7 @@ test('mouse look turns the view and walking follows where you face',async({page}
   expect(errors).toEqual([]);
 });
 test('typing in a dialogue field never drives the town or repeats the interaction',async({page})=>{
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await toLin(page);await page.keyboard.press('e');await pastGreeting(page);
   await expect(page.getByRole('heading',{name:'初次见面'})).toBeVisible();
   const box=page.getByRole('textbox',{name:'你的回答'});await box.click();
@@ -163,7 +165,7 @@ test('ambient music starts after the first gesture and is audible without clippi
   });
   await page.goto('/');
   expect(await page.evaluate(()=>!!window.__analyser)).toBe(false);
-  await page.getByRole('button',{name:'开始旅行'}).click();
+  await startGame(page);
   const level=()=>page.evaluate(()=>{
     const analyser=window.__analyser;if(!analyser)return null;
     const buffer=new Float32Array(analyser.fftSize);analyser.getFloatTimeDomainData(buffer);
@@ -179,7 +181,7 @@ test('ambient music starts after the first gesture and is audible without clippi
 });
 test('highlighting Chinese gives pinyin and a gloss, and saves it for later',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   // A fixture rather than a particular panel: the lookup works on any Chinese on screen, and
   // the test should not break every time a section of the journal is rearranged.
   await page.evaluate(()=>{
@@ -210,10 +212,15 @@ test('highlighting Chinese gives pinyin and a gloss, and saves it for later',asy
   await expect.poll(()=>page.locator('#lookup .lookup-word').count(),{timeout:15000}).toBeGreaterThan(2);
   await page.keyboard.press('Escape');
   // The saved word survives a reload and is listed in the journal.
-  await page.reload();await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.reload();await startGame(page);
   await page.getByRole('button',{name:'旅行手册'}).click();
+  // The list starts folded, shows its count, and remembers being opened.
+  await expect(page.locator('#journal-words summary')).toContainText('HIGHLIGHTED WORDS · 1');
+  await expect(page.locator('#saved-words .lookup-zh')).toBeHidden();
+  await page.locator('#journal-words summary').click();
   await expect(page.locator('#saved-words .lookup-zh')).toHaveText('水');
   await page.locator('[data-forget="0"]').click();
+  await expect(page.locator('#journal-words')).toHaveAttribute('open','');
   await expect(page.locator('#saved-words .lookup-zh')).toHaveCount(0);
   expect(errors).toEqual([]);
 });

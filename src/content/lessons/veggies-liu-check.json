@@ -1,0 +1,46 @@
+{
+  "id": "veggies-liu-check",
+  "npc": "liu",
+  "title": "帮刘奶奶摘菜",
+  "pinyin": "Bāng Liú nǎinai zhāi cài",
+  "en": "Bringing Grandma Liu her vegetables",
+  "target": "saying a job is done (摘好了); thanking an elder",
+  "curriculumStatus": "Beginner prototype; HSK level mapping and native-speaker review pending",
+  "nodes": [
+    {
+      "id": "done",
+      "zh": "摘好了吗？",
+      "pinyin": "Zhāihǎo le ma?",
+      "en": "All picked?",
+      "speaker": "liu",
+      "prompt": {"zh": "说摘好了。", "pinyin": "Shuō zhāihǎo le.", "en": "Say you're done."},
+      "intent": "variants",
+      "accepted": ["摘好了，给您", "摘好了", "好了", "我摘好了"],
+      "model": "摘好了，给您。",
+      "choices": ["摘好了，给您。"],
+      "audio": "veggies-liu-done"
+    },
+    {
+      "id": "thanks",
+      "zh": "太好了！这些菜送给你，回家做饭吧。",
+      "pinyin": "Tài hǎo le! Zhèxiē cài sòng gěi nǐ, huí jiā zuò fàn ba.",
+      "en": "Wonderful! These are for you, go home and cook.",
+      "speaker": "liu",
+      "prompt": {"zh": "说谢谢。", "pinyin": "Shuō xièxie.", "en": "Say thank you."},
+      "intent": "variants",
+      "accepted": ["谢谢刘奶奶", "谢谢", "谢谢您", "太谢谢了"],
+      "model": "谢谢刘奶奶！",
+      "choices": ["谢谢刘奶奶！"],
+      "audio": "veggies-liu-thanks"
+    }
+  ],
+  "extraLines": {
+    "wrong": {
+      "zh": "不对哦，我要三个西红柿和两根黄瓜。",
+      "pinyin": "Bú duì o, wǒ yào sān ge xīhóngshì hé liǎng gēn huángguā.",
+      "en": "Not quite, I want three tomatoes and two cucumbers.",
+      "speaker": "liu",
+      "audio": "veggies-liu-wrong"
+    }
+  }
+}

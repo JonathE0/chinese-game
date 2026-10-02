@@ -1,0 +1,44 @@
+{
+  "_note": "The metro to Yunhai opens only after the town is finished (src/core/unlock.js). `townQuests` are the missions in quests.json that count; the offline Roots steps (meeting Uncle Zhou, the three Qinghe photos, the practice) are added by the rule. A listed mission that is not in quests.json yet (my-camera, until W4-camera adds it) is skipped. home-noodles is left out because only Yunhai's noodle cook teaches the recipe, and reopening the fruit stand because it needs the cloud. Once every step is done, Auntie Lin (`linLesson`) gives Grandpa's card (`card`, a catalog item) and a new album page (`photo`, a Roots memory); the station attendant's chat at the concourse service counter (`checkLesson`) then activates the card. Only journeys from `station` (a metro.json station) wait for this; the card machines (fittings with action metro:machine) always let you top up, and the far end always lets you ride home, so a save that has not unlocked is never stranded in Yunhai. `locked` is what the attendant says at the gates before that, `hints` what townsfolk now and then say in the square while the metro is shut, `questLocked` the note on the metro mission and `linCalls` the notice when Lin is waiting. Clips are unlock-<key>; the listening node reuses the metro's own announcement clip.",
+  "townQuests": ["greet", "four-words", "name-things", "souvenir", "furnish", "market", "order", "furnish-shop", "daily", "teahouse-permit", "teahouse-build", "my-camera", "fishing", "vegetables"],
+  "card": "grandpa-card",
+  "photo": "roots-yunhai",
+  "station": "qinghe",
+  "questLocked": {"zh": "完成青禾的任务后开放", "pinyin": "Wánchéng Qīnghé de rènwu hòu kāifàng", "en": "Opens after you finish Qinghe's tasks"},
+  "linCalls": {"zh": "林阿姨在找你！", "pinyin": "Lín āyí zài zhǎo nǐ!", "en": "Auntie Lin is looking for you!"},
+  "locked": [
+    {"zh": "去云海要先多学一点中文。", "pinyin": "Qù Yúnhǎi yào xiān duō xué yìdiǎn Zhōngwén.", "en": "Before Yunhai, learn a bit more Chinese.", "speaker": "attendant", "audio": "unlock-locked-1"},
+    {"zh": "先把青禾的任务做完，再来找我吧！", "pinyin": "Xiān bǎ Qīnghé de rènwu zuòwán, zài lái zhǎo wǒ ba!", "en": "Finish Qinghe's tasks first, then come and find me!", "speaker": "attendant", "audio": "unlock-locked-2"}
+  ],
+  "hints": [
+    {"id": "unlock-hint-1", "exchange": "unlock-hint-1", "zh": "云海很大，也很热闹！", "pinyin": "Yúnhǎi hěn dà, yě hěn rènao!", "en": "Yunhai is big and lively!", "speaker": "friend-a", "audio": "unlock-hint-1"},
+    {"id": "unlock-hint-2", "exchange": "unlock-hint-2", "zh": "等你中文更好了，一定要去云海看看。", "pinyin": "Děng nǐ Zhōngwén gèng hǎo le, yídìng yào qù Yúnhǎi kànkan.", "en": "When your Chinese is better, you must go and see Yunhai.", "speaker": "friend-b", "audio": "unlock-hint-2"},
+    {"id": "unlock-hint-3", "exchange": "unlock-hint-3", "zh": "坐地铁去云海，很快就到。", "pinyin": "Zuò dìtiě qù Yúnhǎi, hěn kuài jiù dào.", "en": "By metro you're in Yunhai in no time.", "speaker": "friend-a", "audio": "unlock-hint-3"}
+  ],
+  "photoNote": {"zh": "云海的海风，很舒服。", "pinyin": "Yúnhǎi de hǎifēng, hěn shūfu.", "en": "The sea breeze in Yunhai feels wonderful.", "speaker": "narrator", "audio": "unlock-photo-note"},
+  "linLesson": {
+    "id": "lin-card",
+    "title": "爷爷的交通卡",
+    "pinyin": "yéye de jiāotōngkǎ",
+    "en": "Grandpa's transit card",
+    "host": {"zh": "林阿姨", "pinyin": "Lín āyí", "en": "Auntie Lin", "color": "#c77b60"},
+    "nodes": [
+      {"id": "progress", "speaker": "lin", "zh": "你来青禾以后，中文进步了很多！", "pinyin": "Nǐ lái Qīnghé yǐhòu, Zhōngwén jìnbù le hěn duō!", "en": "Your Chinese has come a long way since you came to Qinghe!", "intent": "none", "audio": "unlock-lin-card-1"},
+      {"id": "card", "speaker": "lin", "zh": "这是你爷爷的交通卡。他以前常常坐地铁去云海。", "pinyin": "Zhè shì nǐ yéye de jiāotōngkǎ. Tā yǐqián chángcháng zuò dìtiě qù Yúnhǎi.", "en": "This is your grandpa's transit card. He often took the metro to Yunhai.", "intent": "none", "audio": "unlock-lin-card-2"},
+      {"id": "thanks", "speaker": "lin", "zh": "去地铁站的服务中心，请他们帮你开通吧。", "pinyin": "Qù dìtiězhàn de fúwù zhōngxīn, qǐng tāmen bāng nǐ kāitōng ba.", "en": "Go to the station's service centre and ask them to activate it.", "prompt": {"zh": "说谢谢。", "pinyin": "Shuō xièxie.", "en": "Say thank you."}, "intent": "variants", "accepted": ["谢谢林阿姨", "谢谢", "谢谢你", "谢谢阿姨", "太谢谢了"], "model": "谢谢林阿姨！", "choices": ["谢谢林阿姨！"], "audio": "unlock-lin-card-3"}
+    ]
+  },
+  "checkLesson": {
+    "id": "metro-check",
+    "title": "服务中心",
+    "pinyin": "fúwù zhōngxīn",
+    "en": "Activating Grandpa's card",
+    "host": {"zh": "站务员", "pinyin": "zhànwùyuán", "en": "Station attendant", "color": "#467d9f"},
+    "nodes": [
+      {"id": "card", "speaker": "attendant", "zh": "你好！这张卡是你的吗？", "pinyin": "Nǐ hǎo! Zhè zhāng kǎ shì nǐ de ma?", "en": "Hello! Is this card yours?", "prompt": {"zh": "说这是你爷爷的卡。", "pinyin": "Shuō zhè shì nǐ yéye de kǎ.", "en": "Say it's your grandpa's card."}, "intent": "variants", "accepted": ["这是我爷爷的卡", "是我爷爷的", "我爷爷的卡", "这是我爷爷的交通卡", "是我爷爷的卡"], "model": "这是我爷爷的卡。", "choices": ["这是我爷爷的卡。"], "audio": "unlock-check-card"},
+      {"id": "where", "speaker": "attendant", "zh": "到了云海，你想去哪儿？", "pinyin": "Dàole Yúnhǎi, nǐ xiǎng qù nǎr?", "en": "Once you're in Yunhai, where would you like to go?", "prompt": {"zh": "说一个你想去的地方。", "pinyin": "Shuō yí ge nǐ xiǎng qù de dìfang.", "en": "Name a place you'd like to go."}, "intent": "variants", "accepted": ["我想去海边"], "answerRules": {"templates": ["{go}{place}"], "slots": {"go": ["我想去", "我要去", "去"], "place": ["海边", "商场", "书店", "公园", "银行", "医院", "电影院", "面馆", "咖啡店", "步行街", "美食街"]}}, "model": "我想去海边。", "choices": ["我想去海边。"], "audio": "unlock-check-where"},
+      {"id": "listen", "speaker": "attendant", "zh": "刚才广播说下一站是哪儿？", "pinyin": "Gāngcái guǎngbō shuō xià yí zhàn shì nǎr?", "en": "Where did the announcement say the next stop was?", "intent": "variants", "accepted": ["云海市中心", "下一站是云海市中心", "是云海市中心", "云海市中心站"], "model": "云海市中心", "choices": ["云海市中心"], "audio": "metro-next-city"},
+      {"id": "done", "speaker": "attendant", "zh": "很好！你的中文没问题。卡开通了，祝你玩得开心！", "pinyin": "Hěn hǎo! Nǐ de Zhōngwén méi wèntí. Kǎ kāitōng le, zhù nǐ wán de kāixīn!", "en": "Great, your Chinese is fine. Your card is active, have fun!", "prompt": {"zh": "说谢谢。", "pinyin": "Shuō xièxie.", "en": "Say thank you."}, "intent": "variants", "accepted": ["谢谢", "谢谢你", "谢谢您", "太好了谢谢"], "model": "谢谢！", "choices": ["谢谢！"], "audio": "unlock-check-done"}
+    ]
+  }
+}

@@ -52,6 +52,9 @@ uniform vec4 waterShape;              // tile size in metres, ripple strength, d
 uniform vec2 waterDeepDir;            // the way the water deepens
 uniform vec3 waterShallow;
 uniform vec3 waterDeep;
+#ifdef BANKS
+  uniform vec2 waterBanks;            // a canal's two banks, x0 and x1 (it runs along z)
+#endif
 #ifdef REFLECT
   uniform sampler2D reflectionMap;
   uniform vec4 viewport_size;
@@ -91,6 +94,14 @@ void main(void){
   vec3 body=mix(waterShallow,waterDeep,clamp(depth+(1.0-facing)*.35,0.0,1.0));
   vec3 lit=body*(light_globalAmbient+waterSunColor*max(dot(N,waterSunDir),0.0));
   vec3 sky=waterSky;
+  #ifdef BANKS
+    // Painted reflections of a canal's banks, with no camera of their own: the dark wet embankment
+    // right at the water's edge, the pale walls above it a little further out, then the sky, all
+    // wobbling with the ripples, and following the sky's colour through the day.
+    float fromBank=min(vWorld.x-waterBanks.x,waterBanks.y-vWorld.x)+slope.x*.3+slope.y*.15;
+    vec3 walls=waterSky*vec3(.86,.84,.78),embankment=waterSky*vec3(.2,.23,.21);
+    sky=mix(embankment,mix(walls,sky,smoothstep(.8,1.3,fromBank)),smoothstep(.1,.32,fromBank));
+  #endif
   #ifdef REFLECT
     // The mirror image at this pixel, nudged by the ripples (less so far away).
     vec2 uv=gl_FragCoord.xy*viewport_size.zw+slope*(.5/(4.0+dist));
@@ -191,11 +202,13 @@ export class Water {
    * A material for one body of water; make it once, when the body is built. `flow` is [x, z] in
    * metres a second; `tile` the ripple texture's size in metres; `ripple` how choppy it is;
    * `depth` [x, z, base, per metre] says how deep (0..1) it is at a point: base + (x, z)·(point) ×
-   * per metre. `fall` is a sheet pouring down; `reflect` samples the bay's mirror (src/world/bay.js).
+   * per metre. `fall` is a sheet pouring down; `reflect` samples the bay's mirror (src/world/bay.js);
+   * `banks` [x0, x1] are a canal's banks, whose reflections it paints in (task W5-nature).
    */
-  surface({flow=[0,0],tile=3,ripple=.18,shallow='#7fb6ad',deep='#2e6368',depth=[0,0,.35,0],fall=false,reflect=false}={}){
+  surface({flow=[0,0],tile=3,ripple=.18,shallow='#7fb6ad',deep='#2e6368',depth=[0,0,.35,0],fall=false,reflect=false,banks=null}={}){
     const material=new pc.ShaderMaterial(SHADER),scroll=new Float32Array(4);
     if(fall)material.setDefine('FALL',true);
+    if(banks){material.setDefine('BANKS',true);material.setParameter('waterBanks',new Float32Array(banks));}
     if(reflect){material.setDefine('REFLECT',true);material.setParameter('reflectionStrength',0);}
     material.setParameter('waterMap',this.texture);
     material.setParameter('waterScroll',scroll);   // rewritten in place every frame (update)

@@ -12,18 +12,20 @@ test('alternative replies unlock mastery only after independent variants',async(
  expect(await page.evaluate(()=>Object.values(window.__qinghe.profile.roots.mastery).every(a=>a.length>=2))).toBe(true);
  await expect(page.locator('#roots-activate')).toBeDisabled();
 });
-test('a valid off-centre story photograph spends one film and records the memory',async({page})=>{
+test('a valid off-centre story photograph with Grandpa’s camera uses no film and records the memory',async({page})=>{
  await page.goto('/');await page.getByRole('button',{name:'开始旅行',exact:true}).click();await page.waitForFunction(()=>window.__qinghe?.town);
  await page.evaluate(()=>{const c=window.__qinghe;c.ui.close();c.town.warp(-11,5,-42);c.town.pitch=-3;c.storyMemory='roots-fruit';c.town.onCamera(true);});
  await expect(page.locator('#viewfinder .vf-name')).toContainText('可以记录');await page.evaluate(()=>window.__qinghe.town.onShutter());
- expect(await page.evaluate(()=>window.__qinghe.profile.inventory.film)).toBe(5);expect(await page.evaluate(()=>window.__qinghe.profile.roots.photos)).toContain('roots-fruit');
+ expect(await page.evaluate(()=>window.__qinghe.profile.inventory.film??0)).toBe(0);expect(await page.evaluate(()=>window.__qinghe.profile.roots.photos)).toContain('roots-fruit');
  await page.reload();await page.getByRole('button',{name:'开始旅行',exact:true}).click();expect(await page.evaluate(()=>window.__qinghe.profile.roots.photos)).toContain('roots-fruit');
 });
 
-test('missing local story images can be replaced free, ordinary retakes cost film',async({page})=>{
+test('retakes with Grandpa’s camera are free, and it photographs album places only',async({page})=>{
  await page.goto('/');await page.getByRole('button',{name:'开始旅行',exact:true}).click();await page.waitForFunction(()=>window.__qinghe?.town);
  await page.evaluate(()=>{const c=window.__qinghe;c.ui.close();c.town.warp(-11,5,-42);c.town.pitch=-3;c.storyMemory='roots-fruit';c.profile.roots.photos.push('roots-fruit');c.town.onCamera(true);});
- await expect(page.locator('#viewfinder .vf-name')).toContainText('可以记录');await page.evaluate(()=>window.__qinghe.town.onShutter());expect(await page.evaluate(()=>window.__qinghe.profile.inventory.film)).toBe(6);await page.evaluate(()=>window.__qinghe.town.onShutter());expect(await page.evaluate(()=>window.__qinghe.profile.inventory.film)).toBe(5);
+ await expect(page.locator('#viewfinder .vf-name')).toContainText('可以记录');await page.evaluate(()=>window.__qinghe.town.onShutter());await page.evaluate(()=>window.__qinghe.town.onShutter());expect(await page.evaluate(()=>window.__qinghe.profile.inventory.film??0)).toBe(0);await expect(page.locator('#toast')).toContainText('Memory captured');
+ // Out of reach of every album place (roots.json memories: the old home at 16,53 reaches 15 m).
+ await page.evaluate(()=>{const t=window.__qinghe.town;t.onCamera(false);t.warp(12.5,28,0);t.onCamera(true);});await expect(page.locator('#viewfinder .vf-name')).toContainText('爷爷的相机只拍相册里的地方。');await page.evaluate(()=>window.__qinghe.town.onShutter());await expect(page.locator('#toast')).toContainText('爷爷的相机只拍相册里的地方。');
 });
 
 test('a delayed microphone transcript cannot fill a newly opened conversation',async({page})=>{

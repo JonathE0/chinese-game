@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 import {readFileSync} from 'node:fs';
 
 const SAVE_KEY='little-mandarin-town.v1';
@@ -11,8 +12,14 @@ async function approach(page,x,z,yaw=0){
   await page.evaluate(([x,z,yaw])=>window.__qinghe.town.warp(x,z,yaw),[x,z,yaw]);
   await page.waitForTimeout(120);
 }
-async function walkToHall(page){await approach(page,0,-12.5);await hold(page,'w',1300);}   // up the hall's stairs
-async function walkToHome(page){await approach(page,11,7.8,180);await hold(page,'w',900);}
+/** The hall's visitors wander up to the lectern now and then (src/world/visitors.js), and the one you
+ *  look at takes the E prompt from it; hold them still by the south wall while these tests walk in. */
+async function clearHall(page){
+  await page.evaluate(()=>{const v=window.__qinghe.town.visitors;v.update=()=>{};
+    v.here('hall').forEach((p,i)=>v.put(p,i%2?6.5:-6.5,4.5));});
+}
+async function walkToHall(page){await clearHall(page);await approach(page,0,-12.5);await hold(page,'w',1300);}   // up the hall's stairs
+async function walkToHome(page){await approach(page,16,56.6,0);await hold(page,'w',900);}   // the door faces south to the park gate
 
 async function seed(page,profile){
   // addInitScript runs on every navigation, so only seed when there is nothing saved yet:
@@ -26,7 +33,7 @@ async function seed(page,profile){
 test('the word hall is a place you walk into, and it states its HSK caveat',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await seed(page,{});
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await walkToHall(page);
   await expect(page.locator('#interact')).toBeVisible();
   await expect(page.locator('#interact span')).toHaveText('进词语馆');
@@ -60,9 +67,12 @@ test('an HSK drill credits one skill and stops offering a word until it is due a
   const first=JSON.parse(readFileSync('public/hsk/words.json','utf8')).words.find(w=>w.level===1);
   // Seed that word as overdue so the drill must offer it first.
   await seed(page,{words:{[first.id]:{recognition:{stage:1,due:1,last:1,reviews:1}}}});
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
-  await walkToHall(page);await page.keyboard.press('e');
-  await hold(page,'w',1100);await page.keyboard.press('e');
+  await page.goto('/');await startGame(page);
+  await walkToHall(page);
+  await expect(page.locator('#interact span')).toHaveText('进词语馆');await page.keyboard.press('e');
+  await expect(page.locator('.location b')).toHaveText('词语馆');
+  await hold(page,'w',1100);
+  await expect(page.locator('#interact span')).toHaveText('查词 · HSK');await page.keyboard.press('e');
   await expect(page.locator('.syllabus-note')).toBeVisible({timeout:20000});
 
   const answer=async()=>{
@@ -87,9 +97,12 @@ test('an HSK drill credits one skill and stops offering a word until it is due a
   expect(after.words[first.id].recognition.due).toBeGreaterThan(Date.now());
 
   // Having just been answered, it is no longer due, so the next session offers something else.
-  await page.reload();await page.getByRole('button',{name:'开始旅行'}).click();
-  await walkToHall(page);await page.keyboard.press('e');
-  await hold(page,'w',1100);await page.keyboard.press('e');
+  await page.reload();await startGame(page);
+  await walkToHall(page);
+  await expect(page.locator('#interact span')).toHaveText('进词语馆');await page.keyboard.press('e');
+  await expect(page.locator('.location b')).toHaveText('词语馆');
+  await hold(page,'w',1100);
+  await expect(page.locator('#interact span')).toHaveText('查词 · HSK');await page.keyboard.press('e');
   await expect(page.locator('.syllabus-note')).toBeVisible({timeout:20000});
   await page.getByRole('button',{name:/复习这一级/}).click();
   await expect(page.locator('.drill-zh')).toBeVisible();
@@ -100,7 +113,7 @@ test('an HSK drill credits one skill and stops offering a word until it is due a
 test('furniture bought in town can be placed at home and survives a reload',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await seed(page,{wallet:60,inventory:{'low-table':1,'potted-plant':1},completed:['home:tutorial','home:starter']});
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await walkToHome(page);
   await expect(page.locator('#interact span')).toHaveText('回家');
   await page.keyboard.press('e');
@@ -123,9 +136,12 @@ test('furniture bought in town can be placed at home and survives a reload',asyn
   expect([0,90,180,270]).toContain(record.rot);
 
   // It is still standing there after a reload, and the panel now offers to put it away.
-  await page.reload();await page.getByRole('button',{name:'开始旅行'}).click();
-  await walkToHome(page);await page.keyboard.press('e');
-  await hold(page,'w',900);await page.keyboard.press('e');
+  await page.reload();await startGame(page);
+  await walkToHome(page);
+  await expect(page.locator('#interact span')).toHaveText('回家');await page.keyboard.press('e');
+  await expect(page.locator('.location b')).toHaveText('我的家');
+  await hold(page,'w',900);
+  await expect(page.locator('#interact span')).toHaveText('布置房间');await page.keyboard.press('e');
   await expect(page.locator('.placed-row')).toHaveCount(1);
   await expect(page.locator('[data-place="low-table"]')).toHaveCount(0);   // none spare while it is out
   await page.locator('[data-remove="0"]').click();
@@ -138,7 +154,7 @@ test('touch drives the same first-person controls: drag to look, thumbstick to w
   const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true});
   const page=await context.newPage();
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await page.waitForTimeout(600);
 
   // Synthetic touch pointers, because Playwright's touchscreen can tap but not drag.

@@ -1,0 +1,413 @@
+{
+  "note": "海景公寓, flats to rent in 云海中心 across the bay (src/core/rental.js, src/ui/rental.js, src/world/rental.js). `units` are the flats, one a tier, each rented for `days` in-game days at `price` coins, paid in advance; `rooms` lists what each has for the desk to show (signs.json words). `amenities` open to a running lease of their `tier` or better. `stops` are the lift's floors, one room each, bottom to top: `zh` the floor's name, `arrive` what the lift says there (clip rental-lift-floor-<floor>). The tower is city.json's skyline tower `tower.id`: floor N stands at `base` + (N - 1) x `storey` metres. `lines` are spoken with clip rental-<key>, desk-* by `speakers.desk` and lift-* by `speakers.lift`. `entrance` is the way in on the far landing: `canopy` [width, depth, height] and `glass` [width, height] of the glass front, `door` how far out from the tower's face its target stands, `planters` [x, z out from the face, width, depth] either side of it. `rooms` add to rooms.json's rooms: `glass` the window panes on the front (harbour) wall that show the view (src/world/views.js), [x, width, bottom, top]; `liftBank` the lobby's lift doors (x, and each door's offset), `arrive` where the lift lets you out there [x, z, yaw]; `pieces` what src/world/rental.js draws, in room metres, `y` the floor it stands on (an upper floor), or for a `sign` and a `chandelier` the height it hangs at: chandelier (rings of light, radius `r`), pillar, slats (a wood feature wall `w` by `h`), sign (`text`, `en`, `w`, `h`), mailboxes (`w`, `sign`), wall and glasswall (`w` by `d`, floor to ceiling), tiles, railing (`w` long), bathtub, pool (`w` by `d`), lounger, treadmill, weights, washer (a row of `n`), planter (`w` by `d`) and furniture (a catalog `item` kind), each turned by `rot`.",
+  "name": "海景公寓 · Harbour View Residences",
+  "lobby": "riverside-lobby",
+  "lift": "harbour-lift",
+  "days": 7,
+  "warningDays": 2,
+  "tower": {"id": "yunhai-centre", "storey": 4, "base": 0.36, "viewHaze": [260, 900]},
+  "units": [
+    {"id": "riverside-apartment", "tier": 1, "zh": "单间", "pinyin": "dānjiān", "en": "Studio", "price": 35, "rooms": ["厨房"]},
+    {"id": "harbour-one-bed", "tier": 2, "zh": "一室一厅", "pinyin": "yí shì yì tīng", "en": "One-bedroom flat", "price": 90, "rooms": ["卧室", "客厅", "厨房", "阳台"]},
+    {"id": "harbour-view", "tier": 3, "zh": "海景房", "pinyin": "hǎijǐng fáng", "en": "Harbour-view flat", "price": 180, "rooms": ["卧室", "客厅", "书房", "厨房", "浴室", "阳台"]},
+    {"id": "harbour-penthouse", "tier": 4, "zh": "顶层公寓", "pinyin": "dǐngcéng gōngyù", "en": "Penthouse", "price": 420, "rooms": ["卧室", "客厅", "书房", "厨房", "浴室", "露台"]}
+  ],
+  "amenities": [
+    {"id": "harbour-cafe", "tier": 1, "zh": "咖啡厅", "pinyin": "kāfēitīng", "en": "Café"},
+    {"id": "harbour-laundry", "tier": 1, "zh": "洗衣房", "pinyin": "xǐyīfáng", "en": "Laundry"},
+    {"id": "harbour-gym", "tier": 2, "zh": "健身房", "pinyin": "jiànshēnfáng", "en": "Gym"},
+    {"id": "harbour-garden", "tier": 3, "zh": "空中花园", "pinyin": "kōngzhōng huāyuán", "en": "Sky garden"},
+    {"id": "harbour-pool", "tier": 3, "zh": "游泳池", "pinyin": "yóuyǒngchí", "en": "Pool"},
+    {"id": "harbour-restaurant", "tier": 4, "zh": "屋顶餐厅", "pinyin": "wūdǐng cāntīng", "en": "Rooftop restaurant"}
+  ],
+  "stops": [
+    {"room": "riverside-lobby", "floor": 1, "zh": "一楼", "pinyin": "yī lóu", "arrive": {"zh": "一楼到了。", "pinyin": "Yī lóu dào le.", "en": "Floor 1."}},
+    {"room": "harbour-cafe", "floor": 3, "zh": "三楼", "pinyin": "sān lóu", "arrive": {"zh": "三楼到了。", "pinyin": "Sān lóu dào le.", "en": "Floor 3."}},
+    {"room": "harbour-laundry", "floor": 4, "zh": "四楼", "pinyin": "sì lóu", "arrive": {"zh": "四楼到了。", "pinyin": "Sì lóu dào le.", "en": "Floor 4."}},
+    {"room": "harbour-gym", "floor": 5, "zh": "五楼", "pinyin": "wǔ lóu", "arrive": {"zh": "五楼到了。", "pinyin": "Wǔ lóu dào le.", "en": "Floor 5."}},
+    {"room": "riverside-apartment", "floor": 8, "zh": "八楼", "pinyin": "bā lóu", "arrive": {"zh": "八楼到了。", "pinyin": "Bā lóu dào le.", "en": "Floor 8."}},
+    {"room": "harbour-one-bed", "floor": 15, "zh": "十五楼", "pinyin": "shíwǔ lóu", "arrive": {"zh": "十五楼到了。", "pinyin": "Shíwǔ lóu dào le.", "en": "Floor 15."}},
+    {"room": "harbour-garden", "floor": 16, "zh": "十六楼", "pinyin": "shíliù lóu", "arrive": {"zh": "十六楼到了。", "pinyin": "Shíliù lóu dào le.", "en": "Floor 16."}},
+    {"room": "harbour-pool", "floor": 18, "zh": "十八楼", "pinyin": "shíbā lóu", "arrive": {"zh": "十八楼到了。", "pinyin": "Shíbā lóu dào le.", "en": "Floor 18."}},
+    {"room": "harbour-view", "floor": 22, "zh": "二十二楼", "pinyin": "èrshí'èr lóu", "arrive": {"zh": "二十二楼到了。", "pinyin": "Èrshí'èr lóu dào le.", "en": "Floor 22."}},
+    {"room": "harbour-penthouse", "floor": 28, "zh": "二十八楼", "pinyin": "èrshíbā lóu", "arrive": {"zh": "二十八楼到了。", "pinyin": "Èrshíbā lóu dào le.", "en": "Floor 28."}},
+    {"room": "harbour-restaurant", "floor": 33, "zh": "顶楼", "pinyin": "dǐnglóu", "arrive": {"zh": "顶楼到了。", "pinyin": "Dǐnglóu dào le.", "en": "Top floor."}}
+  ],
+  "speakers": {"desk": "receptionist", "lift": "teacher"},
+  "lines": {
+    "desk-welcome": {"zh": "欢迎来到海景公寓！", "pinyin": "Huānyíng lái dào Hǎijǐng Gōngyù!", "en": "Welcome to Harbour View Residences!"},
+    "desk-rent": {"zh": "您好，想租房吗？", "pinyin": "Nín hǎo, xiǎng zūfáng ma?", "en": "Hello, are you looking to rent?"},
+    "desk-lift": {"zh": "电梯在那边。", "pinyin": "Diàntī zài nàbiān.", "en": "The lift is over there."},
+    "desk-home": {"zh": "欢迎回家！", "pinyin": "Huānyíng huíjiā!", "en": "Welcome home!"},
+    "desk-due": {"zh": "您的房租快到期了。", "pinyin": "Nín de fángzū kuài dàoqī le.", "en": "Your rent is almost due."},
+    "lift-up": {"zh": "电梯上行。", "pinyin": "Diàntī shàngxíng.", "en": "Going up."},
+    "lift-down": {"zh": "电梯下行。", "pinyin": "Diàntī xiàxíng.", "en": "Going down."}
+  },
+  "entrance": {"sign": "海景公寓", "en": "Harbour View Residences", "prompt": "进海景公寓", "canopy": [12, 4.6, 4.4], "glass": [8, 3.6], "door": 1.4,
+    "planters": [[-5.4, 0.9, 1.8, 0.8], [5.4, 0.9, 1.8, 0.8]]},
+  "balcony": {
+    "note": "Balconies out in 云海 (src/world/rental.js balconyOf): a flat's glass door under its 阳台 or 露台 sign (`door`: room-local x and z of the gap in its glass wall, `w` wide, on the floor at `y`) leads out onto a real balcony on the tower's face at that floor, `x` across the face from the tower's middle, `w` wide and `d` deep, with glass railings and side screens; `back` leads back in. `tower.viewHaze` [start, end] is the lighter haze the tower's windows look through (src/world/views.js).",
+    "out": {"zh": "去阳台", "pinyin": "qù yángtái", "en": "To the balcony"},
+    "back": {"zh": "回房间", "pinyin": "huí fángjiān", "en": "Back inside"},
+    "flats": {
+      "harbour-one-bed": {"x": 0, "w": 12.6, "d": 2.0, "door": {"x": 0, "z": 3.4, "w": 1.4}},
+      "harbour-view": {"x": 6, "w": 4.2, "d": 2.0, "door": {"x": 0, "z": 3.9, "w": 1.2}},
+      "harbour-penthouse": {"x": 0.8, "w": 11.8, "d": 2.4, "y": 3.8, "door": {"x": 2.8, "z": 4.4, "w": 1.6}}
+    }
+  },
+  "rooms": {
+    "riverside-lobby": {
+      "glass": [[-4.675, 7.45, 0.15, 6.9], [4.675, 7.45, 0.15, 6.9], [0, 1.9, 2.95, 6.9]],
+      "liftBank": {"x": 4.5, "doors": [-1.2, 1.2]},
+      "arrive": [4.5, -5.6, 180],
+      "pieces": [
+        {"kind": "chandelier", "x": 0, "z": 0, "y": 5.8, "r": 2.4},
+        {"kind": "chandelier", "x": 0, "z": 0, "y": 6.3, "r": 1.3},
+        {"kind": "pillar", "x": -2.9, "z": 4.4},
+        {"kind": "pillar", "x": 2.9, "z": 4.4},
+        {"kind": "pillar", "x": -2.9, "z": -0.6},
+        {"kind": "pillar", "x": 2.9, "z": -0.6},
+        {"kind": "slats", "x": -5, "z": -6.985, "y": 0.3, "w": 6.4, "h": 4.9},
+        {"kind": "sign", "text": "海景公寓", "en": "Harbour View Residences", "x": 1.8, "z": -6.9, "y": 5.4, "w": 7, "h": 0.9, "bg": "#233b52", "fg": "#ffffff"},
+        {"kind": "mailboxes", "x": 8.85, "z": 1.5, "rot": -90, "w": 3.2, "sign": "信箱"}
+      ]
+    },
+    "riverside-apartment": {
+      "glass": [[-2.6, 2.4, 0.9, 2.8], [2.6, 2.4, 0.9, 2.8]],
+      "pieces": [
+        {"kind": "sign", "text": "厨房", "x": -4.93, "z": 0.6, "y": 3.0, "rot": 90}
+      ]
+    },
+    "harbour-cafe": {
+      "glass": [[-4.6, 4.2, 0.8, 3.2], [0, 4.2, 0.8, 3.2], [4.6, 4.2, 0.8, 3.2]],
+      "pieces": [
+        {"kind": "chandelier", "x": -3.5, "z": 1.8, "y": 2.7, "r": 0.45},
+        {"kind": "chandelier", "x": 0, "z": 1.8, "y": 2.7, "r": 0.45},
+        {"kind": "chandelier", "x": 3.5, "z": 1.8, "y": 2.7, "r": 0.45}
+      ]
+    },
+    "harbour-laundry": {
+      "glass": [[0, 4.4, 0.9, 2.9]],
+      "pieces": [
+        {"kind": "washer", "x": -4.1, "z": 0, "rot": 90, "n": 4}
+      ]
+    },
+    "harbour-gym": {
+      "glass": [[0, 13.4, 0.1, 3.35]],
+      "pieces": [
+        {"kind": "treadmill", "x": -3.4, "z": 2.9},
+        {"kind": "treadmill", "x": -1.2, "z": 2.9},
+        {"kind": "treadmill", "x": 1, "z": 2.9},
+        {"kind": "weights", "x": -4.4, "z": -2.8}
+      ]
+    },
+    "harbour-one-bed": {
+      "glass": [[0, 12.4, 0.1, 3.35]],
+      "pieces": [
+        {"kind": "wall", "x": -1.6, "z": -2.1, "w": 0.12, "d": 5.8},
+        {"kind": "furniture", "item": "wardrobe", "x": -6.1, "z": -0.2, "rot": 90},
+        {"kind": "tiles", "x": 0, "z": 4.2, "w": 13, "d": 1.6},
+        {"kind": "glasswall", "x": -3.6, "z": 3.4, "w": 5.8, "d": 0.06},
+        {"kind": "glasswall", "x": 3.6, "z": 3.4, "w": 5.8, "d": 0.06},
+        {"kind": "railing", "x": 0, "z": 4.75, "w": 12.6},
+        {"kind": "sign", "text": "卧室", "x": -1.53, "z": -1.2, "y": 2.4, "rot": 90},
+        {"kind": "sign", "text": "客厅", "x": 6.43, "z": 0.4, "y": 2.4, "rot": -90},
+        {"kind": "sign", "text": "厨房", "x": 3, "z": -4.93, "y": 2.95},
+        {"kind": "sign", "text": "阳台", "x": 0, "z": 3.36, "y": 2.9, "rot": 180}
+      ]
+    },
+    "harbour-garden": {
+      "glass": [[0, 15.4, 0.1, 3.55]],
+      "pieces": [
+        {"kind": "planter", "x": -5.6, "z": -1.2, "w": 3.2, "d": 1.2},
+        {"kind": "planter", "x": 5.6, "z": -1.2, "w": 3.2, "d": 1.2},
+        {"kind": "planter", "x": -6.9, "z": 2.6, "w": 1.2, "d": 3},
+        {"kind": "planter", "x": 6.9, "z": 2.6, "w": 1.2, "d": 3},
+        {"kind": "chandelier", "x": 0, "z": 0.6, "y": 3.2, "r": 1.2}
+      ]
+    },
+    "harbour-pool": {
+      "glass": [[0, 15.4, 0.1, 3.55]],
+      "pieces": [
+        {"kind": "pool", "x": 0.8, "z": 0.2, "w": 10, "d": 5},
+        {"kind": "lounger", "x": -3, "z": 4.4},
+        {"kind": "lounger", "x": 0, "z": 4.4},
+        {"kind": "lounger", "x": 3, "z": 4.4}
+      ]
+    },
+    "harbour-view": {
+      "glass": [[0, 15.4, 0.1, 3.35]],
+      "pieces": [
+        {"kind": "wall", "x": -3.6, "z": -2.15, "w": 0.12, "d": 6.7},
+        {"kind": "glasswall", "x": -6.2, "z": -3.7, "w": 3.6, "d": 0.06},
+        {"kind": "bathtub", "x": -6.9, "z": -4.7},
+        {"kind": "furniture", "item": "nightstand", "x": -7.55, "z": 0.4, "rot": 90},
+        {"kind": "tiles", "x": 0, "z": 4.7, "w": 16, "d": 1.6},
+        {"kind": "glasswall", "x": -4.3, "z": 3.9, "w": 7.4, "d": 0.06},
+        {"kind": "glasswall", "x": 4.3, "z": 3.9, "w": 7.4, "d": 0.06},
+        {"kind": "railing", "x": 0, "z": 5.25, "w": 15.6},
+        {"kind": "sign", "text": "卧室", "x": -3.53, "z": -0.6, "y": 2.4, "rot": 90},
+        {"kind": "sign", "text": "浴室", "x": -6.2, "z": -3.65, "y": 2.3},
+        {"kind": "sign", "text": "书房", "x": 7.93, "z": 0.8, "y": 3.05, "rot": -90},
+        {"kind": "sign", "text": "厨房", "x": 3.6, "z": -5.43, "y": 2.8},
+        {"kind": "sign", "text": "阳台", "x": 0, "z": 3.86, "y": 2.9, "rot": 180}
+      ]
+    },
+    "harbour-penthouse": {
+      "glass": [[-6, 1.4, 0.1, 7.35], [-2.35, 5.1, 0.1, 3.55], [3.1, 5.8, 0.1, 3.55], [-2.35, 5.1, 3.95, 7.35], [3.1, 5.8, 3.95, 7.35]],
+      "pieces": [
+        {"kind": "chandelier", "x": -0.3, "z": 2.6, "y": 3.25, "r": 1.1},
+        {"kind": "sign", "text": "客厅", "x": 6.73, "z": 3.4, "y": 2.6, "rot": -90},
+        {"kind": "sign", "text": "书房", "x": 6.73, "z": -1.4, "y": 2.6, "rot": -90},
+        {"kind": "sign", "text": "厨房", "x": -0.9, "z": -6.53, "y": 3.0},
+        {"kind": "furniture", "item": "wardrobe", "x": -2.6, "z": -6.2, "y": 3.8},
+        {"kind": "furniture", "item": "nightstand", "x": 3.3, "z": -4.3, "y": 3.8},
+        {"kind": "sign", "text": "卧室", "x": -4.2, "z": -6.53, "y": 6.1},
+        {"kind": "glasswall", "x": 5.3, "z": -4.9, "w": 3, "d": 0.06, "y": 3.8},
+        {"kind": "bathtub", "x": 5.6, "z": -5.9, "y": 3.8},
+        {"kind": "sign", "text": "浴室", "x": 5.3, "z": -4.86, "y": 6.1},
+        {"kind": "tiles", "x": 0.8, "z": 5.5, "w": 12, "d": 2.2, "y": 3.8},
+        {"kind": "glasswall", "x": -1.6, "z": 4.4, "w": 7.2, "d": 0.06, "y": 3.8},
+        {"kind": "glasswall", "x": 5.2, "z": 4.4, "w": 3.2, "d": 0.06, "y": 3.8},
+        {"kind": "railing", "x": 0.8, "z": 6.3, "w": 11.8, "y": 3.8},
+        {"kind": "lounger", "x": -2.6, "z": 5.4, "y": 3.8},
+        {"kind": "lounger", "x": 0.2, "z": 5.4, "y": 3.8},
+        {"kind": "planter", "x": 5.6, "z": 5.6, "w": 1.8, "d": 1, "y": 3.8},
+        {"kind": "sign", "text": "露台", "x": 2.8, "z": 4.36, "y": 6.6, "rot": 180}
+      ]
+    },
+    "harbour-restaurant": {
+      "glass": [[0, 10.2, 0.1, 3.15]],
+      "pieces": [
+        {"kind": "chandelier", "x": -3, "z": 2.2, "y": 2.6, "r": 0.4},
+        {"kind": "chandelier", "x": 0, "z": 2.2, "y": 2.6, "r": 0.4},
+        {"kind": "chandelier", "x": 3, "z": 2.2, "y": 2.6, "r": 0.4}
+      ]
+    }
+  },
+  "lesson": {
+    "id": "rental-practice",
+    "title": "Renting a room",
+    "nodes": [
+      {
+        "id": "rent-room",
+        "speaker": "receptionist",
+        "audio": "rental-rent-room",
+        "zh": "你想租一个房间吗？",
+        "pinyin": "Nǐ xiǎng zū yí ge fángjiān ma?",
+        "en": "Would you like to rent a room?",
+        "prompt": {
+          "zh": "说说你想租什么。",
+          "pinyin": "Shuōshuo nǐ xiǎng zū shénme.",
+          "en": "Say you would like to rent a room."
+        },
+        "accepted": [
+          "我想租一个房间",
+          "我要租房间",
+          "我想租房",
+          "租一个房间",
+          "我想租一间房",
+          "可以租房吗",
+          "我想住这里",
+          "我想租这个房间"
+        ],
+        "answerRules": {
+          "templates": [
+            "{polite}{request}{room}{ending}"
+          ],
+          "slots": {
+            "polite": [
+              "",
+              "你好",
+              "请问"
+            ],
+            "request": [
+              "我想租",
+              "我要租",
+              "我想要租"
+            ],
+            "room": [
+              "一个房间",
+              "一间房",
+              "这个房间",
+              "房间"
+            ],
+            "ending": [
+              "",
+              "谢谢",
+              "可以吗"
+            ]
+          }
+        },
+        "model": "我想租一个房间。",
+        "feedback": "You can also say 我想租一间房。",
+        "intent": "variants",
+        "choices": [
+          "我想租一个房间",
+          "我要租房间",
+          "我想租房"
+        ]
+      },
+      {
+        "id": "stay-days",
+        "speaker": "receptionist",
+        "audio": "rental-stay-days",
+        "zh": "好的。你想住几天？",
+        "pinyin": "Hǎo de. Nǐ xiǎng zhù jǐ tiān?",
+        "en": "Sure. How many days would you like to stay?",
+        "prompt": {
+          "zh": "说说你想住几天。",
+          "pinyin": "Shuōshuo nǐ xiǎng zhù jǐ tiān.",
+          "en": "Say you would like to stay seven days."
+        },
+        "accepted": [
+          "我想住七天",
+          "我要住七天",
+          "我住七天",
+          "住七天",
+          "七天",
+          "我想住一个星期",
+          "我要住一个星期",
+          "一个星期"
+        ],
+        "answerRules": {
+          "templates": [
+            "{subject}{verb}{time}{ending}"
+          ],
+          "slots": {
+            "subject": [
+              "",
+              "我"
+            ],
+            "verb": [
+              "想住",
+              "要住",
+              "住"
+            ],
+            "time": [
+              "七天",
+              "一个星期"
+            ],
+            "ending": [
+              "",
+              "可以吗",
+              "谢谢"
+            ]
+          }
+        },
+        "model": "我想住七天。",
+        "feedback": "You can also say 我想住一个星期。 To renew later, say 我想再住七天。",
+        "intent": "variants",
+        "choices": [
+          "我想住七天",
+          "我想住一个星期",
+          "七天"
+        ]
+      },
+      {
+        "id": "ask-price",
+        "speaker": "receptionist",
+        "audio": "rental-ask-price",
+        "zh": "没问题，我们一次租七天。",
+        "pinyin": "Méi wèntí, wǒmen yí cì zū qī tiān.",
+        "en": "No problem. We rent seven days at a time.",
+        "prompt": {
+          "zh": "问问房租多少钱。",
+          "pinyin": "Wènwen fángzū duōshao qián.",
+          "en": "Ask how much the rent is."
+        },
+        "accepted": [
+          "房租多少钱",
+          "房租多少",
+          "多少钱",
+          "房租是多少钱",
+          "七天多少钱",
+          "一共多少钱",
+          "请问房租多少钱",
+          "请问多少钱"
+        ],
+        "answerRules": {
+          "templates": [
+            "{polite}{thing}{ask}"
+          ],
+          "slots": {
+            "polite": [
+              "",
+              "请问"
+            ],
+            "thing": [
+              "",
+              "房租",
+              "七天",
+              "一共"
+            ],
+            "ask": [
+              "多少钱",
+              "是多少钱"
+            ]
+          }
+        },
+        "model": "房租多少钱？",
+        "feedback": "房租 means rent. You can also ask 七天多少钱？",
+        "intent": "variants",
+        "choices": [
+          "房租多少钱",
+          "七天多少钱",
+          "请问多少钱"
+        ]
+      },
+      {
+        "id": "key",
+        "speaker": "receptionist",
+        "audio": "rental-key",
+        "zh": "三十五块。这是你的钥匙。",
+        "pinyin": "Sānshíwǔ kuài. Zhè shì nǐ de yàoshi.",
+        "en": "Thirty-five coins. Here is your key.",
+        "prompt": {
+          "zh": "说谢谢。",
+          "pinyin": "Shuō xièxie.",
+          "en": "Say thank you."
+        },
+        "accepted": [
+          "谢谢",
+          "谢谢你",
+          "谢谢您",
+          "好的谢谢",
+          "太好了谢谢"
+        ],
+        "answerRules": {
+          "templates": [
+            "{lead}{thanks}"
+          ],
+          "slots": {
+            "lead": [
+              "",
+              "好的",
+              "太好了"
+            ],
+            "thanks": [
+              "谢谢",
+              "谢谢你",
+              "谢谢您"
+            ]
+          }
+        },
+        "model": "谢谢！",
+        "feedback": "钥匙 means key.",
+        "intent": "variants",
+        "choices": [
+          "谢谢",
+          "谢谢你",
+          "谢谢您"
+        ]
+      }
+    ],
+    "host": {
+      "zh": "租房练习",
+      "pinyin": "zūfáng liànxí",
+      "en": "Rental practice",
+      "color": "#719d93"
+    },
+    "en": "Practise asking for temporary housing."
+  }
+}

@@ -1,5 +1,5 @@
 import garden from '../content/garden.json' with {type:'json'};
-import {isDisc,bridgeRails} from '../core/garden.js';
+import {isDisc,bridgeRails,crossingLayout,gateLayout} from '../core/garden.js';
 
 /** The park's shapes for the minimap — water, paths, bridges, the pavilion, the pines — as SVG
  *  strings in world coordinates (z down), drawn from the same src/content/garden.json the world
@@ -19,6 +19,10 @@ export function gardenMapParts(){
     const [r]=bridgeRails(b);
     parts.push(`<rect x="${b.x-b.width/2}" y="${r.z0}" width="${b.width}" height="${r.z1-r.z0}" fill="${b.flat?COLOR.timber:COLOR.bridge}"/>`);
   }
+  // The 九曲桥 and the stepping stones, and the town gate in the south wall.
+  for(const c of garden.crossings){const L=crossingLayout(c);for(const s of [...L.deck,...L.steps])parts.push(shapeSvg(s,c.stones?COLOR.rock:COLOR.bridge));}
+  for(const p of gateLayout(garden.gate).piers)parts.push(shapeSvg(p,COLOR.bridge));
+  for(const b of garden.bamboo)parts.push(shapeSvg(b,COLOR.pine));
   const pv=garden.pavilion,R=pv.floor;
   const octagon=Array.from({length:8},(_,i)=>{const a=(22.5+45*i)*Math.PI/180;return `${(pv.x+Math.sin(a)*R).toFixed(2)},${(pv.z+Math.cos(a)*R).toFixed(2)}`;}).join(' ');
   parts.push(`<polygon points="${octagon}" fill="${COLOR.pavilion}"/>`);

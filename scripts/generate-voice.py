@@ -64,6 +64,24 @@ def collect_lines():
             add(node.get("audio"), node["zh"], node.get("speaker", "narrator"), "dialogue")
         for line in data.get("extraLines", {}).values():
             add(line.get("audio"), line["zh"], line.get("speaker", "narrator"), "dialogue")
+    # 海景公寓: the rental desk's practice, the receptionist's and the lift's lines (rental-<key>,
+    # desk-* and lift-* by their own speakers) and the lift calling each floor (rental-lift-floor-<n>).
+    rental = read_json(CONTENT / "rental.json")
+    for node in rental["lesson"]["nodes"]:
+        add(node.get("audio"), node["zh"], node.get("speaker", "narrator"), "dialogue")
+    for key, line in rental["lines"].items():
+        add("rental-" + key, line["zh"], rental["speakers"][key.split("-")[0]], "dialogue")
+    for stop in rental["stops"]:
+        add(f"rental-lift-floor-{stop['floor']}", stop["arrive"]["zh"], rental["speakers"]["lift"], "dialogue")
+    # The metro unlock: Lin's card scene, the station attendant, the townsfolk's hints and the album
+    # note, all unlock-<key>. The attendant's listening node plays the metro's own clip, voiced there.
+    unlock = read_json(CONTENT / "unlock.json")
+    unlock_lines = [*unlock["linLesson"]["nodes"], *unlock["checkLesson"]["nodes"], *unlock["locked"], unlock["photoNote"]]
+    for line in unlock_lines:
+        if line["audio"].startswith("unlock-"):
+            add(line["audio"], line["zh"], line["speaker"], "dialogue")
+    for line in unlock["hints"]:
+        add(line["audio"], line["zh"], line["speaker"], "ambient")
 
     for line in read_json(CONTENT / "ambient.json"):
         add(line.get("audio"), line["zh"], line.get("speaker", "friend-a"), "ambient")

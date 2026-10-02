@@ -1,0 +1,38 @@
+{
+  "id": "veggies-liu",
+  "npc": "liu",
+  "title": "帮刘奶奶摘菜",
+  "pinyin": "Bāng Liú nǎinai zhāi cài",
+  "en": "Help Grandma Liu pick vegetables",
+  "target": "agreeing to help; repeating an order with the measure words 个 and 根",
+  "curriculumStatus": "Beginner prototype; HSK level mapping and native-speaker review pending",
+  "nodes": [
+    {
+      "id": "help",
+      "zh": "你好！你能帮我摘菜吗？",
+      "pinyin": "Nǐ hǎo! Nǐ néng bāng wǒ zhāi cài ma?",
+      "en": "Hello! Could you help me pick vegetables?",
+      "speaker": "liu",
+      "prompt": {"zh": "说可以。", "pinyin": "Shuō kěyǐ.", "en": "Say you can."},
+      "intent": "variants",
+      "accepted": ["没问题", "可以", "好的", "好啊", "当然可以", "可以啊"],
+      "model": "没问题！",
+      "choices": ["没问题！"],
+      "audio": "veggies-liu-help"
+    },
+    {
+      "id": "order",
+      "zh": "请帮我摘三个西红柿和两根黄瓜。",
+      "pinyin": "Qǐng bāng wǒ zhāi sān ge xīhóngshì hé liǎng gēn huángguā.",
+      "en": "Please pick me three tomatoes and two cucumbers.",
+      "note": "个 and 根 are measure words: 根 is for long thin things like cucumbers and carrots. 西红柿 is also called 番茄.",
+      "speaker": "liu",
+      "prompt": {"zh": "再说一遍她要什么。", "pinyin": "Zài shuō yí biàn tā yào shénme.", "en": "Repeat what she wants."},
+      "intent": "variants",
+      "accepted": ["三个西红柿和两根黄瓜", "三个西红柿，两根黄瓜", "三个西红柿两根黄瓜", "西红柿三个，黄瓜两根"],
+      "model": "三个西红柿和两根黄瓜。",
+      "choices": ["三个西红柿和两根黄瓜。"],
+      "audio": "veggies-liu-order"
+    }
+  ]
+}

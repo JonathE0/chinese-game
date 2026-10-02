@@ -10,10 +10,10 @@
     "en": "If you have the chance, visit Qinghe. There are memories of my younger days there. Take your time."
   },
   "film": {
-    "starter": 6,
     "pack": 5,
     "price": 10
   },
+  "camera": "grandpa-camera",
   "memories": [
     {
       "id": "roots-fruit",
@@ -44,8 +44,9 @@
       },
       "place": "town",
       "x": 0,
-      "z": 0,
+      "z": 1.8,
       "radius": 18,
+      "clearance": 2.6,
       "subject": "fountain",
       "image": "/images/roots/square.png"
     },
@@ -60,9 +61,10 @@
         "en": "The address points to the house southeast of the square."
       },
       "place": "town",
-      "x": 11,
-      "z": 14,
+      "x": 16,
+      "z": 53,
       "radius": 15,
+      "clearance": 2.5,
       "subject": "home",
       "image": "/images/roots/home.png"
     },
@@ -78,6 +80,19 @@
       },
       "keepsake": true,
       "image": "/images/roots/next.png"
+    },
+    {
+      "id": "roots-yunhai",
+      "zh": "云海",
+      "pinyin": "Yúnhǎi",
+      "en": "Grandfather by the sea in Yunhai",
+      "clue": {
+        "zh": "云海的海风，很舒服。",
+        "pinyin": "Yúnhǎi de hǎifēng, hěn shūfu.",
+        "en": "The sea breeze in Yunhai feels wonderful."
+      },
+      "keepsake": true,
+      "image": "/images/roots/yunhai.svg"
     }
   ],
   "skills": [
@@ -693,14 +708,14 @@
       "personal": "Take a personal photo"
     },
     "welcome": "You are visiting Qinghe for the first time. You do not need to understand Mandarin yet. Find the places in his old photographs, meet the people who knew him, and learn a little at a time.",
-    "firstStep": "Start with the fruit table on the west side of the square. Walk up to Uncle Zhou and interact with him, then choose “Show him the old photo”. The fountain and house photos are optional discoveries. Open your journal from the top bar and choose “Grandfather’s album” whenever you need it.",
+    "firstStep": "You arrive through the town gate of Lotus Pond Park. Start with the fruit table on the west side of the square: walk north over the pond and through the moon gate. Walk up to Uncle Zhou and interact with him, then choose “Show him the old photo”. The fountain and house photos come next; all three open the way to Yunhai later. Open your journal from the top bar and choose “Grandfather’s album” whenever you need it.",
     "photoTitle": "How the photographs work",
     "photoSteps": [
       "Find the place shown in an old photo. Each card below gives you a location clue.",
-      "At that location, choose “Recreate this photo” to open your camera.",
-      "Wait for “Ready to capture”, then press Enter or the shutter button. You do not need exact framing."
+      "At that location, raise Grandfather’s camera, or choose “Recreate this photo”.",
+      "Wait for “Ready to capture”, then click, press Enter or the shutter button. You do not need exact framing."
     ],
-    "filmGuide": "6 shots to start · 1 per successful photo. Invalid views cost nothing. Buy 5 more for 10 coins. Old and new photos stay side by side.",
+    "filmGuide": "Grandfather’s camera photographs the places in this album for free, as often as you like. For other photos and check-ins, buy a secondhand camera at the resale shop on the square; it uses 1 film per photo. Buy 5 film for 10 coins. Old and new photos stay side by side.",
     "practiceGuide": "Try a short Mandarin reply. The question is explained in English. You can type or use the microphone, edit what it hears, then submit. Open the examples if you need a model answer; using one is practice, and you can try independently afterwards.",
     "journalEntry": "Grandfather, today I found another piece of your life in Qinghe.",
     "objectives": {

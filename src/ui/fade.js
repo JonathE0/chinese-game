@@ -1,5 +1,5 @@
 /**
- * A short fade to black and back — used to hide a jump across town (the taxi ride) that has
+ * A short fade to black and back — used to hide a jump (a night's sleep, src/ui/rest.js) that has
  * nothing worth animating in between. `between` runs once the screen is fully black; the fade
  * back in starts right after it returns, and `onDone` fires once the veil is gone. Modeled on the
  * metro ride scene in `ui/metro.js`: a small overlay appended to `#app`, torn down when it is

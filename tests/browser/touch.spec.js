@@ -44,7 +44,7 @@ test('on a phone the thumbstick walks, 跳 jumps, 记住 saves, the interact but
   await page.getByRole('button',{name:'记住',exact:true}).tap();
   await expect.poll(()=>page.evaluate(()=>window.__qinghe.profile.discovered)).toContain('fountain');
 
-  await page.evaluate(()=>window.__qinghe.town.warp(11,7.8,180));
+  await page.evaluate(()=>window.__qinghe.town.warp(16,56.6,0));   // a few steps out from the front door, facing it
   await page.waitForTimeout(120);
   await pushStick(page,cdp,900);
   await expect(page.locator('#interact span')).toHaveText('回家');

@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 
 const SAVE_KEY='little-mandarin-town.v1';
 
@@ -25,7 +26,7 @@ async function seed(page,profile){
 }
 async function start(page){
   await page.goto('/');
-  await page.getByRole('button',{name:'开始旅行'}).click();
+  await startGame(page);
   await page.waitForTimeout(400);
 }
 
@@ -95,6 +96,9 @@ test('H puts the name in the middle of the screen away and brings it back',async
 test('tapping a mission draws a line to it on the map',async({page})=>{
   await seed(page,{});
   await start(page);
+  // On the square, by the fountain: new players arrive in the park, whose way to every district
+  // runs through the square first.
+  await warp(page,.6,4.9);
   await expect(page.locator('#map-route')).toBeEmpty();
   await page.locator('[data-route="greet"]').click();
   await expect(page.locator('#map-route circle')).toHaveCount(2);
@@ -113,7 +117,7 @@ test('from your own eyes you see your legs, and a shop floor stays first person'
   await start(page);
   const body=()=>page.evaluate(()=>{
     const p=window.__qinghe.town.player;
-    return {upper:p.upper.enabled,head:p.head.enabled,legScale:+p.legs[0].getLocalScale().x.toFixed(2)};
+    return {upper:p.upper.enabled,head:p.head.enabled,legScale:+p.legs[0].limb.getLocalScale().x.toFixed(2)};   // the thigh (src/world/people.js)
   });
   expect(await body()).toEqual({upper:false,head:false,legScale:.84});
   await page.keyboard.press('v');

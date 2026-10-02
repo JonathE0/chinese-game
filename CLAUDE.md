@@ -27,13 +27,19 @@ recipes) is indexed in `docs/CONTENT_MAP.md`, which is generated; never edit it 
 - `npm run build` — production build
 - Voice clips: `.venv/Scripts/python.exe scripts/generate-voice.py --only <id> ...` — see
   `docs/VOICE_PRODUCTION.md`. Never hand-edit `public/audio/manifest.json`.
+- `npm run models` — rebuilds `public/models/*.glb` from the Blender recipes in `scripts/blender/`
+  (Blender runs headless; set `BLENDER` if it isn't at the default 5.2 install path). The .glb
+  files are committed because the deploy has no Blender.
 
 ## Layout
 - `src/content/` — game data: `quests.json`, `npcs.json`, `rooms.json` (interiors), `world.json`
   (districts, buildings), `city.json` (Yunhai), `catalog.json`, `recipes.json`, `sites.json`, `garden.json` (莲池公园),
   `vocabulary.json`, `lessons/`
 - `src/core/` — game rules (economy, review, progress, metro, cooking, construction); unit-tested
-- `src/world/` — PlayCanvas scene (`town.js`, `city.js`, `interior.js`)
+- `src/world/` — PlayCanvas scene (`town.js`, `city.js`, `interior.js`); the Jiangnan look lives in
+  `look.js` (lighting, post-processing, painted textures) and `jiangnan*.js` (buildings, rooms,
+  nature); people are built by `people.js` from `src/content/people.json`; `assets.js` loads the
+  Blender models listed in `src/content/models.json`
 - `src/ui/` — panels and dialogue · `src/services/` — audio, speech, translation, dictionary
 
 ## Rules

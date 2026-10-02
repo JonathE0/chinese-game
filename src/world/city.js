@@ -218,9 +218,10 @@ function building(models,leds,parent,def,level){
   }
   hit(pod);
 
-  // ---- the entrance: a door in a portal, lit lobby glass behind it, and a canopy ----
+  // ---- the entrance: a door in a portal, lit lobby glass behind it, and a canopy (none on a
+  // building nobody goes into: `door: false`) ----
   const lit={colonnade:1.55,books:.4,lobby:.75,marquee:.4,stone:0}[P.style]??.6;
-  if(P.style!=='stone'){
+  if(P.style!=='stone'&&F.door!==false){
     const dg=new pc.Entity('door');dg.lookName='door';dg.setLocalPosition(doorX,0,f-lit+.38);root.addChild(dg);
     const at=(pos,size,what,shadows=false)=>{const e=box(dg,pos,size,typeof what==='string'?what:'#808080');
       if(typeof what!=='string')e.render.meshInstances[0].material=what;if(!shadows)e.render.castShadows=false;return e;};
@@ -452,6 +453,30 @@ function building(models,leds,parent,def,level){
   return {root,marks};
 }
 
+/**
+ * A tower's wings (city.json `wings`: {id, x, z, w, d, h} in its own frame, front on +z): the
+ * volume holding a room behind or beside its main one (the cinema's screening hall, 星光百货's
+ * hardware store), in stone with a cornice round its top; one with a `sign` has a lit shop window
+ * and its name in neon on its front. Returns the hitboxes.
+ */
+function wings(models,leds,parent,def){
+  const {box}=models,marks=[];
+  for(const w of def.wings??[]){
+    const g=new pc.Entity('city-wing');g.lookName='tower';
+    g.setLocalPosition(def.x,0,def.z);g.setLocalEulerAngles(0,def.rot??0,0);parent.addChild(g);
+    box(g,[w.x,w.h/2,w.z],[w.w,w.h,w.d],'#808080').render.meshInstances[0].material=leds.glazing(w.windows??'punched',w.stone??def.stone??'#b8b0a2');
+    box(g,[w.x,w.h+.2,w.z],[w.w+.3,.4,w.d+.3],def.trim??'#dcd8cf');
+    if(w.sign){
+      const f=w.z+w.d/2,sw=Math.min(w.w-1.4,7.4),glass=box(g,[w.x,1.9,f+.03],[w.w-1.6,3,.06],'#dfe8ea');
+      glass.render.meshInstances[0].material=leds.lit('#dfe8ea','#f4fbff');glass.render.castShadows=false;
+      box(g,[w.x,w.h-1.1,f+.1],[sw+.2,1.4,.1],'#1b1e24').render.castShadows=false;
+      leds.neon(g,w.sign,[w.x,w.h-1.1,f+.21],[sw,1.2],{color:w.neon??'#9fe3ff',seed:w.x});
+    }
+    marks.push(turn(def,{x:w.x,z:w.z,hw:w.w/2+.3,hd:w.d/2+.3,y0:0,y1:w.h+.4,name:'tower'}));
+  }
+  return marks;
+}
+
 /** See-through glass (canopies, balcony rails), shared by opacity. */
 const GLASSES=new Map();
 function clearGlass(opacity){
@@ -529,7 +554,7 @@ function landmark(models,leds,parent,def){
   const {box,shape,cylinder}=models,[warm,cool]=leds.windows(def.glass),text=def.leds.text,marks=[];
   const root=new pc.Entity('landmark');root.setLocalPosition(def.x,0,def.z);parent.addChild(root);
   let y=0;
-  for(const [share,tall] of [[1,34],[.89,32],[.77,30],[.64,22],[.5,14]]){
+  for(const [share,tall] of def.tiers){   // city.json: 海景公寓's floors (src/world/rental.js) sit in these tiers
     const w=def.w*share;
     marks.push({x:def.x,z:def.z,hw:w/2+.05,hd:w/2+.05,y0:y,y1:y+tall,name:'tower'});
     box(root,[0,y+tall/2,0],[w,tall,w],'#1b2836').render.castShadows=false;
@@ -549,65 +574,214 @@ function landmark(models,leds,parent,def){
 
 /**
  * The land round the bay (city.json `land`): the city side, the two flanks and the far shore,
- * whose edges on the water are the sea walls; downtown's pavement and the back street to the hill;
- * the carriageway between its kerbs with a dashed centre line; and the station forecourt.
+ * whose edges on the water are the sea walls. On it the paving (`paving`: [x0, x1, z0, z1] and a
+ * colour if it is not the city's stone: the streets and squares, and the park's lawn), and laid
+ * into that the patterns (`pattern`: a band [x0, x1, z0, z1, colour, top] or a ring {disc: [x, z,
+ * r], color, top}), each a few millimetres higher than whatever it lies on, so none lies flush.
  */
 function ground(models,root){
-  const {box}=models,data=city.place,{road:[rx0,rx1,rz0,rz1],asphalt,kerb}=city.street;
+  const {box,cylinder}=models,data=city.place;
   for(const [x0,x1,z0,z1,top] of city.land)box(root,[(x0+x1)/2,top-.95,(z0+z1)/2],[x1-x0,1.9,z1-z0],data.ground);
-  const [dx0,dx1,dz0,dz1]=city.street.pavement;
-  box(root,[(dx0+dx1)/2,-.05,(dz0+dz1)/2],[dx1-dx0,.1,dz1-dz0],data.pave);
-  const mid=(rz0+rz1)/2,long=rz1-rz0;
-  box(root,[(rx0+rx1)/2,.015,mid],[rx1-rx0,.03,long],asphalt);
-  // The kerbs, stepping out round each taxi lay-by.
-  const kerbs=[[rx0,rz0,rz1]];
-  let from=rz0;
-  for(const [bx0,bx1,bz0,bz1] of city.street.bays){
-    box(root,[(bx0+bx1)/2,.015,(bz0+bz1)/2],[bx1-bx0,.03,bz1-bz0],asphalt);
-    box(root,[bx1,.04,(bz0+bz1)/2],[.22,.08,bz1-bz0+.2],kerb);
-    box(root,[(bx0+bx1)/2,.04,bz0],[bx1-bx0+.22,.08,.22],kerb);
-    kerbs.push([rx1,from,bz0]);from=bz1;
+  for(const [x0,x1,z0,z1,color=data.pave] of city.paving)box(root,[(x0+x1)/2,-.05,(z0+z1)/2],[x1-x0,.1,z1-z0],color);
+  for(const p of city.pattern){
+    if(p.disc){const [x,z,r]=p.disc;cylinder(root,[x,p.top-.005,z],[2*r,.01,2*r],p.color);continue;}
+    const [x0,x1,z0,z1,color,top]=p;
+    box(root,[(x0+x1)/2,top-.005,(z0+z1)/2],[x1-x0,.01,z1-z0],color);
   }
-  kerbs.push([rx1,from,rz1]);
-  for(const [x,z0,z1] of kerbs)if(z1>z0)box(root,[x,.04,(z0+z1)/2],[.22,.08,z1-z0+.2],kerb);
-  for(let z=rz0+2;z<rz1-1;z+=4)box(root,[0,.04,z],[.2,.02,2.2],'#dfe1dd');
-  box(root,[0,.01,26],[30,.02,10],'#b3b3ab');                            // the station forecourt
+}
+
+/** An entity drawing one mesh of its own (a column's flare, the leaves let into it). */
+function meshOn(parent,name,mesh,material,shadows=false){
+  const e=new pc.Entity(name);parent.addChild(e);
+  e.addComponent('render',{castShadows:shadows,receiveShadows:true});
+  e.render.meshInstances=[new pc.MeshInstance(mesh,material)];
+  return e;
+}
+/** A mesh from positions, normals and triangles. */
+function meshOf(positions,normals,indices){
+  const g=new pc.Geometry();g.positions=positions;g.normals=normals;g.indices=indices;
+  return pc.Mesh.fromGeometry(pc.Application.getApplication().graphicsDevice,g);
+}
+/**
+ * The facets of a column turned round its axis: frustums stacked up `profile` ([y, radius], bottom
+ * up), `sides` round, each facet flat shaded so it catches the light on its own. `each(facet)` is
+ * handed every facet: {m (the angle of its middle), y0, y1, r0, r1, n (its outward normal)}.
+ */
+function facets(profile,sides,each){
+  const half=Math.PI/sides;
+  for(let k=0;k+1<profile.length;k++){
+    const [y0,r0]=profile[k],[y1,r1]=profile[k+1],tip=-(r1-r0)/(y1-y0)*Math.cos(half);
+    for(let i=0;i<sides;i++){
+      const m=(2*i+1)*half,l=Math.hypot(1,tip);
+      each({k,i,m,y0,y1,r0,r1,n:[Math.sin(m)/l,tip/l,Math.cos(m)/l]});
+    }
+  }
+}
+/** A trumpet column: a slim stem flaring out into the canopy, eight flat facets round. */
+function trumpet(profile){
+  const positions=[],normals=[],indices=[],half=Math.PI/8;
+  facets(profile,8,({m,y0,y1,r0,r1,n})=>{
+    const a=m-half,b=m+half,base=positions.length/3;
+    for(const [ang,y,r] of [[a,y0,r0],[b,y0,r0],[b,y1,r1],[a,y1,r1]]){positions.push(Math.sin(ang)*r,y,Math.cos(ang)*r);normals.push(...n);}
+    indices.push(base,base+1,base+2,base,base+2,base+3);
+  });
+  return meshOf(positions,normals,indices);
+}
+/**
+ * The openings let into a trumpet column's flare, as lit leaves standing a hair off its facets:
+ * two to a facet on its widest stretch, one on the stretch below (and only the widest on medium).
+ */
+function leafMesh(profile,high){
+  const positions=[],normals=[],indices=[],half=Math.PI/8;
+  facets(profile,8,({k,m,y0,y1,r0,r1,n})=>{
+    const rows=k===profile.length-2?[-.27,.27]:k===profile.length-3&&high?[0]:[];
+    const t=[Math.cos(m),0,-Math.sin(m)],rise=(r1-r0)*Math.cos(half),slant=Math.hypot(rise,y1-y0);
+    const v=[Math.sin(m)*rise/slant,(y1-y0)/slant,Math.cos(m)*rise/slant],y=(y0+y1)/2,r=(r0+r1)/2*Math.cos(half)+.03;
+    const wide=2*(r0+r1)/2*Math.sin(half),a=rows.length>1?wide*.16:wide*.3,b=slant*.36;
+    for(const u of rows){
+      const c=[Math.sin(m)*r+t[0]*u*wide,y,Math.cos(m)*r+t[2]*u*wide],base=positions.length/3;
+      for(const [du,dv] of [[0,-b],[a,0],[0,b],[-a,0]]){positions.push(c[0]+t[0]*du+v[0]*dv,c[1]+v[1]*dv,c[2]+t[2]*du+v[2]*dv);normals.push(...n);}
+      indices.push(base,base+1,base+2,base,base+2,base+3);
+    }
+  });
+  return meshOf(positions,normals,indices);
 }
 
 /**
- * The headhouse you arrive in and leave through.
- *
- * It is open to the street on the avenue side, because a station you cannot see into is just a
- * wall: the concourse, the sign and the stair down to the platform all have to be visible from
- * out on the pavement, or nobody would guess that is how you get home.
+ * 云海市中心站, the heart of the city (after Chongqing East): a white canopy with every edge rounded,
+ * held up by trumpet columns that flare out of slim stems into it, leaves of light let into their
+ * flare; a warm timber soffit, lit after dark; a glass hall under it, lit from inside; a terrace
+ * either side of the main exit with a glass balustrade, reached by escalators rising outward from
+ * it; and the name over the front in big red characters, the English beneath. Built with its front
+ * on local +z and turned to face the square (city.json `metroStation.building`). The platforms are
+ * underground (the yunhai-central room): this is walked round, and the ways down are its exits.
  */
-function station(models,leds,parent){
-  const {box,cylinder,label}=models;
-  const root=new pc.Entity('metro-hall');root.lookName='metro-station';root.setLocalPosition(0,0,30.5);parent.addChild(root);
-  box(root,[0,.15,0],[13,.3,7.4],'#b0b2ae');
-  for(const side of [-1,1]){
-    box(root,[side*6,2.4,0],[.7,4.8,7.2],'#9299a1');                 // side piers
-    box(root,[side*4.4,2.35,-3.4],[2.5,4.7,.4],'#a9bcc6');           // glazing flanking the mouth
+function station(models,leds,parent,level){
+  const {box,cylinder,ball}=models,S=city.metroStation.building,high=level==='high',mid=level!=='low';
+  const root=new pc.Entity('metro-hall');root.lookName='metro-station';
+  root.setLocalPosition(S.x,0,S.z);root.setLocalEulerAngles(0,S.rot??0,0);parent.addChild(root);
+  const white='#f2f1ec',steel='#8e959c',hw=S.w/2,hd=S.d/2,thick=1.2,r=thick/2,under=S.h-thick;
+  const marks=[],hit=(x,z,hx,hz,y0,y1,name='metro-station')=>marks.push(turn(S,{x,z,hw:hx,hd:hz,y0,y1,name}));
+  const group=key=>{const g=new pc.Entity(key);g.lookName=key;root.addChild(g);return g;};
+  const paint=(e,material,shadows=false)=>{e.render.meshInstances[0].material=material;e.render.castShadows=shadows;return e;};
+
+  // ---- the canopy: a white slab, every edge rounded, over a timber soffit ----
+  const roof=group('roof');
+  box(roof,[0,S.h-r,0],[S.w-thick,thick,S.d-thick],white);
+  for(const s of [-1,1]){
+    cylinder(roof,[0,S.h-r,s*(hd-r)],[thick,S.w-thick,thick],white,[0,0,90]);
+    cylinder(roof,[s*(hw-r),S.h-r,0],[thick,S.d-thick,thick],white,[90,0,0]);
+    for(const t of [-1,1])ball(roof,[s*(hw-r),S.h-r,t*(hd-r)],[thick,thick,thick],white);
   }
-  box(root,[0,4.5,-3.4],[9,.6,.5],'#8e959c');                        // the header over the way in
-  box(root,[0,2.35,3.45],[12.4,4.7,.4],'#a9bcc6');                   // the back of the concourse
-  for(let i=0;i<5;i++)cylinder(root,[0,4.9,-3+i*1.6],[.22,12.4,.22],'#8e959c',[0,0,90]);
-  box(root,[0,5.15,0],[12.9,.4,7.4],'#c3d2d8');
-  // The stair down to the platform: you never go down it, but it has to look like you could.
-  for(let i=0;i<6;i++)box(root,[0,.14-i*.24,1.1+i*.5],[5.4,.26,.55],'#9fa4a6').lookName='stairs';
-  for(const side of [-1,1])box(root,[side*2.9,.75,2.1],[.14,1.2,3],'#c2c8cb');
-  const sign=label(root,'地铁 1 号线',[0,3.5,-3.62],6.4,1.3,'#20303f','#dfe9f2');
-  sign.setLocalPosition(0,3.5,-3.66);backlight(sign);
-  leds.piece(root,[0,2.6,-3.64],[6.4,.18,.14],leds.light('#5b93c8'));
-  return [
-    {x:-6,z:30.5,hw:.5,hd:3.7,y0:0,y1:5.2,name:'metro-station'},
-    {x: 6,z:30.5,hw:.5,hd:3.7,y0:0,y1:5.2,name:'metro-station'},
-    {x:-4.4,z:27.1,hw:1.4,hd:.3,y0:0,y1:5.2,name:'metro-station'},
-    {x: 4.4,z:27.1,hw:1.4,hd:.3,y0:0,y1:5.2,name:'metro-station'},
-    {x:0,z:34,hw:6.3,hd:.3,y0:0,y1:5.2,name:'metro-station'},
-    // The stair mouth is a hole in the floor; the balustrade round it is what stops you.
-    {x:0,z:32,hw:3.1,hd:2.2,y0:0,y1:1.3,name:'metro-station'},
-  ];
+  paint(box(roof,[0,under-.05,0],[S.w-2*thick,.06,S.d-2*thick],'#b98150'),leds.lit('#b98150','#ffb46a',.5));
+  if(mid)for(let z=-hd+thick+.45;z<hd-thick;z+=high?.9:1.8)box(roof,[0,under-.13,z],[S.w-2*thick,.06,.1],'#9a6a40').render.castShadows=false;
+  leds.piece(roof,[0,under-.03,hd-r],[S.w-thick,.05,.12],leds.strip('#fff1d6'));
+  if(mid)for(const x of [-15,-5,5,15])ball(roof,[x,S.h+.2,0],[5,1.2,5],'#dfe6ea');       // skylights
+
+  // ---- the trumpet columns, leaves of light let into their flare ----
+  const profile=[[0,.55],[6,.8],[10,2],[under,4.2]],shaft=trumpet(profile),leaves=mid?leafMesh(profile,high):null;
+  const stone=models.material(white),glow=leds.lit('#f3dcae','#ffc27a',.95);
+  for(const [x,z] of S.columns){
+    const c=new pc.Entity('column');c.lookName='pillar';c.setLocalPosition(x,0,z);root.addChild(c);
+    meshOn(c,'shaft',shaft,stone,true);
+    if(leaves)meshOn(c,'leaves',leaves,glow);
+    hit(x,z,.95,.95,0,under,'pillar');
+  }
+
+  // ---- the glass hall under the canopy, lit from inside ----
+  const [x0,x1,z0,z1,hh]=S.hall,hallW=x1-x0,hallD=z1-z0,cx=(x0+x1)/2,cz=(z0+z1)/2,glass=clearGlass(.28);
+  const hall=group('window');
+  box(hall,[cx,hh-.2,cz],[hallW,.4,hallD],white);
+  paint(box(hall,[cx,(hh-.4)/2,z0+.15],[hallW-.2,hh-.4,.3],'#dcd6ca'),leds.glazing('curtain','#d9d6cf'),true);   // its back: offices behind glass
+  box(hall,[cx,6,cz+.6],[hallW-.4,.3,hallD-1.8],'#d9d6cf');                         // a mezzanine inside
+  for(const [px,pz,sx,sz] of [[cx,z1-.05,hallW,.04],[x0+.05,cz+.15,.04,hallD-.3],[x1-.05,cz+.15,.04,hallD-.3]])
+    paint(box(hall,[px,(hh-.4)/2,pz],[sx,hh-.4,sz],'#cfe3ea'),glass);
+  // Mullions run up into the roof and the transoms stop short of the corners, so neither lies flush with the glass.
+  if(mid)for(let x=x0+2;x<x1-1;x+=high?2:4)box(hall,[x,(hh-.3)/2,z1],[.1,hh-.3,.16],steel);
+  for(const y of [6.5,hh-.52])box(hall,[cx,y,z1],[hallW-.1,.12,.18],steel);
+  hit(cx,cz,hallW/2,hallD/2,0,hh);
+
+  // ---- a terrace either side of the main exit: shops under it, a glass balustrade along it,
+  // and an escalator rising out to it from beside the exit ----
+  const T=S.terrace,E=S.escalator,tz=(T.z[0]+T.z[1])/2,td=T.z[1]-T.z[0],ez=(E.z[0]+E.z[1])/2,ew=E.z[1]-E.z[0];
+  const rails=clearGlass(.3),shops=leds.lit('#4a4038','#ffc98e');
+  for(const s of [-1,1]){
+    const tx=s*(T.x[0]+T.x[1])/2,tw=T.x[1]-T.x[0],lx=s*(E.x[1]+T.x[1])/2,lw=T.x[1]-E.x[1];
+    const deck=group('patio');
+    box(deck,[tx,T.y/2,tz],[tw,T.y,td],white);
+    paint(box(deck,[tx,T.y/2-.3,T.z[1]+.04],[tw-1,T.y-1.4,.06],'#4a4038'),shops);
+    box(deck,[tx,T.y+.15,tz],[tw+.3,.3,td+.3],white);
+    box(deck,[lx,T.y+.15,(T.z[1]+.15+E.z[1]+.1)/2],[lw+.3,.3,E.z[1]-T.z[1]-.05],white);   // the landing
+    const rail=group('railing');
+    for(const [ax,bx,z] of [[T.x[0],E.x[1],T.z[1]+.1],[E.x[1],T.x[1],E.z[1]+.1]]){
+      paint(box(rail,[s*(ax+bx)/2,T.y+.8,z],[bx-ax,1,.04],'#cfe3ea'),rails);
+      box(rail,[s*(ax+bx)/2,T.y+1.33,z],[bx-ax+.1,.06,.1],'#c9ced2');
+    }
+    if(high)for(let x=T.x[0]+2.5;x<T.x[1]-1;x+=5)box(deck,[s*x,T.y+.6,tz-.6],[1.6,.6,1],'#8f8a80');   // planters
+    hit(tx,tz,tw/2+.15,td/2+.15,0,T.y+1.4,'patio');
+    hit(lx,(T.z[1]+E.z[1])/2,lw/2+.15,(E.z[1]-T.z[1])/2+.1,T.y-.2,T.y+1.4,'patio');
+    // The escalator: a truss sloping up at thirty degrees, glass sides and a handrail each side.
+    const run=E.x[1]-E.x[0],len=Math.hypot(run,T.y),climb=Math.atan2(T.y,run)*180/Math.PI;
+    const esc=group('escalator');esc.setLocalPosition(s*(E.x[0]+E.x[1])/2,T.y/2,ez);esc.setLocalEulerAngles(0,0,s*climb);
+    box(esc,[0,0,0],[len,.5,ew],'#a3a9ae');
+    box(esc,[0,.27,0],[len,.04,ew-.5],'#3b4046');
+    for(const t of [-1,1]){
+      paint(box(esc,[0,.75,t*(ew/2-.12)],[len,.9,.04],'#cfe3ea'),rails);
+      box(esc,[0,1.22,t*(ew/2-.12)],[len,.07,.1],'#2b2f34');
+    }
+    hit(s*(E.x[0]+E.x[1])/2,ez,run/2,ew/2,0,T.y+1.2,'escalator');
+  }
+
+  // ---- the name over the front, big and red, the English beneath, on a white board ----
+  const cell=2.4,tall=cell*1.55,sy=S.h+tall/2+.3,n=[...S.name].length;
+  box(root,[0,sy,hd-.9],[n*cell+.9,tall+.6,.3],white);
+  leds.text(root,S.name,[0,sy,hd-.9+.21],cell,{color:'#ff3b2f',sub:S.en});
+  return marks;
+}
+
+/**
+ * A way down into the station (city.json `metroStation.exits`): a glass box over a stair, open
+ * where you step out, its roof carrying the metro roundel, the exit's letter and where it leads.
+ * It stands just behind the exit's spawn with its mouth towards it, so you come up the stair and
+ * step out facing away from it; the E-target at the spawn takes you back down.
+ */
+function exitPortal(models,leds,parent,exit){
+  const {box,cylinder,label}=models,[sx,sz,yaw]=exit.spawn,a=yaw*Math.PI/180,W=5.4,D=6.4,H=2.9;
+  const def={x:sx+Math.sin(a)*2.2,z:sz+Math.cos(a)*2.2,rot:yaw+180};
+  const root=new pc.Entity('city-metro-exit');root.lookName='metro-station';
+  root.setLocalPosition(def.x,0,def.z);root.setLocalEulerAngles(0,def.rot,0);parent.addChild(root);
+  const steel='#6f7880',granite='#b3b4ae',glass=clearGlass(.3);
+  const paint=(e,m)=>{e.render.meshInstances[0].material=m;e.render.castShadows=false;return e;};
+  // The granite floor, the top step, and the dark of the stair going down with its treads fading.
+  box(root,[0,.06,-D/2],[W,.12,D],granite);
+  const stair=new pc.Entity('stairs');stair.lookName='stairs';root.addChild(stair);
+  box(stair,[0,.125,-.55],[3.4,.03,.5],'#c9cbc6');
+  box(stair,[0,.125,-(D+.3)/2],[3.4,.03,D-1.3],'#1d2226');
+  ['#8d918f','#6b6f6e','#4f5352','#3a3e3e'].forEach((c,i)=>box(stair,[0,.15,-1.1-i*.55],[3.3,.02,.08],c));
+  for(const s of [-1,1]){
+    box(root,[s*1.85,.595,-(D+.3)/2],[.2,.95,D-1.3],granite);
+    paint(box(root,[s*(W/2-.05),1.51,-D/2],[.04,H-.3,D-.2],'#cfe3ea'),glass);
+    for(const z of [-.12,-D/2,-D+.12])box(root,[s*(W/2-.05),(H+.12)/2,z],[.12,H-.12,.12],steel);   // up to the roof
+  }
+  paint(box(root,[0,1.51,-D+.05],[W-.2,H-.3,.04],'#cfe3ea'),glass);
+  // The roof reaches out over the way out, lit along its front edge.
+  box(root,[0,H+.12,-D/2+.45],[W+.5,.24,D+.9],'#e9ebea');
+  leds.piece(root,[0,H-.03,.85],[W+.3,.05,.08],leds.light('#e6eef5'));
+  // The sign band: the roundel, the exit's letter and where it leads, lit from within after dark.
+  const band=new pc.Entity('sign');band.lookName='sign';root.addChild(band);
+  box(band,[0,H+.62,.78],[W+.5,.76,.14],'#1f3552');
+  cylinder(band,[-W/2+.55,H+.62,.87],[.5,.03,.5],'#f2f5f7',[90,0,0]);
+  cylinder(band,[-W/2+.55,H+.62,.89],[.38,.03,.38],'#2c68b0',[90,0,0]);
+  box(band,[-W/2+.55,H+.62,.91],[.07,.27,.02],'#f2f5f7');
+  // Both read from across the square, the way you look for your exit.
+  backlight(label(band,exit.zh,[-.62,H+.62,.88],1.5,.44,'#f0c43a','#1f3552'),.8).lookReach=30;
+  backlight(label(band,exit.to.zh,[1.5,H+.62,.88],2.3,.44,'#1f3552','#f4f7fa'),.8).lookReach=30;
+  // Solid: the glass walls and the roof, and the stairwell past the top step (you go down by the
+  // exit's E-target, not by walking off the edge). Unnamed: a look finds the stair, a sign, or the
+  // exit itself (地铁站).
+  const at=(x,z,hw,hd,y0,y1)=>turn(def,{x,z,hw,hd,y0,y1,name:null});
+  return [at(-W/2+.05,-D/2,.12,D/2,0,H),at(W/2-.05,-D/2,.12,D/2,0,H),at(0,-D+.05,W/2,.12,0,H),
+    at(0,-D/2+.45,W/2+.25,(D+.9)/2,H,H+.3),at(0,-(D+.3)/2,1.95,(D-1.3)/2,0,1.1)];
 }
 
 /**
@@ -638,8 +812,9 @@ function cityProp(models,leds,parent,def){
     return [{hw:.2,hd:.2,y1:5}];
   }
   if(k==='citytree'){
+    // A street tree, or (`tree`) any of the town's kinds: willows round the park's pond.
     e.setLocalEulerAngles(0,Math.abs(def.x*37+def.z*53)%360,0);
-    models.tree(e,0,0,1.05);
+    models.tree(e,0,0,def.size??1.05,def.tree);
     return [{hw:.35,hd:.35,y1:3.6}];
   }
   if(k==='cityplanter'){
@@ -663,32 +838,116 @@ function cityProp(models,leds,parent,def){
     box(e,[0,.86,.29],[.3,.22,.06],'#464c52');
     return [{hw:.34,hd:.34,y1:1.1}];
   }
-  if(k==='citycrossing'){
-    for(let i=-2;i<=2;i++)box(e,[i*1.3,.045,0],[.75,.02,4.4],'#e2e4e2');
-    // Paint, not an obstacle: a named patch of road that says where to cross.
-    return [{hw:3.6,hd:2.2,y0:-.2,y1:.05,solid:false}];
-  }
-  if(k==='trafficlight'){
-    cylinder(e,[0,.1,0],[.44,.2,.44],'#5f656b');
-    cylinder(e,[0,1.9,0],[.16,3.6,.16],'#71777d');
-    box(e,[0,3.5,.2],[.42,1.15,.42],'#3a4046');
-    const colors=['#d4574f','#e0b652','#6fb072'];
-    for(let i=0;i<3;i++){
-      const bulb=ball(e,[0,3.9-i*.36,.42],[.24,.24,.12],colors[i]);bulb.lookName='traffic-light';
-      if(i===2)bulb.render.meshInstances[0].material=leds.light(colors[i]);
+  const low=detail()==='low',paint=(one,material)=>{one.render.meshInstances[0].material=material;one.render.castShadows=false;return one;};
+  if(k==='pool'){
+    // The boulevard's water: a long shallow pool in a granite kerb, dark stone under still water,
+    // and low jets down its middle. Its hitbox stands a little above the kerb, so nobody steps in.
+    e.lookName='fountain';
+    const {w,d}=def,rim='#b9b4a8';
+    for(const s of [-1,1]){
+      box(e,[s*(w/2-.15),.25,0],[.3,.5,d],rim);
+      box(e,[0,.25,s*(d/2-.15)],[w-.6,.5,.3],rim);
     }
-    return [{hw:.3,hd:.3,y1:4.2}];
+    box(e,[0,.1,0],[w-.6,.2,d-.6],'#34454d');
+    paint(box(e,[0,.36,0],[w-.6,.02,d-.6],'#79aaa8'),models.waterMaterial());
+    if(!low)for(let z=-d/2+1.4;z<=d/2-1.3;z+=2.5)paint(models.shape(e,'cone',[0,.66,z],[.12,.6,.12],'#eaf7ff',[180,0,0]),spray());
+    return [{hw:w/2,hd:d/2,y1:.6}];
   }
-  // The shelter and the kiosk are roofed well above head height, so standing under them (or
-  // swinging the camera past them) never feels like ducking under a low shed.
-  if(k==='cityshelter'){
-    for(const x of [-2.4,2.4])cylinder(e,[x,1.6,0],[.16,3.2,.16],'#868d94');
-    box(e,[0,3.25,0],[5.4,.16,2.2],'#b8c8d0');
-    box(e,[0,1.6,-1.0],[5.2,3.0,.1],'#c3d3da');
-    for(let i=0;i<4;i++)box(e,[-1.6+i*1.05,.6,-.7],[.9,.1,.5],'#98a0a7');
-    backlight(label(e,'公交站',[1.9,2.3,.98],1.7,.6,'#26333f','#e2ecf3'),.7);
-    return [{hw:2.8,hd:1.2,y1:3.45}];
+  if(k==='fountain'){
+    // A round basin on a square: a granite rim in twenty stones, still water, a stone bowl on a
+    // stem in the middle with a spray rising out of it.
+    e.lookName='fountain';
+    const R=def.radius??5,n=20;
+    for(let i=0;i<n;i++){
+      const a=i/n*Math.PI*2;
+      box(e,[Math.sin(a)*(R-.2),.3,Math.cos(a)*(R-.2)],[2*(R-.2)*Math.tan(Math.PI/n)+.05,.6,.4],'#b9b4a8',[0,a*180/Math.PI,0]);
+    }
+    cylinder(e,[0,.1,0],[2*R-.6,.2,2*R-.6],'#34454d');
+    paint(cylinder(e,[0,.45,0],[2*R-.7,.02,2*R-.7],'#79aaa8'),models.waterMaterial());
+    cylinder(e,[0,.95,0],[.7,1.9,.7],'#c9c4b8');
+    cylinder(e,[0,2,0],[2.6,.3,2.6],'#c9c4b8');
+    if(!low)paint(models.shape(e,'cone',[0,3.3,0],[1.5,2.4,1.5],'#eaf7ff'),spray());
+    return [{hw:R,hd:R*.42,y1:.7},{hw:R*.42,hd:R,y1:.7},{hw:R*.72,hd:R*.72,y1:.7}];
   }
+  if(k==='pond'){
+    // The park's pond, its ends rounded: still water edged with stones, lotus on it. Its hitbox
+    // follows the rounded ends (an octagon each), so the path round it is clear to the edge.
+    e.lookName='pond';
+    const {w,d}=def,r=d/2,run=(w-d)/2;
+    paint(box(e,[0,.1,0],[w-d,.02,d-.6],'#79aaa8'),models.waterMaterial());
+    for(const s of [-1,1])paint(cylinder(e,[s*run,.1,0],[d-.6,.02,d-.6],'#79aaa8'),models.waterMaterial());
+    const stones=[];
+    for(let x=-run;x<=run+.01;x+=1.3)for(const s of [-1,1])stones.push([x,s*(r-.3),0]);
+    for(const s of [-1,1])for(let i=1;i<12;i++){const a=i/12*Math.PI;stones.push([s*(run+Math.sin(a)*(r-.3)),Math.cos(a)*(r-.3),s*a]);}
+    stones.forEach(([x,z,a],i)=>models.shape(e,'sphere',[x,.14,z],[1.1,.34,.7],i%2?'#b3ab98':'#9d968a',[0,a*180/Math.PI,0]));
+    for(const [x,z,flower] of def.lotus??[]){
+      cylinder(e,[x,.12,z],[.9,.03,.9],'#7f9e6a');
+      if(flower)ball(e,[x+.12,.3,z+.08],[.32,.3,.32],'#e3a1b8');
+    }
+    const out=[{hw:run,hd:r,y1:.6}];
+    for(const s of [-1,1])out.push({x:s*run,hw:r,hd:r*.42,y1:.6},{x:s*run,hw:r*.42,hd:r,y1:.6},{x:s*run,hw:r*.72,hd:r*.72,y1:.6});
+    return out;
+  }
+  if(k==='pavilion'){
+    // A pavilion by the water after the station: four white posts under a white roof on a warm
+    // timber soffit, lit after dark, and a bench inside.
+    e.lookName='pavilion';
+    const s=def.size??5,h=3.3;
+    for(const x of [-1,1])for(const z of [-1,1])box(e,[x*(s/2-.3),(h-.06)/2,z*(s/2-.3)],[.3,h-.06,.3],'#f2f1ec');
+    box(e,[0,h+.2,0],[s+.8,.4,s+.8],'#f2f1ec');
+    paint(box(e,[0,h-.03,0],[s+.4,.06,s+.4],'#b98150'),leds.lit('#b98150','#ffb46a',.5));
+    box(e,[0,.08,0],[s,.16,s],'#c9c2b0');
+    for(const x of [-1.1,1.1])box(e,[x,.4,-s/2+.9],[.18,.48,.5],'#7d848b');
+    box(e,[0,.68,-s/2+.9],[2.6,.08,.6],'#a67c52');
+    return [{hw:s/2,hd:s/2,y1:.16,name:'floor'},...[-1,1].flatMap(x=>[-1,1].map(z=>({x:x*(s/2-.3),z:z*(s/2-.3),hw:.2,hd:.2,y1:h}))),
+      {z:-s/2+.9,hw:1.3,hd:.35,y0:.16,y1:.72,name:null}];   // not the crowd's to sit on: it stands on the floor
+  }
+  if(k==='flowerbed'){
+    // A raised bed of flowers in a granite kerb.
+    e.lookName='planter';
+    const {w,d}=def,colors=def.colors??['#e3a1b8','#f2d27a','#e46c5a','#b98fd6'],step=low?.9:.45;
+    box(e,[0,.2,0],[w,.4,d],'#b9b4a8');
+    box(e,[0,.46,0],[w-.3,.14,d-.3],'#5f7d4f');
+    let i=0;
+    for(let x=-w/2+.4;x<w/2-.3;x+=step)for(let z=-d/2+.4;z<d/2-.3;z+=step,i++)
+      box(e,[x,.6,z],[.16,.16,.16],colors[i%colors.length],[0,45,0]);
+    return [{hw:w/2,hd:d/2,y1:.5}];
+  }
+  if(k==='rockery'){
+    models.rockery(e,{x:0,z:0,r:def.r??1.2,h:def.h??1.4});
+    return [{hw:def.r??1.2,hd:(def.r??1.2)*.85,y1:def.h??1.4}];
+  }
+  if(k==='shopfront'){
+    // A small shop on the food street: two storeys, its window lit, an awning out over the
+    // pavement, its name in neon over the window. Not a way in: its lit window says it is open.
+    e.lookName=def.name??'shop';
+    const {w,d}=def,h=def.h??7,f=d/2,[c1,c2]=def.awning??['#f1e6d0','#b8392f'],sw=Math.min(w-1.2,6.2);
+    box(e,[0,h/2,0],[w,h,d],def.color??'#c9b9a2');
+    paint(box(e,[0,1.9,f+.03],[w-1.2,2.9,.06],'#4a4038'),leds.lit('#4a4038','#ffc98e'));
+    paint(box(e,[0,h-1.2,f+.03],[w-1.2,1.4,.06],'#5c6670'),leds.glazing('home'));
+    const slats=low?4:8,aw=w-.8;
+    for(let i=0;i<slats;i++)box(e,[-aw/2+(i+.5)*aw/slats,3.62,f+.95],[aw/slats+(i%2?.01:0),.08+(i%2?.01:0),1.9],i%2?c1:c2,[16,0,0]);
+    box(e,[0,4.45,f+.08],[sw+.2,1.1,.1],'#1b1e24');
+    leds.neon(e,def.sign,[0,4.45,f+.19],[sw,.9],{color:def.neon??'#ffcf7a',seed:def.x});
+    return [{hw:w/2+.1,hd:f+.1,y1:h}];
+  }
+  if(k==='arch'){
+    // A gateway over the food street: red posts on granite plinths, a dark beam with the street's
+    // name lit on both faces, and a red ridge on top.
+    e.lookName='paifang';
+    const half=def.span/2,h=6.2;
+    for(const s of [-1,1]){
+      box(e,[s*half,h/2,0],[.7,h,.7],'#a8322b');
+      box(e,[s*half,.3,0],[1.1,.6,1.1],'#8f8a80');
+    }
+    box(e,[0,h+.6,0],[def.span+1.4,1.6,.8],'#1c2129');
+    leds.text(e,def.text,[0,h+.6,.46],1.1,{color:'#ffd36b',reach:60});
+    leds.text(e,def.text,[0,h+.6,-.46],1.1,{color:'#ffd36b',reach:60,rot:180});
+    box(e,[0,h+1.55,0],[def.span+2.2,.3,1.3],'#a8322b');
+    return [{x:-half,hw:.55,hd:.55,y1:h},{x:half,hw:.55,hd:.55,y1:h}];
+  }
+  // The kiosk is roofed well above head height, so standing under it (or swinging the camera past
+  // it) never feels like ducking under a low shed.
   if(k==='citykiosk'){
     box(e,[0,1.6,0],[3.4,3.2,2.4],'#8b9299');
     box(e,[0,3.35,0],[3.8,.3,2.8],'#6e757c');
@@ -735,15 +994,18 @@ function cityProp(models,leds,parent,def){
     leds.text(e,def.text,[0,2.35,.09],.66,{color:'#ffd36b',sub:drones.times.map(show=>clockText(show.at)).join(' · '),reach:40});
     return [{z:-.04,hw:1.8,hd:.12,y1:3.4}];                 // the case: its lit face stands proud of it
   }
-  if(k==='taxi'){
-    box(e,[0,.62,0],[1.9,.72,4.3],'#d8c06a');
-    box(e,[0,1.25,-.25],[1.7,.66,2.3],'#e3ddd2');
-    box(e,[0,1.66,-.3],[.7,.2,.5],'#3d4650');
-    for(const [x,z] of [[-.95,1.4],[.95,1.4],[-.95,-1.4],[.95,-1.4]])
-      cylinder(e,[x,.34,z],[.68,.26,.68],'#3a3f45',[0,0,90]);
-    return [{hw:1.1,hd:2.3,y1:1.9}];
-  }
   return [];
+}
+/** Water thrown up by a jet, pale and see-through, shared by every fountain. */
+let sprayMaterial=null;
+function spray(){
+  if(!sprayMaterial){
+    const m=new pc.StandardMaterial();
+    m.diffuse=new pc.Color().fromString('#eaf7ff');m.emissive=new pc.Color(.12,.14,.16);m.opacity=.35;
+    m.blendType=pc.BLEND_NORMAL;m.depthWrite=false;m.gloss=.8;m.useMetalness=true;m.metalness=0;m.update();
+    sprayMaterial=m;
+  }
+  return sprayMaterial;
 }
 
 /**
@@ -871,109 +1133,28 @@ export function buildCity(models,parent,town=null){
   const leds=createLeds(models,{origin:CITY_OFFSET,hour:()=>town?.daylight?.hour??21});
 
   ground(models,root);
-  // The carriageway and its lay-bys are named ground that people walking about keep off (crowd.js).
-  for(const [x0,x1,z0,z1] of [city.street.road,...city.street.bays])
-    marks.push({x:(x0+x1)/2,z:(z0+z1)/2,hw:(x1-x0)/2,hd:(z1-z0)/2,y0:-.2,y1:.05,name:'road',solid:false});
-  marks.push(...station(models,leds,root));
+  // Each structure's hitboxes carry a `group`: its parts (a tower and its wings, a pavilion's floor
+  // and posts, an exit's walls) meet or overlap by design, unlike two separate things.
+  const one=(list,group)=>list.map(m=>({...m,group}));
+  marks.push(...one(station(models,leds,root,level),'metro-hall'));
+  for(const exit of city.metroStation.exits)marks.push(...one(exitPortal(models,leds,root,exit),'metro-exit-'+exit.id));
   for(const def of city.towers){
-    if(def.drawnBy)continue;   // a city part draws it (星光百货: src/world/mall.js); the entry still names its door for the taxi
+    marks.push(...one(wings(models,leds,root,def),def.id));
+    if(def.drawnBy)continue;   // a city part draws it (星光百货: src/world/mall.js); the entry is its place and size
     const made=building(models,leds,root,def,level);
-    reflect(made.root);marks.push(...made.marks);
+    reflect(made.root);marks.push(...one(made.marks,def.id));
   }
-  for(const def of city.props)for(const hit of cityProp(models,leds,root,def))marks.push(turn(def,hit));
+  city.props.forEach((def,i)=>{for(const hit of cityProp(models,leds,root,def))marks.push({...turn(def,hit),group:'prop-'+i});});
   promenade(models,leds,root);
   edges(models,root);
   marks.push(...skyline(models,leds,root));
   backdrop(models,leds,root,level);
   const beams=searchlights(models,leds,root,level);
   const people=city.people.map(def=>{
-    const made=models.person(root,def.color,[def.x,0,def.z]);
+    const made=models.person(root,def.color,[def.x,0,def.z],false,undefined,{mix:'city'});   // Yunhai's people (people.json)
     made.entity.setLocalEulerAngles(0,def.rot??0,0);
     return {...def,...made,leg:0};
   });
   return {root,marks,people,lamps:leds.lamps,data:city.place,update:dt=>{leds.update(dt);beams(dt);}};
 }
-
-/**
- * The way in, back in 青禾广场: a modern metro entrance, a glass pavilion under a rounded steel
- * canopy over a stair going down, its open front facing the square. A sign band across the front
- * carries the metro roundel, the station's name 青禾站 and the exit letter A出入口, and a pair of
- * granite steps lead up to it.
- *
- * Built with the town, not with the city, because it has to be standing on the square from the
- * first minute — it is how you find out the city exists at all. The town's ground is one solid
- * slab, so the stairwell below the top step is drawn as a dark opening rather than cut into it;
- * pressing E on the top step takes you down to the platform (rooms.json `metro-platform`).
- */
-export function buildStationEntrance(models,parent,lamps){
-  const {box,cylinder,label,glow}=models;
-  const def=city.station;
-  const root=new pc.Entity('metro-entrance');root.lookName='metro-station';
-  root.setLocalPosition(def.x,0,def.z);root.setLocalEulerAngles(0,def.rotation??0,0);
-  parent.addChild(root);
-  const granite='#a9aaa5',steel='#8f989f',dark='#65707a';
-  // The granite deck round the stairwell, open where the stair drops away (x ±1.7, z -1.72 to
-  // 1.45), and two granite steps up to it along the front.
-  for(const side of [-1,1])box(root,[side*2.075,.1,.35],[.75,.2,5.06],granite);
-  box(root,[0,.1,-1.95],[3.4,.2,.46],granite);
-  box(root,[0,.1,2.17],[3.4,.2,1.42],granite);
-  box(root,[0,.075,-2.33],[4.9,.15,.3],'#b3b4ae');
-  box(root,[0,.04,-2.63],[4.9,.08,.3],'#b3b4ae');
-  // The top step, then the dark of the stairwell going down.
-  box(root,[0,-.06,-1.5],[3.4,.28,.44],'#9ba09f').lookName='stairs';
-  box(root,[0,.03,.09],[3.4,.02,2.72],'#1d2226').lookName='stairs';
-  box(root,[0,-.6,1.6],[3.8,2,.3],'#3c4247');
-  // Clear glass on three sides, in a slim steel frame. The glass casts no shadow.
-  const glass=new pc.StandardMaterial();
-  glass.diffuse=new pc.Color().fromString('#cfe3ea');glass.opacity=.3;glass.blendType=pc.BLEND_NORMAL;
-  glass.depthWrite=false;glass.gloss=.9;glass.useMetalness=true;glass.metalness=.2;glass.update();
-  const pane=(pos,size)=>{const e=box(root,pos,size,'#cfe3ea');e.render.meshInstances[0].material=glass;e.render.castShadows=false;};
-  for(const side of [-1,1]){
-    pane([side*2.3,1.48,.35],[.05,2.56,4.9]);
-    for(const z of [-2.1,-.55,1.05,2.8])box(root,[side*2.3,1.475,z],[.12,2.55,.12],steel);   // tops just under the glass's
-    box(root,[side*2.3,.28,.35],[.14,.12,5.02],steel);
-    box(root,[side*2.3,2.8,.35],[.18,.16,5.1],steel);
-  }
-  pane([0,1.48,2.8],[4.5,2.56,.05]);
-  box(root,[0,2.8,2.8],[4.7,.16,.18],steel);
-  box(root,[0,2.8,-2.1],[4.7,.16,.18],steel);
-  // The rounded canopy: a shallow barrel vault of steel panels, rising 0.7 m over the 5.2 m span
-  // and reaching out over the steps, with darker ribs at its ends and in the middle.
-  const half=2.6,rise=.7,spring=2.9,R=(half*half+rise*rise)/(2*rise),top=Math.asin(half/R),n=8;
-  for(let i=0;i<n;i++){
-    const a=-top+(i+.5)*2*top/n,x=R*Math.sin(a),y=spring+rise-R+R*Math.cos(a),wide=2*R*Math.sin(top/n)+.03;
-    box(root,[x,y,.2],[wide,.08,5.9],'#aab3b9',[0,0,-a*180/Math.PI]);
-    for(const z of [-2.72,.2,3.12])box(root,[x,y-.07,z],[wide,.1,.12],dark,[0,0,-a*180/Math.PI]);
-  }
-  // The sign band along the front, read from the square (local -x is on your right): roundel,
-  // name and exit letter, lit from within after dark.
-  box(root,[0,2.45,-2.2],[4.62,.62,.12],'#1f3552');
-  cylinder(root,[1.95,2.45,-2.27],[.48,.03,.48],'#f2f5f7',[90,0,0]);
-  cylinder(root,[1.95,2.45,-2.29],[.36,.03,.36],'#2c68b0',[90,0,0]);
-  box(root,[1.95,2.45,-2.31],[.07,.26,.02],'#f2f5f7');
-  backlight(label(root,'青禾站',[.45,2.45,-2.28],2.4,.5,'#1f3552','#f4f7fa'),.8);
-  backlight(label(root,'A出入口',[-1.5,2.45,-2.28],1.44,.3,'#f0c43a','#1f3552'),.8);
-  const lit=glow('#e6eef5');
-  const strip=box(root,[0,2.11,-2.2],[4.4,.05,.1],'#e6eef5');
-  strip.render.meshInstances[0].material=lit;
-  lamps?.push(lit);
-  // The registry is axis aligned and knows nothing about the entity's rotation, so the hitboxes
-  // are turned by hand here. Getting this wrong leaves a solid canopy floating on the wrong side
-  // of the stair, which is invisible until you walk into it.
-  const turn=(def.rotation??0)*Math.PI/180,cos=Math.cos(turn),sin=Math.sin(turn);
-  const at=(lx,lz,hw,hd)=>({
-    x:def.x+lx*cos+lz*sin, z:def.z-lx*sin+lz*cos,
-    hw:Math.abs(cos)>.5?hw:hd, hd:Math.abs(cos)>.5?hd:hw,
-  });
-  // The canopy and the glass walls are solid, and so is the stairwell past the top step: you go
-  // down by pressing E, not by walking off the edge. None of them is named, so a look lands on
-  // the step or the stairwell (楼梯), a sign, or anywhere else on the entrance (地铁站). The boxes
-  // meet without overlapping: walls up to 2.1 m, the roof above, the back wall between the sides.
-  return {root,marks:[
-    {...at(0,.2,2.65,3),y0:2.1,y1:3.7,name:null},
-    {...at(-2.3,.35,.14,2.55),y0:0,y1:2.1,name:null},
-    {...at(2.3,.35,.14,2.55),y0:0,y1:2.1,name:null},
-    {...at(0,2.8,2.12,.14),y0:0,y1:2.1,name:null},
-    {...at(0,.24,1.6,1.52),y0:0,y1:1.1,name:null},
-  ]};
-}
+// The metro entrance on 青禾广场 (buildStationEntrance) is built with the stations: src/world/metro-station.js.

@@ -1,7 +1,10 @@
 import introductions from '../content/lessons/introductions.json' with {type:'json'};
 import cityDirections from '../content/lessons/city-directions.json' with {type:'json'};
-import cityTaxi from '../content/lessons/city-taxi.json' with {type:'json'};
 import cityNoodles from '../content/lessons/city-noodles.json' with {type:'json'};
+import fishingWang from '../content/lessons/fishing-wang.json' with {type:'json'};
+import fishingWangShow from '../content/lessons/fishing-wang-show.json' with {type:'json'};
+import veggiesLiu from '../content/lessons/veggies-liu.json' with {type:'json'};
+import veggiesLiuCheck from '../content/lessons/veggies-liu-check.json' with {type:'json'};
 import npcs from '../content/npcs.json' with {type:'json'};
 import balance from '../content/balance.json' with {type:'json'};
 import {escapeHtml as esc} from '../core/language.js';
@@ -11,13 +14,14 @@ import {icon} from './art.js';
 
 // Every lesson the conversation engine knows how to open, keyed by id. A gameplay adapter opens
 // one by id; it does not import the JSON itself.
-const LESSONS=Object.fromEntries([introductions,cityDirections,cityTaxi,cityNoodles].map(l=>[l.id,l]));
+const LESSONS=Object.fromEntries([introductions,cityDirections,cityNoodles,fishingWang,fishingWangShow,veggiesLiu,veggiesLiuCheck].map(l=>[l.id,l]));
 
 /** Who a lesson's header and portrait speak for: the town NPC it belongs to (Auntie Lin, via her
- *  `npcs.json` `lesson`), or — for a conversation that is not tied to a square NPC, like a
- *  stranger met in Yunhai — the lesson's own `host`. */
+ *  `npcs.json` `lesson`, or one named by the lesson's own `npc`, as 王爷爷's second chat is), or —
+ *  for a conversation that is not tied to a town NPC, like a stranger met in Yunhai — the lesson's
+ *  own `host`. */
 function hostOf(lesson) {
-  const npc=npcs.find(n=>n.lesson===lesson.id);
+  const npc=npcs.find(n=>n.id===lesson.npc||n.lesson===lesson.id);
   return {npc,info:npc??lesson.host??{}};
 }
 
@@ -44,7 +48,7 @@ export function openDialogue(ctx,lessonId,{onFinish,lessonData,onAttempt,reward=
     const answerArea=node.intent==='none'
       ? `<button class="primary" id="next-line">${nextLabel} ${icon('arrow',17)}</button>`
       : `<form id="answer-form"><label for="answer">你说</label><div class="answer-row"><input id="answer" name="answer" autocomplete="off" maxlength="100" placeholder="输入中文…" aria-label="你的回答"><button type="button" id="microphone" class="mic-button" aria-label="麦克风回答">${icon('mic')}</button><button type="submit" class="primary compact" aria-label="提交回答">${icon('arrow')}</button></div></form><p id="speech-status" class="microcopy" aria-live="polite">${ctx.speech.supported?'语音识别可能使用浏览器的在线服务。文字可修改后提交。':'此浏览器语音不可用，可打字或选择回答。'}</p><details class="answer-options"><summary>需要一个例子？</summary><div>${choicesFor(node).map(c=>`<button class="choice" data-answer="${esc(c)}">${esc(c)}</button>`).join('')}</div><p class="microcopy">选择例句算作辅助练习。</p></details><div id="answer-feedback" aria-live="polite"></div>`;
-    body.innerHTML=`<div class="dialogue-top"><div class="portrait"${portraitStyle}>${esc((info.zh??'').slice(0,1))}${badge}</div><div><b>${name}</b><small>${node.register==='casual'?'日常口语':esc(lesson.title)}</small></div><span class="step-label">${index+1} / ${lesson.nodes.length}</span></div><div class="step-track">${lesson.nodes.map((_,i)=>`<i class="${i<=index?'active':''}"></i>`).join('')}</div>${languageLine(node,ctx.profile.settings,{className:'dialogue-line'})}<div class="audio-row"><button class="subtle" id="replay">${icon('sound',16)} 重听</button><button class="subtle" id="slow">慢速</button><small class="audio-source">${ctx.voice.sourceLabel(node.audio)}</small></div>${answerArea}`;
+    body.innerHTML=`<div class="dialogue-top"><div class="portrait"${portraitStyle}>${esc((info.zh??'').slice(0,1))}${badge}</div><div><b>${name}</b><small>${node.register==='casual'?'日常口语':esc(lesson.title)}</small></div><span class="step-label">${index+1} / ${lesson.nodes.length}</span></div><div class="step-track">${lesson.nodes.map((_,i)=>`<i class="${i<=index?'active':''}"></i>`).join('')}</div>${languageLine(node,ctx.profile.settings,{className:'dialogue-line'})}${node.prompt?.zh?languageLine(node.prompt,ctx.profile.settings,{className:'dialogue-prompt microcopy'}):''}<div class="audio-row"><button class="subtle" id="replay">${icon('sound',16)} 重听</button><button class="subtle" id="slow">慢速</button><small class="audio-source">${ctx.voice.sourceLabel(node.audio)}</small></div>${answerArea}`;
     if(englishSupport){
       const prompt=document.createElement('p');prompt.className='roots-english';prompt.textContent=node.en;body.querySelector('.dialogue-line').before(prompt);
       const field=body.querySelector('label[for="answer"]');if(field)field.textContent='Your reply in Mandarin';
@@ -84,7 +88,7 @@ export function openDialogue(ctx,lessonId,{onFinish,lessonData,onAttempt,reward=
     // line rather than inventing new Chinese for the completion screen.
     const headline=lesson.id==='introductions' ? '认识新朋友了！' : esc(lesson.title);
     const send=lesson.id==='introductions' ? '一句你好，让旅程更近了一点。' : esc(lesson.en);
-    body.innerHTML=`<div class="completion"><div class="completion-seal">好</div><div class="eyebrow">A LITTLE CONNECTION</div><h3>${headline}</h3><p>${send}</p><div class="reward">${icon('coin')} +${amount} 学习币</div><p class="microcopy">${amount?'奖励已存入你的钱包。':'你已经领取过这段对话的奖励。练习仍然有价值。'}</p><button class="primary" id="back-town">回到小镇 ${icon('arrow')}</button></div>`;
+    body.innerHTML=`<div class="completion"><div class="completion-seal">好</div><div class="eyebrow">A LITTLE CONNECTION</div><h3>${headline}</h3><p>${send}</p>${reward?`<div class="reward">${icon('coin')} +${amount} 学习币</div>`:''}<p class="microcopy">${amount?'奖励已存入你的钱包。':reward?'你已经领取过这段对话的奖励。练习仍然有价值。':''}</p><button class="primary" id="back-town">回到小镇 ${icon('arrow')}</button></div>`;
     if(englishSupport){body.querySelector('#back-town').textContent='Continue exploring';body.querySelector('.completion .microcopy').textContent='Practice saved. Independent answers build mastery; help is always available.';}
     body.querySelector('#back-town').onclick=()=>ctx.ui.close();
   }

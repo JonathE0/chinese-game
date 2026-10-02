@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 
 // 河边文化街 as a walled Suzhou garden (docs/superpowers/plans/2026-09-24-west-quarter-and-scenery.md,
 // Task S): on foot from the fountain, through the square's west lane, round the post office, over
@@ -10,7 +11,7 @@ async function start(page){
     version:1,wallet:0,inventory:{},equipped:{},claims:{},words:{},completed:['home:tutorial','home:starter'],phrases:[],saved:[],home:[],
     discovered:[],clock:14,dayIndex:0,vendors:{},settings:{pinyin:true,english:true,dialogueVolume:0,ambientVolume:0,musicVolume:0},playerName:'旅人'})]);
   await page.goto('/');
-  await page.getByRole('button',{name:'开始旅行'}).click();
+  await startGame(page);
   await page.waitForFunction(()=>!!window.__qinghe?.town);
   await page.waitForTimeout(300);
 }
@@ -40,6 +41,8 @@ test('from the fountain through the west lane, over a canal bridge, to the resta
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await start(page);
   await openQuarter(page);
+  // New players arrive in the park; start this walk by the fountain, where the square's spawn used to be.
+  await page.evaluate(()=>window.__qinghe.town.warp(.6,4.9));
   // Due west from the fountain into the lane between 青禾银行 and 家居小铺, and through the gate.
   for(const [x,z] of [[-9.5,5],[-9.7,0],[-11,-0.3],[-12.6,-1.85],[-19.5,-1.85],[-23.3,-1.6]])
     expect(await walkTo(page,x,z),`to ${x},${z}`).toBeLessThan(.6);
@@ -51,7 +54,7 @@ test('from the fountain through the west lane, over a canal bridge, to the resta
   // Over the crest of the arched bridge: the water below is not somewhere you can walk.
   expect(await walkTo(page,-40,6.2),'onto the crest').toBeLessThan(.6);
   expect(await page.evaluate(()=>window.__qinghe.town.playerY)).toBeGreaterThanOrEqual(1);
-  for(const [x,z] of [[-44.5,6.2],[-51,6.2],[-51,5.3]])
+  for(const [x,z] of [[-44.5,6.2],[-52.1,6.2],[-52.1,5.3]])
     expect(await walkTo(page,x,z),`to ${x},${z}`).toBeLessThan(.6);
   expect(await page.evaluate(()=>window.__qinghe.town.playerY)).toBeLessThan(.05);
   await expect(page.locator('#interact span')).toHaveText('进餐厅');

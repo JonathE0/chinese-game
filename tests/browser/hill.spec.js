@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 import {readFileSync} from 'node:fs';
 
 // The 山城 hill in 云海 (src/world/hill.js): walked up and down with W alone, its path lights on at
@@ -10,7 +11,7 @@ const UP=[[-36,-40],...nodes('promenade'),...nodes('terrace').slice(1),[-61.5,-3
 
 async function start(page){
   await page.goto('/');
-  await page.getByRole('button',{name:'开始旅行'}).click();
+  await startGame(page);
   await page.waitForFunction(()=>!!window.__qinghe?.town);
   await page.evaluate(()=>{window.__qinghe.town.enterCity();window.__qinghe.syncPlace?.();});
   await page.mouse.click(700,500);

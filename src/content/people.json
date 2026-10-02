@@ -1,0 +1,83 @@
+{
+  "note": "Everyone in the town and the city, built by src/world/people.js from the reference sheets in docs/references/wave4/: the tourist from character-turnaround.webp, Yunhai's people from character-lineup.webp and Qinghe's from character-village-lineup.webp. `head` is the size of a grown-up's head box in metres (width, height, depth); a build scales it by `head`. A build is measured from its sheet: `chin`, `shoulder` (the top of the body), `hip` (where the legs hang) and `hand` (the bottom of a hanging hand) are heights above the ground, and an archetype's `hem` and `waistline` (where a belt, sash or apron sits) are fractions of the way from the hip up to the shoulder; `torso` and `leg` are [width, depth]; `legX` is how far each leg hangs from the middle; `shoe` is [width, height, length]; `armX` is how far out past the body the arms hang from, and `splay` how far they lean out, in degrees. An archetype names its build, hair, clothes (`top`, `waist`, `bottom`, `shoes`), `hat`, `extras` and `props`, and its colour variants: the first is the sheet's, and a seed picks one. Any colour a variant leaves out comes from `colours`; `skin` comes from `skins`. A village archetype wears the painted print (`print` lists which colours are printed fabric). `mixes` are who you meet where, by weight; `props` says whether they carry their things (shopkeepers and anyone whose hands are busy do not).",
+  "head": [0.44, 0.45, 0.42],
+  "builds": {
+    "tourist":     {"head": 1,    "chin": 1.383, "shoulder": 1.33, "armX": 0.055, "torso": [0.47, 0.30], "hip": 0.69, "leg": [0.232, 0.258], "legX": 0.128, "shoe": [0.263, 0.139, 0.371], "hand": 0.645, "splay": 11},
+    "man":         {"head": 1,    "chin": 1.346, "shoulder": 1.27, "armX": 0.03, "torso": [0.47, 0.30], "hip": 0.6,  "leg": [0.232, 0.258], "legX": 0.128, "shoe": [0.27, 0.15, 0.39],    "hand": 0.57,  "splay": 7},
+    "elder-man":   {"head": 1,    "chin": 1.316, "shoulder": 1.264, "armX": 0.035, "torso": [0.47, 0.30], "hip": 0.56, "leg": [0.23, 0.255],  "legX": 0.125, "shoe": [0.26, 0.13, 0.37],    "hand": 0.58,  "splay": 8},
+    "woman":       {"head": 0.95, "chin": 1.302, "shoulder": 1.21, "armX": 0.02, "torso": [0.38, 0.25],  "hip": 0.62, "leg": [0.21, 0.23],   "legX": 0.105, "shoe": [0.22, 0.1, 0.32],     "hand": 0.61,  "splay": 6},
+    "elder-woman": {"head": 0.97, "chin": 1.219, "shoulder": 1.168, "armX": 0.03, "torso": [0.43, 0.28], "hip": 0.55, "leg": [0.215, 0.24],  "legX": 0.11,  "shoe": [0.23, 0.1, 0.33],     "hand": 0.555, "splay": 8},
+    "girl":        {"head": 0.84, "chin": 0.892, "shoulder": 0.84, "armX": 0.02, "torso": [0.34, 0.23], "hip": 0.33, "leg": [0.17, 0.19],   "legX": 0.088, "shoe": [0.2, 0.11, 0.29],     "hand": 0.415, "splay": 8},
+    "boy":         {"head": 0.87, "chin": 0.922, "shoulder": 0.884, "armX": 0.02, "torso": [0.36, 0.24], "hip": 0.34, "leg": [0.17, 0.19],   "legX": 0.09,  "shoe": [0.21, 0.12, 0.3],     "hand": 0.415, "splay": 8}
+  },
+  "skins": ["#e3ac7b", "#ebbb8f", "#d6a070", "#c79062"],
+  "colours": {"eyes": "#2b2422", "mouth": "#6f2f2b", "teeth": "#efe4d6", "blush": "#ec9a82", "frame": "#2c2826", "rope": "#a98a5e", "straw": "#c69c62", "wood": "#9a6b3f", "hoop": "#4a3a2e", "net": "#8f7254", "sole": "#ebe3d7", "lining": "#d8c8b6"},
+  "archetypes": {
+    "tourist": {"waistline": 0.3125, "build": "tourist", "hair": "quiff", "top": "shirt", "waist": "belt", "bottom": "trousers", "shoes": "plain",
+      "colours": [{"top": "#e4d3c3", "waist": "#372c25", "buckle": "#6a5c52", "loop": "#5a4436", "bottom": "#6f5542", "shoes": "#2d2d2f", "hair": "#2c2522"}]},
+    "grandpa": {"build": "elder-man", "hair": "swept", "top": "tang-jacket", "bottom": "trousers", "shoes": "cloth", "extras": ["glasses", "wrinkles"],
+      "colours": [
+        {"top": "#383f5a", "lining": "#cdc4bc", "trim": "#2b2f42", "bottom": "#4d4b4f", "shoes": "#2e2a2a", "sock": "#d9c9b3", "hair": "#c8bcb7", "brows": "#a69b97"},
+        {"top": "#4b4038", "lining": "#d6ccbe", "trim": "#2f2721", "bottom": "#3d3b3c", "shoes": "#2e2a2a", "sock": "#d9c9b3", "hair": "#bdb3ae", "brows": "#9d928e"},
+        {"top": "#34483f", "lining": "#d3cdbf", "trim": "#22312a", "bottom": "#4a4744", "shoes": "#2e2a2a", "sock": "#d9c9b3", "hair": "#d0c8c2", "brows": "#a69b97"}]},
+    "grandma": {"hem": 0.1, "build": "elder-woman", "hair": "bun", "top": "cardigan", "bottom": "trousers", "shoes": "flat", "extras": ["wrinkles"],
+      "colours": [
+        {"top": "#714053", "under": "#ead6bc", "trim": "#55303a", "bottom": "#423937", "shoes": "#383333", "sole": "#8a7466", "hair": "#cbbfb8", "brows": "#a5958f"},
+        {"top": "#4b5a70", "under": "#ece0cc", "trim": "#34405a", "bottom": "#3f3d40", "shoes": "#383333", "sole": "#8a7466", "hair": "#c2b8b2", "brows": "#a5958f"},
+        {"top": "#6e5a3e", "under": "#efe2cc", "trim": "#4e3f2b", "bottom": "#4a4038", "shoes": "#383333", "sole": "#8a7466", "hair": "#d2c9c3", "brows": "#a5958f"}]},
+    "young-woman": {"hem": 0.21, "build": "woman", "hair": "bob", "top": "qipao", "bottom": "wide", "shoes": "flat",
+      "colours": [
+        {"top": "#899577", "trim": "#5d6447", "bottom": "#efdec6", "shoes": "#f0d4b2", "sole": "#58473f", "hair": "#2a2629"},
+        {"top": "#b0505a", "trim": "#7a2f37", "bottom": "#efdec6", "shoes": "#f0d4b2", "sole": "#58473f", "hair": "#2a2321"},
+        {"top": "#4f6d8f", "trim": "#2f4560", "bottom": "#e9e2d4", "shoes": "#3a3330", "sole": "#e8e0d4", "hair": "#3b2e27"}]},
+    "young-man": {"build": "man", "hair": "spiky", "top": "open-shirt", "bottom": "jeans", "shoes": "sneaker",
+      "colours": [
+        {"top": "#9b5244", "under": "#e3dbdb", "bottom": "#35445c", "cuff": "#4f5d78", "shoes": "#2f2c2e", "hair": "#2f2929"},
+        {"top": "#4f6d8a", "under": "#e8d9cf", "bottom": "#3a3f4a", "cuff": "#535a68", "shoes": "#2f2c2e", "hair": "#2e2624"},
+        {"top": "#5f7d5a", "under": "#efe6da", "bottom": "#45536b", "cuff": "#5d6b84", "shoes": "#5a3a2a", "hair": "#3e3029"}]},
+    "girl": {"hem": 0.31, "build": "girl", "hair": "pigtails", "top": "girl-cardigan", "bottom": "cropped", "shoes": "sneaker", "extras": ["blush"],
+      "colours": [
+        {"top": "#e5af5f", "lining": "#f2e0c8", "under": "#f2e0c8", "bottom": "#4f7375", "cuff": "#5e8385", "shoes": "#cc5a48", "sock": "#ece2d6", "hair": "#302927", "tie": "#c0392f"},
+        {"top": "#e6a0a8", "lining": "#f4e6d4", "under": "#f4e6d4", "bottom": "#4d5d7a", "cuff": "#5c6d8b", "shoes": "#e2c25a", "sock": "#ece2d6", "hair": "#302927", "tie": "#c0392f"}]},
+    "boy": {"hem": 0.29, "build": "boy", "hair": "tufts", "top": "tang-shirt", "bottom": "shorts", "shoes": "sneaker",
+      "colours": [
+        {"top": "#ab4c4c", "trim": "#6a2e26", "bottom": "#a68160", "cuff": "#bb9a76", "sock": "#ece2d6", "shoes": "#3f4456", "hair": "#372e2d"},
+        {"top": "#3f6b8c", "trim": "#27465f", "bottom": "#6f6a5a", "cuff": "#827c6b", "sock": "#ece2d6", "shoes": "#a33b32", "hair": "#2d2523"}]},
+    "v-grandpa": {"hem": 0.15, "waistline": 0.41, "frogs": 3, "build": "elder-man", "hair": "swept", "top": "cross", "sleeve": 0.62, "waist": "sash", "knot": 0.1, "bottom": "baggy", "shoes": "sandal", "hat": "straw", "extras": ["glasses", "wrinkles"], "props": ["basket"], "print": ["top", "bottom"],
+      "colours": [
+        {"top": "#384058", "lining": "#d2c3b4", "trim": "#232a3e", "waist": "#5a5457", "bottom": "#3c3a3d", "cuff": "#4a4649", "hat": "#d4a872", "hair": "#bdb0ab", "brows": "#a69b97", "prop": "#a77a46"},
+        {"top": "#4a4238", "lining": "#d6c8b4", "trim": "#2c261f", "waist": "#5f5a52", "bottom": "#3a3a3e", "cuff": "#4a494d", "hat": "#d4a872", "hair": "#c8bfba", "brows": "#a69b97", "prop": "#a77a46"},
+        {"top": "#2f4a4a", "lining": "#d4cbbb", "trim": "#1d3030", "waist": "#555a5f", "bottom": "#403c3a", "cuff": "#504a47", "hat": "#d4a872", "hair": "#b5aaa5", "brows": "#a69b97", "prop": "#a77a46"}]},
+    "v-grandma": {"hem": 0.12, "waistline": 0.41, "build": "elder-woman", "hair": "bun", "top": "cross", "sleeve": 0.5, "waist": "apron", "bottom": "baggy", "shoes": "cloth", "hat": "scarf", "extras": ["wrinkles"], "props": ["tray"], "print": ["top", "bottom", "apron", "scarf"],
+      "colours": [
+        {"top": "#7a4650", "lining": "#b8737e", "trim": "#4f2a32", "apron": "#727a8b", "waist": "#5a6172", "bottom": "#333649", "cuff": "#53535f", "shoes": "#38322f", "sole": "#d8c0a8", "sock": "#e6a96f", "scarf": "#55608c", "hair": "#cfbcae", "brows": "#a69b97", "prop": "#b08152"},
+        {"top": "#3f4f6e", "lining": "#7d8db0", "trim": "#283550", "apron": "#8a7a62", "waist": "#5e5446", "bottom": "#3a3a40", "cuff": "#55555c", "shoes": "#38322f", "sole": "#d8c0a8", "sock": "#e6a96f", "scarf": "#7a4650", "hair": "#c9bcb2", "brows": "#a69b97", "prop": "#b08152"},
+        {"top": "#5e6b4a", "lining": "#9aa682", "trim": "#3c4630", "apron": "#6d7690", "waist": "#4e566a", "bottom": "#363848", "cuff": "#52535e", "shoes": "#38322f", "sole": "#d8c0a8", "sock": "#e6a96f", "scarf": "#4c5a80", "hair": "#d3c6bc", "brows": "#a69b97", "prop": "#b08152"}]},
+    "v-young-woman": {"hem": 0.2, "waistline": 0.45, "build": "woman", "hair": "bob", "top": "cross", "sleeve": 0.3, "waist": "apron", "pocket": true, "bottom": "baggy", "shoes": "sandal", "props": ["net"], "print": ["top", "bottom"],
+      "colours": [
+        {"top": "#8d9185", "lining": "#dccab7", "trim": "#5d6157", "apron": "#b8a08f", "waist": "#41475c", "bottom": "#363c4c", "cuff": "#4f4f5a", "hair": "#38302e"},
+        {"top": "#4d6283", "lining": "#dccab7", "trim": "#2f3f5a", "apron": "#c2b39a", "waist": "#7a4650", "bottom": "#3a3a42", "cuff": "#55545c", "hair": "#2b2422"},
+        {"top": "#a0605a", "lining": "#e2d0bc", "trim": "#6a3a36", "apron": "#b8ab93", "waist": "#3e4a5c", "bottom": "#383d4d", "cuff": "#51525d", "hair": "#3a2c25"}]},
+    "v-young-man": {"hem": 0.13, "waistline": 0.39, "build": "man", "hair": "spiky", "top": "frog-shirt", "sleeve": 0.3, "waist": "sash", "knot": -0.04, "bottom": "baggy", "shoes": "sandal", "props": ["rope", "hatback"], "print": ["bottom"],
+      "colours": [
+        {"top": "#dcbda2", "vest": "#86593e", "trim": "#b89a80", "waist": "#4f5263", "bottom": "#2c2f3c", "cuff": "#5c5a66", "hair": "#372e2c", "hat": "#c9a06a", "prop": "#a88457"},
+        {"top": "#d8c9b0", "vest": "#4a5a6e", "trim": "#b4a68e", "waist": "#7a4a3a", "bottom": "#33333a", "cuff": "#55535a", "hair": "#2c2422", "hat": "#c9a06a", "prop": "#a88457"},
+        {"top": "#c9cdbd", "vest": "#6e5537", "trim": "#a7ab9b", "waist": "#3e4a5e", "bottom": "#3b3632", "cuff": "#57514c", "hair": "#3d2f28", "hat": "#c9a06a", "prop": "#a88457"}]},
+    "v-girl": {"hem": 0.31, "build": "girl", "hair": "pigtails", "top": "cross", "sleeve": 0.48, "bottom": "cropped", "shoes": "cloth", "extras": ["blush"], "props": ["satchel"], "print": ["top", "bottom"],
+      "colours": [
+        {"top": "#e0a660", "lining": "#ecd2b0", "trim": "#a8742f", "bottom": "#4c5c64", "cuff": "#586b72", "shoes": "#3c3432", "sole": "#dcc0a8", "sock": "#e3a66f", "hair": "#332d2b", "tie": "#b73a2e", "prop": "#8a6142"},
+        {"top": "#c96a6a", "lining": "#ecd6c0", "trim": "#8a3a3a", "bottom": "#4f5a74", "cuff": "#5d6984", "shoes": "#3c3432", "sole": "#dcc0a8", "sock": "#e3a66f", "hair": "#2e2725", "tie": "#e0a03a", "prop": "#8a6142"}]},
+    "v-boy": {"hem": 0.23, "waistline": 0.51, "build": "boy", "hair": "tufts", "top": "cross", "sleeve": 0.3, "waist": "sash", "knot": -0.05, "bottom": "shorts", "shoes": "sandal", "props": ["bucket"], "print": ["top", "bottom"],
+      "colours": [
+        {"top": "#9f483d", "lining": "#d9bea6", "trim": "#62281c", "waist": "#544e51", "bottom": "#a8835f", "cuff": "#c4a283", "hair": "#38302d", "prop": "#a06c3e"},
+        {"top": "#3f5f7f", "lining": "#d6c8b4", "trim": "#263c52", "waist": "#5a514a", "bottom": "#8c8466", "cuff": "#a39b7c", "hair": "#2d2523", "prop": "#a06c3e"}]},
+    "auntie": {"hem": 0.12, "waistline": 0.41, "build": "elder-woman", "hair": "bun", "top": "cross", "sleeve": 0.5, "waist": "apron", "bottom": "baggy", "shoes": "cloth", "print": ["top", "bottom", "apron"],
+      "colours": [{"top": "#7a4650", "lining": "#b8737e", "trim": "#4f2a32", "apron": "#727a8b", "waist": "#5a6172", "bottom": "#333649", "cuff": "#53535f", "shoes": "#38322f", "sole": "#d8c0a8", "sock": "#e6a96f", "hair": "#1f1d1c"}]}
+  },
+  "mixes": {
+    "village": {"props": false, "weights": {"v-grandpa": 2, "v-grandma": 2, "v-young-woman": 3, "v-young-man": 3}},
+    "village-street": {"props": true, "weights": {"v-grandpa": 2, "v-grandma": 2, "v-young-woman": 3, "v-young-man": 3, "v-girl": 1, "v-boy": 1}},
+    "city": {"props": false, "weights": {"grandpa": 1, "grandma": 1, "young-woman": 3, "young-man": 3}},
+    "city-crowd": {"props": false, "weights": {"grandpa": 1, "grandma": 1, "young-woman": 3, "young-man": 3, "girl": 1, "boy": 1}}
+  }
+}

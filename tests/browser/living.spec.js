@@ -215,6 +215,9 @@ test('the games use your own words and pay out once a day',async({page})=>{
 test('a wild pointer-lock delta cannot spin the view, and you never get stuck inside geometry',async({page})=>{
   await seed(page,{});
   await start(page);
+  // The e2e server keeps the drag mouse; this is about the locked one (Settings, 鼠标).
+  await page.evaluate(()=>window.__qinghe.town.setMouseMode('lock'));
+  await page.mouse.click(700,500);
   const heading=async()=>Number((await page.locator('#map-facing').getAttribute('transform')).match(/rotate\(([-\d.]+)\)/)[1]);
   await warp(page,0,10,0);
   expect(await heading()).toBe(0);

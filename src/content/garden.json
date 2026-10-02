@@ -1,5 +1,5 @@
 {
-  "note": "莲池公园 · Lotus Pond Park, south of the square through the moon gate (district 'garden' in world.json). World coordinates: x east, z south. src/world/garden.js builds the scenery from this file, src/core/garden.js derives the collision marks, src/ui/garden-map.js draws the minimap. Rects are {x0,x1,z0,z1}; discs are {x,z,r}. Bridge steps are [z0, z1, top]. A stretch of the stream's flow is [x, z] in metres a second, from the waterfall to the pond.",
+  "note": "莲池公园 · Lotus Pond Park, south of the square through the moon gate (district 'garden' in world.json), and the way into town: new players arrive through the town gate in its south wall. World coordinates: x east, z south. src/world/garden.js builds the scenery from this file, src/core/garden.js derives the collision marks, src/ui/garden-map.js draws the minimap. Rects are {x0,x1,z0,z1}; discs are {x,z,r}. Bridge steps are [z0, z1, top]. A crossing (the 九曲桥, the stepping stones) runs through `points` along x or z, `width` across, its deck `top` high with a `step` for the first and last `ends` metres on the banks. A stretch of the stream's flow is [x, z] in metres a second, from the waterfall to the pond. Trails are winding flagstone paths through [x, z] points. `life` is who is in the park and when (hours of the day): people [x, z, facing in degrees, 0 = south, 90 = east], and who they are (`looks`/`look`: a people.json archetype and its colour, hair or hat, as Town builds townsfolk).",
   "water": {"top": 0.6, "bottom": -0.5, "level": 0.08, "fence": 2.6, "fenceSpacing": 0.45},
   "guards": {"bridgeRail": 1.6, "climbable": 3.5},
   "pond": [
@@ -31,54 +31,124 @@
     {"id": "mill-bridge", "x": -13.8, "width": 2.4, "flat": true,
      "steps": [[37.8, 38.6, 0.3], [38.6, 40.2, 0.6], [40.2, 41.0, 0.3]]}
   ],
+  "crossings": [
+    {"id": "zigzag-bridge", "name": "zigzag-bridge", "width": 1.4, "top": 0.7, "step": 0.35, "ends": 0.6,
+     "points": [[-7, 25.8], [-7, 28.6], [-9, 28.6], [-9, 31.4], [-6, 31.4], [-6, 34.6], [-8.5, 34.6], [-8.5, 37.4], [-6.5, 37.4], [-6.5, 41.8]]},
+    {"id": "stream-stones", "name": "stone", "width": 1.1, "top": 0.66, "step": 0.33, "ends": 0.6, "stones": 5,
+     "points": [[-14.7, 42.3], [-18.1, 42.3]]}
+  ],
   "waterfall": {"x": -16.4, "z": 46.4, "top": 2.4,
-    "rocks": [{"x": -16.8, "z": 47.7, "r": 1.5, "h": 2.6}, {"x": -14.8, "z": 48.3, "r": 1.1, "h": 1.7}, {"x": -17.5, "z": 49.3, "r": 1.0, "h": 1.9}, {"x": -18.0, "z": 45.4, "r": 0.6, "h": 1.2}]},
+    "rocks": [{"x": -16.8, "z": 47.7, "r": 1.5, "h": 2.6}, {"x": -14.8, "z": 48.3, "r": 1.1, "h": 1.7}, {"x": -17.5, "z": 49.3, "r": 1.0, "h": 1.9}, {"x": -18.0, "z": 45.4, "r": 0.6, "h": 1.2},
+              {"x": -19.6, "z": 47.9, "r": 1.5, "h": 3.6, "name": "rock"}, {"x": -19.2, "z": 50.6, "r": 1.2, "h": 2.7, "name": "rock"},
+              {"x": -15.6, "z": 50.4, "r": 1.0, "h": 2.2, "name": "rock"}, {"x": -20.2, "z": 44.9, "r": 0.9, "h": 1.8, "name": "rock"},
+              {"x": -15.5, "z": 46.9, "r": 0.6, "h": 2.0}, {"x": -17.6, "z": 46.9, "r": 0.6, "h": 2.3}]},
   "mill": {
     "house": {"x": -16.8, "z": 36.4, "width": 3.0, "depth": 2.8, "height": 2.4},
     "wheel": {"x": -16.3, "z": 39.4, "y": 0.8, "radius": 0.85, "thickness": 0.5, "spin": 18}
   },
   "paths": [
     {"x0": -5.5, "x1": 5.5, "z0": 19.3, "z1": 24.0},
-    {"x0": -15.0, "x1": 15.4, "z0": 24.0, "z1": 26.2},
+    {"x0": -30, "x1": 30, "z0": 24.0, "z1": 26.2},
     {"x0": -15.0, "x1": -12.6, "z0": 26.2, "z1": 41.4},
     {"x0": 13.0, "x1": 15.4, "z0": 26.2, "z1": 41.4},
-    {"x0": -15.0, "x1": 15.4, "z0": 41.4, "z1": 43.5}
+    {"x0": -15.0, "x1": 32, "z0": 41.4, "z1": 43.5},
+    {"x0": -2.5, "x1": 2.5, "z0": 43.5, "z1": 53.4},
+    {"x0": -7, "x1": 7, "z0": 53.4, "z1": 64.6, "joints": 1.6},
+    {"x0": -33, "x1": -7, "z0": 53.6, "z1": 55.6},
+    {"x0": 7, "x1": 32, "z0": 53.4, "z1": 55.4},
+    {"x0": 30, "x1": 32, "z0": 43.5, "z1": 53.4},
+    {"x": -18.5, "z": 59.8, "r": 3.8},
+    {"x": 8.6, "z": 58.6, "r": 2.0}
   ],
-  "rocks": [{"x": -3.8, "z": 21.8, "r": 0.9, "h": 1.5}, {"x": 3.8, "z": 21.8, "r": 0.9, "h": 1.3}],
+  "avenue": {"x0": -1.5, "x1": 1.5, "z0": 41.4, "z1": 64.6},
+  "trails": [
+    {"width": 1.0, "points": [[-30, 26.2], [-27.8, 29.5], [-28.6, 33.5], [-26.2, 37.5], [-22.6, 40.4], [-18.4, 42.3]]},
+    {"width": 1.0, "points": [[-26, 53.6], [-24.6, 50.4], [-25.6, 46.8], [-22.6, 43.6], [-22.6, 40.4]]},
+    {"width": 1.0, "points": [[30, 26.2], [32.2, 30.4], [30.2, 34.6], [31.6, 38.6], [31, 41.4]]}
+  ],
+  "rocks": [{"x": -3.8, "z": 21.8, "r": 0.9, "h": 1.5}, {"x": 3.8, "z": 21.8, "r": 0.9, "h": 1.3},
+            {"x": 26.5, "z": 39.6, "r": 0.8, "h": 1.4}, {"x": -12.6, "z": 49.8, "r": 0.8, "h": 1.3}],
   "pines": [
     {"x": -7.5, "z": 21.5, "size": 1.1}, {"x": 7.5, "z": 21.5, "size": 1.1},
     {"x": -16.5, "z": 31.5, "size": 0.9}, {"x": 16.6, "z": 26.8, "size": 0.9},
     {"x": 16.6, "z": 40.2, "size": 0.9}, {"x": 3.0, "z": 46.8, "size": 1.0},
-    {"x": -6.0, "z": 48.2, "size": 0.9}
+    {"x": -6.0, "z": 48.2, "size": 0.9},
+    {"x": -7.8, "z": 63.2, "size": 1.1}, {"x": 7.8, "z": 63.2, "size": 1.1},
+    {"x": -23.5, "z": 21.8, "size": 1.0}, {"x": 31.5, "z": 21.8, "size": 1.0}
   ],
-  "blossoms": [{"x": -10.0, "z": 47.2}, {"x": 5.8, "z": 49.0}, {"x": 17.0, "z": 33.0}, {"x": -2.0, "z": 49.4}],
+  "blossoms": [
+    {"x": -10.0, "z": 47.2, "kind": "peach"}, {"x": 18.8, "z": 36.8, "kind": "plum"}, {"x": -4.4, "z": 51.8, "kind": "peach"},
+    {"x": -13.2, "z": 62.4, "kind": "plum"}, {"x": 13.8, "z": 62.2, "kind": "peach"}, {"x": -22.5, "z": 50.5, "kind": "peach"},
+    {"x": -28.0, "z": 31.0, "kind": "plum"}, {"x": -22.4, "z": 28.4, "kind": "peach"}, {"x": 31.6, "z": 47.0, "kind": "plum"},
+    {"x": 33.0, "z": 58.5, "kind": "peach"}, {"x": 5.6, "z": 52.4, "kind": "peach"}, {"x": 22.5, "z": 22.0, "kind": "plum"}, {"x": -29.5, "z": 45.5, "kind": "peach"}
+  ],
   "lanterns": [
     {"x": -2.6, "z": 20.0}, {"x": 2.6, "z": 20.0}, {"x": -9.0, "z": 23.5}, {"x": 9.0, "z": 23.5},
     {"x": -15.6, "z": 29.0}, {"x": 15.9, "z": 30.0}, {"x": 15.9, "z": 37.0},
-    {"x": -4.0, "z": 44.1}, {"x": 4.0, "z": 44.1}, {"x": -12.0, "z": 44.1}
+    {"x": -4.0, "z": 44.1}, {"x": 4.0, "z": 44.1}, {"x": -12.0, "z": 44.1},
+    {"x": -3.4, "z": 48.6}, {"x": -3.4, "z": 52.4}, {"x": -7.6, "z": 57.2}, {"x": -7.6, "z": 61.9},
+    {"x": 7.4, "z": 61.9}, {"x": -24.0, "z": 56.2}, {"x": -31.5, "z": 56.2}, {"x": 24.0, "z": 55.9},
+    {"x": -22.0, "z": 23.5}, {"x": -29.0, "z": 23.5}, {"x": 21.0, "z": 23.5}, {"x": 29.0, "z": 23.5},
+    {"x": -24.8, "z": 33.6}, {"x": -20.5, "z": 41.2}, {"x": 30.8, "z": 36.2}
   ],
   "benches": [
     {"x": -7.5, "z": 23.4, "rot": 0}, {"x": 7.5, "z": 23.4, "rot": 0},
     {"x": -16.0, "z": 27.2, "rot": 90}, {"x": 16.2, "z": 34.0, "rot": 270},
-    {"x": -7.5, "z": 44.3, "rot": 180}, {"x": 6.2, "z": 44.3, "rot": 180}
+    {"x": -7.5, "z": 44.3, "rot": 180}, {"x": -10.3, "z": 44.3, "rot": 180},
+    {"x": -19.8, "z": 34.0, "rot": 270}, {"x": -19.8, "z": 38.0, "rot": 270},
+    {"x": -23.6, "z": 60.0, "rot": 90}, {"x": 12.2, "z": 58.2, "rot": 270},
+    {"x": 33.4, "z": 30.0, "rot": 270}, {"x": 21.0, "z": 34.4, "rot": 0}
   ],
   "lotus": [
-    {"x": -6.0, "z": 28.2, "flower": true}, {"x": -7.6, "z": 29.8}, {"x": -9.4, "z": 31.6, "flower": true},
-    {"x": -5.0, "z": 31.2}, {"x": 6.2, "z": 28.0, "flower": true}, {"x": 8.2, "z": 30.2},
-    {"x": 9.6, "z": 31.8, "flower": true}, {"x": -6.2, "z": 38.0}, {"x": -8.2, "z": 39.6, "flower": true},
-    {"x": 7.0, "z": 37.0}, {"x": 8.6, "z": 38.8, "flower": true}, {"x": 5.8, "z": 39.8},
-    {"x": -4.4, "z": 40.0}, {"x": 4.0, "z": 27.6}, {"x": -3.2, "z": 27.8, "flower": true}
+    {"x": 6.2, "z": 28.0, "flower": true}, {"x": 8.2, "z": 30.2}, {"x": 9.6, "z": 31.8, "flower": true},
+    {"x": 7.0, "z": 37.0}, {"x": 8.6, "z": 38.8, "flower": true}, {"x": 5.8, "z": 39.8}, {"x": 4.0, "z": 27.6},
+    {"x": -11.0, "z": 30.5, "flower": true}, {"x": -10.8, "z": 32.4}, {"x": -4.2, "z": 28.4, "flower": true},
+    {"x": -4.6, "z": 39.8, "flower": true}, {"x": -8.4, "z": 40.4, "flower": true}, {"x": -3.8, "z": 37.4},
+    {"x": -10.0, "z": 38.6}
   ],
   "koi": [
     {"x": -3.6, "z": 29.6, "rot": 30, "color": "#e07a4a"}, {"x": 3.2, "z": 39.2, "rot": -60, "color": "#f0ede4"},
-    {"x": -6.4, "z": 35.0, "rot": 110, "color": "#e3a24c"}, {"x": 6.4, "z": 34.2, "rot": 200, "color": "#e07a4a"},
+    {"x": -11.0, "z": 31.5, "rot": 110, "color": "#e3a24c"}, {"x": 6.4, "z": 34.2, "rot": 200, "color": "#e07a4a"},
     {"x": 9.0, "z": 35.6, "rot": 80, "color": "#f0ede4"}
   ],
+  "flowerbeds": [
+    {"x": -4.5, "z": 59.8, "r": 1.3}, {"x": 4.5, "z": 59.8, "r": 1.3}, {"x": -7.5, "z": 50.5, "r": 1.3},
+    {"x": 22.0, "z": 60.0, "r": 1.5}, {"x": 24.0, "z": 38.5, "r": 1.4}, {"x": -27.5, "z": 60.5, "r": 1.3}
+  ],
+  "stoneTables": [
+    {"x": 8.6, "z": 58.6, "stools": [[-0.95, 0], [0.95, 0], [0, -0.95], [0, 0.95]]},
+    {"x": 26.0, "z": 36.5, "stools": [[-0.95, 0], [0.95, 0]]}
+  ],
+  "bamboo": [
+    {"x": -34.2, "z": 21.0, "r": 0.9}, {"x": -34.2, "z": 25.5, "r": 0.9}, {"x": -34.2, "z": 30.0, "r": 0.9},
+    {"x": -34.2, "z": 34.5, "r": 0.9}, {"x": -34.2, "z": 39.0, "r": 0.9}, {"x": -34.2, "z": 43.5, "r": 0.9},
+    {"x": -34.2, "z": 48.0, "r": 0.9}, {"x": -34.2, "z": 52.2, "r": 0.9}, {"x": -34.2, "z": 57.0, "r": 0.9},
+    {"x": -34.2, "z": 61.5, "r": 0.9},
+    {"x": -31.4, "z": 23.2, "r": 0.9}, {"x": -31.4, "z": 27.8, "r": 0.9}, {"x": -31.4, "z": 36.8, "r": 0.9},
+    {"x": -31.4, "z": 41.3, "r": 0.9}, {"x": -31.4, "z": 50.3, "r": 0.9}, {"x": -31.4, "z": 59.3, "r": 0.9},
+    {"x": -22.5, "z": 47.6, "r": 0.8},
+    {"x": 34.5, "z": 22.0, "r": 0.8}, {"x": 34.3, "z": 26.5, "r": 0.8}, {"x": 34.5, "z": 45.5, "r": 0.8}, {"x": 34.3, "z": 50.0, "r": 0.8}
+  ],
   "walls": [
-    {"x0": -19.0, "x1": -18.6, "z0": 19.2, "z1": 51.0},
-    {"x0": 18.6, "x1": 19.0, "z0": 19.2, "z1": 51.0},
-    {"x0": -18.6, "x1": 18.6, "z0": 50.6, "z1": 51.0}
+    {"x0": -36.0, "x1": -19.0, "z0": 19.2, "z1": 19.6},
+    {"x0": 19.0, "x1": 36.0, "z0": 19.2, "z1": 19.6},
+    {"x0": -36.0, "x1": -35.6, "z0": 19.6, "z1": 65.0},
+    {"x0": 35.6, "x1": 36.0, "z0": 19.6, "z1": 65.0},
+    {"x0": -35.6, "x1": -4.6, "z0": 64.6, "z1": 65.0},
+    {"x0": 4.6, "x1": 35.6, "z0": 64.6, "z1": 65.0}
   ],
   "wallHeight": 3,
-  "reservedLot": {"x0": 8, "x1": 17, "z0": 43.5, "z1": 50.5, "door": [12.5, 43]}
+  "gate": {"x": 0, "z": 64.8, "opening": 6, "wallEnd": 4.6, "height": 5.6, "plaque": "莲池公园", "welcome": "欢迎来到青禾", "road": {"width": 5, "to": 74}},
+  "reservedLot": {"x0": 18, "x1": 28, "z0": 26.4, "z1": 33, "door": [23, 25.9]},
+  "life": {
+    "taichi": {"from": 5.5, "to": 11, "people": [[-18.5, 57.0, 0], [-19.9, 59.6, 180], [-17.1, 59.6, 180], [-19.9, 62.1, 180], [-17.1, 62.1, 180]],
+      "looks": [{"archetype": "v-grandpa", "top": "#b8453a", "hat": false}, {"archetype": "v-grandma", "top": "#f0ede4"}, {"archetype": "v-grandpa", "top": "#f0ede4", "hat": false, "hair": "#8f8a82"}, {"archetype": "v-young-woman", "top": "#f0ede4"}, {"archetype": "v-grandma", "top": "#f0ede4"}]},
+    "xiangqi": {"table": 0, "from": 8, "to": 18, "players": [[-0.95, 0, 90], [0.95, 0, -90]], "watcher": [0.3, 1.5, 180],
+      "looks": [{"archetype": "v-grandpa", "hair": "#8f8a82"}, {"archetype": "v-grandpa", "hair": "#d9d5cc", "hat": false}, {"archetype": "v-grandma"}]},
+    "calligraphy": {"x": -1.2, "z": 57.6, "rot": 160, "from": 7, "to": 17, "look": {"archetype": "v-grandpa", "hair": "#d9d5cc", "hat": false}},
+    "kite": {"x": -23.8, "z": 31.8, "from": 9, "to": 18, "sky": [-15, 23, 19], "look": {"archetype": "v-girl", "props": true}},
+    "ducks": [{"x": 6.0, "z": 30.0, "r": 1.3, "speed": 0.22}, {"x": 6.3, "z": 30.4, "r": 1.8, "speed": -0.18}, {"x": 5.8, "z": 38.4, "r": 1.2, "speed": 0.25}],
+    "butterflies": 6,
+    "fireflies": {"count": 24, "areas": [{"x0": -12, "x1": -4, "z0": 27, "z1": 41}, {"x0": -33, "x1": -29, "z0": 22, "z1": 50}, {"x0": -19, "x1": -14, "z0": 38, "z1": 46}]}
+  }
 }

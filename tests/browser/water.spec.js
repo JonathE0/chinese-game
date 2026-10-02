@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 
 /**
  * Flowing, reacting water and the bay's reflection (docs/superpowers/plans/2026-09-26-development-wave-2.md, H-water).
@@ -7,7 +8,7 @@ import {test,expect} from '@playwright/test';
  */
 async function start(page){
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await page.waitForFunction(()=>!!window.__qinghe?.town);
   return errors;
 }

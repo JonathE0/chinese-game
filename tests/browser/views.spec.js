@@ -14,8 +14,8 @@ test('inside 慢慢咖啡 the street view renders facing the door, not facing th
   expect(await rendered()).toBeGreaterThan(3);
   const facing=await state();
   expect(facing.on).toBe(true);
-  // The camera stands inside the café's building on the square (door at x 28, z 5.9, facing north).
-  expect(facing.x).toBeCloseTo(28,2);
+  // The camera stands inside the café's building on the street (door at x 28.7, z 5.9, facing north).
+  expect(facing.x).toBeCloseTo(28.7,2);
   expect(facing.z).toBeGreaterThan(5.9);
 
   await page.evaluate(()=>{window.__qinghe.town.yaw=0;});   // facing the back wall

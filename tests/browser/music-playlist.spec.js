@@ -1,8 +1,9 @@
 import {test,expect} from '@playwright/test';
+import {startGame} from './start.js';
 
 test('playlist controls skip smoothly, keep songs across places, and clean up',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await page.getByRole('button',{name:'开始旅行'}).click();
+  await page.goto('/');await startGame(page);
   await expect.poll(()=>page.evaluate(()=>window.__qinghe.music.currentTrack?.id)).toBeTruthy();
   const first=await page.evaluate(()=>{
     const m=window.__qinghe.music,id=m.currentTrack.id;
